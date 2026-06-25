@@ -4,23 +4,39 @@ import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { Eye, EyeOff, AlertCircle, ArrowRight, CheckCircle, ShieldCheck } from 'lucide-react'
 import { saveUser } from '../hooks/useCurrentUser'
+import { createClient } from '../utils/supabase/client'
 
 export default function LoginPage() {
-  const [step,     setStep]     = useState<'creds' | 'mfa'>('creds')
-  const [email,    setEmail]    = useState('')
-  const [password, setPassword] = useState('')
-  const [showPw,   setShowPw]   = useState(false)
-  const [mfaCode,  setMfaCode]  = useState('')
-  const [loading,  setLoading]  = useState(false)
-  const [error,    setError]    = useState('')
-  const mfaRef = useRef<HTMLInputElement>(null)
+  const [step,        setStep]        = useState<'creds' | 'mfa'>('creds')
+  const [email,       setEmail]       = useState('')
+  const [password,    setPassword]    = useState('')
+  const [showPw,      setShowPw]      = useState(false)
+  const [mfaCode,     setMfaCode]     = useState('')
+  const [loading,     setLoading]     = useState(false)
+  const [error,       setError]       = useState('')
+  const [factorId,    setFactorId]    = useState('')
+  const [challengeId, setChallengeId] = useState('')
+  const mfaRef  = useRef<HTMLInputElement>(null)
   const router  = useRouter()
+  const supabase = createClient()
 
   useEffect(() => {
     if (step === 'mfa') mfaRef.current?.focus()
   }, [step])
 
-  // ── Step 1: credentials ───────────────────────────────────────────────────
+  // ── Derive display name / company from email ──────────────────────────────
+
+  function deriveUser(userEmail: string) {
+    const namePart      = userEmail.split('@')[0].replace(/[._-]/g, ' ')
+    const derivedName   = namePart.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+    const domain        = userEmail.split('@')[1] ?? ''
+    const derivedCompany = domain
+      ? domain.split('.')[0].charAt(0).toUpperCase() + domain.split('.')[0].slice(1)
+      : 'Your Organization'
+    return { derivedName, derivedCompany }
+  }
+
+  // ── Step 1: sign in with email + password ─────────────────────────────────
 
   async function handleCredentials(e: React.FormEvent) {
     e.preventDefault()
@@ -31,12 +47,39 @@ export default function LoginPage() {
     if (!password) { setError('Please enter a password.'); return }
 
     setLoading(true)
-    await new Promise(r => setTimeout(r, 700))
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+
+    if (signInError) {
+      setLoading(false)
+      setError(signInError.message === 'Invalid login credentials'
+        ? 'Incorrect email or password. Please try again.'
+        : signInError.message)
+      return
+    }
+
+    // Check if MFA upgrade is needed
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+    if (aal?.nextLevel === 'aal2' && aal.nextLevel !== aal.currentLevel) {
+      const { data: factors } = await supabase.auth.mfa.listFactors()
+      const totp = factors?.totp[0]
+      if (totp) {
+        const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({ factorId: totp.id })
+        if (challengeError) {
+          setLoading(false)
+          setError('Could not start MFA challenge. Please try again.')
+          return
+        }
+        setFactorId(totp.id)
+        setChallengeId(challenge?.id ?? '')
+      }
+    }
+
     setLoading(false)
     setStep('mfa')
   }
 
-  // ── Step 2: MFA ───────────────────────────────────────────────────────────
+  // ── Step 2: verify MFA code ───────────────────────────────────────────────
 
   function handleMFAInput(value: string) {
     const digits = value.replace(/\D/g, '').slice(0, 6)
@@ -50,14 +93,31 @@ export default function LoginPage() {
     setError('')
     if (code.length < 6) { setError('Enter all 6 digits.'); return }
     setLoading(true)
-    await new Promise(r => setTimeout(r, 800))
-    const namePart      = email.split('@')[0].replace(/[._-]/g, ' ')
-    const derivedName   = namePart.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
-    const domain        = email.split('@')[1] ?? ''
-    const derivedCompany = domain
-      ? domain.split('.')[0].charAt(0).toUpperCase() + domain.split('.')[0].slice(1)
-      : 'Your Organization'
-    saveUser({ email, name: derivedName, company: derivedCompany, role: 'Admin' })
+
+    if (factorId && challengeId) {
+      // Real TOTP challenge — verify against Supabase
+      const { error: verifyError } = await supabase.auth.mfa.verify({
+        factorId,
+        challengeId,
+        code,
+      })
+      if (verifyError) {
+        setLoading(false)
+        setMfaCode('')
+        setError('Incorrect verification code. Please try again.')
+        mfaRef.current?.focus()
+        return
+      }
+    } else {
+      // MFA not enrolled — accept any 6-digit code
+      await new Promise(r => setTimeout(r, 600))
+    }
+
+    const { data: { user } } = await supabase.auth.getUser()
+    const userEmail = user?.email ?? email
+    const { derivedName, derivedCompany } = deriveUser(userEmail)
+
+    saveUser({ email: userEmail, name: derivedName, company: derivedCompany, role: 'Admin' })
     if (typeof window !== 'undefined') localStorage.setItem('sf_token', `session_${Date.now()}`)
     setLoading(false)
     router.push('/welcome')
@@ -224,9 +284,13 @@ export default function LoginPage() {
                     </div>
                     <h1 className="text-2xl font-bold text-slate-900">Two-factor authentication</h1>
                     <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">
-                      Enter the 6-digit code from your authenticator app.
+                      {factorId
+                        ? 'Enter the 6-digit code from your authenticator app.'
+                        : 'Enter any 6-digit code to continue.'}
                     </p>
-                    <p className="text-xs text-slate-400 mt-1">Signing in as <span className="font-medium text-slate-600">{email}</span></p>
+                    <p className="text-xs text-slate-400 mt-1">
+                      Signing in as <span className="font-medium text-slate-600">{email}</span>
+                    </p>
                   </div>
 
                   {error && (
@@ -250,7 +314,9 @@ export default function LoginPage() {
                         placeholder="000000"
                         className="w-full border border-slate-300 bg-white px-3.5 py-3 text-xl font-mono text-center tracking-[0.5em] text-slate-900 placeholder-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-colors"
                       />
-                      <p className="text-xs text-slate-400 mt-1.5">The code changes every 30 seconds.</p>
+                      {factorId && (
+                        <p className="text-xs text-slate-400 mt-1.5">The code changes every 30 seconds.</p>
+                      )}
                     </div>
 
                     <button
@@ -270,7 +336,7 @@ export default function LoginPage() {
                     <button
                       type="button"
                       className="text-xs text-slate-400 hover:text-slate-700 transition-colors text-left"
-                      onClick={() => { setStep('creds'); setMfaCode(''); setError('') }}
+                      onClick={() => { setStep('creds'); setMfaCode(''); setError(''); setFactorId(''); setChallengeId('') }}
                     >
                       ← Back to sign in
                     </button>

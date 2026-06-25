@@ -51,7 +51,7 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
                 <p className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-3">Product</p>
                 <ul className="space-y-2 text-xs">
                   {['Anomaly Detection', 'Workflow Intelligence', 'AI Governance', 'Integrations'].map((l) => (
-                    <li key={l}><Link href="#" className="hover:text-slate-200 transition-colors">{l}</Link></li>
+                    <li key={l}><Link href="#" title="Coming soon" className="hover:text-slate-200 transition-colors">{l}</Link></li>
                   ))}
                 </ul>
               </div>
@@ -59,7 +59,7 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
                 <p className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-3">Company</p>
                 <ul className="space-y-2 text-xs">
                   {['About', 'Security', 'Privacy Policy', 'Terms of Service'].map((l) => (
-                    <li key={l}><Link href="#" className="hover:text-slate-200 transition-colors">{l}</Link></li>
+                    <li key={l}><Link href="#" title="Coming soon" className="hover:text-slate-200 transition-colors">{l}</Link></li>
                   ))}
                 </ul>
               </div>
@@ -67,7 +67,7 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
                 <p className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-3">Resources</p>
                 <ul className="space-y-2 text-xs">
                   {['Documentation', 'API Reference', 'Status', 'Support'].map((l) => (
-                    <li key={l}><Link href="#" className="hover:text-slate-200 transition-colors">{l}</Link></li>
+                    <li key={l}><Link href="#" title="Coming soon" className="hover:text-slate-200 transition-colors">{l}</Link></li>
                   ))}
                 </ul>
               </div>

@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
@@ -6,8 +6,6 @@ import { Eye, EyeOff, AlertCircle, ArrowRight, CheckCircle } from 'lucide-react'
 import { saveUser } from '../hooks/useCurrentUser'
 
 export default function LoginPage() {
-  const [name,     setName]     = useState('')
-  const [company,  setCompany]  = useState('')
   const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
   const [showPw,   setShowPw]   = useState(false)
@@ -18,8 +16,6 @@ export default function LoginPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
-    if (!name.trim())    { setError('Please enter your full name.'); return }
-    if (!company.trim()) { setError('Please enter your company name.'); return }
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setError('Please enter a valid work email address.'); return
     }
@@ -27,21 +23,26 @@ export default function LoginPage() {
 
     setLoading(true)
     await new Promise(r => setTimeout(r, 600))
-    saveUser({ email, name: name.trim(), company: company.trim(), role: 'Admin' })
+    const namePart = email.split('@')[0].replace(/[._-]/g, ' ')
+    const derivedName = namePart.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+    const domain = email.split('@')[1] ?? ''
+    const derivedCompany = domain ? domain.split('.')[0].charAt(0).toUpperCase() + domain.split('.')[0].slice(1) : 'Your Organization'
+    saveUser({ email, name: derivedName, company: derivedCompany, role: 'Admin' })
     if (typeof window !== 'undefined') localStorage.setItem('sf_token', `session_${Date.now()}`)
     setLoading(false)
     router.push('/welcome')
   }
 
   async function handleSSO() {
-    if (!company.trim()) { setError('Please enter your company name before continuing with SSO.'); return }
     setError('')
     setLoading(true)
     await new Promise(r => setTimeout(r, 800))
     const emailFromSSO = email || 'admin@yourcompany.com'
     const namePart = emailFromSSO.split('@')[0].replace(/[._-]/g, ' ')
     const ssoName  = namePart.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
-    saveUser({ email: emailFromSSO, name: name.trim() || ssoName, company: company.trim(), role: 'Admin' })
+    const domain = emailFromSSO.split('@')[1] ?? ''
+    const derivedCompany = domain ? domain.split('.')[0].charAt(0).toUpperCase() + domain.split('.')[0].slice(1) : 'Your Organization'
+    saveUser({ email: emailFromSSO, name: ssoName, company: derivedCompany, role: 'Admin' })
     if (typeof window !== 'undefined') localStorage.setItem('sf_token', `session_${Date.now()}`)
     setLoading(false)
     router.push('/welcome')
@@ -62,8 +63,8 @@ export default function LoginPage() {
 
           <div>
             <h2 className="text-2xl font-bold text-white leading-snug mb-4">
-              Financial intelligence<br />
-              for enterprise teams
+              Financial Operations Intelligence<br />
+              for Enterprise Finance Teams
             </h2>
             <p className="text-sm text-slate-400 leading-relaxed mb-8">
               Connect your accounting systems, detect anomalies automatically,
@@ -110,23 +111,6 @@ export default function LoginPage() {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">Full name</label>
-                    <input
-                      type="text" required value={name} onChange={e => setName(e.target.value)}
-                      placeholder="Your name" autoComplete="name" className={inputCls}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">Company</label>
-                    <input
-                      type="text" required value={company} onChange={e => setCompany(e.target.value)}
-                      placeholder="Company name" autoComplete="organization" className={inputCls}
-                    />
-                  </div>
-                </div>
-
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1.5">Work email</label>
                   <input
@@ -138,9 +122,9 @@ export default function LoginPage() {
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="text-xs font-semibold text-slate-700">Password</label>
-                    <button type="button" className="text-xs text-emerald-600 hover:text-emerald-800 transition-colors">
+                    <Link href="/forgot-password" className="text-xs text-emerald-600 hover:text-emerald-800 transition-colors">
                       Forgot password?
-                    </button>
+                    </Link>
                   </div>
                   <div className="relative">
                     <input

@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import { CheckCircleIcon, ArrowLeftIcon } from '@heroicons/react/24/outline'
@@ -13,8 +13,9 @@ const COMPANY_SIZES = [
 ]
 
 export default function ContactPage() {
-  const [submitted, setSubmitted] = useState(false)
-  const [sending,   setSending]   = useState(false)
+  const [submitted,   setSubmitted]   = useState(false)
+  const [sending,     setSending]     = useState(false)
+  const [submitError, setSubmitError] = useState('')
   const [form, setForm] = useState({
     name: '', email: '', businessName: '', companySize: '', message: '',
   })
@@ -26,6 +27,7 @@ export default function ContactPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setSending(true)
+    setSubmitError('')
     try {
       const res = await fetch('https://formsubmit.co/ajax/ghazialkhaldi45@gmail.com', {
         method: 'POST',
@@ -39,9 +41,13 @@ export default function ContactPage() {
           _subject:        `Ventura Enquiry — ${form.businessName}`,
         }),
       })
-      if (res.ok) setSubmitted(true)
+      if (res.ok) {
+        setSubmitted(true)
+      } else {
+        setSubmitError('Something went wrong — please try again or email us directly.')
+      }
     } catch {
-      setSubmitted(true)
+      setSubmitError('Something went wrong — please try again or email us directly.')
     } finally {
       setSending(false)
     }
@@ -53,7 +59,20 @@ export default function ContactPage() {
         <title>Contact Us — Ventura</title>
       </Head>
 
-      <div className="min-h-screen flex">
+      {/* Nav header */}
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
+        <div className="h-16 px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 flex items-center justify-between">
+          <Link href="/" className="no-underline">
+            <span className="text-[1.15rem] font-black tracking-tight bg-gradient-to-r from-black via-slate-700 to-slate-400 bg-clip-text text-transparent">Ventura</span>
+          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/login" className="text-base font-medium text-slate-600 hover:text-slate-900 transition-colors">Sign in</Link>
+            <Link href="/contact" className="bg-slate-900 hover:bg-slate-800 text-white text-base font-semibold px-5 py-2.5 transition-colors">Get started</Link>
+          </div>
+        </div>
+      </header>
+
+      <div className="min-h-[calc(100vh-64px)] flex">
 
         {/* ── Left panel: branding ── */}
         <div className="hidden lg:flex lg:w-1/2 bg-[#0c1526] flex-col items-center justify-center px-16 relative">
@@ -96,15 +115,6 @@ export default function ContactPage() {
 
         {/* ── Right panel: form ── */}
         <div className="flex-1 flex flex-col justify-center bg-white px-8 sm:px-14 lg:px-16 py-12 overflow-y-auto">
-
-          {/* Mobile back link */}
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900 transition-colors mb-8 lg:hidden"
-          >
-            <ArrowLeftIcon className="w-4 h-4" />
-            Back to home
-          </Link>
 
           <div className="max-w-md w-full mx-auto lg:mx-0">
 
@@ -204,7 +214,8 @@ export default function ContactPage() {
                 {/* Footer */}
                 <div className="border-t border-slate-100 px-7 py-4 bg-slate-50 flex items-center justify-between gap-4">
                   <p className="text-xs text-slate-400 leading-snug">
-                    By submitting you agree to our privacy policy. We never share your data.
+                    By submitting you agree to our{' '}
+                    <Link href="/privacy" className="underline hover:text-slate-600 transition-colors">privacy policy</Link>. We never share your data.
                   </p>
                   <button
                     type="submit"
@@ -222,6 +233,11 @@ export default function ContactPage() {
                     ) : 'Send Message'}
                   </button>
                 </div>
+                {submitError && (
+                  <div className="px-7 py-3 bg-red-50 border-t border-red-100">
+                    <p className="text-xs text-red-700">{submitError}</p>
+                  </div>
+                )}
               </form>
             )}
           </div>

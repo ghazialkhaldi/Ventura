@@ -191,10 +191,19 @@ export default function DemoPage() {
                 </div>
               </div>
               <div className="px-5 py-5 flex flex-col items-center justify-center gap-3 flex-shrink-0">
-                <span className="flex items-center gap-2 bg-slate-900 text-white text-sm font-semibold px-4 py-2.5 opacity-60 cursor-not-allowed whitespace-nowrap">
+                <span
+                  title="Available in your connected workspace — talk to our team to get started"
+                  className="flex items-center gap-2 bg-slate-900 text-white text-sm font-semibold px-4 py-2.5 opacity-60 cursor-not-allowed whitespace-nowrap"
+                >
                   Investigate <ArrowRightIcon className="w-3.5 h-3.5" />
                 </span>
-                <span className="text-[10px] text-slate-400">View all {ANOMALIES.length} alerts</span>
+                <Link
+                  href="/contact"
+                  title="Available in your connected workspace — talk to our team to get started"
+                  className="text-[10px] text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  View all {ANOMALIES.length} alerts
+                </Link>
               </div>
             </div>
             <div className="border-t border-slate-200 px-5 py-2.5 flex items-center gap-5 overflow-x-auto bg-slate-50">

@@ -123,12 +123,15 @@ export default function HomePage() {
                 for enterprise compliance requirements.
               </p>
 
-              <div className="flex flex-wrap gap-2 mb-8">
-                {['SOC 2 Type II', 'SAML 2.0 / SCIM', 'Role-Based Access', 'Immutable Audit Log'].map(cert => (
-                  <span key={cert} className="inline-flex items-center gap-1.5 text-sm text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 font-medium">
-                    <CheckCircleIcon className="w-4 h-4 text-green-500 flex-shrink-0" />
-                    {cert}
-                  </span>
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-2 mb-8">
+                {['SOC 2 Type II', 'SAML 2.0 / SCIM', 'Role-Based Access', 'Immutable Audit Log'].map((cert, i) => (
+                  <React.Fragment key={cert}>
+                    {i > 0 && <span className="text-slate-300 select-none" aria-hidden="true">·</span>}
+                    <span className="inline-flex items-center gap-1.5 text-sm text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 font-medium">
+                      <CheckCircleIcon className="w-4 h-4 text-green-500 flex-shrink-0" />
+                      {cert}
+                    </span>
+                  </React.Fragment>
                 ))}
               </div>
 
@@ -216,7 +219,7 @@ export default function HomePage() {
                 key={`${b.id}-${i}`}
                 className="flex items-center gap-3 bg-white border border-slate-200 px-5 py-3 shadow-sm flex-shrink-0"
               >
-                <BrandIcon brand={b.brand} size={30} contained={false} />
+                <BrandIcon brand={b.brand} size={30} />
                 <span className="text-sm font-semibold text-slate-600 whitespace-nowrap">{b.name}</span>
               </div>
             ))}
@@ -343,7 +346,7 @@ export default function HomePage() {
               </p>
             </div>
             <div className="flex flex-col gap-3 md:flex-shrink-0">
-              <Link href="/contact" className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-100 text-slate-900 font-semibold px-7 py-3 text-base transition-colors">
+              <Link href="/demo" className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-100 text-slate-900 font-semibold px-7 py-3 text-base transition-colors">
                 Talk to us
               </Link>
               <Link href="/contact" className="inline-flex items-center justify-center gap-2 bg-[#1a2640] text-slate-200 font-medium px-7 py-3 text-base border border-slate-700 hover:bg-[#1e3a6e] transition-colors">
@@ -415,8 +418,10 @@ function WorkflowPreviewPanel() {
             {i + 1}
           </div>
           <p className="text-xs text-slate-700 flex-1">{s.step}</p>
-          <span className="text-[10px] text-slate-400">{s.actor}</span>
-          <span className={`text-[10px] font-semibold px-1.5 py-0.5 border ${statusStyle[s.status]}`}>{statusLabel[s.status]}</span>
+          <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
+            <span className="text-[10px] text-slate-400">{s.actor}</span>
+            <span className={`text-[10px] font-semibold px-1.5 py-0.5 border ${statusStyle[s.status]}`}>{statusLabel[s.status]}</span>
+          </div>
         </div>
       ))}
       <div className="px-4 py-2.5 bg-amber-50 border-t border-amber-200">
@@ -449,11 +454,7 @@ function GovernancePreviewPanel() {
           <div className="flex items-start gap-2.5">
             <div className="flex-1 min-w-0">
               <p className="text-[11px] font-medium text-slate-800 leading-snug">{e.action}</p>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-[9px] text-slate-400">Risk tier: {e.tier}</span>
-                <span className="text-[9px] text-slate-400">·</span>
-                <span className="text-[9px] text-slate-400">Confidence {e.conf}%</span>
-              </div>
+              <p className="text-[9px] text-slate-400 mt-1">Risk tier: {e.tier} · Confidence {e.conf}%</p>
             </div>
             <span className={`text-[9px] font-semibold px-1.5 py-0.5 border flex-shrink-0 ${typeCls[e.type]}`}>
               {e.type.replace('_', ' ')}

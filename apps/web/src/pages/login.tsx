@@ -80,10 +80,13 @@ export default function LoginPage() {
         email,
         options: { shouldCreateUser: false },
       })
-      if (!otpError) {
-        setEmailOtpSent(true)
+      if (otpError) {
+        // Surface the real error so it's debuggable
+        setLoading(false)
+        setError(`Could not send verification code: ${otpError.message}`)
+        return
       }
-      // If otpError, we still advance — any 6-digit code will be accepted as fallback
+      setEmailOtpSent(true)
     }
 
     setLoading(false)

@@ -237,34 +237,50 @@ create trigger on_auth_user_created
 
 -- ── 4. Test user (remove before production) ─────────────────────────────────
 -- Creates ghazialkhaldi45@gmail.com / password: 123
+-- Also creates the auth.identities record required for email OTP to work.
 
 do $$
+declare
+  new_uid  uuid := gen_random_uuid();
+  user_uid uuid;
 begin
-  if not exists (select 1 from auth.users where email = 'ghazialkhaldi45@gmail.com') then
+  select id into user_uid from auth.users where email = 'ghazialkhaldi45@gmail.com';
+
+  if user_uid is null then
     insert into auth.users (
-      id,
-      email,
-      encrypted_password,
-      email_confirmed_at,
-      created_at,
-      updated_at,
-      aud,
-      role,
-      raw_app_meta_data,
-      raw_user_meta_data,
-      is_super_admin
+      id, email, encrypted_password,
+      email_confirmed_at, created_at, updated_at,
+      aud, role, raw_app_meta_data, raw_user_meta_data, is_super_admin
     ) values (
-      gen_random_uuid(),
-      'ghazialkhaldi45@gmail.com',
+      new_uid, 'ghazialkhaldi45@gmail.com',
       crypt('123', gen_salt('bf')),
       now(), now(), now(),
-      'authenticated',
-      'authenticated',
+      'authenticated', 'authenticated',
       '{"provider":"email","providers":["email"]}',
       '{"full_name":"Ghazi Alkhaldi"}',
       false
     );
+    user_uid := new_uid;
   end if;
+
+  -- auth.identities is required for Supabase email OTP to work.
+  -- Without this record, signInWithOtp silently fails.
+  insert into auth.identities (
+    id, user_id, identity_data, provider,
+    last_sign_in_at, created_at, updated_at
+  ) values (
+    user_uid::text,
+    user_uid,
+    jsonb_build_object(
+      'sub',            user_uid::text,
+      'email',          'ghazialkhaldi45@gmail.com',
+      'email_verified', true,
+      'provider_id',    'ghazialkhaldi45@gmail.com'
+    ),
+    'email',
+    now(), now(), now()
+  ) on conflict do nothing;
+
 end $$;
 
 -- ── 5. Seed data ─────────────────────────────────────────────────────────────

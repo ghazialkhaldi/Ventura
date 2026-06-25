@@ -18,11 +18,8 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
         {/* Top nav — logo + auth only */}
         <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
           <div className="h-16 px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2.5 no-underline">
-              <div className="w-7 h-7 bg-gradient-to-br from-black to-slate-500 flex items-center justify-center">
-                <span className="text-white text-xs font-black">V</span>
-              </div>
-              <span className="font-bold text-slate-900 text-base tracking-tight">Ventura</span>
+            <Link href="/" className="no-underline">
+              <span className="text-[1.15rem] font-black tracking-tight bg-gradient-to-r from-black via-slate-700 to-slate-400 bg-clip-text text-transparent">Ventura</span>
             </Link>
 
             <div className="flex items-center gap-4">
@@ -43,11 +40,8 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
           <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
             <div className="grid md:grid-cols-4 gap-8 mb-8">
               <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-5 h-5 bg-gradient-to-br from-white to-slate-300 flex items-center justify-center">
-                    <span className="text-black text-[9px] font-black">V</span>
-                  </div>
-                  <span className="text-white font-semibold text-sm">Ventura</span>
+                <div className="mb-3">
+                  <span className="text-sm font-black tracking-tight bg-gradient-to-r from-white via-slate-300 to-slate-500 bg-clip-text text-transparent">Ventura</span>
                 </div>
                 <p className="text-xs text-slate-500 leading-relaxed">
                   Financial operations intelligence for enterprise finance teams.

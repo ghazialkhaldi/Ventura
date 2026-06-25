@@ -56,11 +56,8 @@ export default function LoginPage() {
 
         {/* ── Left panel: brand ── */}
         <div className="hidden lg:flex lg:w-[420px] xl:w-[480px] bg-[#0c1526] flex-col justify-between p-10 flex-shrink-0">
-          <Link href="/" className="flex items-center gap-2.5 no-underline">
-            <div className="w-8 h-8 bg-gradient-to-br from-black to-slate-500 flex items-center justify-center flex-shrink-0">
-              <span className="text-white text-sm font-black">V</span>
-            </div>
-            <span className="text-white font-bold text-base tracking-tight">Ventura</span>
+          <Link href="/" className="no-underline">
+            <span className="text-base font-black tracking-tight bg-gradient-to-r from-white via-slate-300 to-slate-500 bg-clip-text text-transparent">Ventura</span>
           </Link>
 
           <div>
@@ -93,11 +90,8 @@ export default function LoginPage() {
         {/* ── Right panel: form ── */}
         <div className="flex-1 flex flex-col bg-white">
           <header className="lg:hidden h-14 border-b border-slate-200 flex items-center px-6">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-gradient-to-br from-black to-slate-500 flex items-center justify-center">
-                <span className="text-white text-xs font-black">V</span>
-              </div>
-              <span className="font-bold text-slate-900 text-sm">Ventura</span>
+            <Link href="/" className="no-underline">
+              <span className="text-sm font-black tracking-tight bg-gradient-to-r from-black via-slate-700 to-slate-400 bg-clip-text text-transparent">Ventura</span>
             </Link>
           </header>
 

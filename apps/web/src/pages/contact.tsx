@@ -67,13 +67,8 @@ export default function ContactPage() {
             Back to home
           </Link>
 
-          {/* Logo mark */}
-          <div className="w-20 h-20 bg-gradient-to-br from-black to-slate-500 flex items-center justify-center mb-8">
-            <span className="text-white text-4xl font-black leading-none">V</span>
-          </div>
-
           {/* Wordmark */}
-          <p className="text-white text-4xl font-bold tracking-tight mb-4">Ventura</p>
+          <p className="text-[3.5rem] font-black tracking-tight leading-none mb-6 bg-gradient-to-r from-white via-slate-300 to-slate-500 bg-clip-text text-transparent">Ventura</p>
           <p className="text-[#8ea4c0] text-base text-center leading-relaxed max-w-xs mb-12">
             Financial operations intelligence for enterprise finance teams.
           </p>
@@ -128,7 +123,7 @@ export default function ContactPage() {
                 <CheckCircleIcon className="w-10 h-10 text-green-500 mx-auto mb-4" />
                 <h2 className="text-lg font-bold text-slate-900 mb-2">Message sent</h2>
                 <p className="text-sm text-slate-500 max-w-xs mx-auto">
-                  Thanks for reaching out. We'll be in touch at <strong>{form.email}</strong> shortly.
+                  Thanks for reaching out. We'll be in touch within one business day.
                 </p>
                 <button
                   onClick={() => { setSubmitted(false); setForm({ name: '', email: '', businessName: '', companySize: '', message: '' }) }}

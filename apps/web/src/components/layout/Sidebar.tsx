@@ -93,14 +93,9 @@ export default function Sidebar() {
 
       {/* Brand */}
       <div className="h-14 flex items-center px-5 border-b border-[#1e2d47] flex-shrink-0">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 bg-gradient-to-br from-black to-slate-500 flex items-center justify-center flex-shrink-0">
-            <span className="text-white text-xs font-black tracking-tight">V</span>
-          </div>
-          <div>
-            <span className="text-white font-semibold text-sm tracking-tight">Ventura</span>
-            <span className="block text-[10px] text-[#4d6a8a] -mt-0.5">Financial Operations</span>
-          </div>
+        <div>
+          <span className="text-base font-black tracking-tight bg-gradient-to-r from-white via-slate-300 to-slate-500 bg-clip-text text-transparent">Ventura</span>
+          <span className="block text-[10px] text-[#4d6a8a] mt-0.5">Financial Operations</span>
         </div>
       </div>
 

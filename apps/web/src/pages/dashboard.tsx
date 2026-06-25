@@ -1,0 +1,616 @@
+﻿import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import AppLayout from '../components/layout/AppLayout'
+import Badge from '../components/ui/Badge'
+import DataUploadWidget from '../components/ui/DataUploadWidget'
+import { useCurrentUser } from '../hooks/useCurrentUser'
+import { useDataReady } from '../hooks/useDataReady'
+import { loadDataset } from '../lib/dataStore'
+import type { Dataset } from '../lib/dataStore'
+import { computeTierSummary, loadTierConfig, tierLabel, tierColor, tierDot } from '../lib/dataLayers'
+import type { TierSummary } from '../lib/dataLayers'
+import { getTestingMode } from '../lib/dataMasking'
+import {
+  AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
+} from 'recharts'
+import {
+  ExclamationTriangleIcon,
+  ArrowRightIcon,
+  ChevronRightIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  ArrowUpTrayIcon,
+  ChartBarIcon,
+  InboxIcon,
+} from '@heroicons/react/24/outline'
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function fmtC(n: number): string {
+  if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(1) + 'M'
+  if (n >= 1_000)     return '$' + (n / 1_000).toFixed(0) + 'K'
+  return '$' + n.toFixed(0)
+}
+
+function fmtFull(n: number): string {
+  return n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
+}
+
+function fmtDate(iso: string): string {
+  if (!iso) return '—'
+  try { return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }
+  catch { return iso }
+}
+
+function timeAgo(iso: string): string {
+  if (!iso) return '—'
+  const sec = Math.floor((Date.now() - new Date(iso).getTime()) / 1000)
+  if (sec < 60)    return 'just now'
+  if (sec < 3600)  return `${Math.floor(sec / 60)}m ago`
+  if (sec < 86400) return `${Math.floor(sec / 3600)}h ago`
+  return `${Math.floor(sec / 86400)}d ago`
+}
+
+const SEV_LEFT: Record<string, string> = {
+  CRITICAL: 'border-l-red-600',
+  HIGH:     'border-l-orange-500',
+  MEDIUM:   'border-l-amber-400',
+  LOW:      'border-l-slate-300',
+}
+
+const SEV_AMT: Record<string, string> = {
+  CRITICAL: 'text-red-700',
+  HIGH:     'text-orange-700',
+  MEDIUM:   'text-amber-700',
+  LOW:      'text-slate-600',
+}
+
+const SEV_BANNER: Record<string, string> = {
+  CRITICAL: 'border-l-red-600',
+  HIGH:     'border-l-orange-500',
+  MEDIUM:   'border-l-amber-400',
+  LOW:      'border-l-slate-400',
+}
+
+const SEV_LABEL: Record<string, string> = {
+  CRITICAL: 'text-red-700',
+  HIGH:     'text-orange-700',
+  MEDIUM:   'text-amber-700',
+  LOW:      'text-slate-600',
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
+export default function DashboardPage() {
+  const user = useCurrentUser()
+  const { isReady, mounted, markReady } = useDataReady()
+  const [dataset,     setDataset]     = useState<Dataset | null>(null)
+  const [tierSummary, setTierSummary] = useState<TierSummary | null>(null)
+  const [testMode,    setTestMode]    = useState<string>('live')
+  const company = user?.company || 'Your Organization'
+
+  useEffect(() => {
+    if (isReady) {
+      const ds = loadDataset()
+      setDataset(ds)
+      setTestMode(getTestingMode())
+      if (ds?.sampleTransactions?.length) {
+        setTierSummary(computeTierSummary(ds.sampleTransactions, loadTierConfig()))
+      }
+    }
+  }, [isReady])
+
+  if (!mounted) return <AppLayout title="Dashboard"><div className="h-96" /></AppLayout>
+
+  // ── Onboarding / empty state ───────────────────────────────────────────────
+  if (!isReady || !dataset) {
+    return (
+      <AppLayout title="Dashboard">
+        <div className="max-w-lg mx-auto py-16">
+          <div className="text-center mb-10">
+            <div className="w-14 h-14 bg-slate-100 border border-slate-200 flex items-center justify-center mx-auto mb-4">
+              <ChartBarIcon className="w-7 h-7 text-slate-500" />
+            </div>
+            <h1 className="text-xl font-bold text-slate-900 mb-2">Set up your finance workspace</h1>
+            <p className="text-sm text-slate-500 max-w-sm mx-auto">
+              Connect your accounting data to detect anomalies, surface savings, and take action on financial risk.
+            </p>
+          </div>
+
+          <div className="space-y-2 mb-8">
+            {[
+              { n: 1, text: 'Upload a transaction export or connect your accounting system', href: '/integrations', cta: 'Connect data' },
+              { n: 2, text: 'Ventura normalizes and scans transactions for anomalies automatically' },
+              { n: 3, text: 'Review AI findings — approve, escalate, or dismiss each alert' },
+              { n: 4, text: 'Monitor spend trends, vendor risk, and savings opportunities' },
+            ].map(s => (
+              <div key={s.n} className="flex items-center gap-3 p-3.5 bg-white border border-slate-200">
+                <div className="w-6 h-6 bg-slate-100 text-slate-500 text-xs font-bold flex items-center justify-center flex-shrink-0">
+                  {s.n}
+                </div>
+                <p className="text-sm text-slate-700 flex-1">{s.text}</p>
+                {s.href && (
+                  <Link href={s.href} className="text-xs bg-slate-900 text-white px-3 py-1.5 font-semibold whitespace-nowrap hover:bg-slate-800 transition-colors">
+                    {s.cta}
+                  </Link>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <DataUploadWidget onReady={markReady} />
+        </div>
+      </AppLayout>
+    )
+  }
+
+  // ── Data derivations ───────────────────────────────────────────────────────
+  const openAnomalies      = dataset.anomalies.filter(a => a.status !== 'Resolved')
+  const criticalCount      = openAnomalies.filter(a => a.severity === 'CRITICAL').length
+  const highCount          = openAnomalies.filter(a => a.severity === 'HIGH').length
+  const totalExposure      = openAnomalies.reduce((s, a) => s + a.amount, 0)
+  const topAnomaly         = openAnomalies[0] ?? null
+  const topSeverity        = criticalCount > 0 ? 'CRITICAL' : highCount > 0 ? 'HIGH' : 'MEDIUM'
+  const duplicates         = openAnomalies.filter(a => a.type === 'duplicate')
+  const duplicateSavings   = duplicates.reduce((s, a) => s + a.amount, 0)
+  const highConf           = openAnomalies.filter(a => a.confidence >= 85)
+  const topVendors         = dataset.topVendors.slice(0, 8)
+  const categories         = dataset.categoryBreakdown.slice(0, 8)
+  const maxCat             = categories[0]?.total ?? 1
+  const recentAudit        = dataset.auditLog.slice(0, 4)
+  const topVendorShare     = topVendors[0] ? Math.round((topVendors[0].total / dataset.totalSpend) * 100) : 0
+  const dateLabel          = dataset.dateRange.from
+    ? `${fmtDate(dataset.dateRange.from)} – ${fmtDate(dataset.dateRange.to)}`
+    : 'All time'
+
+  return (
+    <AppLayout title="Dashboard">
+
+      {/* ── Data trust strip ── */}
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 mb-5 text-[11px] text-slate-500 border-b border-slate-100 pb-3.5">
+        <div className="flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0" />
+          <span className="font-semibold text-slate-700">
+            {testMode === 'live' ? 'Live data' : testMode === 'masked' ? 'Masked data' : 'Synthetic data'}
+          </span>
+        </div>
+        {dataset.uploadedAt && (
+          <span className="flex items-center gap-1.5">
+            <ClockIcon className="w-3 h-3" />
+            Last scanned {timeAgo(dataset.uploadedAt)}
+          </span>
+        )}
+        {testMode !== 'live' && (
+          <span className="bg-amber-50 border border-amber-200 text-amber-700 font-bold px-2 py-0.5 rounded-full uppercase tracking-wide text-[10px]">
+            {testMode === 'masked' ? 'Masked mode active' : 'Synthetic mode active'}
+          </span>
+        )}
+        {tierSummary && (
+          <>
+            <span className="text-slate-200">|</span>
+            {(['hot', 'warm', 'cold'] as const).map(t => {
+              const b = tierSummary[t]
+              if (!b.count) return null
+              return (
+                <span key={t} className={`flex items-center gap-1 font-medium ${tierColor(t)}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${tierDot(t)}`} />
+                  {tierLabel(t)}: {b.count.toLocaleString()}
+                </span>
+              )
+            })}
+          </>
+        )}
+        {(dataset.pendingReviewCount ?? 0) > 0 && (
+          <Link href="/import-center" className="flex items-center gap-1 text-amber-600 font-semibold hover:text-amber-800 transition-colors">
+            <InboxIcon className="w-3 h-3" /> {dataset.pendingReviewCount} pending review
+          </Link>
+        )}
+        <Link href="/admin/data-settings" className="ml-auto flex items-center gap-0.5 text-slate-400 hover:text-slate-600 transition-colors">
+          Configure <ChevronRightIcon className="w-3 h-3" />
+        </Link>
+      </div>
+
+      {/* ── Priority alert banner ── */}
+      {topAnomaly && (
+        <div className={`bg-white border border-slate-200 border-l-4 ${SEV_BANNER[topSeverity]} shadow-card mb-6 overflow-hidden`}>
+          <div className="flex items-stretch divide-x divide-slate-200">
+            {/* Content */}
+            <div className="flex-1 p-5 min-w-0">
+              <div className="flex items-center gap-2 mb-2">
+                <span className={`text-[10px] font-bold tracking-widest uppercase ${SEV_LABEL[topSeverity]}`}>
+                  {criticalCount > 0 ? 'Critical — Immediate Action Required' : highCount > 0 ? 'High Priority' : 'Needs Review'}
+                </span>
+                <span className="text-[10px] text-slate-400">·</span>
+                <span className="text-[10px] text-slate-500">
+                  {openAnomalies.length} open alert{openAnomalies.length !== 1 ? 's' : ''}
+                  {highConf.length > 0 ? ` · ${highConf.length} high-confidence` : ''}
+                </span>
+              </div>
+              <p className="text-slate-900 font-semibold text-base leading-snug">{topAnomaly.title}</p>
+              <p className="text-slate-500 text-xs mt-1">
+                {topAnomaly.vendor}{topAnomaly.category ? ` · ${topAnomaly.category}` : ''}
+              </p>
+              <p className="text-slate-600 text-xs mt-2 leading-relaxed line-clamp-2">{topAnomaly.description}</p>
+            </div>
+
+            {/* Amount */}
+            <div className="px-5 py-5 flex flex-col items-center justify-center gap-1.5 flex-shrink-0">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">At Risk</p>
+              <p className={`text-2xl font-bold ${SEV_AMT[topSeverity]}`}>
+                {fmtC(topAnomaly.amount)}
+              </p>
+              <div className="flex items-center gap-1.5">
+                <div className="w-16 h-1 bg-slate-200 overflow-hidden">
+                  <div className="h-full bg-slate-500" style={{ width: `${topAnomaly.confidence}%` }} />
+                </div>
+                <span className="text-[10px] font-semibold text-slate-600">{topAnomaly.confidence}% conf.</span>
+              </div>
+            </div>
+
+            {/* CTA */}
+            <div className="px-5 py-5 flex flex-col items-center justify-center gap-3 flex-shrink-0">
+              <Link
+                href={`/anomalies/${topAnomaly.id}`}
+                className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold px-4 py-2.5 transition-colors whitespace-nowrap"
+              >
+                Investigate <ArrowRightIcon className="w-3.5 h-3.5" />
+              </Link>
+              <Link href="/anomalies" className="text-[10px] text-slate-500 hover:text-slate-700 transition-colors">
+                View all {openAnomalies.length} alerts
+              </Link>
+            </div>
+          </div>
+
+          {/* Secondary alerts strip */}
+          {openAnomalies.length > 1 && (
+            <div className="border-t border-slate-200 px-5 py-2.5 flex items-center gap-5 overflow-x-auto bg-slate-50">
+              {openAnomalies.slice(1, 5).map(a => (
+                <Link key={a.id} href={`/anomalies/${a.id}`} className="flex items-center gap-2 flex-shrink-0 group">
+                  <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${a.severity === 'CRITICAL' ? 'bg-red-500' : a.severity === 'HIGH' ? 'bg-orange-400' : 'bg-amber-400'}`} />
+                  <span className="text-[11px] text-slate-600 group-hover:text-slate-900 transition-colors truncate max-w-[160px]">{a.title}</span>
+                  <span className="text-[11px] font-semibold text-slate-500">{fmtC(a.amount)}</span>
+                </Link>
+              ))}
+              {openAnomalies.length > 5 && (
+                <span className="text-[10px] text-slate-400 flex-shrink-0">+{openAnomalies.length - 5} more</span>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Page header ── */}
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <h1 className="text-lg font-bold text-slate-900">{company}</h1>
+          <p className="text-xs text-slate-500 mt-0.5">{dateLabel} · {dataset.files.length} file{dataset.files.length !== 1 ? 's' : ''} · {dataset.totalTransactions.toLocaleString()} transactions</p>
+        </div>
+        <Link
+          href="/integrations"
+          className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 border border-slate-200 px-3 py-1.5 bg-white hover:bg-slate-50 transition-colors"
+        >
+          <ArrowUpTrayIcon className="w-3 h-3" /> Upload more
+        </Link>
+      </div>
+
+      {/* ── KPI row ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        <div className="bg-white border border-slate-200 px-5 py-4 shadow-card">
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Total Spend</p>
+          <p className="text-3xl font-bold leading-none text-slate-900">{fmtC(dataset.totalSpend)}</p>
+          <p className="text-xs text-slate-500 mt-1.5">{dateLabel}</p>
+        </div>
+
+        <div className="bg-white border border-slate-200 px-5 py-4 shadow-card">
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Risk Exposure</p>
+          <p className={`text-3xl font-bold leading-none ${totalExposure > 0 ? 'text-red-700' : 'text-slate-400'}`}>{fmtC(totalExposure)}</p>
+          <p className="text-xs text-slate-500 mt-1.5">{openAnomalies.length} open anomal{openAnomalies.length !== 1 ? 'ies' : 'y'}</p>
+        </div>
+
+        <div className="bg-white border border-slate-200 px-5 py-4 shadow-card">
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Savings Identified</p>
+          <p className={`text-3xl font-bold leading-none ${duplicateSavings > 0 ? 'text-slate-900' : 'text-slate-400'}`}>{fmtC(duplicateSavings)}</p>
+          <p className="text-xs text-slate-500 mt-1.5">{duplicates.length} duplicate payment{duplicates.length !== 1 ? 's' : ''}</p>
+        </div>
+
+        <div className="bg-white border border-slate-200 px-5 py-4 shadow-card">
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Transactions</p>
+          <p className="text-3xl font-bold leading-none text-slate-900">{dataset.totalTransactions.toLocaleString()}</p>
+          <p className="text-xs text-slate-500 mt-1.5">{dataset.uniqueVendors.toLocaleString()} unique vendors</p>
+        </div>
+      </div>
+
+      {/* ── Risk & Savings Chart ── */}
+      {openAnomalies.length > 0 && (() => {
+        type TypeRow = { type: string; exposure: number; savings: number }
+        const byType = openAnomalies.reduce<Record<string, TypeRow>>((acc, a) => {
+          const key = a.type.replace(/_/g, ' ')
+          if (!acc[key]) acc[key] = { type: key, exposure: 0, savings: 0 }
+          acc[key].exposure += a.amount
+          if (a.type === 'duplicate') acc[key].savings += a.amount
+          return acc
+        }, {})
+        const chartData = Object.values(byType).sort((a, b) => b.exposure - a.exposure)
+        const SEV_COLORS: Record<string, string> = {
+          duplicate: '#ef4444', outlier: '#f97316', large_amount: '#eab308',
+          round_number: '#8b5cf6', high_frequency: '#ec4899', missing_vendor: '#64748b',
+        }
+        return (
+          <div className="bg-white border border-slate-200 shadow-card overflow-hidden mb-6">
+            <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-slate-900">Risk & Savings Overview</p>
+                <p className="text-xs text-slate-500">Anomaly exposure vs recoverable savings by type</p>
+              </div>
+              <div className="flex items-center gap-5 text-xs text-slate-500">
+                <span className="flex items-center gap-1.5 font-medium">
+                  <span className="w-2.5 h-2.5 bg-red-400 inline-block" /> Risk Exposure
+                </span>
+                <span className="flex items-center gap-1.5 font-medium">
+                  <span className="w-2.5 h-2.5 bg-slate-500 inline-block" /> Savings Identified
+                </span>
+              </div>
+            </div>
+            <div className="px-2 py-4 h-56">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 4 }} barGap={4}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                  <XAxis dataKey="type" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={v => fmtC(v)} width={52} />
+                  <Tooltip
+                    contentStyle={{ fontSize: 12, border: '1px solid #e2e8f0' }}
+                    formatter={(v: number, name: string) => [fmtFull(v), name === 'exposure' ? 'Risk Exposure' : 'Savings Identified']}
+                  />
+                  <Bar dataKey="exposure" name="exposure" maxBarSize={40}>
+                    {chartData.map((entry) => (
+                      <Cell key={entry.type} fill={SEV_COLORS[entry.type.replace(/ /g, '_')] ?? '#94a3b8'} />
+                    ))}
+                  </Bar>
+                  <Bar dataKey="savings" name="savings" fill="#475569" maxBarSize={40} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )
+      })()}
+
+      {/* ── Main grid ── */}
+      <div className="grid lg:grid-cols-5 gap-5 mb-5">
+
+        {/* Left 3/5 */}
+        <div className="lg:col-span-3 space-y-5">
+
+          {/* Spend trend */}
+          {dataset.monthlyBreakdown.length > 1 && (
+            <div className="bg-white border border-slate-200 shadow-card overflow-hidden">
+              <div className="px-5 py-3.5 flex items-center justify-between border-b border-slate-100">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">Spend Trend</p>
+                  <p className="text-xs text-slate-500">{dataset.monthlyBreakdown.length} months</p>
+                </div>
+                <span className="text-xs font-bold text-slate-700">{fmtC(dataset.totalSpend)} total</span>
+              </div>
+              <div className="px-2 py-3 h-40">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={dataset.monthlyBreakdown} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="spendGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%"  stopColor="#475569" stopOpacity={0.08} />
+                        <stop offset="95%" stopColor="#475569" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={v => fmtC(v)} width={52} />
+                    <Tooltip
+                      contentStyle={{ fontSize: 12, border: '1px solid #e2e8f0' }}
+                      formatter={(v: number) => [fmtFull(v), 'Spend']}
+                    />
+                    <Area type="monotone" dataKey="spend" stroke="#475569" strokeWidth={1.5} fill="url(#spendGrad)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
+
+          {/* Open anomaly list */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-sm font-semibold text-slate-900">Open Anomalies</p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {openAnomalies.length} require review
+                  {highConf.length > 0 ? ` · ${highConf.length} high-confidence` : ''}
+                </p>
+              </div>
+              <Link href="/anomalies" className="text-xs text-slate-600 hover:text-slate-900 flex items-center gap-0.5 font-medium transition-colors">
+                All anomalies <ChevronRightIcon className="w-3 h-3" />
+              </Link>
+            </div>
+
+            {openAnomalies.length === 0 ? (
+              <div className="bg-white border border-slate-200 p-8 text-center">
+                <CheckCircleIcon className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                <p className="text-sm font-semibold text-slate-700">No open anomalies</p>
+                <p className="text-xs text-slate-400 mt-1">All findings reviewed or none detected in current data.</p>
+              </div>
+            ) : (
+              <div className="bg-white border border-slate-200 divide-y divide-slate-100 shadow-card overflow-hidden">
+                {openAnomalies.slice(0, 6).map(a => (
+                  <Link
+                    key={a.id}
+                    href={`/anomalies/${a.id}`}
+                    className={`flex items-center gap-3 border-l-4 ${SEV_LEFT[a.severity] ?? 'border-l-slate-300'} px-4 py-3 hover:bg-slate-50 transition-colors group`}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <Badge variant="severity" value={a.severity} dot>{a.severity}</Badge>
+                        <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wide">{a.type.replace(/_/g, ' ')}</span>
+                      </div>
+                      <p className="text-sm font-medium text-slate-900 group-hover:text-slate-700 transition-colors truncate">{a.title}</p>
+                      <p className="text-xs text-slate-500 truncate">{a.vendor}{a.category ? ` · ${a.category}` : ''}</p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                      <p className={`text-sm font-bold ${SEV_AMT[a.severity]}`}>{fmtC(a.amount)}</p>
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-10 h-1 bg-slate-100 overflow-hidden">
+                          <div className="h-full bg-slate-400" style={{ width: `${a.confidence}%` }} />
+                        </div>
+                        <span className="text-[10px] text-slate-400">{a.confidence}%</span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+                {openAnomalies.length > 6 && (
+                  <Link
+                    href="/anomalies"
+                    className="flex items-center justify-center gap-1.5 py-3 text-xs font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-50 border-t border-slate-100 transition-colors"
+                  >
+                    View {openAnomalies.length - 6} more <ChevronRightIcon className="w-3 h-3" />
+                  </Link>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right 2/5 */}
+        <div className="lg:col-span-2 space-y-5">
+
+          {/* Savings opportunities */}
+          <div className="bg-white border border-slate-200 shadow-card overflow-hidden">
+            <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-slate-900">Savings Opportunities</p>
+                <p className="text-xs text-slate-500">Duplicate & recoverable spend</p>
+              </div>
+              {duplicateSavings > 0 && (
+                <p className="text-base font-bold text-slate-900">{fmtC(duplicateSavings)}</p>
+              )}
+            </div>
+            <div className="p-5">
+              {duplicates.length > 0 ? (
+                <div className="space-y-3">
+                  {duplicates.slice(0, 4).map(a => (
+                    <Link key={a.id} href={`/anomalies/${a.id}`} className="flex items-center justify-between group">
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-slate-800 group-hover:text-slate-600 transition-colors truncate">{a.vendor}</p>
+                        <p className="text-[10px] text-slate-400">{a.confidence}% confidence</p>
+                      </div>
+                      <span className="text-sm font-bold text-slate-900 flex-shrink-0 ml-4">{fmtC(a.amount)}</span>
+                    </Link>
+                  ))}
+                  {duplicates.length > 4 && (
+                    <p className="text-[11px] text-slate-400">+{duplicates.length - 4} more duplicates</p>
+                  )}
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Total recoverable</span>
+                    <span className="text-sm font-bold text-slate-900">{fmtC(duplicateSavings)}</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="py-3 text-center">
+                  <CheckCircleIcon className="w-6 h-6 text-slate-300 mx-auto mb-1.5" />
+                  <p className="text-xs text-slate-400">No duplicate payments detected.</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Category breakdown */}
+          {categories.length > 0 && (
+            <div className="bg-white border border-slate-200 shadow-card overflow-hidden">
+              <div className="px-5 py-3.5 border-b border-slate-100">
+                <p className="text-sm font-semibold text-slate-900">Spend by Category</p>
+                <p className="text-xs text-slate-500">Top {categories.length} categories</p>
+              </div>
+              <div className="p-5 space-y-2.5">
+                {categories.map(cat => {
+                  const pct = Math.round((cat.total / maxCat) * 100)
+                  const hasAlert = openAnomalies.some(a => a.category === cat.category)
+                  return (
+                    <div key={cat.category}>
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className="text-xs text-slate-700 font-medium truncate max-w-[120px]">{cat.category || 'Uncategorized'}</span>
+                          {hasAlert && <ExclamationTriangleIcon className="w-2.5 h-2.5 text-amber-500 flex-shrink-0" />}
+                        </div>
+                        <span className="text-xs font-semibold text-slate-700 ml-2">{fmtC(cat.total)}</span>
+                      </div>
+                      <div className="h-1.5 bg-slate-100 overflow-hidden">
+                        <div className={`h-full ${hasAlert ? 'bg-amber-400' : 'bg-slate-400'}`} style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Vendor concentration */}
+          {topVendors.length > 0 && (
+            <div className="bg-white border border-slate-200 shadow-card overflow-hidden">
+              <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">Vendor Concentration</p>
+                  <p className="text-xs text-slate-500">Top vendors by spend</p>
+                </div>
+                {topVendorShare > 40 && (
+                  <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5">
+                    {topVendorShare}% top vendor
+                  </span>
+                )}
+              </div>
+              <div className="p-5 space-y-2.5">
+                {topVendors.map(v => {
+                  const pct = Math.round((v.total / (topVendors[0]?.total ?? 1)) * 100)
+                  const share = Math.round((v.total / dataset.totalSpend) * 100)
+                  const alert = openAnomalies.some(a => a.vendor.toLowerCase() === v.vendor.toLowerCase())
+                  return (
+                    <div key={v.vendor}>
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className="text-xs text-slate-700 font-medium truncate max-w-[120px]" title={v.vendor}>{v.vendor}</span>
+                          {alert && <ExclamationTriangleIcon className="w-2.5 h-2.5 text-amber-500 flex-shrink-0" />}
+                        </div>
+                        <div className="flex items-center gap-2 ml-2">
+                          <span className="text-[10px] text-slate-400">{share}%</span>
+                          <span className="text-xs font-semibold text-slate-700">{fmtC(v.total)}</span>
+                        </div>
+                      </div>
+                      <div className="h-1.5 bg-slate-100 overflow-hidden">
+                        <div className={`h-full ${alert ? 'bg-amber-400' : 'bg-slate-400'}`} style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Processing log ── */}
+      {recentAudit.length > 0 && (
+        <div className="bg-white border border-slate-200 shadow-card overflow-hidden">
+          <div className="px-5 py-3.5 flex items-center justify-between border-b border-slate-100">
+            <p className="text-sm font-semibold text-slate-900">Processing Log</p>
+            <Link href="/audit-logs" className="text-xs text-slate-600 hover:text-slate-900 flex items-center gap-0.5 transition-colors">
+              Full audit log <ChevronRightIcon className="w-3 h-3" />
+            </Link>
+          </div>
+          <div className="divide-y divide-slate-100">
+            {recentAudit.map((item, i) => (
+              <div key={i} className="flex items-center gap-3 px-5 py-3">
+                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${item.severity === 'critical' ? 'bg-red-500' : item.severity === 'warning' ? 'bg-amber-500' : 'bg-slate-400'}`} />
+                <p className="text-xs font-medium text-slate-700 flex-1 truncate">{item.event}</p>
+                <p className="text-xs text-slate-400 flex-shrink-0 hidden sm:block">{item.actor}</p>
+                <p className="text-[10px] text-slate-400 flex-shrink-0">{timeAgo(item.ts)}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </AppLayout>
+  )
+}

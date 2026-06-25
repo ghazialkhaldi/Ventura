@@ -1,0 +1,84 @@
+Date,Vendor,Amount,Description,Category,Account
+01/01/2026,Commercial Property Group,8500,Office rent - January,Facilities,Rent & Facilities
+01/01/2026,Aetna Health Insurance,5600,Group health premium - January,Benefits,Employee Benefits
+01/01/2026,Salesforce Inc,1450,CRM license - January,Software,SaaS & Subscriptions
+01/05/2026,Amazon Web Services,3200,Cloud infrastructure - January,IT,Cloud Infrastructure
+01/05/2026,Adobe Creative Cloud,680,Design licenses - January,Software,SaaS & Subscriptions
+01/05/2026,Zoom Video Communications,340,Video conferencing - January,Software,SaaS & Subscriptions
+01/09/2026,Google Ads,1800,Paid search - Week 2,Marketing,Digital Marketing
+01/12/2026,Staples Business Advantage,185,Office supplies,Operations,Office Supplies
+01/15/2026,ADP Payroll Services,42000,Payroll run - Jan 15,Payroll,Payroll
+01/16/2026,Delta Air Lines,740,Flight - sales team Boston,Travel,Travel & Entertainment
+01/23/2026,Google Ads,1950,Paid search - Week 4,Marketing,Digital Marketing
+01/28/2026,Delta Air Lines,890,Flight - exec team Denver,Travel,Travel & Entertainment
+01/31/2026,ADP Payroll Services,42000,Payroll run - Jan 31,Payroll,Payroll
+02/01/2026,Commercial Property Group,8500,Office rent - February,Facilities,Rent & Facilities
+02/01/2026,Aetna Health Insurance,5600,Group health premium - February,Benefits,Employee Benefits
+02/01/2026,Salesforce Inc,1450,CRM license - February,Software,SaaS & Subscriptions
+02/05/2026,Amazon Web Services,3200,Cloud infrastructure - February,IT,Cloud Infrastructure
+02/05/2026,Adobe Creative Cloud,680,Design licenses - February,Software,SaaS & Subscriptions
+02/05/2026,Zoom Video Communications,340,Video conferencing - February,Software,SaaS & Subscriptions
+02/06/2026,Google Ads,1750,Paid search - Week 2,Marketing,Digital Marketing
+02/12/2026,Staples Business Advantage,220,Office supplies,Operations,Office Supplies
+02/15/2026,ADP Payroll Services,42000,Payroll run - Feb 15,Payroll,Payroll
+02/19/2026,Google Ads,1900,Paid search - Week 4,Marketing,Digital Marketing
+02/20/2026,Delta Air Lines,620,Flight - engineer NYC,Travel,Travel & Entertainment
+02/28/2026,ADP Payroll Services,42000,Payroll run - Feb 28,Payroll,Payroll
+02/28/2026,Nexus Capital Advisors,62000,Strategic advisory retainer Q1,Professional Services,Consulting
+03/01/2026,Commercial Property Group,8500,Office rent - March,Facilities,Rent & Facilities
+03/01/2026,Aetna Health Insurance,5600,Group health premium - March,Benefits,Employee Benefits
+03/01/2026,Salesforce Inc,1450,CRM license - March,Software,SaaS & Subscriptions
+03/05/2026,Amazon Web Services,3200,Cloud infrastructure - March,IT,Cloud Infrastructure
+03/05/2026,Adobe Creative Cloud,680,Design licenses - March,Software,SaaS & Subscriptions
+03/05/2026,Zoom Video Communications,340,Video conferencing - March,Software,SaaS & Subscriptions
+03/06/2026,Google Ads,1850,Paid search - Week 2,Marketing,Digital Marketing
+03/10/2026,Staples Business Advantage,145,Office supplies,Operations,Office Supplies
+03/15/2026,ADP Payroll Services,42000,Payroll run - Mar 15,Payroll,Payroll
+03/15/2026,Atlas Consulting Group,8200,Consulting invoice #INV-0441,Professional Services,Consulting
+03/15/2026,Atlas Consulting Group,8200,Consulting invoice #INV-0441,Professional Services,Consulting
+03/20/2026,Unknown,5500,Unclassified disbursement,Uncategorized,General Ledger
+03/21/2026,Google Ads,2100,Paid search - Week 4,Marketing,Digital Marketing
+03/31/2026,ADP Payroll Services,42000,Payroll run - Mar 31,Payroll,Payroll
+04/01/2026,Commercial Property Group,8500,Office rent - April,Facilities,Rent & Facilities
+04/01/2026,Aetna Health Insurance,5600,Group health premium - April,Benefits,Employee Benefits
+04/01/2026,Salesforce Inc,1450,CRM license - April,Software,SaaS & Subscriptions
+04/01/2026,BrightStar Media LLC,30000,Brand campaign Q2,Marketing,Advertising
+04/05/2026,Amazon Web Services,3200,Cloud infrastructure - April,IT,Cloud Infrastructure
+04/05/2026,Adobe Creative Cloud,680,Design licenses - April,Software,SaaS & Subscriptions
+04/05/2026,Zoom Video Communications,340,Video conferencing - April,Software,SaaS & Subscriptions
+04/07/2026,Google Ads,1700,Paid search - Week 2,Marketing,Digital Marketing
+04/08/2026,CloudOps Inc,2850,Infrastructure support - ticket #7741,IT,Managed Services
+04/11/2026,CloudOps Inc,2850,Infrastructure support - ticket #7741,IT,Managed Services
+04/14/2026,Staples Business Advantage,195,Office supplies,Operations,Office Supplies
+04/15/2026,ADP Payroll Services,42000,Payroll run - Apr 15,Payroll,Payroll
+04/18/2026,Delta Air Lines,810,Flight - sales team Chicago,Travel,Travel & Entertainment
+04/24/2026,Google Ads,1950,Paid search - Week 4,Marketing,Digital Marketing
+04/30/2026,ADP Payroll Services,42000,Payroll run - Apr 30,Payroll,Payroll
+05/01/2026,Commercial Property Group,8500,Office rent - May,Facilities,Rent & Facilities
+05/01/2026,Aetna Health Insurance,5600,Group health premium - May,Benefits,Employee Benefits
+05/01/2026,PrintFast Express,850,Print run batch #1,Marketing,Print & Production
+05/01/2026,Salesforce Inc,1450,CRM license - May,Software,SaaS & Subscriptions
+05/03/2026,PrintFast Express,920,Print run batch #2,Marketing,Print & Production
+05/05/2026,Amazon Web Services,38400,Cloud infrastructure - May,IT,Cloud Infrastructure
+05/05/2026,Adobe Creative Cloud,680,Design licenses - May,Software,SaaS & Subscriptions
+05/05/2026,PrintFast Express,870,Print run batch #3,Marketing,Print & Production
+05/06/2026,Zoom Video Communications,340,Video conferencing - May,Software,SaaS & Subscriptions
+05/07/2026,PrintFast Express,900,Print run batch #4,Marketing,Print & Production
+05/09/2026,Google Ads,1800,Paid search - Week 2,Marketing,Digital Marketing
+05/09/2026,PrintFast Express,840,Print run batch #5,Marketing,Print & Production
+05/11/2026,PrintFast Express,880,Print run batch #6,Marketing,Print & Production
+05/15/2026,ADP Payroll Services,42000,Payroll run - May 15,Payroll,Payroll
+05/15/2026,EventPro Agency,25000,Annual conference production,Events,Events & Conferences
+05/18/2026,Unknown,3800,Unclassified disbursement,Uncategorized,General Ledger
+05/22/2026,Google Ads,1900,Paid search - Week 4,Marketing,Digital Marketing
+05/29/2026,Delta Air Lines,950,Flight - exec team SF,Travel,Travel & Entertainment
+05/31/2026,ADP Payroll Services,42000,Payroll run - May 31,Payroll,Payroll
+06/01/2026,Commercial Property Group,8500,Office rent - June,Facilities,Rent & Facilities
+06/01/2026,Aetna Health Insurance,5600,Group health premium - June,Benefits,Employee Benefits
+06/01/2026,Salesforce Inc,1450,CRM license - June,Software,SaaS & Subscriptions
+06/05/2026,Amazon Web Services,3200,Cloud infrastructure - June,IT,Cloud Infrastructure
+06/05/2026,Adobe Creative Cloud,680,Design licenses - June,Software,SaaS & Subscriptions
+06/05/2026,Zoom Video Communications,340,Video conferencing - June,Software,SaaS & Subscriptions
+06/06/2026,Google Ads,1850,Paid search - Week 2,Marketing,Digital Marketing
+06/12/2026,Staples Business Advantage,165,Office supplies,Operations,Office Supplies
+06/15/2026,ADP Payroll Services,42000,Payroll run - Jun 15,Payroll,Payroll

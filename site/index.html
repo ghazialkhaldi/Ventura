@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+    <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>SecureFlow — Secure workflow intelligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container">
+        <div class="brand">SecureFlow</div>
+        <nav class="nav">
+          <a href="#product">Product</a>
+          <a href="#how">How it works</a>
+          <a href="#features">Features</a>
+          <a href="#security">Security</a>
+          <a href="#contact">Request demo</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="hero">
+        <h1>SecureFlow — Goverened AI for workflow and financial intelligence</h1>
+        <p class="lead">Connect finance data, detect waste and anomalous spend, and get explainable AI recommendations — with human review, audit trails, and policy controls.</p>
+        <div class="cta">
+          <a class="primary" href="#product">Explore platform</a>
+          <a class="secondary" href="#contact">Request demo</a>
+        </div>
+        <div class="preview">Dashboard preview (click Explore)</div>
+      </section>
+
+      <section id="product">
+        <h2>Product summary</h2>
+        <p>SecureFlow combines deterministic rules, anomaly scoring, and a governed AI reasoning layer to explain findings, rank priorities, and recommend safe actions — always auditable and permissioned.</p>
+      </section>
+
+      <section id="how">
+        <h2>How it works</h2>
+        <ol>
+          <li>Connect systems with secure connectors or CSV uploads</li>
+          <li>Normalize and analyze events across systems</li>
+          <li>Detect bottlenecks and anomalous spend</li>
+          <li>Review explainable recommendations and automate safely</li>
+        </ol>
+      </section>
+
+      <section id="features">
+        <h2>Features</h2>
+        <ul>
+          <li>Workflow intelligence & bottleneck detection</li>
+          <li>Cross-system event timeline</li>
+          <li>Financial anomaly detection with explainability</li>
+          <li>AI recommendations with confidence scores</li>
+          <li>Human approval gates and audit logs</li>
+          <li>Policy-based safe automation</li>
+        </ul>
+      </section>
+
+      <section id="security">
+        <h2>Security & trust</h2>
+        <ul>
+          <li>Tenant isolation and role-based access control</li>
+          <li>Auditability and immutable logs</li>
+          <li>Masking/redaction before AI use</li>
+          <li>SCIM/SSO-ready identity provisioning</li>
+        </ul>
+      </section>
+
+      <section id="contact">
+        <h2>Request demo</h2>
+        <p>Contact us to schedule an enterprise demo and implementation review.</p>
+      </section>
+
+      <section id="authPanel">
+        <h2>Sign up / Sign in</h2>
+        <div class="grid two">
+          <form id="signupForm" class="card form">
+            <h3>Create account</h3>
+            <input id="signupEmail" placeholder="Email" type="email" required />
+            <input id="signupPassword" placeholder="Password" type="password" required />
+            <button type="submit" class="primary">Sign up</button>
+          </form>
+
+          <form id="loginForm" class="card form">
+            <h3>Sign in</h3>
+            <input id="loginEmail" placeholder="Email" type="email" required />
+            <input id="loginPassword" placeholder="Password" type="password" required />
+            <button type="submit" class="primary">Sign in</button>
+          </form>
+        </div>
+      </section>
+
+      <section id="userPanel" style="display:none">
+        <h2>Account</h2>
+        <div class="card">
+          <div>Signed in as <strong id="who"></strong></div>
+          <button id="logoutBtn" class="secondary">Sign out</button>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h3>Upload data</h3>
+          <form id="uploadForm">
+            <input id="fileInput" type="file" />
+            <button type="submit" class="primary">Upload</button>
+          </form>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h3>Your uploads</h3>
+          <ul id="uploadsList"></ul>
+        </div>
+
+        <div id="auditPanel" class="card" style="margin-top:12px">
+          <h3>Audit logs (admin)</h3>
+          <ul id="auditList"></ul>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">© SecureFlow — Built for secure operations</div>
+    </footer>
+    <script src="/app.js"></script>
+  </body>
+  </html>

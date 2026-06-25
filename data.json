@@ -1,0 +1,21 @@
+{
+  "users": [
+    {
+      "id": 1782233482955,
+      "email": "admin@secureflow.local",
+      "password": "$2a$10$MzQSexvdqNlQXtDQwAL3geYhWMSMgdmnzzyDGqMxKDJH01zLQFyw.",
+      "role": "admin",
+      "created_at": "2026-06-23T16:51:22.955Z"
+    }
+  ],
+  "uploads": [],
+  "audit_logs": [
+    {
+      "id": 1782233482956,
+      "user_id": 1782233482955,
+      "action": "seed_admin",
+      "data": "{\"email\":\"admin@secureflow.local\"}",
+      "created_at": "2026-06-23T16:51:22.956Z"
+    }
+  ]
+}

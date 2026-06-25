@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #__next {
+  height: 100%;
+}
+
+body {
+  @apply bg-white text-slate-900 antialiased;
+  font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  font-feature-settings: "kern" 1, "liga" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Tabular numbers for financial figures */
+.tabular-nums,
+td, th {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Better text selection */
+::selection {
+  background: rgba(30, 64, 175, 0.12);
+  color: inherit;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { @apply bg-transparent; }
+::-webkit-scrollbar-thumb { @apply bg-slate-300; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { @apply bg-slate-400; }
+
+.sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); }
+.sidebar-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.14); }
+
+/* Table row hover */
+.data-table tbody tr:hover { @apply bg-slate-50; }
+
+/* Focus ring — slate, not green */
+*:focus-visible {
+  @apply outline-none ring-2 ring-slate-900 ring-offset-2;
+}
+
+/* Transitions */
+button, a { transition: background-color 0.12s, color 0.12s, border-color 0.12s, opacity 0.12s; }
+
+/* Marquee / logo stream */
+@keyframes marquee-left {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.animate-marquee { animation: marquee-left 40s linear infinite; }
+.animate-marquee:hover { animation-play-state: paused; }
+
+/* Metric value emphasis */
+.metric-value {
+  @apply text-2xl font-bold leading-none tracking-tight text-slate-900;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Section divider */
+.section-rule {
+  @apply border-t border-slate-200 pt-5 mt-5;
+}
+
+/* Status dot */
+.status-dot {
+  @apply inline-block w-1.5 h-1.5 rounded-full flex-shrink-0;
+}

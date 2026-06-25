@@ -1,0 +1,22 @@
+
+> secureflow-web@0.1.0 dev
+> next dev -p 3000
+
+  ▲ Next.js 13.5.11
+  - Local:        http://localhost:3000
+
+ ✓ Ready in 1411ms
+ ○ Compiling /import-center ...
+ ✓ Compiled /import-center in 3.2s (746 modules)
+Do not add stylesheets using next/head (see <link rel="stylesheet"> tag with href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"). Use Document instead. 
+See more info here: https://nextjs.org/docs/messages/no-stylesheets-in-head-component
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ✓ Compiled / in 167ms (762 modules)
+ ✓ Compiled /anomalies in 215ms (586 modules)
+ ✓ Compiled /dashboard in 860ms (1240 modules)
+ ✓ Compiled /workflows in 619ms (1237 modules)
+ ✓ Compiled /anomalies/[id] in 157ms (1238 modules)
+ ✓ Compiled /admin/data-settings in 481ms (592 modules)
+ ✓ Compiled /settings in 133ms (600 modules)
+ ✓ Compiled /dashboard in 254ms (1246 modules)
+ ✓ Compiled /audit-logs in 155ms (1249 modules)

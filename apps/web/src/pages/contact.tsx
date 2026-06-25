@@ -63,7 +63,7 @@ export default function ContactPage() {
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
         <div className="h-16 px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 flex items-center justify-between">
           <Link href="/" className="no-underline">
-            <span className="text-[1.15rem] font-black tracking-tight bg-gradient-to-r from-black via-slate-700 to-slate-400 bg-clip-text text-transparent">Ventura</span>
+            <span className="text-[1.75rem] font-black tracking-tight bg-gradient-to-r from-black via-slate-700 to-slate-400 bg-clip-text text-transparent">Ventura</span>
           </Link>
           <div className="flex items-center gap-4">
             <Link href="/login" className="text-base font-medium text-slate-600 hover:text-slate-900 transition-colors">Sign in</Link>

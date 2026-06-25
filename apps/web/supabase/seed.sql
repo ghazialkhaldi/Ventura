@@ -269,7 +269,7 @@ begin
     id, user_id, identity_data, provider,
     last_sign_in_at, created_at, updated_at
   ) values (
-    user_uid::text,
+    user_uid,
     user_uid,
     jsonb_build_object(
       'sub',            user_uid::text,

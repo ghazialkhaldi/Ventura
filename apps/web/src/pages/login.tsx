@@ -189,7 +189,8 @@ export default function LoginPage() {
   return (
     <>
       <Head><title>Sign in — Ventura</title></Head>
-      <div className="min-h-screen flex">
+      <div className="min-h-screen flex relative">
+        <span className="absolute top-3 right-4 text-[10px] text-slate-400 z-50 select-none">v1.2</span>
 
         {/* ── Left panel ── */}
         <div className="hidden lg:flex lg:w-[420px] xl:w-[480px] bg-[#0c1526] flex-col justify-between p-10 flex-shrink-0">

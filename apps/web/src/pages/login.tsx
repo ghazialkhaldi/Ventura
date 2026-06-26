@@ -6,6 +6,10 @@ import { Eye, EyeOff, AlertCircle, ArrowRight, CheckCircle, ShieldCheck, Mail } 
 import { saveUser } from '../hooks/useCurrentUser'
 import { createClient } from '../utils/supabase/client'
 
+export async function getServerSideProps() {
+  return { props: {} }
+}
+
 export default function LoginPage() {
   const [step,         setStep]         = useState<'creds' | 'mfa'>('creds')
   const [email,        setEmail]        = useState('')
@@ -60,7 +64,12 @@ export default function LoginPage() {
       return
     }
 
-    // Check if TOTP MFA is enrolled (hardware / authenticator app)
+    // Use local variables — React state updates are async and can't be read
+    // immediately after setFactorId/setChallengeId in the same function.
+    let localFactorId = ''
+    let localChallengeId = ''
+
+    // Check if TOTP MFA is enrolled (authenticator app)
     const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
     if (aal?.nextLevel === 'aal2' && aal.nextLevel !== aal.currentLevel) {
       const { data: factors } = await supabase.auth.mfa.listFactors()
@@ -68,22 +77,25 @@ export default function LoginPage() {
       if (totp) {
         const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({ factorId: totp.id })
         if (!challengeError) {
-          setFactorId(totp.id)
-          setChallengeId(challenge?.id ?? '')
+          localFactorId = totp.id
+          localChallengeId = challenge?.id ?? ''
+          setFactorId(localFactorId)
+          setChallengeId(localChallengeId)
         }
       }
     }
 
     // If no TOTP enrolled, send an email OTP as the second factor
-    if (!factorId) {
+    if (!localFactorId) {
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email,
         options: { shouldCreateUser: false },
       })
       if (otpError) {
-        // Surface the real error so it's debuggable
+        // OTP failed — sign out the password session so we don't leave a partial auth state
+        await supabase.auth.signOut()
         setLoading(false)
-        setError(`Could not send verification code: ${otpError.message}`)
+        setError('Could not send verification code. Check your email address and try again.')
         return
       }
       setEmailOtpSent(true)

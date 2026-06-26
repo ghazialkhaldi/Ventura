@@ -6,9 +6,12 @@ type PageContext = GetServerSidePropsContext
 type ApiContext = { req: NextApiRequest; res: NextApiResponse }
 
 export function createClient(context: PageContext | ApiContext) {
+  const key =
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    key!,
     {
       cookies: {
         getAll() {

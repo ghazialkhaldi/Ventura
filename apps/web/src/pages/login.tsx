@@ -18,6 +18,8 @@ export default function LoginPage() {
   const [mfaCode,      setMfaCode]      = useState('')
   const [loading,      setLoading]      = useState(false)
   const [resending,    setResending]    = useState(false)
+  const [resentOk,     setResentOk]     = useState(false)
+  const [resendCooldown, setResendCooldown] = useState(0)
   const [error,        setError]        = useState('')
   const [factorId,     setFactorId]     = useState('')
   const [challengeId,  setChallengeId]  = useState('')
@@ -110,6 +112,7 @@ export default function LoginPage() {
   async function handleResend() {
     setResending(true)
     setError('')
+    setResentOk(false)
     const { error: otpError } = await supabase.auth.signInWithOtp({
       email,
       options: { shouldCreateUser: false },
@@ -119,6 +122,15 @@ export default function LoginPage() {
       setError('Could not resend code. Please try again.')
     } else {
       setEmailOtpSent(true)
+      setResentOk(true)
+      setResendCooldown(30)
+      const interval = setInterval(() => {
+        setResendCooldown(prev => {
+          if (prev <= 1) { clearInterval(interval); return 0 }
+          return prev - 1
+        })
+      }, 1000)
+      setTimeout(() => setResentOk(false), 4000)
     }
   }
 
@@ -190,7 +202,7 @@ export default function LoginPage() {
     <>
       <Head><title>Sign in — Ventura</title></Head>
       <div className="min-h-screen flex relative">
-        <span className="absolute top-3 right-4 text-[10px] text-slate-400 z-50 select-none">v1.2</span>
+        <span className="absolute top-3 right-4 text-[10px] text-slate-400 z-50 select-none">v1.3</span>
 
         {/* ── Left panel ── */}
         <div className="hidden lg:flex lg:w-[420px] xl:w-[480px] bg-[#0c1526] flex-col justify-between p-10 flex-shrink-0">
@@ -409,14 +421,19 @@ export default function LoginPage() {
 
                   <div className="mt-5 flex flex-col gap-2.5">
                     {mfaIsEmail && (
-                      <button
-                        type="button"
-                        disabled={resending}
-                        onClick={handleResend}
-                        className="text-xs text-slate-500 hover:text-slate-800 transition-colors text-left disabled:opacity-50"
-                      >
-                        {resending ? 'Sending…' : 'Didn\'t receive it? Resend code'}
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          disabled={resending || resendCooldown > 0}
+                          onClick={handleResend}
+                          className="text-xs text-slate-500 hover:text-slate-800 transition-colors text-left disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          {resending ? 'Sending…' : resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Didn\'t receive it? Resend code'}
+                        </button>
+                        {resentOk && (
+                          <span className="text-xs text-emerald-600 font-medium">Code sent!</span>
+                        )}
+                      </div>
                     )}
                     <button
                       type="button"

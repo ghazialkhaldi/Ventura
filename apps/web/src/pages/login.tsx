@@ -87,17 +87,18 @@ export default function LoginPage() {
       }
     }
 
-    // If no TOTP enrolled, send an email OTP as the second factor
+    // If no TOTP enrolled, send a custom email OTP via Resend
     if (!localFactorId) {
-      const { error: otpError } = await supabase.auth.signInWithOtp({
-        email,
-        options: { shouldCreateUser: false },
+      const sendRes = await fetch('/api/send-mfa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
       })
-      if (otpError) {
-        // OTP failed — sign out the password session so we don't leave a partial auth state
+      if (!sendRes.ok) {
+        const { error: sendErr } = await sendRes.json().catch(() => ({ error: 'Unknown error' }))
         await supabase.auth.signOut()
         setLoading(false)
-        setError('Could not send verification code. Check your email address and try again.')
+        setError(sendErr ?? 'Could not send verification code. Try again.')
         return
       }
       setEmailOtpSent(true)
@@ -113,12 +114,13 @@ export default function LoginPage() {
     setResending(true)
     setError('')
     setResentOk(false)
-    const { error: otpError } = await supabase.auth.signInWithOtp({
-      email,
-      options: { shouldCreateUser: false },
+    const sendRes = await fetch('/api/send-mfa', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
     })
     setResending(false)
-    if (otpError) {
+    if (!sendRes.ok) {
       setError('Could not resend code. Please try again.')
     } else {
       setEmailOtpSent(true)
@@ -160,22 +162,18 @@ export default function LoginPage() {
         return
       }
     } else if (emailOtpSent) {
-      // Email OTP — verify against Supabase
-      const { error: otpError } = await supabase.auth.verifyOtp({
-        email,
-        token: code,
-        type: 'email',
+      const verifyRes = await fetch('/api/verify-mfa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code }),
       })
-      if (otpError) {
+      if (!verifyRes.ok) {
         setLoading(false)
         setMfaCode('')
         setError('Incorrect or expired code. Check your email and try again.')
         mfaRef.current?.focus()
         return
       }
-    } else {
-      // Fallback: email OTP send failed — accept any 6 digits for demo
-      await new Promise(r => setTimeout(r, 700))
     }
 
     const { data: { user } } = await supabase.auth.getUser()
@@ -202,7 +200,7 @@ export default function LoginPage() {
     <>
       <Head><title>Sign in — Ventura</title></Head>
       <div className="min-h-screen flex relative">
-        <span className="absolute top-3 right-4 text-[10px] text-slate-400 z-50 select-none">v1.3</span>
+        <span className="absolute top-3 right-4 text-[10px] text-slate-400 z-50 select-none">v1.4</span>
 
         {/* ── Left panel ── */}
         <div className="hidden lg:flex lg:w-[420px] xl:w-[480px] bg-[#0c1526] flex-col justify-between p-10 flex-shrink-0">

@@ -22,7 +22,10 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
               <span className="text-[1.75rem] font-black tracking-tight bg-gradient-to-r from-black via-slate-700 to-slate-400 bg-clip-text text-transparent">Ventura</span>
             </Link>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-5">
+              <Link href="/demo" className="hidden sm:block text-base font-medium text-slate-500 hover:text-slate-900 transition-colors">
+                Demo
+              </Link>
               <Link href="/login" className="text-base font-medium text-slate-600 hover:text-slate-900 transition-colors">
                 Sign in
               </Link>
@@ -58,8 +61,13 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
               <div>
                 <p className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-3">Company</p>
                 <ul className="space-y-2 text-xs">
-                  {['About', 'Security', 'Privacy Policy', 'Terms of Service'].map((l) => (
-                    <li key={l}><Link href="#" title="Coming soon" className="hover:text-slate-200 transition-colors">{l}</Link></li>
+                  {[
+                    { label: 'About',            href: '#'        },
+                    { label: 'Security',         href: '#'        },
+                    { label: 'Privacy Policy',   href: '/privacy' },
+                    { label: 'Terms of Service', href: '#'        },
+                  ].map(({ label, href }) => (
+                    <li key={label}><Link href={href} title={href === '#' ? 'Coming soon' : undefined} className="hover:text-slate-200 transition-colors">{label}</Link></li>
                   ))}
                 </ul>
               </div>

@@ -251,8 +251,8 @@ export default function HomePage() {
                     ))}
                   </ul>
                   <div className="mt-7">
-                    <Link href="/login" className="inline-flex items-center gap-1.5 text-base font-semibold text-slate-600 hover:text-slate-900 transition-colors">
-                      See it in your workspace <ArrowRightIcon className="w-5 h-5" />
+                    <Link href="/demo" className="inline-flex items-center gap-1.5 text-base font-semibold text-slate-600 hover:text-slate-900 transition-colors">
+                      See it in action <ArrowRightIcon className="w-5 h-5" />
                     </Link>
                   </div>
                 </div>
@@ -346,7 +346,7 @@ export default function HomePage() {
               </p>
             </div>
             <div className="flex flex-col gap-3 md:flex-shrink-0">
-              <Link href="/demo" className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-100 text-slate-900 font-semibold px-7 py-3 text-base transition-colors">
+              <Link href="/contact" className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-100 text-slate-900 font-semibold px-7 py-3 text-base transition-colors">
                 Talk to us
               </Link>
               <Link href="/contact" className="inline-flex items-center justify-center gap-2 bg-[#1a2640] text-slate-200 font-medium px-7 py-3 text-base border border-slate-700 hover:bg-[#1e3a6e] transition-colors">

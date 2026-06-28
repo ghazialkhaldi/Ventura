@@ -14,6 +14,7 @@ import {
   BuildingOfficeIcon,
   AdjustmentsHorizontalIcon,
   EnvelopeIcon,
+  DocumentArrowDownIcon,
 } from '@heroicons/react/24/outline'
 import { useCurrentUser, clearUser, initials } from '../../hooks/useCurrentUser'
 import { loadDataset } from '../../lib/dataStore'
@@ -76,6 +77,7 @@ export default function Sidebar() {
       items: [
         { href: '/ai-governance',       icon: ScaleIcon,                  label: 'AI Governance'    },
         { href: '/audit-logs',          icon: DocumentTextIcon,           label: 'Audit Logs'       },
+        { href: '/reports',             icon: DocumentArrowDownIcon,      label: 'Reports'          },
         { href: '/admin/data-settings', icon: AdjustmentsHorizontalIcon,  label: 'Data Settings'    },
       ],
     },

@@ -58,10 +58,10 @@ const capabilities = [
     title: 'Continuous anomaly detection across every financial source',
     body: 'Ventura runs rule-based checks against your accounting systems, bank feeds, payroll, and card data — flagging duplicates, budget overruns, policy violations, and statistical outliers before they close in the ledger.',
     bullets: [
-      'Duplicate and near-duplicate invoice detection',
+      'Duplicate and near-duplicate payment detection',
       'Vendor spend baseline and spike analysis',
       'Round-number and high-frequency payment flags',
-      'Policy rule violations with evidence chains',
+      'Transaction evidence references on every finding',
     ],
     icon: ExclamationTriangleIcon,
     iconBg: 'bg-orange-50',
@@ -73,10 +73,10 @@ const capabilities = [
     title: 'Map and enforce every approval workflow with SLA tracking',
     body: 'Model every finance approval process — vendor onboarding, invoice sign-off, contract amendments, expense reimbursements. Surface bottlenecks and SLA breaches in real time so nothing stays stuck in someone\'s inbox.',
     bullets: [
-      'Per-workflow SLA targets and breach alerting',
-      'Bottleneck identification at each handoff stage',
-      'Approval queue analytics by team and role',
-      'Automated escalation on SLA breach',
+      'Per-workflow SLA targets with overdue detection',
+      'Bottleneck identification per anomaly type',
+      'Step-by-step owner assignment for each workflow stage',
+      'Status tracking across Open, Under Review, and Resolved',
     ],
     icon: ArrowsRightLeftIcon,
     iconBg: 'bg-slate-100',
@@ -124,7 +124,7 @@ export default function HomePage() {
               </p>
 
               <div className="flex flex-wrap items-center gap-x-2 gap-y-2 mb-8">
-                {['SOC 2 Type II', 'SAML 2.0 / SCIM', 'Role-Based Access', 'Immutable Audit Log'].map((cert, i) => (
+                {['AI Anomaly Detection', 'Approval Workflows', 'Immutable Audit Log', 'Explainable AI'].map((cert, i) => (
                   <React.Fragment key={cert}>
                     {i > 0 && <span className="text-slate-300 select-none" aria-hidden="true">·</span>}
                     <span className="inline-flex items-center gap-1.5 text-sm text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 font-medium">
@@ -267,25 +267,26 @@ export default function HomePage() {
         )
       })}
 
-      {/* ── Security & Trust ── */}
+      {/* ── Transparency & Audit Trail ── */}
       <section id="security" className="py-14 bg-white border-b border-slate-200">
         <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
           <div className="grid md:grid-cols-2 gap-14 items-start">
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">Security & Compliance</p>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">Transparency & Audit Trail</p>
               <h2 className="text-[2rem] font-bold text-slate-900 mb-4 leading-snug">
-                Enterprise-grade security controls, not bolted on after the fact
+                Every AI decision is explainable, logged, and traceable to source transactions
               </h2>
               <p className="text-base text-slate-600 leading-relaxed mb-8">
-                Ventura was designed from the ground up for organizations where data security, access control,
-                and compliance documentation are procurement requirements — not nice-to-haves.
+                Ventura doesn't just flag anomalies — it shows its reasoning. Every finding includes a
+                confidence score, a plain-language explanation, and direct references to the underlying
+                transactions, so your team can investigate, approve, or dismiss with full context.
               </p>
               <div className="space-y-5">
                 {[
-                  { icon: LockClosedIcon,  title: 'SOC 2 Type II certified',   body: 'Annual third-party audit. Controls documentation and penetration test results available under NDA.' },
-                  { icon: ShieldCheckIcon, title: 'SAML 2.0 and SCIM 2.0',     body: 'Native integration with Okta, Azure AD, and Google Workspace. Automated provisioning and deprovisioning.' },
-                  { icon: UsersIcon,       title: 'Role-based access control', body: 'Fine-grained permissions per user, role, and data source. Least-privilege default with explicit grant model.' },
-                  { icon: ChartBarIcon,    title: 'Immutable AI audit trail',  body: 'Every inference, human approval, and system action is cryptographically logged with full provenance.' },
+                  { icon: ChartBarIcon,    title: 'Complete audit trail',             body: 'Every detection, manual review, status change, and approval is logged with a timestamp and actor — giving you a full history of every decision.' },
+                  { icon: ShieldCheckIcon, title: 'Confidence scores on every finding', body: 'Each anomaly includes a model confidence score (0–100%) and the reasoning behind it, so reviewers know exactly how certain the system is.' },
+                  { icon: LockClosedIcon,  title: 'Transaction evidence references',  body: 'Every anomaly links directly to the specific transaction IDs involved — no guessing which rows triggered the alert.' },
+                  { icon: UsersIcon,       title: 'Data masking and testing modes',   body: 'Run analysis on masked or synthetic data to protect sensitive information during demos, onboarding, or internal testing.' },
                 ].map(item => {
                   const IIcon = item.icon
                   return (

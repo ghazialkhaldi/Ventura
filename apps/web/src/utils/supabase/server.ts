@@ -22,7 +22,7 @@ export function createClient(context: PageContext | ApiContext) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => {
-            const maxAge = options?.maxAge ?? 3600
+            const maxAge = options?.maxAge ?? 60 * 60 * 24 * 365
             const parts = [
               `${name}=${value}`,
               'Path=/',

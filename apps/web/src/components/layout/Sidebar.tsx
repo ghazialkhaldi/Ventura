@@ -18,6 +18,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { useCurrentUser, clearUser, initials } from '../../hooks/useCurrentUser'
 import { loadDataset } from '../../lib/dataStore'
+import { createClient } from '../../utils/supabase/client'
 
 export default function Sidebar() {
   const router = useRouter()
@@ -48,7 +49,9 @@ export default function Sidebar() {
     return router.pathname.startsWith(href)
   }
 
-  function handleSignOut() {
+  async function handleSignOut() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
     clearUser()
     router.push('/login')
   }

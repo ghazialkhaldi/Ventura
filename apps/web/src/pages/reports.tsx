@@ -30,473 +30,559 @@ function todaySlug() {
   return new Date().toISOString().slice(0, 10)
 }
 
-// ── PDF generation via jsPDF ───────────────────────────────────────────────────
+// jsPDF's default Helvetica only covers latin-1. Replace characters outside that set.
+function safe(s: string): string {
+  return (s ?? '')
+    .replace(/×/g, 'x')   // × multiplication sign -> x
+    .replace(/✕/g, 'x')   // ✕ -> x
+    .replace(/⚠/g, '(!)')  // ⚠ -> (!)
+    .replace(/–/g, '-')   // en dash -> hyphen
+    .replace(/—/g, '--')  // em dash -> --
+    .replace(/[Ā-￿]/g, '?') // anything above latin-1 -> ?
+}
+
+// ── PDF generation ─────────────────────────────────────────────────────────────
 
 async function generateAndDownload(dataset: Dataset, company: string, includeAudit: boolean) {
-  const { jsPDF }          = await import('jspdf')
+  const { jsPDF }              = await import('jspdf')
   const { default: autoTable } = await import('jspdf-autotable')
 
-  const doc  = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' })
-  const W    = 210
-  const H    = 297
-  const L    = 18   // left margin
-  const R    = 192  // right edge (W - 18)
-  const CW   = R - L // content width = 174
+  const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' })
+  const W  = 210
+  const H  = 297
+  const ML = 16   // left margin
+  const MR = 16   // right margin
+  const CW = W - ML - MR  // content width = 178mm
 
-  // ── Colours ──
-  const NAVY    : [number,number,number] = [12, 21, 38]
-  const SLATE700: [number,number,number] = [51, 65, 85]
-  const SLATE500: [number,number,number] = [100, 116, 139]
+  // ── Palette ──
+  const NAVY    : [number,number,number] = [10, 18, 35]
+  const NAVY2   : [number,number,number] = [18, 32, 56]   // slightly lighter navy for accents
+  const SLATE800: [number,number,number] = [30, 41, 59]
+  const SLATE600: [number,number,number] = [71, 85, 105]
   const SLATE400: [number,number,number] = [148, 163, 184]
   const SLATE200: [number,number,number] = [226, 232, 240]
-  const SLATE100: [number,number,number] = [241, 245, 249]
+  const SLATE100: [number,number,number] = [248, 250, 252]
   const WHITE   : [number,number,number] = [255, 255, 255]
-  const RED     : [number,number,number] = [220, 38, 38]
-  const ORANGE  : [number,number,number] = [234, 88, 12]
-  const AMBER   : [number,number,number] = [217, 119, 6]
-  const GREEN   : [number,number,number] = [22, 163, 74]
+  const RED     : [number,number,number] = [185, 28, 28]   // darker red — more print-safe
+  const RED_BG  : [number,number,number] = [254, 242, 242]
+  const ORANGE  : [number,number,number] = [194, 65, 12]
+  const ORANGE_BG:[number,number,number] = [255, 247, 237]
+  const AMBER   : [number,number,number] = [161, 98, 7]
+  const AMBER_BG: [number,number,number] = [255, 251, 235]
+  const GREEN   : [number,number,number] = [21, 128, 61]
+  const ACCENT  : [number,number,number] = [37, 99, 235]   // blue accent for amounts
 
-  const SEV_RGB: Record<string, [number,number,number]> = {
-    CRITICAL: RED, HIGH: ORANGE, MEDIUM: AMBER, LOW: SLATE500,
+  const SEV_FG : Record<string,[number,number,number]> = {
+    CRITICAL: WHITE,  HIGH: WHITE,  MEDIUM: [92, 51, 2],   LOW: [51, 65, 85],
+  }
+  const SEV_BG_CELL: Record<string,[number,number,number]> = {
+    CRITICAL: RED,  HIGH: ORANGE,  MEDIUM: [217, 145, 10],  LOW: [203, 213, 225],
+  }
+
+  // ── Utilities ──
+  function tc(c:[number,number,number]) { doc.setTextColor(c[0],c[1],c[2]) }
+  function fc(c:[number,number,number]) { doc.setFillColor(c[0],c[1],c[2]) }
+  function dc(c:[number,number,number]) { doc.setDrawColor(c[0],c[1],c[2]) }
+
+  function rule(y:number, x1=ML, x2=W-MR, color=SLATE200, lw=0.2) {
+    dc(color); doc.setLineWidth(lw); doc.line(x1,y,x2,y)
+  }
+
+  function sectionHead(label:string, y:number): number {
+    // Left accent bar
+    fc(NAVY); doc.rect(ML, y-3, 3, 5.5, 'F')
+    doc.setFont('helvetica','bold'); doc.setFontSize(8.5)
+    tc(NAVY)
+    doc.text(label.toUpperCase(), ML+6, y+1)
+    rule(y+3, ML+6, W-MR, SLATE200, 0.25)
+    return y + 10
+  }
+
+  function footer(pageNum:number, totalPages?:number) {
+    rule(H-11, ML, W-MR, SLATE200, 0.15)
+    doc.setFont('helvetica','normal'); doc.setFontSize(7); tc(SLATE400)
+    doc.text(safe(`Ventura Financial Intelligence  |  ${company}  |  ${today()}`), ML, H-7)
+    doc.setFont('helvetica','bold'); doc.setFontSize(7); tc(RED)
+    doc.text('CONFIDENTIAL', W/2, H-7, {align:'center'})
+    doc.setFont('helvetica','normal'); tc(SLATE400)
+    doc.text(`Page ${pageNum}${totalPages ? ` of ${totalPages}` : ''}`, W-MR, H-7, {align:'right'})
   }
 
   // ── Derived data ──
-  const open       = dataset.anomalies.filter(a => a.status !== 'Resolved' && a.status !== 'Dismissed')
-  const critical   = open.filter(a => a.severity === 'CRITICAL')
-  const high       = open.filter(a => a.severity === 'HIGH')
-  const medium     = open.filter(a => a.severity === 'MEDIUM')
-  const low        = open.filter(a => a.severity === 'LOW')
-  const exposure   = open.reduce((s, a) => s + a.amount, 0)
-  const duplicates = open.filter(a => a.type === 'duplicate')
-  const savings    = duplicates.reduce((s, a) => s + a.amount, 0)
-  const dateRange  = dataset.dateRange.from
-    ? `${fmtShort(dataset.dateRange.from)} – ${fmtShort(dataset.dateRange.to)}`
+  const open      = dataset.anomalies.filter(a => a.status !== 'Resolved' && a.status !== 'Dismissed')
+  const critical  = open.filter(a => a.severity === 'CRITICAL')
+  const high      = open.filter(a => a.severity === 'HIGH')
+  const medium    = open.filter(a => a.severity === 'MEDIUM')
+  const low       = open.filter(a => a.severity === 'LOW')
+  const exposure  = open.reduce((s,a) => s + a.amount, 0)
+  const dups      = open.filter(a => a.type === 'duplicate')
+  const savings   = dups.reduce((s,a) => s + a.amount, 0)
+  const dateRange = dataset.dateRange.from
+    ? `${fmtShort(dataset.dateRange.from)} - ${fmtShort(dataset.dateRange.to)}`
     : 'All dates'
 
-  const sortedAnomalies = [...open].sort((a, b) => {
-    const o: Record<string,number> = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 }
-    return (o[a.severity] ?? 3) - (o[b.severity] ?? 3)
+  const sorted = [...open].sort((a,b) => {
+    const o:Record<string,number> = {CRITICAL:0,HIGH:1,MEDIUM:2,LOW:3}
+    return (o[a.severity]??3)-(o[b.severity]??3)
   })
+  const cats    = dataset.categoryBreakdown.slice(0,8)
+  const vendors = dataset.topVendors.slice(0,10)
+  const audits  = includeAudit ? dataset.auditLog.slice(0,25) : []
 
-  const topVendors    = dataset.topVendors.slice(0, 10)
-  const topCategories = dataset.categoryBreakdown.slice(0, 8)
-  const auditRows     = includeAudit ? dataset.auditLog.slice(0, 25) : []
+  // ══════════════════════════════════════════════════════════════════════════
+  // PAGE 1 — TITLE
+  // ══════════════════════════════════════════════════════════════════════════
 
-  // ── Utilities ──
-  function setTc(c: [number,number,number]) { doc.setTextColor(c[0], c[1], c[2]) }
-  function setFc(c: [number,number,number]) { doc.setFillColor(c[0], c[1], c[2]) }
-  function setDc(c: [number,number,number]) { doc.setDrawColor(c[0], c[1], c[2]) }
+  // Full-bleed dark header — taller to eliminate wasted space
+  fc(NAVY); doc.rect(0, 0, W, 88, 'F')
 
-  function hRule(y: number, color: [number,number,number] = SLATE200, w = 0.2) {
-    setDc(color)
-    doc.setLineWidth(w)
-    doc.line(L, y, R, y)
-  }
+  // Brand
+  doc.setFont('helvetica','bold'); doc.setFontSize(24); tc(WHITE)
+  doc.text('VENTURA', ML, 24)
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); tc(SLATE400)
+  doc.text('Financial Intelligence', ML, 33)
 
-  function sectionTitle(label: string, y: number): number {
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(8)
-    setTc(NAVY)
-    doc.text(label.toUpperCase(), L, y)
-    hRule(y + 1.5, NAVY, 0.4)
-    return y + 8
-  }
+  // Confidential badge — top right inside header
+  dc(RED); doc.setLineWidth(0.4); doc.rect(W-MR-32, 17, 32, 7, 'D')
+  doc.setFont('helvetica','bold'); doc.setFontSize(6.5); tc(RED)
+  doc.text('CONFIDENTIAL', W-MR-16, 22.2, {align:'center'})
 
-  function pageFooter(pageNum: number) {
-    hRule(H - 12, SLATE200)
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(7)
-    setTc(SLATE400)
-    doc.text(`Ventura Financial Intelligence · ${company} · ${today()}`, L, H - 8)
-    doc.text(`Page ${pageNum}`, R, H - 8, { align: 'right' })
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(7)
-    setTc([220, 38, 38])
-    doc.text('CONFIDENTIAL', W / 2, H - 8, { align: 'center' })
-  }
+  // Tagline at bottom of dark band
+  rule(76, ML, W-MR, NAVY2, 0.5)
+  doc.setFont('helvetica','normal'); doc.setFontSize(8.5); tc(SLATE400)
+  doc.text('Spend Anomaly Detection  |  Risk Exposure Analysis  |  Workflow Intelligence', ML, 83)
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // PAGE 1 — Title page
-  // ──────────────────────────────────────────────────────────────────────────
+  // Report title block
+  doc.setFont('helvetica','bold'); doc.setFontSize(32); tc(NAVY)
+  doc.text('Financial Intelligence', ML, 112)
+  doc.text('Report', ML, 126)
 
-  // Full-bleed dark header band
-  setFc(NAVY)
-  doc.rect(0, 0, W, 48, 'F')
+  doc.setFont('helvetica','normal'); doc.setFontSize(11); tc(SLATE600)
+  doc.text('Spend anomalies, risk exposure, and workflow findings', ML, 136)
+  rule(140, ML, W-MR, SLATE200, 0.3)
 
-  // Brand name
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(22)
-  setTc(WHITE)
-  doc.text('VENTURA', L, 20)
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(9)
-  setTc(SLATE400)
-  doc.text('Financial Intelligence', L, 29)
-
-  // Confidential badge in header
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(6.5)
-  setTc([220, 38, 38])
-  setDc([220, 38, 38])
-  doc.setLineWidth(0.3)
-  doc.rect(R - 34, 17, 34, 7, 'D')
-  doc.text('CONFIDENTIAL', R - 17, 22, { align: 'center' })
-
-  // Report title
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(30)
-  setTc(NAVY)
-  doc.text('Financial Intelligence', L, 78)
-  doc.text('Report', L, 92)
-
-  // Subtitle line
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(11)
-  setTc(SLATE500)
-  doc.text('Spend anomalies, risk exposure, and workflow findings', L, 104)
-
-  // Thin rule below subtitle
-  hRule(110, SLATE200)
-
-  // Metadata grid (2 columns × 3 rows)
-  const metaItems = [
-    { label: 'Organization',              value: company },
-    { label: 'Report Date',               value: today() },
-    { label: 'Data Period',               value: dateRange },
-    { label: 'Transactions Analyzed',     value: dataset.totalTransactions.toLocaleString() },
-    { label: 'Total Spend Reviewed',      value: fmtFull(dataset.totalSpend) },
-    { label: 'Open Anomalies Detected',   value: open.length.toString() },
+  // Metadata grid — 2 columns x 3 rows, starting at y=148
+  const meta = [
+    { label:'Organization',            value: safe(company) },
+    { label:'Report Date',             value: today()       },
+    { label:'Data Period',             value: safe(dateRange) },
+    { label:'Transactions Analyzed',   value: dataset.totalTransactions.toLocaleString() },
+    { label:'Total Spend Reviewed',    value: fmtFull(dataset.totalSpend) },
+    { label:'Open Anomalies Detected', value: open.length.toString()      },
   ]
 
-  let my = 122
-  for (let i = 0; i < metaItems.length; i += 2) {
-    const cols = [metaItems[i], metaItems[i + 1]].filter(Boolean)
-    cols.forEach((item, ci) => {
-      const cx = L + ci * 90
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(6.5)
-      setTc(SLATE400)
+  let my = 150
+  for (let i = 0; i < meta.length; i += 2) {
+    // Row separator
+    if (i > 0) rule(my - 5, ML, W-MR, SLATE200, 0.1)
+
+    for (let col = 0; col < 2; col++) {
+      const item = meta[i+col]
+      if (!item) continue
+      const cx = ML + col * 90
+
+      doc.setFont('helvetica','bold'); doc.setFontSize(6.5); tc(SLATE400)
       doc.text(item.label.toUpperCase(), cx, my)
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(13)
-      setTc(NAVY)
-      doc.text(item.value, cx, my + 8)
-    })
-    // thin separator between rows
-    if (i + 2 < metaItems.length) {
-      hRule(my + 13, SLATE200, 0.1)
+
+      doc.setFont('helvetica','bold'); doc.setFontSize(14); tc(NAVY)
+      doc.text(item.value, cx, my+9)
     }
-    my += 20
+    my += 22
   }
 
-  // Bottom rule + footer
-  hRule(H - 18, SLATE200)
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(7)
-  setTc(SLATE400)
-  doc.text('Generated by Ventura Financial Intelligence · venturafinance.net', L, H - 13)
-  doc.text('For internal use only', R, H - 13, { align: 'right' })
+  // Key risk callout box at bottom — fills space and draws attention
+  const calloutY = 240
+  fc(RED_BG); dc(RED); doc.setLineWidth(0.4)
+  doc.rect(ML, calloutY, CW, 22, 'FD')
+  // Left accent
+  fc(RED); doc.rect(ML, calloutY, 4, 22, 'F')
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // PAGE 2 — Executive Summary
-  // ──────────────────────────────────────────────────────────────────────────
-  doc.addPage()
-  let y = 20
-  pageFooter(2)
+  doc.setFont('helvetica','bold'); doc.setFontSize(7); tc(RED)
+  doc.text('RISK SUMMARY', ML+8, calloutY+7)
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); tc(SLATE800)
+  doc.text(
+    safe(`${open.length} open anomalies detected  |  $${fmtFull(exposure).replace('$','')} total exposure  |  ${critical.length} Critical  |  ${high.length} High  |  ${medium.length} Medium`),
+    ML+8, calloutY+15
+  )
 
-  y = sectionTitle('Executive Summary', y)
+  // Bottom footer line
+  rule(H-14, ML, W-MR, SLATE200, 0.2)
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); tc(SLATE400)
+  doc.text('Generated by Ventura Financial Intelligence  |  venturafinance.net', ML, H-9)
+  doc.text('For internal use only', W-MR, H-9, {align:'right'})
 
-  // 4 stat boxes
-  const statBoxes = [
-    { label: 'Total Spend',       value: fmtFull(dataset.totalSpend), sub: dateRange,                                             color: NAVY    },
-    { label: 'Risk Exposure',     value: fmtFull(exposure),            sub: `${open.length} open finding${open.length !== 1 ? 's' : ''}`, color: RED     },
-    { label: 'Critical Findings', value: critical.length.toString(),   sub: `${high.length} High · ${medium.length} Med · ${low.length} Low`, color: ORANGE  },
-    { label: 'Recoverable',       value: fmtFull(savings),             sub: `${duplicates.length} duplicate${duplicates.length !== 1 ? 's' : ''} detected`, color: GREEN   },
+  // ══════════════════════════════════════════════════════════════════════════
+  // PAGE 2 — EXECUTIVE SUMMARY
+  // ══════════════════════════════════════════════════════════════════════════
+  doc.addPage(); let y = 18; footer(2)
+
+  y = sectionHead('Executive Summary', y)
+
+  // Stat cards — 4 across, with colored left accent bars
+  const cards = [
+    { label:'Total Spend',       value:fmtFull(dataset.totalSpend), sub:safe(dateRange),                                          accent:NAVY,   vcolor:NAVY    },
+    { label:'Risk Exposure',     value:fmtFull(exposure),            sub:`${open.length} open finding${open.length!==1?'s':''}`,   accent:RED,    vcolor:RED     },
+    { label:'Critical Findings', value:critical.length.toString(),   sub:`${high.length} High  ${medium.length} Med  ${low.length} Low`, accent:ORANGE, vcolor:ORANGE  },
+    { label:'Recoverable',       value:fmtFull(savings),             sub:`${dups.length} duplicate${dups.length!==1?'s':''} found`, accent:GREEN,  vcolor:GREEN   },
   ]
 
-  const bw = (CW - 9) / 4
-  statBoxes.forEach((box, i) => {
-    const bx = L + i * (bw + 3)
-    const bh = 28
-    setFc(SLATE100)
-    setDc(SLATE200)
-    doc.setLineWidth(0.25)
-    doc.rect(bx, y, bw, bh, 'FD')
+  const cw  = (CW-9)/4
+  const ch  = 38
+  cards.forEach((card,i) => {
+    const cx = ML + i*(cw+3)
+    // Card background
+    fc(WHITE); dc(SLATE200); doc.setLineWidth(0.25)
+    doc.rect(cx, y, cw, ch, 'FD')
+    // Colored top border
+    fc(card.accent); doc.rect(cx, y, cw, 3, 'F')
 
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(6)
-    setTc(SLATE400)
-    doc.text(box.label.toUpperCase(), bx + 4, y + 6)
+    doc.setFont('helvetica','bold'); doc.setFontSize(6.5); tc(SLATE400)
+    doc.text(card.label.toUpperCase(), cx+4, y+10)
 
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(14)
-    setTc(box.color)
-    // Fit long dollar values
-    const maxW = bw - 8
-    let valStr = box.value
-    doc.setFontSize(14)
-    while (doc.getStringUnitWidth(valStr) * 14 / doc.internal.scaleFactor > maxW && valStr.length > 4) {
-      valStr = valStr.slice(0, -1)
+    // Value — scale font if too wide
+    doc.setFont('helvetica','bold'); tc(card.vcolor)
+    let fs = 17
+    doc.setFontSize(fs)
+    while (doc.getStringUnitWidth(card.value)*fs/doc.internal.scaleFactor > cw-8 && fs > 9) {
+      fs--; doc.setFontSize(fs)
     }
-    doc.text(valStr, bx + 4, y + 17)
+    doc.text(card.value, cx+4, y+24)
 
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(6.5)
-    setTc(SLATE400)
-    doc.text(box.sub, bx + 4, y + 24)
+    doc.setFont('helvetica','normal'); doc.setFontSize(6.5); tc(SLATE400)
+    doc.text(card.sub, cx+4, y+33)
   })
-  y += 36
+  y += ch + 10
 
-  // Severity legend row
-  const sevLegend = [
-    { label: 'Critical', count: critical.length, color: RED    },
-    { label: 'High',     count: high.length,     color: ORANGE },
-    { label: 'Medium',   count: medium.length,   color: AMBER  },
-    { label: 'Low',      count: low.length,      color: SLATE500 },
+  // Severity breakdown — pill-style with coloured squares
+  const sevRow = [
+    {label:'Critical', n:critical.length, bg:RED,    fg:WHITE},
+    {label:'High',     n:high.length,     bg:ORANGE, fg:WHITE},
+    {label:'Medium',   n:medium.length,   bg:AMBER,  fg:WHITE},
+    {label:'Low',      n:low.length,      bg:[148,163,184] as [number,number,number], fg:WHITE},
   ]
-  let sx = L
-  sevLegend.forEach(s => {
-    setFc(s.color)
-    doc.rect(sx, y, 3.5, 3.5, 'F')
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(8)
-    setTc(SLATE700)
-    doc.text(`${s.label}  `, sx + 5.5, y + 3)
-    doc.setFont('helvetica', 'normal')
-    setTc(SLATE500)
-    doc.text(s.count.toString(), sx + 5.5 + doc.getStringUnitWidth(`${s.label}  `) * 8 / doc.internal.scaleFactor, y + 3)
-    sx += 44
+  let sx = ML
+  sevRow.forEach(s => {
+    // Pill background
+    fc(s.bg); doc.rect(sx, y, 38, 8, 'F')
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); tc(s.fg)
+    doc.text(`${s.label}  ${s.n}`, sx+4, y+5.5)
+    sx += 42
   })
-  y += 12
+  y += 16
 
   // Summary paragraph
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(8.5)
-  setTc(SLATE700)
-  const para = `Ventura analyzed ${dataset.totalTransactions.toLocaleString()} transactions across ${dataset.uniqueVendors} unique vendors for the period ${dateRange}. The analysis detected ${open.length} open anomal${open.length !== 1 ? 'ies' : 'y'} representing a total risk exposure of ${fmtFull(exposure)}.${savings > 0 ? ` ${fmtFull(savings)} is potentially recoverable from ${duplicates.length} duplicate payment detection${duplicates.length !== 1 ? 's' : ''}.` : ''} All Critical and High severity findings require immediate review.`
-  const paraLines = doc.splitTextToSize(para, CW)
-  doc.text(paraLines, L, y)
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); tc(SLATE600)
+  const summaryText = safe(
+    `Ventura analyzed ${dataset.totalTransactions.toLocaleString()} transactions across ${dataset.uniqueVendors} unique vendors ` +
+    `for the period ${dateRange}. The analysis detected ${open.length} open anomal${open.length!==1?'ies':'y'} ` +
+    `representing a total risk exposure of ${fmtFull(exposure)}.` +
+    (savings>0 ? ` ${fmtFull(savings)} is potentially recoverable from ${dups.length} duplicate payment detection${dups.length!==1?'s':''}.` : '') +
+    ` All Critical and High severity findings require immediate review.`
+  )
+  const paraLines = doc.splitTextToSize(summaryText, CW)
+  doc.text(paraLines, ML, y)
+  y += paraLines.length * 5 + 10
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // PAGE 3 — Anomaly Findings
-  // ──────────────────────────────────────────────────────────────────────────
-  doc.addPage()
-  y = 20
-  pageFooter(3)
-  y = sectionTitle(`Anomaly Findings — ${open.length} Open`, y)
+  // Top findings preview on exec summary page — fills empty space
+  if (sorted.length > 0) {
+    y = sectionHead('Top Findings at a Glance', y)
+    const preview = sorted.slice(0,4)
+    preview.forEach((a, i) => {
+      const rowY = y + i*14
+      const sevBg = SEV_BG_CELL[a.severity] ?? [203,213,225]
+      const sevFg = SEV_FG[a.severity] ?? SLATE800
 
-  if (sortedAnomalies.length === 0) {
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(9)
-    setTc(SLATE400)
-    doc.text('No open anomalies detected in the current dataset.', L, y + 6)
+      // Severity pill
+      fc(sevBg); doc.rect(ML, rowY, 22, 9, 'F')
+      doc.setFont('helvetica','bold'); doc.setFontSize(7); tc(sevFg)
+      doc.text(a.severity.slice(0,4), ML+11, rowY+6, {align:'center'})
+
+      // Finding title
+      doc.setFont('helvetica','bold'); doc.setFontSize(8.5); tc(SLATE800)
+      const title = safe(a.title.length > 62 ? a.title.slice(0,60)+'...' : a.title)
+      doc.text(title, ML+26, rowY+4)
+
+      // Vendor + amount right-aligned
+      doc.setFont('helvetica','normal'); doc.setFontSize(7.5); tc(SLATE400)
+      doc.text(safe(a.vendor), ML+26, rowY+9)
+      doc.setFont('helvetica','bold'); doc.setFontSize(8.5); tc(a.severity==='CRITICAL'?RED:a.severity==='HIGH'?ORANGE:SLATE800)
+      doc.text(fmtFull(a.amount), W-MR, rowY+6, {align:'right'})
+
+      // Row divider
+      if (i < preview.length-1) rule(rowY+12, ML, W-MR, SLATE200, 0.12)
+    })
+    if (sorted.length > 4) {
+      const moreY = y + preview.length*14 + 2
+      doc.setFont('helvetica','normal'); doc.setFontSize(7.5); tc(SLATE400)
+      doc.text(`+ ${sorted.length-4} more finding${sorted.length-4!==1?'s':''} on the following pages`, ML, moreY)
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PAGE 3+ — ANOMALY FINDINGS TABLE
+  // ══════════════════════════════════════════════════════════════════════════
+  doc.addPage(); y = 18; footer(3)
+
+  y = sectionHead(`Anomaly Findings  -  ${open.length} Open`, y)
+
+  if (sorted.length === 0) {
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); tc(SLATE400)
+    doc.text('No open anomalies detected in the current dataset.', ML, y+6)
   } else {
     autoTable(doc, {
-      startY: y,
-      margin: { left: L, right: W - R },
+      startY:   y,
+      margin:   { left: ML, right: MR },
       tableWidth: CW,
+      rowPageBreak: 'avoid',
       styles: {
-        font: 'helvetica',
-        fontSize: 7.5,
-        cellPadding: { top: 3, right: 4, bottom: 3, left: 4 },
-        textColor: SLATE700,
-        lineColor: SLATE200,
-        lineWidth: 0.15,
-        overflow: 'linebreak',
-        valign: 'top',
+        font:        'helvetica',
+        fontSize:    8,
+        cellPadding: { top:4, right:5, bottom:4, left:5 },
+        textColor:   SLATE800,
+        lineColor:   SLATE200,
+        lineWidth:   0.15,
+        overflow:    'linebreak',
+        valign:      'middle',
       },
       headStyles: {
-        fillColor: NAVY,
-        textColor: WHITE,
-        fontStyle: 'bold',
-        fontSize: 7,
-        cellPadding: { top: 4, right: 4, bottom: 4, left: 4 },
+        fillColor:  NAVY,
+        textColor:  WHITE,
+        fontStyle:  'bold',
+        fontSize:   7.5,
+        cellPadding:{ top:5, right:5, bottom:5, left:5 },
+        lineWidth:  0,
       },
       alternateRowStyles: { fillColor: SLATE100 },
       columnStyles: {
-        0: { cellWidth: 18, fontStyle: 'bold' },
-        1: { cellWidth: 22, font: 'courier', fontSize: 7, textColor: SLATE500 },
+        0: { cellWidth: 24, halign:'center', fontStyle:'bold', fontSize:7 },
+        1: { cellWidth: 22, fontSize:7, textColor:SLATE400 },
         2: { cellWidth: 'auto' },
-        3: { cellWidth: 30 },
-        4: { cellWidth: 22, halign: 'right', fontStyle: 'bold' },
-        5: { cellWidth: 14, halign: 'center' },
-        6: { cellWidth: 22 },
+        3: { cellWidth: 32 },
+        4: { cellWidth: 24, halign:'right', fontStyle:'bold' },
+        5: { cellWidth: 14, halign:'center', textColor:SLATE400 },
+        6: { cellWidth: 20, halign:'center' },
       },
-      head: [['Severity', 'ID', 'Finding', 'Vendor', 'Amount', 'Conf.', 'Status']],
-      body: sortedAnomalies.map(a => [
-        a.severity,
-        a.id,
-        `${a.title}\n${a.type.replace(/_/g, ' ')} · ${a.category || '—'}\n${a.description.slice(0, 100)}${a.description.length > 100 ? '…' : ''}`,
-        a.vendor || '—',
-        fmtFull(a.amount),
-        `${a.confidence}%`,
-        a.status,
-      ]),
+      head: [['SEVERITY','ID','FINDING','VENDOR','AMOUNT','CONF.','STATUS']],
+      body: sorted.map(a => {
+        const descClean = safe(a.description).slice(0,110) + (a.description.length>110?'...':'')
+        const typeLabel = safe(a.type.replace(/_/g,' '))
+        return [
+          a.severity,
+          a.id,
+          `${safe(a.title)}\n${typeLabel}  |  ${safe(a.category||'')}\n${descClean}`,
+          safe(a.vendor||'Unknown'),
+          fmtFull(a.amount),
+          `${a.confidence}%`,
+          a.status,
+        ]
+      }),
       didParseCell: (data) => {
-        if (data.section === 'body' && data.column.index === 0) {
-          const sev = data.cell.raw as string
-          const color = SEV_RGB[sev] ?? SLATE500
-          data.cell.styles.textColor = color
+        if (data.section !== 'body') return
+        const row = sorted[data.row.index]
+        if (!row) return
+
+        // Severity cell — coloured background
+        if (data.column.index === 0) {
+          data.cell.styles.fillColor  = SEV_BG_CELL[row.severity] ?? [203,213,225]
+          data.cell.styles.textColor  = SEV_FG[row.severity] ?? SLATE800
+          data.cell.styles.fontStyle  = 'bold'
+          data.cell.styles.fontSize   = 7.5
         }
-        if (data.section === 'body' && data.column.index === 4) {
-          const rowSev = sortedAnomalies[data.row.index]?.severity
-          data.cell.styles.textColor = SEV_RGB[rowSev] ?? SLATE700
+        // Amount — colour by severity
+        if (data.column.index === 4) {
+          data.cell.styles.textColor = row.severity==='CRITICAL'?RED:row.severity==='HIGH'?ORANGE:NAVY
+        }
+        // Finding — make title line bold (we can't do per-line styling in autoTable,
+        // but we can ensure decent readability via the separator)
+      },
+      didDrawCell: (data) => {
+        // Draw a subtle left border on each body row matching severity colour
+        if (data.section === 'body' && data.column.index === 0) {
+          const row = sorted[data.row.index]
+          if (!row) return
+          const col = SEV_BG_CELL[row.severity] ?? NAVY
+          fc(col)
+          doc.rect(data.cell.x, data.cell.y, 1.5, data.cell.height, 'F')
         }
       },
       didDrawPage: (data) => {
-        // Re-draw footer on continuation pages
-        if (data.pageNumber > 1) {
-          pageFooter(2 + data.pageNumber)
-        }
+        // Add footer on continuation pages
+        if (data.pageNumber > 1) footer(2 + data.pageNumber)
       },
     })
   }
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // PAGE — Spend by Category + Top Vendors
-  // ──────────────────────────────────────────────────────────────────────────
+  // ══════════════════════════════════════════════════════════════════════════
+  // PAGE N — SPEND BY CATEGORY + TOP VENDORS
+  // ══════════════════════════════════════════════════════════════════════════
   doc.addPage()
   const catPage = (doc as any).internal.getCurrentPageInfo().pageNumber
-  pageFooter(catPage)
-  y = 20
-  y = sectionTitle('Spend by Category', y)
+  footer(catPage)
+  y = 18
+  y = sectionHead('Spend by Category', y)
 
-  if (topCategories.length === 0) {
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(9)
-    setTc(SLATE400)
-    doc.text('No category data available.', L, y + 6)
+  if (cats.length === 0) {
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); tc(SLATE400)
+    doc.text('No category data available.', ML, y+6)
     y += 14
   } else {
-    const maxVal = topCategories[0]?.total ?? 1
-    const barMaxW = CW - 75   // space left for bar after label and amount
-    topCategories.forEach((cat, i) => {
-      const rowY = y + i * 11
+    const maxCatVal = cats[0]?.total ?? 1
+    const BAR_MAX   = CW - 58 - 26   // label=58, amount=26
+    const BAR_H     = 5.5
+    const ROW_H     = 10
+
+    cats.forEach((cat, i) => {
+      const ry = y + i * ROW_H
+      const barW = Math.max(1, (cat.total/maxCatVal)*BAR_MAX)
+      const pct  = Math.round((cat.total/maxCatVal)*100)
+
       // Label
-      doc.setFont('helvetica', 'normal')
-      doc.setFontSize(8.5)
-      setTc(SLATE700)
-      const labelStr = cat.category.length > 28 ? cat.category.slice(0, 26) + '…' : cat.category
-      doc.text(labelStr, L, rowY + 3)
+      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); tc(SLATE600)
+      const lbl = safe(cat.category.length > 18 ? cat.category.slice(0,16)+'...' : cat.category)
+      doc.text(lbl, ML, ry+4)
 
       // Bar track
-      const barX = L + 58
-      const barW = (cat.total / maxVal) * barMaxW
-      setFc(SLATE200)
-      doc.rect(barX, rowY, barMaxW, 5, 'F')
-      setFc(NAVY)
-      doc.rect(barX, rowY, barW, 5, 'F')
+      fc(SLATE200); doc.rect(ML+58, ry, BAR_MAX, BAR_H, 'F')
+
+      // Bar fill — gradient feel: darker for larger bars
+      const shade = Math.max(0, Math.min(255, 10 + Math.round((1-cat.total/maxCatVal)*40)))
+      fc([shade, 35+Math.round((1-cat.total/maxCatVal)*20), 60+Math.round((1-cat.total/maxCatVal)*30)])
+      doc.rect(ML+58, ry, barW, BAR_H, 'F')
+
+      // Percentage inside bar (if wide enough)
+      if (barW > 12) {
+        doc.setFont('helvetica','bold'); doc.setFontSize(6); tc(WHITE)
+        doc.text(`${pct}%`, ML+59, ry+4)
+      }
 
       // Amount
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(8.5)
-      setTc(NAVY)
-      doc.text(fmtFull(cat.total), R, rowY + 4, { align: 'right' })
+      doc.setFont('helvetica','bold'); doc.setFontSize(8.5); tc(NAVY)
+      doc.text(fmtFull(cat.total), W-MR, ry+4, {align:'right'})
     })
-    y += topCategories.length * 11 + 10
+    y += cats.length * ROW_H + 12
   }
 
-  // Top Vendors — auto table on same page if space, else new page
-  const vendorStartY = (y > H - 80) ? (() => { doc.addPage(); pageFooter(catPage + 1); return 20 })() : y
-  y = sectionTitle('Top Vendors by Spend', vendorStartY)
+  // Vendors
+  const vendorStartY = y > H - 90 ? (() => { doc.addPage(); footer(catPage+1); return 18 })() : y
+  y = sectionHead('Top Vendors by Spend', vendorStartY)
 
   autoTable(doc, {
-    startY: y,
-    margin: { left: L, right: W - R },
+    startY:   y,
+    margin:   { left: ML, right: MR },
     tableWidth: CW,
+    rowPageBreak: 'avoid',
     styles: {
-      font: 'helvetica',
-      fontSize: 8,
-      cellPadding: { top: 3.5, right: 5, bottom: 3.5, left: 5 },
-      textColor: SLATE700,
-      lineColor: SLATE200,
-      lineWidth: 0.15,
+      font:        'helvetica',
+      fontSize:    8,
+      cellPadding: { top:3.5, right:5, bottom:3.5, left:5 },
+      textColor:   SLATE800,
+      lineColor:   SLATE200,
+      lineWidth:   0.15,
+      valign:      'middle',
     },
     headStyles: {
-      fillColor: NAVY,
-      textColor: WHITE,
-      fontStyle: 'bold',
-      fontSize: 7,
-      cellPadding: { top: 4, right: 5, bottom: 4, left: 5 },
+      fillColor:   NAVY,
+      textColor:   WHITE,
+      fontStyle:   'bold',
+      fontSize:    7.5,
+      cellPadding: { top:5, right:5, bottom:5, left:5 },
+      lineWidth:   0,
     },
     alternateRowStyles: { fillColor: SLATE100 },
     columnStyles: {
-      0: { cellWidth: 8, halign: 'center', fontStyle: 'bold' },
-      1: { cellWidth: 'auto' },
-      2: { cellWidth: 28 },
-      3: { cellWidth: 20, halign: 'center' },
-      4: { cellWidth: 26, halign: 'right', fontStyle: 'bold' },
-      5: { cellWidth: 26, halign: 'right' },
+      0: { cellWidth:10, halign:'center', fontStyle:'bold', textColor:SLATE400, fontSize:7.5 },
+      1: { cellWidth:'auto' },
+      2: { cellWidth:30 },
+      3: { cellWidth:16, halign:'center', textColor:SLATE400 },
+      4: { cellWidth:28, halign:'right', fontStyle:'bold' },
+      5: { cellWidth:24, halign:'right', textColor:SLATE600 },
     },
-    head: [['#', 'Vendor', 'Category', 'Transactions', 'Total Spend', 'Avg. Payment']],
-    body: topVendors.map((v, i) => {
-      const hasAlert = sortedAnomalies.some(a => a.vendor === v.vendor)
+    head: [['#','VENDOR','CATEGORY','TXNS','TOTAL SPEND','AVG. PAYMENT']],
+    body: vendors.map((v,i) => {
+      const hasAlert = sorted.some(a => a.vendor === v.vendor)
       return [
-        (i + 1).toString(),
-        `${v.vendor}${hasAlert ? ' ⚠' : ''}`,
-        v.category || 'Uncategorized',
+        (i+1).toString(),
+        safe(v.vendor) + (hasAlert ? '  (!)' : ''),
+        safe(v.category||'Uncategorized'),
         v.count.toString(),
         fmtFull(v.total),
         fmtFull(v.avgAmount),
       ]
     }),
     didParseCell: (data) => {
-      if (data.section === 'body' && data.column.index === 1) {
-        const raw = data.cell.raw as string
-        if (raw.includes('⚠')) data.cell.styles.textColor = ORANGE
+      if (data.section !== 'body') return
+      const v = vendors[data.row.index]
+      if (!v) return
+      if (data.column.index === 1) {
+        const hasAlert = sorted.some(a => a.vendor === v.vendor)
+        if (hasAlert) data.cell.styles.textColor = ORANGE
+      }
+      if (data.column.index === 4) {
+        data.cell.styles.textColor = NAVY
       }
     },
-    foot: [['', '⚠ Vendor has one or more open anomaly findings', '', '', '', '']],
-    footStyles: { fontSize: 6.5, textColor: SLATE400, fillColor: WHITE, fontStyle: 'normal', lineWidth: 0 },
+    didDrawPage: (data) => {
+      if (data.pageNumber > 1) footer(catPage+data.pageNumber)
+    },
   })
 
-  // ──────────────────────────────────────────────────────────────────────────
-  // PAGE — Audit Log (optional)
-  // ──────────────────────────────────────────────────────────────────────────
-  if (includeAudit && auditRows.length > 0) {
+  // Note below vendor table
+  const afterVendors = (doc as any).lastAutoTable?.finalY ?? y
+  if (afterVendors < H - 20) {
+    doc.setFont('helvetica','normal'); doc.setFontSize(7); tc(SLATE400)
+    doc.text('(!)  Vendor has one or more open anomaly findings', ML, afterVendors+8)
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PAGE N — AUDIT LOG
+  // ══════════════════════════════════════════════════════════════════════════
+  if (includeAudit && audits.length > 0) {
     doc.addPage()
     const auditPageNum = (doc as any).internal.getCurrentPageInfo().pageNumber
-    pageFooter(auditPageNum)
-    y = 20
-    y = sectionTitle(`Audit Log — Recent ${auditRows.length} Events`, y)
+    footer(auditPageNum)
+    y = 18
+    y = sectionHead(`Audit Log  -  Recent ${audits.length} Events`, y)
 
     autoTable(doc, {
-      startY: y,
-      margin: { left: L, right: W - R },
+      startY:   y,
+      margin:   { left: ML, right: MR },
       tableWidth: CW,
+      rowPageBreak: 'avoid',
       styles: {
-        font: 'helvetica',
-        fontSize: 7.5,
-        cellPadding: { top: 3, right: 4, bottom: 3, left: 4 },
-        textColor: SLATE700,
-        lineColor: SLATE200,
-        lineWidth: 0.15,
-        overflow: 'linebreak',
+        font:        'helvetica',
+        fontSize:    8,
+        cellPadding: { top:4, right:5, bottom:4, left:5 },
+        textColor:   SLATE800,
+        lineColor:   SLATE200,
+        lineWidth:   0.15,
+        overflow:    'linebreak',
+        valign:      'top',
       },
       headStyles: {
-        fillColor: NAVY,
-        textColor: WHITE,
-        fontStyle: 'bold',
-        fontSize: 7,
-        cellPadding: { top: 4, right: 4, bottom: 4, left: 4 },
+        fillColor:   NAVY,
+        textColor:   WHITE,
+        fontStyle:   'bold',
+        fontSize:    7.5,
+        cellPadding: { top:5, right:5, bottom:5, left:5 },
+        lineWidth:   0,
       },
       alternateRowStyles: { fillColor: SLATE100 },
       columnStyles: {
-        0: { cellWidth: 30, textColor: SLATE400, fontSize: 7 },
-        1: { cellWidth: 'auto' },
-        2: { cellWidth: 28, textColor: SLATE500 },
+        0: { cellWidth:34, fontSize:7.5, textColor:SLATE400 },
+        1: { cellWidth:'auto' },
+        2: { cellWidth:28, textColor:SLATE600, halign:'right' },
       },
-      head: [['Timestamp', 'Event', 'Actor']],
-      body: auditRows.map(e => [
+      head: [['TIMESTAMP','EVENT','ACTOR']],
+      body: audits.map(e => [
         fmtShort(e.ts),
-        `${e.event}${e.detail ? ` — ${e.detail}` : ''}`,
-        e.actor,
+        safe(`${e.event}${e.detail ? '  -  '+e.detail : ''}`),
+        safe(e.actor),
       ]),
     })
   }
 
   // ── Save ──
-  const slug = company.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-')
+  const slug = company.replace(/[^a-zA-Z0-9]/g,'-').replace(/-+/g,'-').slice(0,30)
   doc.save(`Ventura-Report-${slug}-${todaySlug()}.pdf`)
 }
 
@@ -510,9 +596,7 @@ export default function ReportsPage() {
   const [generating,   setGenerating]   = useState(false)
   const [error,        setError]        = useState('')
 
-  useEffect(() => {
-    if (isReady) setDataset(loadDataset())
-  }, [isReady])
+  useEffect(() => { if (isReady) setDataset(loadDataset()) }, [isReady])
 
   if (mounted && !isReady) {
     return (
@@ -531,37 +615,29 @@ export default function ReportsPage() {
   const open       = dataset.anomalies.filter(a => a.status !== 'Resolved' && a.status !== 'Dismissed')
   const critical   = open.filter(a => a.severity === 'CRITICAL')
   const high       = open.filter(a => a.severity === 'HIGH')
-  const exposure   = open.reduce((s, a) => s + a.amount, 0)
+  const exposure   = open.reduce((s,a) => s + a.amount, 0)
   const duplicates = open.filter(a => a.type === 'duplicate')
-  const savings    = duplicates.reduce((s, a) => s + a.amount, 0)
+  const savings    = duplicates.reduce((s,a) => s + a.amount, 0)
   const dateRange  = dataset.dateRange.from
-    ? `${fmtShort(dataset.dateRange.from)} – ${fmtShort(dataset.dateRange.to)}`
+    ? `${fmtShort(dataset.dateRange.from)} - ${fmtShort(dataset.dateRange.to)}`
     : 'All dates'
 
   async function handleGenerate() {
-    setGenerating(true)
-    setError('')
-    try {
-      await generateAndDownload(dataset!, company, includeAudit)
-    } catch (e) {
-      console.error(e)
-      setError('Failed to generate PDF. Please try again.')
-    } finally {
-      setGenerating(false)
-    }
+    setGenerating(true); setError('')
+    try { await generateAndDownload(dataset!, company, includeAudit) }
+    catch (e) { console.error(e); setError('Failed to generate PDF. Please try again.') }
+    finally { setGenerating(false) }
   }
 
   return (
     <AppLayout title="Reports">
       <div className="max-w-3xl">
-
         <div className="mb-8">
           <h1 className="text-lg font-bold text-slate-900">Reports</h1>
           <p className="text-xs text-slate-500 mt-0.5">Download a professional PDF report directly to your computer</p>
         </div>
 
         <div className="bg-white border border-slate-200">
-
           {/* Header */}
           <div className="px-6 py-5 border-b border-slate-200 flex items-start justify-between gap-6">
             <div className="flex items-start gap-4">
@@ -582,12 +658,12 @@ export default function ReportsPage() {
             <p className="text-xs font-semibold text-slate-700 mb-4">Report contents</p>
             <div className="grid sm:grid-cols-2 gap-3">
               {[
-                { icon: Building2,     label: 'Title page',         desc: `${company} · ${today()}` },
-                { icon: TrendingUp,    label: 'Executive summary',  desc: `${fmtFull(dataset.totalSpend)} total spend · ${open.length} open findings` },
-                { icon: AlertTriangle, label: 'Anomaly findings',   desc: `${open.length} open · ${critical.length} critical · ${high.length} high` },
-                { icon: ShieldAlert,   label: 'Risk exposure',      desc: `${fmtFull(exposure)} total · ${fmtFull(savings)} recoverable` },
-                { icon: TrendingUp,    label: 'Spend by category',  desc: `${dataset.categoryBreakdown.length} categories` },
-                { icon: Building2,     label: 'Top vendors',        desc: `${Math.min(dataset.topVendors.length, 10)} vendors by total spend` },
+                { icon: Building2,     label: 'Title page',        desc: `${company} · ${today()} · risk summary callout` },
+                { icon: TrendingUp,    label: 'Executive summary', desc: `Stat cards + top findings preview + severity breakdown` },
+                { icon: AlertTriangle, label: 'Anomaly findings',  desc: `${open.length} open · ${critical.length} critical · ${high.length} high · colour-coded` },
+                { icon: ShieldAlert,   label: 'Risk exposure',     desc: `${fmtFull(exposure)} total · ${fmtFull(savings)} recoverable` },
+                { icon: TrendingUp,    label: 'Spend by category', desc: `${dataset.categoryBreakdown.length} categories with bar chart` },
+                { icon: Building2,     label: 'Top vendors',       desc: `${Math.min(dataset.topVendors.length,10)} vendors · anomaly flags` },
               ].map(item => {
                 const Icon = item.icon
                 return (
@@ -616,12 +692,12 @@ export default function ReportsPage() {
               />
               <div>
                 <p className="text-xs font-medium text-slate-800">Include audit log</p>
-                <p className="text-[10px] text-slate-400">Appends the last {Math.min(dataset.auditLog.length, 25)} audit events as a final page</p>
+                <p className="text-[10px] text-slate-400">Appends the last {Math.min(dataset.auditLog.length,25)} audit events as a final page</p>
               </div>
             </label>
           </div>
 
-          {/* Download button */}
+          {/* Download */}
           <div className="px-6 py-5 flex items-center justify-between gap-4 bg-slate-50">
             <div>
               {error
@@ -636,23 +712,22 @@ export default function ReportsPage() {
             >
               {generating ? (
                 <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                 </svg>
               ) : <Download className="w-4 h-4" />}
-              {generating ? 'Generating…' : 'Download PDF'}
+              {generating ? 'Generating...' : 'Download PDF'}
             </button>
           </div>
-
         </div>
 
-        {/* Stats recap */}
+        {/* Stats */}
         <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { label: 'Transactions',  value: dataset.totalTransactions.toLocaleString(), color: 'text-slate-900'  },
-            { label: 'Open findings', value: open.length.toString(),                     color: open.length > 0     ? 'text-red-700'    : 'text-slate-900' },
-            { label: 'Risk exposure', value: fmtFull(exposure),                          color: exposure > 0        ? 'text-orange-700' : 'text-slate-900' },
-            { label: 'Recoverable',   value: fmtFull(savings),                           color: savings > 0         ? 'text-green-700'  : 'text-slate-500' },
+            { label:'Transactions',  value:dataset.totalTransactions.toLocaleString(), color:'text-slate-900' },
+            { label:'Open findings', value:open.length.toString(),                     color:open.length>0    ?'text-red-700'    :'text-slate-900' },
+            { label:'Risk exposure', value:fmtFull(exposure),                          color:exposure>0       ?'text-orange-700' :'text-slate-900' },
+            { label:'Recoverable',   value:fmtFull(savings),                           color:savings>0        ?'text-green-700'  :'text-slate-500' },
           ].map(s => (
             <div key={s.label} className="bg-white border border-slate-200 px-4 py-3">
               <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">{s.label}</p>
@@ -660,7 +735,6 @@ export default function ReportsPage() {
             </div>
           ))}
         </div>
-
       </div>
     </AppLayout>
   )

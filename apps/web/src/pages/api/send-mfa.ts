@@ -1,19 +1,56 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { randomInt, createHmac } from 'crypto'
+import { randomInt, createHash } from 'crypto'
+import { createClient } from '../../utils/supabase/server'
 
-const SECRET = process.env.MFA_SECRET ?? 'ventura-mfa-dev-secret'
+const CODE_TTL_MS  = 10 * 60 * 1000
+const MAX_SENDS    = 3
+const WINDOW_MS    = 10 * 60 * 1000
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end()
 
   const { email } = req.body
-  if (!email) return res.status(400).json({ error: 'Email required' })
+  if (!email || typeof email !== 'string') {
+    return res.status(400).json({ error: 'Email required' })
+  }
 
+  const supabase = createClient({ req, res })
+
+  // Confirm the caller has a live Supabase session (created by signInWithPassword)
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user || user.email !== email) {
+    return res.status(401).json({ error: 'Session not found. Please sign in again.' })
+  }
+
+  // Rate-limit: track send timestamps in metadata
+  const meta       = (user.user_metadata || {}) as Record<string, unknown>
+  const sendLog    = Array.isArray(meta._mfa_sends) ? (meta._mfa_sends as number[]) : []
+  const windowStart = Date.now() - WINDOW_MS
+  const recentSends = sendLog.filter((t: number) => t > windowStart)
+
+  if (recentSends.length >= MAX_SENDS) {
+    return res.status(429).json({ error: 'Too many codes requested. Please wait a few minutes.' })
+  }
+
+  // Cryptographically secure code + SHA-256 hash (never store plaintext)
   const code      = randomInt(100000, 1000000).toString()
-  const exp       = Date.now() + 10 * 60 * 1000
-  const payload   = `${email}|${code}|${exp}`
-  const sig       = createHmac('sha256', SECRET).update(payload).digest('base64url')
-  const cookieVal = `${Buffer.from(payload).toString('base64url')}.${sig}`
+  const codeHash  = createHash('sha256').update(code).digest('hex')
+  const expiresAt = new Date(Date.now() + CODE_TTL_MS).toISOString()
+
+  // Store hash + expiry + attempt counter in user metadata
+  const { error: updateErr } = await supabase.auth.updateUser({
+    data: {
+      _mfa_hash:     codeHash,
+      _mfa_exp:      expiresAt,
+      _mfa_attempts: 0,
+      _mfa_sends:    [...recentSends, Date.now()],
+    },
+  })
+
+  if (updateErr) {
+    console.error('updateUser error:', updateErr)
+    return res.status(500).json({ error: 'Failed to create verification code. Please try again.' })
+  }
 
   const html = `
 <!DOCTYPE html>
@@ -23,13 +60,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#0c1526;min-height:100vh;padding:48px 0;">
     <tr><td align="center" style="padding:0 24px;">
       <table width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;">
-
         <tr>
           <td style="padding:0 0 40px;">
             <p style="margin:0;font-size:20px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">Ventura</p>
           </td>
         </tr>
-
         <tr>
           <td style="background:#111d2e;border:1px solid #1e3048;border-radius:12px;overflow:hidden;">
             <table width="100%" cellpadding="0" cellspacing="0">
@@ -66,13 +101,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             </table>
           </td>
         </tr>
-
         <tr>
           <td style="padding:28px 0 0;">
             <p style="margin:0;font-size:12px;color:#2a3d5a;">© 2026 Ventura Financial Intelligence, Inc. &nbsp;·&nbsp; All rights reserved.</p>
           </td>
         </tr>
-
       </table>
     </td></tr>
   </table>
@@ -95,9 +128,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (!emailRes.ok) {
     const err = await emailRes.text()
-    return res.status(500).json({ error: `Failed to send email: ${err}` })
+    console.error('Resend error:', err)
+    // Clear the stored code so it can't be guessed
+    await supabase.auth.updateUser({ data: { _mfa_hash: null, _mfa_exp: null } })
+    return res.status(500).json({ error: 'Failed to send verification email. Please try again.' })
   }
 
-  res.setHeader('Set-Cookie', `mfa_token=${cookieVal}; HttpOnly; SameSite=Strict; Max-Age=600; Path=/`)
   res.json({ ok: true })
 }

@@ -172,9 +172,10 @@ export default function LoginPage() {
         body: JSON.stringify({ email, code }),
       })
       if (!verifyRes.ok) {
+        const { error: verifyErr } = await verifyRes.json().catch(() => ({ error: null }))
         setLoading(false)
         setMfaCode('')
-        setError('Incorrect or expired code. Check your email and try again.')
+        setError(verifyErr || 'Incorrect or expired code. Please try again.')
         mfaRef.current?.focus()
         return
       }

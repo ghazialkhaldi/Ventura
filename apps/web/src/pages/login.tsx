@@ -29,6 +29,10 @@ export default function LoginPage() {
   const supabase = createClient()
 
   useEffect(() => {
+    if (localStorage.getItem('sf_user')) router.replace('/dashboard')
+  }, [router])
+
+  useEffect(() => {
     if (step === 'mfa') mfaRef.current?.focus()
   }, [step])
 

@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react'
+﻿import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import AppLayout from '../components/layout/AppLayout'
 import BrandIcon, { type BrandKey } from '../components/ui/BrandIcon'
@@ -6,7 +6,7 @@ import ConnectModal from '../components/ui/ConnectModal'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import {
   CheckCircle, ArrowRight, Upload,
-  GitMerge, BarChart2, Bell, ChevronRight,
+  GitMerge, BarChart2, Bell, ChevronRight, X,
 } from 'lucide-react'
 
 const SETUP_STEPS = [
@@ -50,8 +50,31 @@ export default function WelcomePage() {
   const [activeModal, setActiveModal] = useState<string | null>(null)
   const [connected,   setConnected]   = useState<string[]>([])
 
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('sf_connected') || '{}')
+      setConnected(Object.keys(stored))
+    } catch {}
+  }, [])
+
   function handleConnected(id: string) {
+    try {
+      const stored = JSON.parse(localStorage.getItem('sf_connected') || '{}')
+      if (!stored[id]) {
+        stored[id] = { connectedAt: new Date().toISOString(), status: 'Connected' }
+        localStorage.setItem('sf_connected', JSON.stringify(stored))
+      }
+    } catch {}
     setConnected(prev => prev.includes(id) ? prev : [...prev, id])
+  }
+
+  function handleDisconnect(id: string) {
+    try {
+      const stored = JSON.parse(localStorage.getItem('sf_connected') || '{}')
+      delete stored[id]
+      localStorage.setItem('sf_connected', JSON.stringify(stored))
+    } catch {}
+    setConnected(prev => prev.filter(x => x !== id))
   }
 
   return (
@@ -158,21 +181,32 @@ export default function WelcomePage() {
                     )}
                   </div>
                   <p className="text-[11px] text-slate-500 leading-snug">{src.desc}</p>
-                  <button
-                    onClick={() => !isConnected && setActiveModal(src.id)}
-                    disabled={isConnected}
-                    className={`w-full text-xs font-semibold py-2 rounded-md transition-colors flex items-center justify-center gap-1.5 ${
-                      isConnected
-                        ? 'bg-green-50 text-green-700 border border-green-200 cursor-default'
-                        : 'bg-[#0c1526] hover:bg-[#1a2640] text-white'
-                    }`}
-                  >
-                    {isConnected ? (
-                      <><CheckCircle className="w-3.5 h-3.5" /> Connected</>
-                    ) : (
-                      <>Connect {src.name.split(' ')[0]}</>
+                  <div className="flex gap-1.5">
+                    <button
+                      onClick={() => !isConnected && setActiveModal(src.id)}
+                      disabled={isConnected}
+                      className={`flex-1 text-xs font-semibold py-2 rounded-md transition-colors flex items-center justify-center gap-1.5 ${
+                        isConnected
+                          ? 'bg-green-50 text-green-700 border border-green-200 cursor-default'
+                          : 'bg-[#0c1526] hover:bg-[#1a2640] text-white'
+                      }`}
+                    >
+                      {isConnected ? (
+                        <><CheckCircle className="w-3.5 h-3.5" /> Connected</>
+                      ) : (
+                        <>Connect {src.name.split(' ')[0]}</>
+                      )}
+                    </button>
+                    {isConnected && (
+                      <button
+                        onClick={() => handleDisconnect(src.id)}
+                        title="Reset connection"
+                        className="text-red-400 hover:text-red-600 hover:bg-red-50 px-2 rounded-md transition-colors border border-transparent hover:border-red-200"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
                     )}
-                  </button>
+                  </div>
                 </div>
               )
             })}

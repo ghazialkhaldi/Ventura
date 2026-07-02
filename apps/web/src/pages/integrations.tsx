@@ -8,7 +8,7 @@ import BrandIcon, { type BrandKey } from '../components/ui/BrandIcon'
 import ConnectModal, { INTEGRATION_CONFIGS } from '../components/ui/ConnectModal'
 import {
   Plug, RefreshCw, Settings, Plus, Database, Shield,
-  Link, Clock, ChevronRight, Search,
+  Link, Clock, ChevronRight, Search, Loader2, Trash2,
 } from 'lucide-react'
 
 const BRAND_MAP: Record<string, BrandKey> = {
@@ -96,10 +96,10 @@ const ADD_OPTIONS = [
 ]
 
 export default function IntegrationsPage() {
-  const [syncing,       setSyncing]       = useState<string | null>(null)
-  const [activeModal,   setActiveModal]   = useState<string | null>(null)
-  const [showAddPanel,  setShowAddPanel]  = useState(false)
-  const [addSearch,     setAddSearch]     = useState('')
+  const [processingCard, setProcessingCard] = useState<string | null>(null)
+  const [activeModal,    setActiveModal]    = useState<string | null>(null)
+  const [showAddPanel,   setShowAddPanel]   = useState(false)
+  const [addSearch,      setAddSearch]      = useState('')
   const [newlyConnected, setNewlyConnected] = useState<string[]>([])
 
   useEffect(() => {
@@ -109,18 +109,34 @@ export default function IntegrationsPage() {
     } catch {}
   }, [])
 
-  async function handleSync(id: string) {
+  async function handleRefresh(id: string) {
     if (INTEGRATION_CONFIGS[id]?.authType === 'file') {
       setActiveModal(id)
       return
     }
-    setSyncing(id)
-    await new Promise(r => setTimeout(r, 1800))
-    setSyncing(null)
+    setProcessingCard(id)
+    await new Promise(r => setTimeout(r, 2000))
+    setProcessingCard(null)
   }
 
   function handleConnected(id: string) {
+    try {
+      const stored = JSON.parse(localStorage.getItem('sf_connected') || '{}')
+      if (!stored[id]) {
+        stored[id] = { connectedAt: new Date().toISOString(), status: 'Connected' }
+        localStorage.setItem('sf_connected', JSON.stringify(stored))
+      }
+    } catch {}
     setNewlyConnected(prev => prev.includes(id) ? prev : [...prev, id])
+  }
+
+  function handleDisconnect(id: string) {
+    try {
+      const stored = JSON.parse(localStorage.getItem('sf_connected') || '{}')
+      delete stored[id]
+      localStorage.setItem('sf_connected', JSON.stringify(stored))
+    } catch {}
+    setNewlyConnected(prev => prev.filter(x => x !== id))
   }
 
   const connectedCount = newlyConnected.length
@@ -220,55 +236,91 @@ export default function IntegrationsPage() {
           const isConnected = newlyConnected.includes(modalId)
           const status = isConnected ? 'Connected' : 'Not connected'
           return (
-            <div key={intg.id} className="bg-white border border-slate-200 rounded-lg shadow-card p-5 flex flex-col">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <BrandIcon brand={brand} size={40} />
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">{intg.name}</p>
-                    <p className="text-xs text-slate-500">{intg.type}</p>
+            <div key={intg.id} className="bg-white border border-slate-200 rounded-lg shadow-card p-5 flex flex-col min-h-[220px]">
+              {processingCard === modalId ? (
+                <div className="flex flex-col items-center justify-center flex-1 gap-3 py-4">
+                  <div className="w-10 h-10 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center">
+                    <Loader2 className="w-5 h-5 text-emerald-600 animate-spin" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-semibold text-slate-900">Refreshing…</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Syncing latest records from {intg.name}</p>
                   </div>
                 </div>
-                <Badge variant="integration" value={status} dot>{status}</Badge>
-              </div>
-
-              <p className="text-xs text-slate-600 leading-relaxed mb-4 flex-1">{intg.description}</p>
-
-              <div className="space-y-1.5 mb-4">
-                {[
-                  { label: 'Auth method', value: intg.authMethod },
-                  { label: 'Records',     value: isConnected ? 'Synced' : '—' },
-                ].map((row) => (
-                  <div key={row.label} className="flex justify-between text-xs">
-                    <span className="text-slate-400">{row.label}</span>
-                    <span className="text-slate-700 font-medium">{row.value}</span>
+              ) : (
+                <>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <BrandIcon brand={brand} size={40} />
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">{intg.name}</p>
+                        <p className="text-xs text-slate-500">{intg.type}</p>
+                      </div>
+                    </div>
+                    <Badge variant="integration" value={status} dot>{status}</Badge>
                   </div>
-                ))}
-              </div>
 
-              <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  loading={syncing === intg.id}
-                  icon={<RefreshCw className={`w-3 h-3 ${syncing === intg.id ? 'animate-spin' : ''}`} />}
-                  onClick={() => handleSync(intg.id)}
-                  className="flex-1"
-                >
-                  {syncing === intg.id ? 'Syncing…' : 'Sync now'}
-                </Button>
-                {isInConfig && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    icon={<Settings className="w-3.5 h-3.5" />}
-                    onClick={() => setActiveModal(modalId)}
-                  >
-                    Configure
-                  </Button>
-                )}
-                <Button variant="ghost" size="sm" icon={<ChevronRight className="w-3.5 h-3.5" />} />
-              </div>
+                  <p className="text-xs text-slate-600 leading-relaxed mb-4 flex-1">{intg.description}</p>
+
+                  <div className="space-y-1.5 mb-4">
+                    {[
+                      { label: 'Auth method', value: intg.authMethod },
+                      { label: 'Records',     value: isConnected ? 'Synced' : '—' },
+                    ].map((row) => (
+                      <div key={row.label} className="flex justify-between text-xs">
+                        <span className="text-slate-400">{row.label}</span>
+                        <span className="text-slate-700 font-medium">{row.value}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
+                    {isConnected ? (
+                      <>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          icon={<RefreshCw className="w-3 h-3" />}
+                          onClick={() => handleRefresh(modalId)}
+                          className="flex-1"
+                        >
+                          Refresh
+                        </Button>
+                        <button
+                          onClick={() => handleDisconnect(modalId)}
+                          className="flex items-center gap-1 text-xs font-medium text-red-500 hover:text-red-700 hover:bg-red-50 px-2.5 py-1.5 rounded-md transition-colors border border-transparent hover:border-red-200"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          Reset
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          icon={<RefreshCw className="w-3 h-3" />}
+                          onClick={() => handleRefresh(intg.id)}
+                          className="flex-1"
+                        >
+                          Sync now
+                        </Button>
+                        {isInConfig && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            icon={<Settings className="w-3.5 h-3.5" />}
+                            onClick={() => setActiveModal(modalId)}
+                          >
+                            Configure
+                          </Button>
+                        )}
+                        <Button variant="ghost" size="sm" icon={<ChevronRight className="w-3.5 h-3.5" />} />
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           )
         })}

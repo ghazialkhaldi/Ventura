@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { X, Check, Loader2, Upload, AlertCircle, FileText, Clock, ExternalLink, ArrowLeft } from 'lucide-react'
+import { X, Check, Loader2, Upload, AlertCircle, FileText, Clock, ExternalLink } from 'lucide-react'
 import BrandIcon, { BrandKey } from './BrandIcon'
 import { parseFile } from '../../lib/transactionParser'
 import { runAnomalyDetection } from '../../lib/anomalyEngine'
@@ -10,9 +10,8 @@ export interface IntegrationConfig {
   id: string
   name: string
   brand: BrandKey
-  authType: 'oauth' | 'apikey' | 'tba' | 'saml' | 'file' | 'webhook'
+  authType: 'apikey' | 'tba' | 'saml' | 'file' | 'webhook'
   fields: FieldDef[]
-  helpText?: string
   instructions?: {
     steps: string[]
     note?: string
@@ -30,157 +29,179 @@ interface FieldDef {
 }
 
 export const INTEGRATION_CONFIGS: Record<string, IntegrationConfig> = {
-  // ── OAuth 2.0 providers ───────────────────────────────────────────────────────
+  // ── QuickBooks ────────────────────────────────────────────────────────────────
   'quickbooks': {
-    id: 'quickbooks', name: 'QuickBooks Online', brand: 'quickbooks', authType: 'oauth',
-    fields: [],
+    id: 'quickbooks', name: 'QuickBooks Online', brand: 'quickbooks', authType: 'apikey',
     instructions: {
       steps: [
-        'Make sure you have a QuickBooks Online account (not Desktop) with Admin or Accountant access.',
-        'Click "Connect QuickBooks Online" below — you\'ll be redirected to Intuit to sign in.',
-        'Select the company file you want to connect and review the permission request.',
-        'Click Authorize — you\'ll be returned to Ventura automatically.',
+        'Go to developer.intuit.com and sign in (or create a free developer account).',
+        'Click "Create an App" → select "QuickBooks Online and Payments".',
+        'Under Keys & OAuth → Production, copy your Client ID and Client Secret.',
+        'To find your Company/Realm ID: log in to QuickBooks Online — it appears in the URL as ?realmId=XXXXXXXXX.',
       ],
-      note: 'Requires an active QuickBooks Online subscription. QuickBooks Desktop is not supported.',
-      link: { label: 'Log in to QuickBooks Online', url: 'https://accounts.intuit.com/app/sign-in' },
+      link: { label: 'Open Intuit Developer Portal', url: 'https://developer.intuit.com/app/developer/homepage' },
     },
-  },
-  'salesforce': {
-    id: 'salesforce', name: 'Salesforce CRM', brand: 'salesforce', authType: 'oauth',
-    fields: [],
-    instructions: {
-      steps: [
-        'You\'ll need System Administrator access (or a profile with API Enabled) on your Salesforce org.',
-        'Click "Connect Salesforce CRM" below — you\'ll be redirected to your Salesforce org login.',
-        'Sign in and review the Connected App permission request.',
-        'Click Allow — you\'ll be returned to Ventura automatically.',
-      ],
-      note: 'Your Salesforce org must have API access enabled. Contact your Salesforce admin if unsure.',
-      link: { label: 'Log in to Salesforce', url: 'https://login.salesforce.com' },
-    },
-  },
-  'xero': {
-    id: 'xero', name: 'Xero', brand: 'xero', authType: 'oauth',
-    fields: [],
-    instructions: {
-      steps: [
-        'Ensure you have Adviser or Standard role on the Xero organization you want to connect.',
-        'Click "Connect Xero" below — you\'ll be redirected to the Xero login page.',
-        'Sign in to Xero, select the organization, and review the permission request.',
-        'Click Allow Access — you\'ll be returned to Ventura automatically.',
-      ],
-      note: 'One Xero organization is connected per account. To switch organizations, disconnect and reconnect.',
-      link: { label: 'Log in to Xero', url: 'https://login.xero.com' },
-    },
-  },
-  'gusto': {
-    id: 'gusto', name: 'Gusto', brand: 'gusto', authType: 'oauth',
-    fields: [],
-    instructions: {
-      steps: [
-        'You\'ll need Administrator access to your Gusto company account.',
-        'Click "Connect Gusto" below — you\'ll be redirected to Gusto to sign in.',
-        'Sign in and review the authorization request for payroll data access.',
-        'Click Authorize — you\'ll be returned to Ventura automatically.',
-      ],
-      link: { label: 'Log in to Gusto', url: 'https://app.gusto.com/login' },
-    },
+    fields: [
+      { key: 'client_id',     label: 'Client ID',        type: 'text',     placeholder: 'ABcd1234...', required: true },
+      { key: 'client_secret', label: 'Client Secret',    type: 'password', placeholder: '••••••••••••', required: true },
+      { key: 'company_id',    label: 'Company / Realm ID', type: 'text',   placeholder: '123456789', required: true },
+    ],
   },
 
-  // ── API-key / credential providers ───────────────────────────────────────────
+  // ── Salesforce ────────────────────────────────────────────────────────────────
+  'salesforce': {
+    id: 'salesforce', name: 'Salesforce CRM', brand: 'salesforce', authType: 'apikey',
+    instructions: {
+      steps: [
+        'In Salesforce, go to Setup → App Manager → New Connected App.',
+        'Enable OAuth Settings, add "api" and "refresh_token" scopes, and save.',
+        'Copy the Consumer Key (Client ID) and Consumer Secret from the app settings.',
+        'Your Instance URL is the base URL of your Salesforce org (e.g. https://yourorg.my.salesforce.com).',
+      ],
+      link: { label: 'Open Salesforce Setup', url: 'https://login.salesforce.com' },
+    },
+    fields: [
+      { key: 'instance_url',  label: 'Instance URL',    type: 'url',      placeholder: 'https://yourorg.my.salesforce.com', required: true },
+      { key: 'client_id',     label: 'Consumer Key',    type: 'text',     placeholder: '3MVG9...', required: true },
+      { key: 'client_secret', label: 'Consumer Secret', type: 'password', placeholder: '••••••••••••', required: true },
+    ],
+  },
+
+  // ── Xero ──────────────────────────────────────────────────────────────────────
+  'xero': {
+    id: 'xero', name: 'Xero', brand: 'xero', authType: 'apikey',
+    instructions: {
+      steps: [
+        'Go to developer.xero.com → My Apps → New App.',
+        'Select "Web App", fill in the details, and save.',
+        'Copy your Client ID from the Configuration tab.',
+        'Click "Generate a secret" to get your Client Secret — copy it immediately as it won\'t be shown again.',
+      ],
+      note: 'Client Secret is shown only once — copy it immediately after generating.',
+      link: { label: 'Open Xero Developer Portal', url: 'https://developer.xero.com/myapps' },
+    },
+    fields: [
+      { key: 'client_id',     label: 'Client ID',     type: 'text',     placeholder: 'UUID-...', required: true },
+      { key: 'client_secret', label: 'Client Secret', type: 'password', placeholder: '••••••••••••', required: true },
+    ],
+  },
+
+  // ── Gusto ─────────────────────────────────────────────────────────────────────
+  'gusto': {
+    id: 'gusto', name: 'Gusto', brand: 'gusto', authType: 'apikey',
+    instructions: {
+      steps: [
+        'Go to dev.gusto.com and sign in or create a developer account.',
+        'Create a new application and fill in the required details.',
+        'Copy your Client ID and Client Secret from the application settings.',
+      ],
+      link: { label: 'Open Gusto Developer Portal', url: 'https://dev.gusto.com' },
+    },
+    fields: [
+      { key: 'client_id',     label: 'Client ID',     type: 'text',     placeholder: '...', required: true },
+      { key: 'client_secret', label: 'Client Secret', type: 'password', placeholder: '••••••••••••', required: true },
+    ],
+  },
+
+  // ── Plaid ─────────────────────────────────────────────────────────────────────
   'plaid': {
     id: 'plaid', name: 'Plaid Bank Feeds', brand: 'plaid', authType: 'apikey',
-    helpText: 'Your credentials are encrypted with AES-256-GCM and stored server-side — never visible after saving.',
-    fields: [
-      { key: 'client_id', label: 'Client ID',  type: 'text',     placeholder: '5f3a...', required: true },
-      { key: 'api_key',   label: 'Secret Key', type: 'password', placeholder: '••••••••••••', required: true },
-    ],
     instructions: {
       steps: [
         'Log in to your Plaid Dashboard at dashboard.plaid.com.',
         'Go to Team Settings → Keys in the left sidebar.',
-        'Copy your Client ID (always visible) and Secret key (Development or Production environment).',
-        'Paste both values on the next screen and click "Save & Connect".',
+        'Copy your Client ID (always visible) and Secret key for your environment (Development or Production).',
       ],
-      note: 'Use your Production secret for live bank data, or Development secret for testing.',
-      link: { label: 'Open Plaid Dashboard → Team Settings → Keys', url: 'https://dashboard.plaid.com/team/keys' },
+      link: { label: 'Open Plaid Dashboard → Keys', url: 'https://dashboard.plaid.com/team/keys' },
     },
+    fields: [
+      { key: 'client_id', label: 'Client ID',  type: 'text',     placeholder: '5f3a...', required: true },
+      { key: 'api_key',   label: 'Secret Key', type: 'password', placeholder: '••••••••••••', required: true },
+    ],
   },
+
+  // ── ADP ───────────────────────────────────────────────────────────────────────
   'adp': {
     id: 'adp', name: 'ADP Workforce Now', brand: 'adp', authType: 'apikey',
-    helpText: 'Your credentials are encrypted and stored server-side.',
-    fields: [
-      { key: 'client_id',    label: 'Client ID',     type: 'text',     placeholder: 'ADP-CLIENT-ID', required: true },
-      { key: 'api_key',      label: 'Client Secret', type: 'password', placeholder: '••••••••••••',  required: true },
-      { key: 'company_code', label: 'Company Code',  type: 'text',     placeholder: 'ABC12',          required: true },
-    ],
     instructions: {
       steps: [
         'Log in to the ADP Developer Portal at developers.adp.com → My Apps.',
-        'Select your application and copy the Client ID and Client Secret from the Credentials tab.',
+        'Open your application and copy the Client ID and Client Secret from the Credentials tab.',
         'Find your Company Code in ADP Workforce Now under Company → Company Settings.',
-        'Enter all three values on the next screen and click "Save & Connect".',
       ],
       link: { label: 'Open ADP Developer Portal', url: 'https://developers.adp.com' },
     },
+    fields: [
+      { key: 'client_id',    label: 'Client ID',     type: 'text',     placeholder: 'ADP-CLIENT-ID', required: true },
+      { key: 'api_key',      label: 'Client Secret', type: 'password', placeholder: '••••••••••••',  required: true },
+      { key: 'company_code', label: 'Company Code',  type: 'text',     placeholder: 'ABC12', required: true },
+    ],
   },
+
+  // ── Stripe ────────────────────────────────────────────────────────────────────
   'stripe': {
     id: 'stripe', name: 'Stripe', brand: 'stripe', authType: 'apikey',
-    helpText: 'Your Secret Key is encrypted with AES-256-GCM and stored server-side — never visible after saving.',
-    fields: [
-      { key: 'api_key', label: 'Stripe Secret Key', type: 'password', placeholder: 'sk_live_••••••••', required: true },
-    ],
     instructions: {
       steps: [
         'Log in to your Stripe Dashboard at dashboard.stripe.com.',
         'Click Developers → API keys in the left sidebar.',
         'Copy your Secret key (sk_live_... for production, sk_test_... for testing).',
-        'For best security, create a Restricted Key with read-only access to Charges and Customers.',
-        'Paste your key on the next screen and click "Save & Connect".',
+        'For tighter security, create a Restricted Key with read-only access to Charges and Customers.',
       ],
-      link: { label: 'Open Stripe → Developers → API keys', url: 'https://dashboard.stripe.com/apikeys' },
+      link: { label: 'Open Stripe → API keys', url: 'https://dashboard.stripe.com/apikeys' },
     },
+    fields: [
+      { key: 'api_key', label: 'Secret Key', type: 'password', placeholder: 'sk_live_••••••••', required: true },
+    ],
   },
+
+  // ── Expensify ─────────────────────────────────────────────────────────────────
   'expensify': {
     id: 'expensify', name: 'Expensify', brand: 'expensify', authType: 'apikey',
-    helpText: 'Your credentials are encrypted and stored server-side.',
-    fields: [
-      { key: 'partner_user_id', label: 'Partner User ID', type: 'text',     placeholder: 'user@yourco.com', required: true },
-      { key: 'api_key',         label: 'Partner Secret',  type: 'password', placeholder: '••••••••••••',   required: true },
-    ],
     instructions: {
       steps: [
         'Log in to Expensify at expensify.com.',
         'Go to Settings → Account → Integrations → API.',
         'Copy your partnerUserID and partnerUserSecret from that page.',
-        'Paste both values on the next screen and click "Save & Connect".',
       ],
-      link: { label: 'Open Expensify → Settings → API', url: 'https://www.expensify.com/tools/integrations/' },
+      link: { label: 'Open Expensify → API Settings', url: 'https://www.expensify.com/tools/integrations/' },
     },
+    fields: [
+      { key: 'partner_user_id', label: 'Partner User ID', type: 'text',     placeholder: 'user@yourco.com', required: true },
+      { key: 'api_key',         label: 'Partner Secret',  type: 'password', placeholder: '••••••••••••',   required: true },
+    ],
   },
+
+  // ── SAP ───────────────────────────────────────────────────────────────────────
   'sap': {
     id: 'sap', name: 'SAP S/4HANA', brand: 'sap', authType: 'apikey',
-    helpText: 'Your API key and system URL are encrypted and stored server-side.',
+    instructions: {
+      steps: [
+        'In SAP BTP Cockpit, go to your subaccount → Services → Service Marketplace.',
+        'Open your S/4HANA Cloud API instance and create or download a Service Key.',
+        'Extract the API Key and System URL from the downloaded Service Key JSON file.',
+        'If you don\'t have BTP access, ask your SAP BASIS administrator for the API Key and System URL.',
+      ],
+    },
     fields: [
       { key: 'api_key',    label: 'API Key',    type: 'password', placeholder: '••••••••••••', required: true },
       { key: 'system_url', label: 'System URL', type: 'url',      placeholder: 'https://your-sap.example.com', required: true },
     ],
-    instructions: {
-      steps: [
-        'In SAP BTP Cockpit, navigate to your subaccount → Services → Service Marketplace.',
-        'Open your S/4HANA Cloud API instance and create or download a Service Key.',
-        'Extract the API Key and System URL from the downloaded Service Key JSON file.',
-        'If you don\'t have BTP access, contact your SAP BASIS administrator for the API Key and System URL.',
-        'Enter both values on the next screen and click "Save & Connect".',
-      ],
-      note: 'Your SAP system URL typically looks like https://your-company.s4hana.ondemand.com',
-    },
   },
 
-  // ── Token-Based Auth ──────────────────────────────────────────────────────────
+  // ── NetSuite ──────────────────────────────────────────────────────────────────
   'netsuite': {
     id: 'netsuite', name: 'NetSuite ERP', brand: 'netsuite', authType: 'tba',
-    helpText: 'All values are encrypted with AES-256-GCM before storage.',
+    instructions: {
+      steps: [
+        'In NetSuite, go to Setup → Integrations → Manage Integrations → New. Enable Token-Based Authentication and save.',
+        'Immediately copy the Consumer Key and Consumer Secret shown on the confirmation screen — they won\'t appear again.',
+        'Go to Setup → Users/Roles → Access Tokens → New. Select your integration and assign a role, then save.',
+        'Immediately copy the Token ID and Token Secret shown — they won\'t appear again.',
+        'Find your Account ID in Setup → Company → Company Information.',
+      ],
+      note: 'Consumer Key/Secret and Token ID/Secret are each shown only once at creation. Copy them before closing.',
+    },
     fields: [
       { key: 'account_id',      label: 'Account ID',      type: 'text',     placeholder: '1234567', required: true },
       { key: 'consumer_key',    label: 'Consumer Key',    type: 'password', placeholder: '••••••••••••', required: true },
@@ -188,70 +209,52 @@ export const INTEGRATION_CONFIGS: Record<string, IntegrationConfig> = {
       { key: 'token_id',        label: 'Token ID',        type: 'password', placeholder: '••••••••••••', required: true },
       { key: 'token_secret',    label: 'Token Secret',    type: 'password', placeholder: '••••••••••••', required: true },
     ],
-    instructions: {
-      steps: [
-        'In NetSuite, go to Setup → Integrations → Manage Integrations → New. Enable Token-Based Authentication and save.',
-        'Immediately copy the Consumer Key and Consumer Secret shown on the confirmation page — they won\'t appear again.',
-        'Go to Setup → Users/Roles → Access Tokens → New. Select your integration and assign a role.',
-        'Immediately copy the Token ID and Token Secret shown — they won\'t appear again.',
-        'Find your Account ID in Setup → Company → Company Information.',
-        'Enter all five values on the next screen and click "Save & Connect".',
-      ],
-      note: 'Consumer Key/Secret and Token ID/Secret are shown only once at creation. Store them securely before continuing.',
-    },
   },
 
-  // ── SAML / SSO ───────────────────────────────────────────────────────────────
+  // ── Okta ──────────────────────────────────────────────────────────────────────
   'okta': {
     id: 'okta', name: 'Okta SSO / SCIM', brand: 'okta', authType: 'saml',
-    helpText: 'Ventura will generate SAML metadata and a SCIM endpoint URL for you to paste into the Okta admin console.',
+    instructions: {
+      steps: [
+        'Log in to your Okta Admin console (e.g. yourorg.okta.com/admin).',
+        'Your Okta domain is shown in the top-right corner of the admin panel (e.g. yourorg.okta.com).',
+        'Enter it below — Ventura will generate SAML metadata for you to paste back into Okta.',
+      ],
+    },
     fields: [
       { key: 'okta_domain', label: 'Okta Domain', type: 'url', placeholder: 'https://yourorg.okta.com', required: true },
     ],
-    instructions: {
-      steps: [
-        'Log in to your Okta Admin console (e.g., yourorg.okta.com/admin).',
-        'Your Okta domain is displayed in the top-right corner of the admin panel (e.g., yourorg.okta.com).',
-        'Enter your Okta domain on the next screen and click "Save & Connect".',
-        'Ventura will return SAML metadata and a SCIM endpoint URL to configure in your Okta Application.',
-      ],
-      note: 'You\'ll need Okta Super Admin or Org Admin privileges to complete the SAML app configuration.',
-    },
   },
 
-  // ── Webhook ───────────────────────────────────────────────────────────────────
+  // ── Slack ─────────────────────────────────────────────────────────────────────
   'slack': {
     id: 'slack', name: 'Slack Notifications', brand: 'slack', authType: 'webhook',
-    helpText: 'Ventura will post anomaly alerts and reports to your chosen Slack channel.',
-    fields: [
-      { key: 'webhook_url', label: 'Slack Webhook URL', type: 'url', placeholder: 'https://hooks.slack.com/services/...', required: true },
-    ],
     instructions: {
       steps: [
-        'Go to api.slack.com/apps → Create New App → From Scratch. Name it "Ventura" and select your workspace.',
-        'Under "Add features and functionality", click Incoming Webhooks and toggle it ON.',
-        'Click "Add New Webhook to Workspace" and select the channel where Ventura should post alerts.',
+        'Go to api.slack.com/apps → Create New App → From Scratch.',
+        'Under "Add features", click Incoming Webhooks and toggle it ON.',
+        'Click "Add New Webhook to Workspace" and select the channel for Ventura alerts.',
         'Copy the generated Webhook URL (starts with https://hooks.slack.com/services/...).',
-        'Paste it on the next screen and click "Save & Connect".',
       ],
       link: { label: 'Open Slack App settings', url: 'https://api.slack.com/apps' },
     },
+    fields: [
+      { key: 'webhook_url', label: 'Webhook URL', type: 'url', placeholder: 'https://hooks.slack.com/services/...', required: true },
+    ],
   },
 
   // ── File upload ───────────────────────────────────────────────────────────────
   'csv': {
     id: 'csv', name: 'CSV / Excel Import', brand: 'csv', authType: 'file',
-    helpText: 'Upload a CSV or Excel file. Columns are auto-detected — no template required.',
     fields: [],
   },
   'documents': {
     id: 'documents', name: 'Document Upload', brand: 'documents', authType: 'file',
-    helpText: 'Upload CSV, Excel, or other financial export files for automatic processing.',
     fields: [],
   },
 }
 
-type ModalStep = 'instructions' | 'configure' | 'processing' | 'connected' | 'error' | 'unavailable'
+type ModalStep = 'configure' | 'processing' | 'connected' | 'error' | 'unavailable'
 
 interface ProcessResult {
   txCount: number
@@ -274,7 +277,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
   const config = INTEGRATION_CONFIGS[integrationId]
   const isFileType = config?.authType === 'file'
 
-  const [step,         setStep]         = useState<ModalStep>(() => isFileType ? 'configure' : 'instructions')
+  const [step,         setStep]         = useState<ModalStep>('configure')
   const [values,       setValues]       = useState<Record<string, string>>({})
   const [error,        setError]        = useState('')
   const [dragOver,     setDragOver]     = useState(false)
@@ -405,28 +408,6 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
     return { txCount: txs.length, anomalyCount: anomalies.length, fileName: file.name }
   }
 
-  async function triggerOAuth() {
-    setStep('processing')
-    setStatusMsg('Redirecting to authorization page…')
-    try {
-      const res = await fetch('/api/oauth/start', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ provider: integrationId }),
-      })
-      const body = await res.json().catch(() => ({})) as { url?: string; error?: string; not_configured?: boolean }
-      if (res.status === 503 && body.not_configured) {
-        setStep('unavailable')
-        return
-      }
-      if (!res.ok) throw new Error(body.error ?? 'Could not start authorization')
-      window.location.href = body.url!
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Authorization could not be initiated.')
-      setStep('error')
-    }
-  }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
@@ -447,7 +428,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
       return
     }
 
-    // ── API key / TBA / SAML / Webhook — validate then save encrypted ──────────
+    // ── Credential providers — validate then save encrypted ───────────────────
     for (const f of config.fields) {
       if (f.required && !values[f.key]?.trim()) {
         setError(`${f.label} is required.`)
@@ -481,20 +462,19 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
     }
   }
 
-  const authLabel = config.authType === 'oauth' ? 'OAuth 2.0'
-    : config.authType === 'tba'  ? 'Token-Based Auth'
-    : config.authType === 'saml' ? 'SAML 2.0'
-    : config.authType === 'apikey' ? 'API Key'
+  const authLabel = config.authType === 'tba' ? 'Token-Based Auth'
+    : config.authType === 'saml'    ? 'SAML 2.0'
     : config.authType === 'webhook' ? 'Webhook'
-    : 'File Upload'
+    : config.authType === 'file'    ? 'File Upload'
+    : 'API Key'
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]" onClick={step === 'processing' ? undefined : onClose} />
 
-      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-200">
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-200 flex-shrink-0">
           <BrandIcon brand={config.brand} size={32} contained />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-slate-900">
@@ -509,86 +489,53 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
           )}
         </div>
 
-        {/* Body */}
-        <div className="px-5 py-5">
-
-          {/* ── Instructions ── */}
-          {step === 'instructions' && config.instructions && (
-            <>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">How to connect</p>
-              <ol className="space-y-3 mb-4">
-                {config.instructions.steps.map((s, i) => (
-                  <li key={i} className="flex gap-3 text-xs text-slate-700 leading-relaxed">
-                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-bold flex items-center justify-center mt-0.5">
-                      {i + 1}
-                    </span>
-                    <span>{s}</span>
-                  </li>
-                ))}
-              </ol>
-
-              {config.instructions.note && (
-                <div className="text-[11px] text-slate-500 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5 mb-4 leading-relaxed">
-                  <span className="font-semibold text-amber-700">Note: </span>
-                  {config.instructions.note}
-                </div>
-              )}
-
-              {config.instructions.link && (
-                <a
-                  href={config.instructions.link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-xs text-emerald-600 hover:text-emerald-800 mb-5 transition-colors"
-                >
-                  <ExternalLink className="w-3 h-3" />
-                  {config.instructions.link.label}
-                </a>
-              )}
-
-              <div className="flex items-center gap-3 pt-1">
-                {config.authType === 'oauth' ? (
-                  <button
-                    onClick={triggerOAuth}
-                    className="flex-1 bg-[#0c1526] hover:bg-[#1a2640] text-white font-semibold py-2.5 rounded-lg transition-colors text-sm"
-                  >
-                    Connect {config.name}
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => setStep('configure')}
-                    className="flex-1 bg-[#0c1526] hover:bg-[#1a2640] text-white font-semibold py-2.5 rounded-lg transition-colors text-sm"
-                  >
-                    I have my credentials
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-4 py-2.5 text-sm font-medium text-slate-600 hover:text-slate-800 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </>
-          )}
+        {/* Scrollable body */}
+        <div className="px-5 py-5 overflow-y-auto flex-1">
 
           {/* ── Configure ── */}
           {step === 'configure' && (
             <>
-              {!isFileType && (
-                <button
-                  onClick={() => setStep('instructions')}
-                  className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-700 mb-4 transition-colors"
-                >
-                  <ArrowLeft className="w-3.5 h-3.5" />
-                  Back to instructions
-                </button>
+              {/* Instructions */}
+              {config.instructions && (
+                <div className="mb-5">
+                  <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-3">
+                    How to get your credentials
+                  </p>
+                  <ol className="space-y-2.5 mb-3">
+                    {config.instructions.steps.map((s, i) => (
+                      <li key={i} className="flex gap-2.5 text-xs text-slate-700 leading-relaxed">
+                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-bold flex items-center justify-center mt-0.5">
+                          {i + 1}
+                        </span>
+                        <span>{s}</span>
+                      </li>
+                    ))}
+                  </ol>
+
+                  {config.instructions.note && (
+                    <div className="text-[11px] bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3 leading-relaxed">
+                      <span className="font-semibold text-amber-700">Note: </span>
+                      <span className="text-amber-800">{config.instructions.note}</span>
+                    </div>
+                  )}
+
+                  {config.instructions.link && (
+                    <a
+                      href={config.instructions.link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs text-emerald-600 hover:text-emerald-800 transition-colors mb-1"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      {config.instructions.link.label}
+                    </a>
+                  )}
+
+                  <div className="border-t border-slate-100 mt-4 mb-5" />
+                </div>
               )}
 
-              {config.helpText && (
-                <p className="text-xs text-slate-500 mb-5 leading-relaxed">{config.helpText}</p>
-              )}
+              {/* Error */}
               {error && (
                 <div className="flex items-start gap-2.5 bg-red-50 border border-red-200 text-red-700 rounded-lg px-3.5 py-3 text-xs mb-4">
                   <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -685,7 +632,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
               </div>
               <div>
                 <p className="text-sm font-semibold text-slate-900">
-                  {isFileType ? 'Processing your file…' : 'Testing connection…'}
+                  {isFileType ? 'Processing your file…' : 'Saving connection…'}
                 </p>
                 <p className="text-xs text-slate-500 mt-1">{statusMsg}</p>
               </div>
@@ -707,7 +654,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
                     {result.txCount.toLocaleString()} transactions · {result.anomalyCount} anomal{result.anomalyCount !== 1 ? 'ies' : 'y'} detected
                   </p>
                 ) : (
-                  <p className="text-xs text-slate-500 mt-1">Initial sync will begin shortly</p>
+                  <p className="text-xs text-slate-500 mt-1">Credentials saved — initial sync will begin shortly</p>
                 )}
               </div>
               <button
@@ -719,7 +666,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
             </div>
           )}
 
-          {/* ── Not yet configured ── */}
+          {/* ── Unavailable ── */}
           {step === 'unavailable' && (
             <div className="py-8 flex flex-col items-center gap-4 text-center">
               <div className="w-14 h-14 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center">
@@ -728,17 +675,14 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
               <div>
                 <p className="text-sm font-semibold text-slate-900">{config.name} coming soon</p>
                 <p className="text-xs text-slate-500 mt-2 max-w-xs leading-relaxed">
-                  This integration is not yet activated on your account. Contact your Ventura administrator or{' '}
+                  Contact{' '}
                   <a href="mailto:support@venturafinance.net" className="text-emerald-600 hover:underline">
-                    reach out to support
+                    support@venturafinance.net
                   </a>{' '}
-                  to enable {config.name} access.
+                  to enable {config.name} access on your account.
                 </p>
               </div>
-              <button
-                onClick={onClose}
-                className="mt-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2 px-6 rounded-lg transition-colors text-sm"
-              >
+              <button onClick={onClose} className="mt-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2 px-6 rounded-lg transition-colors text-sm">
                 Close
               </button>
             </div>
@@ -755,7 +699,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
                 <p className="text-xs text-red-600 mt-1 max-w-xs">{error}</p>
               </div>
               <button
-                onClick={() => { setStep('instructions'); setError('') }}
+                onClick={() => { setStep('configure'); setError('') }}
                 className="mt-1 text-sm text-emerald-600 hover:text-emerald-800 underline"
               >
                 Try again

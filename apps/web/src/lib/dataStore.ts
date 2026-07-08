@@ -117,8 +117,113 @@ export interface Dataset {
   pendingReviewCount?: number
 }
 
-const DS_KEY   = 'sf_dataset'
-const READY_KEY = 'sf_data_ready'
+const DS_KEY      = 'sf_dataset'
+const READY_KEY   = 'sf_data_ready'
+const SOURCES_KEY = 'sf_source_datasets'
+
+// ── Per-source storage ────────────────────────────────────────────────────────
+
+function mergeSourceDatasets(sources: Dataset[]): Dataset {
+  if (sources.length === 0) {
+    return {
+      uploadedAt: new Date().toISOString(),
+      files: [],
+      columnMapping: { date: null, vendor: null, amount: null, debit: null, credit: null, description: null, category: null, account: null },
+      totalTransactions: 0,
+      totalSpend: 0,
+      uniqueVendors: 0,
+      dateRange: { from: '', to: '' },
+      topVendors: [],
+      categoryBreakdown: [],
+      monthlyBreakdown: [],
+      anomalies: [],
+      auditLog: [],
+      sampleTransactions: [],
+    }
+  }
+
+  const vendorMap = new Map<string, VendorStat>()
+  for (const src of sources) {
+    for (const v of src.topVendors) {
+      const ex = vendorMap.get(v.vendor)
+      if (ex) { ex.total += v.total; ex.count += v.count; ex.avgAmount = ex.total / ex.count }
+      else vendorMap.set(v.vendor, { ...v })
+    }
+  }
+
+  const catMap = new Map<string, CategoryStat>()
+  for (const src of sources) {
+    for (const c of src.categoryBreakdown) {
+      const ex = catMap.get(c.category)
+      if (ex) { ex.total += c.total; ex.count += c.count }
+      else catMap.set(c.category, { ...c })
+    }
+  }
+
+  const monthMap = new Map<string, MonthlyEntry>()
+  for (const src of sources) {
+    for (const m of src.monthlyBreakdown) {
+      const ex = monthMap.get(m.month)
+      if (ex) { ex.spend += m.spend; ex.count += m.count }
+      else monthMap.set(m.month, { ...m })
+    }
+  }
+
+  const allDates = sources.flatMap(s => [s.dateRange.from, s.dateRange.to]).filter(Boolean).sort()
+
+  return {
+    uploadedAt: new Date().toISOString(),
+    files:              sources.flatMap(s => s.files),
+    columnMapping:      sources[0].columnMapping,
+    totalTransactions:  sources.reduce((n, s) => n + s.totalTransactions, 0),
+    totalSpend:         sources.reduce((n, s) => n + s.totalSpend, 0),
+    uniqueVendors:      vendorMap.size,
+    dateRange:          { from: allDates[0] ?? '', to: allDates[allDates.length - 1] ?? '' },
+    topVendors:         [...vendorMap.values()].sort((a, b) => b.total - a.total).slice(0, 20),
+    categoryBreakdown:  [...catMap.values()].sort((a, b) => b.total - a.total),
+    monthlyBreakdown:   [...monthMap.values()],
+    anomalies:          sources.flatMap(s => s.anomalies),
+    auditLog:           sources.flatMap(s => s.auditLog).sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 500),
+    sampleTransactions: sources.flatMap(s => s.sampleTransactions).slice(0, 100),
+  }
+}
+
+function loadSourceMap(): Record<string, Dataset> {
+  if (typeof window === 'undefined') return {}
+  try {
+    const raw = localStorage.getItem(SOURCES_KEY)
+    return raw ? (JSON.parse(raw) as Record<string, Dataset>) : {}
+  } catch { return {} }
+}
+
+export function saveSourceDataset(sourceId: string, ds: Dataset): boolean {
+  if (typeof window === 'undefined') return false
+  try {
+    const map = loadSourceMap()
+    map[sourceId] = ds
+    localStorage.setItem(SOURCES_KEY, JSON.stringify(map))
+    return saveDataset(mergeSourceDatasets(Object.values(map)))
+  } catch { return false }
+}
+
+export function removeSourceDataset(sourceId: string): void {
+  if (typeof window === 'undefined') return
+  try {
+    const map = loadSourceMap()
+    delete map[sourceId]
+    localStorage.setItem(SOURCES_KEY, JSON.stringify(map))
+    const remaining = Object.values(map)
+    if (remaining.length === 0) {
+      clearDataset()
+    } else {
+      saveDataset(mergeSourceDatasets(remaining))
+    }
+  } catch {}
+}
+
+export function getConnectedSourceIds(): string[] {
+  return Object.keys(loadSourceMap())
+}
 
 export function saveDataset(ds: Dataset): boolean {
   try {
@@ -152,6 +257,7 @@ export function clearDataset(): void {
   try {
     localStorage.removeItem(DS_KEY)
     localStorage.removeItem(READY_KEY)
+    localStorage.removeItem(SOURCES_KEY)
     localStorage.removeItem('sf_connected')
   } catch {}
 }

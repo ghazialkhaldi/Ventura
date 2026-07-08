@@ -14,11 +14,11 @@ import {
 type SettingsTab = 'users' | 'roles' | 'security' | 'tenant'
 
 const roles = [
-  { name: 'Admin',           desc: 'Full access — manage users, settings, AI governance, all data',       users: 3,  color: 'bg-red-50 text-red-700 border-red-200' },
-  { name: 'Finance Manager', desc: 'Approve anomalies, manage workflows, view all spend data',             users: 2,  color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  { name: 'Finance Analyst', desc: 'View and comment on anomalies, read-only workflow access',             users: 4,  color: 'bg-purple-50 text-purple-700 border-purple-200' },
-  { name: 'Read-Only',       desc: 'View dashboards and reports. No approval or action capabilities.',     users: 3,  color: 'bg-slate-100 text-slate-600 border-slate-200' },
-  { name: 'System',          desc: 'Ventura AI service account — non-human, cannot log in directly.',        users: 1,  color: 'bg-green-50 text-green-700 border-green-200' },
+  { name: 'Admin',           desc: 'Full access — manage users, settings, AI governance, all data',    color: 'bg-red-50 text-red-700 border-red-200'          },
+  { name: 'Finance Manager', desc: 'Approve anomalies, manage workflows, view all spend data',         color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  { name: 'Finance Analyst', desc: 'View and comment on anomalies, read-only workflow access',         color: 'bg-purple-50 text-purple-700 border-purple-200'  },
+  { name: 'Read-Only',       desc: 'View dashboards and reports. No approval or action capabilities.', color: 'bg-slate-100 text-slate-600 border-slate-200'     },
+  { name: 'System',          desc: 'Ventura AI service account — non-human, cannot log in directly.',  color: 'bg-green-50 text-green-700 border-green-200'     },
 ]
 
 const statusColor: Record<string, string> = {
@@ -139,10 +139,6 @@ export default function SettingsPage() {
                 {role.name}
               </span>
               <p className="text-sm text-slate-600 flex-1">{role.desc}</p>
-              <div className="text-right flex-shrink-0">
-                <p className="text-sm font-bold text-slate-800">{role.users}</p>
-                <p className="text-xs text-slate-400">users</p>
-              </div>
               <div className="flex gap-1 flex-shrink-0">
                 <Button variant="ghost" size="sm" icon={<Eye className="w-3.5 h-3.5" />}>View</Button>
                 <Button variant="ghost" size="sm" icon={<Edit className="w-3.5 h-3.5" />} />

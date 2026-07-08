@@ -3,7 +3,7 @@ import { X, Check, Loader2, Upload, AlertCircle, FileText } from 'lucide-react'
 import BrandIcon, { BrandKey } from './BrandIcon'
 import { parseFile } from '../../lib/transactionParser'
 import { runAnomalyDetection } from '../../lib/anomalyEngine'
-import { saveDataset } from '../../lib/dataStore'
+import { saveSourceDataset } from '../../lib/dataStore'
 import type { StoredTransaction, AuditEntry, Dataset, VendorStat, CategoryStat, MonthlyEntry } from '../../lib/dataStore'
 
 export interface IntegrationConfig {
@@ -284,7 +284,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
     }
 
     setStatusMsg('Saving…')
-    saveDataset(dataset)
+    saveSourceDataset(integrationId, dataset)
 
     try {
       const existing = JSON.parse(localStorage.getItem('sf_connected') || '{}')

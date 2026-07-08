@@ -12,7 +12,6 @@ import {
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
   BuildingOfficeIcon,
-  AdjustmentsHorizontalIcon,
   EnvelopeIcon,
   DocumentArrowDownIcon,
 } from '@heroicons/react/24/outline'
@@ -78,10 +77,9 @@ export default function Sidebar() {
     {
       label: 'Governance',
       items: [
-        { href: '/ai-governance',       icon: ScaleIcon,                  label: 'AI Governance'    },
-        { href: '/audit-logs',          icon: DocumentTextIcon,           label: 'Audit Logs'       },
-        { href: '/reports',             icon: DocumentArrowDownIcon,      label: 'Reports'          },
-        { href: '/admin/data-settings', icon: AdjustmentsHorizontalIcon,  label: 'Data Settings'    },
+        { href: '/ai-governance', icon: ScaleIcon,             label: 'AI Governance' },
+        { href: '/audit-logs',    icon: DocumentTextIcon,      label: 'Audit Logs'    },
+        { href: '/reports',       icon: DocumentArrowDownIcon, label: 'Reports'       },
       ],
     },
     {

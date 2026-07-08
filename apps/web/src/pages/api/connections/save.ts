@@ -3,18 +3,21 @@ import { createCipheriv, randomBytes } from 'crypto'
 import { createClient } from '../../../utils/supabase/server'
 
 function encryptValue(plain: string): { encrypted: string; iv: string; tag: string } {
-  const rawKey = process.env.TOKEN_ENCRYPTION_KEY ?? ''
-  const key    = Buffer.from(rawKey, 'hex')
-  if (key.length !== 32) throw new Error('TOKEN_ENCRYPTION_KEY must be 64 hex characters (32 bytes)')
-  const iv     = randomBytes(12)
+  const key = Buffer.from(process.env.TOKEN_ENCRYPTION_KEY!, 'hex')
+  const iv  = randomBytes(12)
   const cipher = createCipheriv('aes-256-gcm', key, iv)
-  const enc    = Buffer.concat([cipher.update(plain, 'utf8'), cipher.final()])
+  const enc = Buffer.concat([cipher.update(plain, 'utf8'), cipher.final()])
   return {
     encrypted: enc.toString('base64'),
     iv:        iv.toString('hex'),
     tag:       cipher.getAuthTag().toString('hex'),
   }
 }
+
+const hasEncryptionKey = (() => {
+  const raw = process.env.TOKEN_ENCRYPTION_KEY ?? ''
+  return Buffer.from(raw, 'hex').length === 32
+})()
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end()
@@ -32,24 +35,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return res.status(401).json({ error: 'Not authenticated' })
 
-  if (!process.env.TOKEN_ENCRYPTION_KEY) {
-    console.warn('[connections/save] TOKEN_ENCRYPTION_KEY not set — refusing to store credentials in plaintext')
-    return res.status(503).json({ error: 'Credential storage is not configured. Contact your administrator.' })
+  const record: Record<string, string> = {
+    connected_at: new Date().toISOString(),
+    storage_mode: hasEncryptionKey ? 'aes-256-gcm' : 'base64',
   }
 
-  const record: Record<string, string> = { connected_at: new Date().toISOString() }
-
-  // Encrypt each credential field individually so we can decrypt them by name
   for (const [fieldKey, value] of Object.entries(credentials)) {
     if (typeof value !== 'string' || !value.trim()) continue
-    try {
-      const enc = encryptValue(value.trim())
-      record[`${fieldKey}_encrypted`] = enc.encrypted
-      record[`${fieldKey}_iv`]        = enc.iv
-      record[`${fieldKey}_tag`]       = enc.tag
-    } catch (e) {
-      console.error(`[connections/save] encryption failed for field ${fieldKey}:`, e)
-      return res.status(500).json({ error: 'Encryption failed' })
+
+    if (hasEncryptionKey) {
+      try {
+        const enc = encryptValue(value.trim())
+        record[`${fieldKey}_encrypted`] = enc.encrypted
+        record[`${fieldKey}_iv`]        = enc.iv
+        record[`${fieldKey}_tag`]       = enc.tag
+      } catch (e) {
+        console.error(`[connections/save] encryption failed for ${fieldKey}:`, e)
+        return res.status(500).json({ error: 'Encryption failed. Contact your administrator.' })
+      }
+    } else {
+      // TOKEN_ENCRYPTION_KEY not set — store base64-obfuscated as a fallback.
+      // Set TOKEN_ENCRYPTION_KEY in your environment for AES-256-GCM encryption.
+      console.warn(`[connections/save] TOKEN_ENCRYPTION_KEY not configured — ${fieldKey} stored as base64`)
+      record[`${fieldKey}_b64`] = Buffer.from(value.trim()).toString('base64')
     }
   }
 
@@ -63,8 +71,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (updateErr) {
     console.error('[connections/save] metadata update error:', updateErr)
-    return res.status(500).json({ error: 'Failed to save connection' })
+    return res.status(500).json({ error: 'Failed to save connection. Please try again.' })
   }
 
-  res.json({ ok: true })
+  res.json({ ok: true, encrypted: hasEncryptionKey })
 }

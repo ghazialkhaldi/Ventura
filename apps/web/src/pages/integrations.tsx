@@ -106,6 +106,22 @@ export default function IntegrationsPage() {
   useEffect(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('sf_connected') || '{}')
+      const params          = new URLSearchParams(window.location.search)
+      const oauthConnected  = params.get('connected')
+      const oauthError      = params.get('error')
+
+      if (oauthConnected) {
+        // OAuth callback returned — mark as connected and clean the URL
+        stored[oauthConnected] = { connectedAt: new Date().toISOString(), status: 'Connected' }
+        localStorage.setItem('sf_connected', JSON.stringify(stored))
+        window.history.replaceState({}, '', '/integrations')
+      }
+
+      if (oauthError) {
+        console.error('[OAuth] connection error:', oauthError)
+        window.history.replaceState({}, '', '/integrations')
+      }
+
       setNewlyConnected(Object.keys(stored))
     } catch {}
   }, [])

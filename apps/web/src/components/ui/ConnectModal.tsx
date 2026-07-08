@@ -27,90 +27,71 @@ interface FieldDef {
 export const INTEGRATION_CONFIGS: Record<string, IntegrationConfig> = {
   'quickbooks': {
     id: 'quickbooks', name: 'QuickBooks Online', brand: 'quickbooks', authType: 'oauth',
-    helpText: 'Connect your QuickBooks Online account. You\'ll need OAuth credentials from the Intuit Developer Portal.',
-    fields: [
-      { key: 'client_id',     label: 'Client ID',     type: 'text',     placeholder: 'ABcd1234...', required: true },
-      { key: 'client_secret', label: 'Client Secret', type: 'password', placeholder: '••••••••••••', required: true },
-      { key: 'environment',   label: 'Environment',   type: 'select',   options: ['Production', 'Sandbox'], required: true },
-    ],
+    helpText: 'Click Connect to authorize Ventura with your QuickBooks account. You will be redirected to Intuit to sign in and approve access — no credentials required here.',
+    fields: [],
   },
   'plaid': {
     id: 'plaid', name: 'Plaid Bank Feeds', brand: 'plaid', authType: 'apikey',
-    helpText: 'Link live bank and credit card accounts via Plaid. Get credentials from your Plaid Dashboard.',
+    helpText: 'Enter your Plaid Secret Key from the Plaid Dashboard. It is encrypted with AES-256-GCM and stored server-side — never visible after saving.',
     fields: [
-      { key: 'client_id',   label: 'Client ID', type: 'text',     placeholder: '5f3a...', required: true },
-      { key: 'secret',      label: 'Secret',    type: 'password', placeholder: '••••••••••••', required: true },
-      { key: 'environment', label: 'Environment', type: 'select', options: ['Production', 'Development', 'Sandbox'], required: true },
+      { key: 'api_key', label: 'Plaid Secret Key', type: 'password', placeholder: '••••••••••••', required: true },
     ],
   },
   'adp': {
     id: 'adp', name: 'ADP Workforce Now', brand: 'adp', authType: 'apikey',
-    helpText: 'Connect ADP for payroll and headcount sync. API credentials are in your ADP Developer Console.',
+    helpText: 'Enter your ADP Client Secret from the ADP Developer Console. Encrypted and stored server-side.',
     fields: [
-      { key: 'client_id',     label: 'Client ID',     type: 'text',     placeholder: 'ADP-CLIENT-ID', required: true },
-      { key: 'client_secret', label: 'Client Secret', type: 'password', placeholder: '••••••••••••', required: true },
-      { key: 'company_code',  label: 'Company Code',  type: 'text',     placeholder: 'ABC12', required: true },
+      { key: 'api_key', label: 'ADP Client Secret', type: 'password', placeholder: '••••••••••••', required: true },
     ],
   },
   'salesforce': {
     id: 'salesforce', name: 'Salesforce CRM', brand: 'salesforce', authType: 'oauth',
-    helpText: 'Pull contract values, renewal dates, and revenue data from Salesforce.',
-    fields: [
-      { key: 'client_id',     label: 'Consumer Key',    type: 'text',     placeholder: '3MVG9...', required: true },
-      { key: 'client_secret', label: 'Consumer Secret', type: 'password', placeholder: '••••••••••••', required: true },
-      { key: 'instance_url',  label: 'Instance URL',    type: 'url',      placeholder: 'https://yourorg.salesforce.com', required: true },
-    ],
+    helpText: 'Click Connect to authorize Ventura via Salesforce OAuth. You will be redirected to your org\'s login page — no credentials required here.',
+    fields: [],
   },
   'netsuite': {
     id: 'netsuite', name: 'NetSuite ERP', brand: 'netsuite', authType: 'tba',
-    helpText: 'Connect NetSuite via Token-Based Authentication. Generate tokens in NetSuite > Setup > Integrations.',
+    helpText: 'Connect via NetSuite Token-Based Auth. Generate tokens in NetSuite › Setup › Integrations. All values are encrypted with AES-256-GCM before storage.',
     fields: [
       { key: 'account_id',      label: 'Account ID',      type: 'text',     placeholder: '1234567', required: true },
-      { key: 'consumer_key',    label: 'Consumer Key',    type: 'text',     placeholder: '...', required: true },
+      { key: 'consumer_key',    label: 'Consumer Key',    type: 'password', placeholder: '••••••••••••', required: true },
       { key: 'consumer_secret', label: 'Consumer Secret', type: 'password', placeholder: '••••••••••••', required: true },
-      { key: 'token_id',        label: 'Token ID',        type: 'text',     placeholder: '...', required: true },
+      { key: 'token_id',        label: 'Token ID',        type: 'password', placeholder: '••••••••••••', required: true },
       { key: 'token_secret',    label: 'Token Secret',    type: 'password', placeholder: '••••••••••••', required: true },
     ],
   },
   'xero': {
     id: 'xero', name: 'Xero', brand: 'xero', authType: 'oauth',
-    helpText: 'Connect your Xero organisation for accounting data.',
-    fields: [
-      { key: 'client_id',     label: 'Client ID',     type: 'text',     placeholder: 'UUID...', required: true },
-      { key: 'client_secret', label: 'Client Secret', type: 'password', placeholder: '••••••••••••', required: true },
-    ],
+    helpText: 'Click Connect to authorize Ventura with your Xero organisation. You will be redirected to Xero to sign in — no credentials required here.',
+    fields: [],
   },
   'okta': {
     id: 'okta', name: 'Okta SSO / SCIM', brand: 'okta', authType: 'saml',
-    helpText: 'Configure SAML SSO and SCIM provisioning via Okta.',
+    helpText: 'Enter your Okta domain to configure SAML SSO and SCIM provisioning. Stored server-side.',
     fields: [
-      { key: 'okta_domain',   label: 'Okta Domain',   type: 'url',      placeholder: 'https://yourorg.okta.com', required: true },
-      { key: 'client_id',     label: 'Client ID',     type: 'text',     placeholder: '0oab...', required: true },
-      { key: 'client_secret', label: 'Client Secret', type: 'password', placeholder: '••••••••••••', required: true },
+      { key: 'okta_domain', label: 'Okta Domain', type: 'url', placeholder: 'https://yourorg.okta.com', required: true },
     ],
   },
   'slack': {
     id: 'slack', name: 'Slack Notifications', brand: 'slack', authType: 'webhook',
-    helpText: 'Receive anomaly alerts in a Slack channel via Incoming Webhooks.',
+    helpText: 'Paste your Slack Incoming Webhook URL from your Slack App settings. Anomaly alerts will be posted to your chosen channel.',
     fields: [
-      { key: 'webhook_url', label: 'Webhook URL',  type: 'url',  placeholder: 'https://hooks.slack.com/services/...', required: true },
-      { key: 'channel',     label: 'Channel Name', type: 'text', placeholder: '#finance-ops', required: false },
+      { key: 'webhook_url', label: 'Slack Webhook URL', type: 'url', placeholder: 'https://hooks.slack.com/services/...', required: true },
     ],
   },
   'stripe': {
     id: 'stripe', name: 'Stripe', brand: 'stripe', authType: 'apikey',
-    helpText: 'Connect Stripe to sync payment volume, refunds, and billing data.',
+    helpText: 'Enter your Stripe Secret Key (sk_live_... or sk_test_...). Encrypted with AES-256-GCM and stored server-side — never visible after saving.',
     fields: [
-      { key: 'secret_key',     label: 'Secret Key',     type: 'password', placeholder: 'sk_live_...', required: true },
-      { key: 'webhook_secret', label: 'Webhook Secret', type: 'password', placeholder: 'whsec_...', required: false },
+      { key: 'api_key', label: 'Stripe Secret Key', type: 'password', placeholder: 'sk_live_••••••••', required: true },
     ],
   },
   'sap': {
     id: 'sap', name: 'SAP S/4HANA', brand: 'sap', authType: 'apikey',
-    helpText: 'Connect SAP S/4HANA for ERP financial data, purchase orders, and vendor master records.',
+    helpText: 'Enter your SAP API key and system URL. Both are encrypted and stored server-side.',
     fields: [
       { key: 'api_key',    label: 'API Key',    type: 'password', placeholder: '••••••••••••', required: true },
-      { key: 'system_url', label: 'System URL', type: 'url',      placeholder: 'https://your-sap-system.example.com', required: true },
+      { key: 'system_url', label: 'System URL', type: 'url',      placeholder: 'https://your-sap.example.com', required: true },
     ],
   },
   'csv': {
@@ -125,19 +106,15 @@ export const INTEGRATION_CONFIGS: Record<string, IntegrationConfig> = {
   },
   'expensify': {
     id: 'expensify', name: 'Expensify', brand: 'expensify', authType: 'apikey',
-    helpText: 'Sync expense reports and receipts from Expensify.',
+    helpText: 'Enter your Expensify Partner Secret from your Expensify account. Encrypted and stored server-side — never visible after saving.',
     fields: [
-      { key: 'partner_user_id',     label: 'Partner User ID', type: 'text',     placeholder: 'user@yourco.com', required: true },
-      { key: 'partner_user_secret', label: 'Partner Secret',  type: 'password', placeholder: '••••••••••••', required: true },
+      { key: 'api_key', label: 'Partner Secret', type: 'password', placeholder: '••••••••••••', required: true },
     ],
   },
   'gusto': {
     id: 'gusto', name: 'Gusto', brand: 'gusto', authType: 'oauth',
-    helpText: 'Connect Gusto for payroll, benefits, and employee headcount data.',
-    fields: [
-      { key: 'client_id',     label: 'Client ID',     type: 'text',     placeholder: 'gusto_client_...', required: true },
-      { key: 'client_secret', label: 'Client Secret', type: 'password', placeholder: '••••••••••••', required: true },
-    ],
+    helpText: 'Click Connect to authorize Ventura with your Gusto account. You will be redirected to Gusto to sign in — no credentials required here.',
+    fields: [],
   },
 }
 
@@ -299,6 +276,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
     e.preventDefault()
     setError('')
 
+    // File uploads — unchanged local processing flow
     if (isFileType) {
       if (!uploadedFile) { setError('Please select a file to upload.'); return }
       setStep('processing')
@@ -311,24 +289,64 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
         setError(err instanceof Error ? err.message : 'Processing failed.')
         setStep('error')
       }
-    } else {
-      for (const f of config.fields) {
-        if (f.required && !values[f.key]?.trim()) {
-          setError(`Please enter your ${f.label}.`)
-          return
-        }
-      }
+      return
+    }
+
+    // OAuth — redirect to provider; no credentials collected here
+    if (config.authType === 'oauth') {
       setStep('processing')
-      setStatusMsg('Verifying credentials and checking permissions…')
-      setTimeout(() => {
-        try {
-          const existing = JSON.parse(localStorage.getItem('sf_connected') || '{}')
-          existing[integrationId] = { connectedAt: new Date().toISOString(), status: 'Connected' }
-          localStorage.setItem('sf_connected', JSON.stringify(existing))
-        } catch {}
-        setStep('connected')
-        onConnected(integrationId)
-      }, 2200)
+      setStatusMsg('Opening authorization page…')
+      try {
+        const res = await fetch('/api/oauth/start', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ provider: integrationId }),
+        })
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}))
+          throw new Error((body as { error?: string }).error || 'Could not start authorization')
+        }
+        const { url } = await res.json() as { url: string }
+        window.location.href = url
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Authorization failed.')
+        setStep('error')
+      }
+      return
+    }
+
+    // API key / TBA / SAML / webhook — validate fields then POST to secure backend
+    for (const f of config.fields) {
+      if (f.required && !values[f.key]?.trim()) {
+        setError(`${f.label} is required.`)
+        return
+      }
+    }
+
+    setStep('processing')
+    setStatusMsg('Encrypting and saving credentials securely…')
+
+    try {
+      const res = await fetch('/api/connections/save', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ provider: integrationId, credentials: values }),
+      })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error((body as { error?: string }).error || 'Failed to save connection')
+      }
+      // Mirror in localStorage so the integrations page shows "Connected" immediately
+      try {
+        const stored = JSON.parse(localStorage.getItem('sf_connected') || '{}')
+        stored[integrationId] = { connectedAt: new Date().toISOString(), status: 'Connected' }
+        localStorage.setItem('sf_connected', JSON.stringify(stored))
+      } catch { /* non-critical */ }
+      setStep('connected')
+      onConnected(integrationId)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Connection failed.')
+      setStep('error')
     }
   }
 
@@ -438,7 +456,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
                     type="submit"
                     className="flex-1 bg-[#0c1526] hover:bg-[#1a2640] text-white font-semibold py-2.5 rounded-lg transition-colors text-sm"
                   >
-                    {isFileType ? 'Process file' : 'Test & Connect'}
+                    {isFileType ? 'Process file' : config.authType === 'oauth' ? `Connect to ${config.name}` : 'Save & Connect'}
                   </button>
                   <button
                     type="button"

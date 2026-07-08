@@ -37,7 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (!cfg) return res.status(400).json({ error: `Unknown OAuth provider: ${provider}` })
   if (!cfg.clientId) {
-    return res.status(503).json({ error: `${provider} OAuth is not configured on this server` })
+    return res.status(503).json({ not_configured: true })
   }
 
   const supabase = createClient({ req, res })

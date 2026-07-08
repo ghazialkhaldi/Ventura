@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect, useRef } from 'react'
-import { X, Check, Loader2, Upload, AlertCircle, FileText } from 'lucide-react'
+import { X, Check, Loader2, Upload, AlertCircle, FileText, Clock } from 'lucide-react'
 import BrandIcon, { BrandKey } from './BrandIcon'
 import { parseFile } from '../../lib/transactionParser'
 import { runAnomalyDetection } from '../../lib/anomalyEngine'
@@ -133,7 +133,7 @@ export const INTEGRATION_CONFIGS: Record<string, IntegrationConfig> = {
   },
 }
 
-type ModalStep = 'configure' | 'processing' | 'connected' | 'error'
+type ModalStep = 'configure' | 'processing' | 'connected' | 'error' | 'unavailable'
 
 interface ProcessResult {
   txCount: number
@@ -317,7 +317,11 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
           headers: { 'Content-Type': 'application/json' },
           body:    JSON.stringify({ provider: integrationId }),
         })
-        const body = await res.json().catch(() => ({})) as { url?: string; error?: string }
+        const body = await res.json().catch(() => ({})) as { url?: string; error?: string; not_configured?: boolean }
+        if (res.status === 503 && body.not_configured) {
+          setStep('unavailable')
+          return
+        }
         if (!res.ok) throw new Error(body.error ?? 'Could not start authorization')
         window.location.href = body.url!
       } catch (err) {
@@ -527,6 +531,31 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
             </div>
           )}
 
+          {/* ── Not yet configured ── */}
+          {step === 'unavailable' && (
+            <div className="py-8 flex flex-col items-center gap-4 text-center">
+              <div className="w-14 h-14 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center">
+                <Clock className="w-7 h-7 text-slate-400" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-slate-900">{config.name} coming soon</p>
+                <p className="text-xs text-slate-500 mt-2 max-w-xs leading-relaxed">
+                  This integration is not yet activated on your account. Contact your Ventura administrator or{' '}
+                  <a href="mailto:support@venturafinance.net" className="text-emerald-600 hover:underline">
+                    reach out to support
+                  </a>{' '}
+                  to enable {config.name} access.
+                </p>
+              </div>
+              <button
+                onClick={onClose}
+                className="mt-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2 px-6 rounded-lg transition-colors text-sm"
+              >
+                Close
+              </button>
+            </div>
+          )}
+
           {/* ── Error ── */}
           {step === 'error' && (
             <div className="py-8 flex flex-col items-center gap-4 text-center">
@@ -534,7 +563,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
                 <AlertCircle className="w-7 h-7 text-red-500" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-900">Processing failed</p>
+                <p className="text-sm font-semibold text-slate-900">Connection failed</p>
                 <p className="text-xs text-red-600 mt-1 max-w-xs">{error}</p>
               </div>
               <button

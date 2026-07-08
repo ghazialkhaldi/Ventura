@@ -1,4 +1,4 @@
-﻿import React from 'react'
+﻿import React, { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 
@@ -8,6 +8,12 @@ interface PublicLayoutProps {
 }
 
 export default function PublicLayout({ children, title }: PublicLayoutProps) {
+  const [loggedIn, setLoggedIn] = useState(false)
+
+  useEffect(() => {
+    setLoggedIn(!!localStorage.getItem('sf_user'))
+  }, [])
+
   return (
     <>
       <Head>
@@ -26,12 +32,20 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
               <Link href="/demo" className="hidden sm:block text-base font-medium text-slate-500 hover:text-slate-900 transition-colors">
                 Demo
               </Link>
-              <Link href="/login" className="text-base font-medium text-slate-600 hover:text-slate-900 transition-colors">
-                Sign in
-              </Link>
-              <Link href="/contact" className="bg-slate-900 hover:bg-slate-800 text-white text-base font-semibold px-5 py-2.5 transition-colors">
-                Get started
-              </Link>
+              {!loggedIn && (
+                <Link href="/login" className="text-base font-medium text-slate-600 hover:text-slate-900 transition-colors">
+                  Sign in
+                </Link>
+              )}
+              {loggedIn ? (
+                <Link href="/dashboard" className="bg-emerald-700 hover:bg-emerald-800 text-white text-base font-semibold px-5 py-2.5 transition-colors">
+                  Go to dashboard
+                </Link>
+              ) : (
+                <Link href="/contact" className="bg-slate-900 hover:bg-slate-800 text-white text-base font-semibold px-5 py-2.5 transition-colors">
+                  Get started
+                </Link>
+              )}
             </div>
           </div>
         </header>

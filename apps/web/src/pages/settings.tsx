@@ -1,24 +1,26 @@
-﻿import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import AppLayout from '../components/layout/AppLayout'
 import PageHeader from '../components/ui/PageHeader'
 import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
 import { Card, CardHeader, CardDivider } from '../components/ui/Card'
 import { useCurrentUser, saveUser } from '../hooks/useCurrentUser'
+import { clearDataset } from '../lib/dataStore'
 import {
   Users, Shield, Building2, Settings, Plus, Edit,
-  CheckCircle, XCircle, Lock, Key, RefreshCw, AlertTriangle,
-  Eye, Mail,
+  CheckCircle, Lock, Key, RefreshCw, AlertTriangle,
+  Eye, Mail, Database, Trash2, AlertCircle, Loader2,
 } from 'lucide-react'
 
-type SettingsTab = 'users' | 'roles' | 'security' | 'tenant'
+type SettingsTab = 'users' | 'roles' | 'security' | 'tenant' | 'data'
+type ResetStep   = 'idle' | 'confirm' | 'sending' | 'verify' | 'verifying' | 'done' | 'error'
 
 const roles = [
-  { name: 'Admin',           desc: 'Full access — manage users, settings, AI governance, all data',    color: 'bg-red-50 text-red-700 border-red-200'          },
+  { name: 'Admin',           desc: 'Full access — manage users, settings, AI governance, all data',    color: 'bg-red-50 text-red-700 border-red-200'             },
   { name: 'Finance Manager', desc: 'Approve anomalies, manage workflows, view all spend data',         color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  { name: 'Finance Analyst', desc: 'View and comment on anomalies, read-only workflow access',         color: 'bg-purple-50 text-purple-700 border-purple-200'  },
-  { name: 'Read-Only',       desc: 'View dashboards and reports. No approval or action capabilities.', color: 'bg-slate-100 text-slate-600 border-slate-200'     },
-  { name: 'System',          desc: 'Ventura AI service account — non-human, cannot log in directly.',  color: 'bg-green-50 text-green-700 border-green-200'     },
+  { name: 'Finance Analyst', desc: 'View and comment on anomalies, read-only workflow access',         color: 'bg-purple-50 text-purple-700 border-purple-200'    },
+  { name: 'Read-Only',       desc: 'View dashboards and reports. No approval or action capabilities.', color: 'bg-slate-100 text-slate-600 border-slate-200'      },
+  { name: 'System',          desc: 'Ventura AI service account — non-human, cannot log in directly.',  color: 'bg-green-50 text-green-700 border-green-200'       },
 ]
 
 const statusColor: Record<string, string> = {
@@ -29,20 +31,118 @@ const statusColor: Record<string, string> = {
 
 export default function SettingsPage() {
   const currentUser = useCurrentUser()
-  const [activeTab, setActiveTab] = useState<SettingsTab>('users')
-  const [tenantName, setTenantName] = useState('')
-  const [timezone, setTimezone] = useState('America/New_York')
-  const [plan] = useState('Enterprise')
+  const [activeTab,   setActiveTab]   = useState<SettingsTab>('users')
+  const [tenantName,  setTenantName]  = useState('')
+  const [timezone,    setTimezone]    = useState('America/New_York')
+  const [plan]                        = useState('Enterprise')
+
+  // ── Reset data flow ──────────────────────────────────────────────────────────
+  const [resetStep,  setResetStep]  = useState<ResetStep>('idle')
+  const [resetCode,  setResetCode]  = useState('')
+  const [resetError, setResetError] = useState('')
+  const codeRefs = useRef<(HTMLInputElement | null)[]>([])
 
   useEffect(() => {
     if (currentUser?.company) setTenantName(currentUser.company)
   }, [currentUser])
 
+  // Auto-focus first code box when verify step opens
+  useEffect(() => {
+    if (resetStep === 'verify') {
+      setTimeout(() => codeRefs.current[0]?.focus(), 80)
+    }
+  }, [resetStep])
+
+  async function sendResetCode() {
+    setResetStep('sending')
+    setResetError('')
+    try {
+      const res  = await fetch('/api/send-mfa', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email: currentUser?.email }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to send code')
+      setResetCode('')
+      setResetStep('verify')
+    } catch (e) {
+      setResetError(e instanceof Error ? e.message : 'Failed to send verification code')
+      setResetStep('error')
+    }
+  }
+
+  async function verifyAndReset() {
+    if (resetCode.length !== 6) return
+    setResetStep('verifying')
+    setResetError('')
+    try {
+      const res  = await fetch('/api/verify-mfa', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email: currentUser?.email, code: resetCode }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Incorrect code')
+      clearDataset()
+      setResetStep('done')
+    } catch (e) {
+      setResetError(e instanceof Error ? e.message : 'Verification failed')
+      setResetCode('')
+      setResetStep('verify')
+      setTimeout(() => codeRefs.current[0]?.focus(), 80)
+    }
+  }
+
+  function handleCodeDigit(i: number, val: string) {
+    const digits = val.replace(/\D/g, '').slice(-1)
+    const chars  = resetCode.split('')
+    chars[i]     = digits
+    const next   = chars.join('').slice(0, 6)
+    setResetCode(next)
+    if (digits && i < 5) codeRefs.current[i + 1]?.focus()
+    if (next.length === 6) {
+      // Small delay so the last digit renders before submit
+      setTimeout(() => {
+        const syntheticCode = next
+        setResetStep('verifying')
+        setResetError('')
+        fetch('/api/verify-mfa', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ email: currentUser?.email, code: syntheticCode }),
+        })
+          .then(r => r.json().then(d => ({ ok: r.ok, d })))
+          .then(({ ok, d }) => {
+            if (!ok) throw new Error(d.error || 'Incorrect code')
+            clearDataset()
+            setResetStep('done')
+          })
+          .catch(e => {
+            setResetError(e instanceof Error ? e.message : 'Verification failed')
+            setResetCode('')
+            setResetStep('verify')
+            setTimeout(() => codeRefs.current[0]?.focus(), 80)
+          })
+      }, 80)
+    }
+  }
+
+  function handleCodeKeyDown(i: number, e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Backspace' && !resetCode[i] && i > 0) {
+      const chars = resetCode.split('')
+      chars[i - 1] = ''
+      setResetCode(chars.join(''))
+      codeRefs.current[i - 1]?.focus()
+    }
+  }
+
   const tabs: { id: SettingsTab; label: string; icon: React.ReactElement }[] = [
-    { id: 'users',    label: 'Users',    icon: <Users className="w-3.5 h-3.5" />    },
-    { id: 'roles',    label: 'Roles',    icon: <Shield className="w-3.5 h-3.5" />   },
-    { id: 'security', label: 'Security', icon: <Lock className="w-3.5 h-3.5" />     },
+    { id: 'users',    label: 'Users',    icon: <Users    className="w-3.5 h-3.5" /> },
+    { id: 'roles',    label: 'Roles',    icon: <Shield   className="w-3.5 h-3.5" /> },
+    { id: 'security', label: 'Security', icon: <Lock     className="w-3.5 h-3.5" /> },
     { id: 'tenant',   label: 'Tenant',   icon: <Building2 className="w-3.5 h-3.5" /> },
+    { id: 'data',     label: 'Data',     icon: <Database  className="w-3.5 h-3.5" /> },
   ]
 
   return (
@@ -276,6 +376,198 @@ export default function SettingsPage() {
               <Button variant="ghost" size="sm">Billing portal</Button>
             </div>
           </Card>
+        </div>
+      )}
+
+      {/* ── Data ── */}
+      {activeTab === 'data' && (
+        <div className="max-w-xl space-y-6">
+
+          {/* ── Idle ── */}
+          {resetStep === 'idle' && (
+            <Card>
+              <CardHeader title="Data Management" icon={<Database className="w-4 h-4" />} />
+              <CardDivider />
+              <div className="space-y-4">
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  Reset all uploaded data and connected source contributions from your workspace.
+                  This removes every file you have uploaded and all computed metrics derived from them.
+                  Your account and settings are not affected.
+                </p>
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex gap-3">
+                  <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-700">
+                    This action is permanent. All uploaded data, anomaly results, and spend metrics will be erased.
+                    You will need to re-upload your files to restore them.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setResetStep('confirm')}
+                  className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Reset all data
+                </button>
+              </div>
+            </Card>
+          )}
+
+          {/* ── Confirm ── */}
+          {resetStep === 'confirm' && (
+            <Card>
+              <CardHeader title="Confirm data reset" icon={<AlertCircle className="w-4 h-4 text-red-600" />} />
+              <CardDivider />
+              <div className="space-y-5">
+                <p className="text-sm text-slate-700 leading-relaxed">
+                  Are you sure you want to permanently delete all uploaded data?
+                  This cannot be undone. A verification code will be sent to{' '}
+                  <span className="font-semibold text-slate-900">{currentUser?.email}</span>{' '}
+                  to confirm.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={sendResetCode}
+                    className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors"
+                  >
+                    Yes, send verification code
+                  </button>
+                  <button
+                    onClick={() => setResetStep('idle')}
+                    className="text-sm font-medium text-slate-600 hover:text-slate-900 px-4 py-2.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {/* ── Sending ── */}
+          {resetStep === 'sending' && (
+            <Card>
+              <CardHeader title="Sending verification code…" icon={<Loader2 className="w-4 h-4 animate-spin text-slate-500" />} />
+              <CardDivider />
+              <p className="text-sm text-slate-500 py-2">
+                Sending a 6-digit code to <span className="font-medium text-slate-700">{currentUser?.email}</span>
+              </p>
+            </Card>
+          )}
+
+          {/* ── Verify ── */}
+          {(resetStep === 'verify' || resetStep === 'verifying') && (
+            <Card>
+              <CardHeader title="Enter verification code" icon={<Shield className="w-4 h-4" />} />
+              <CardDivider />
+              <div className="space-y-5">
+                <p className="text-sm text-slate-600">
+                  Enter the 6-digit code sent to <span className="font-semibold text-slate-800">{currentUser?.email}</span>.
+                  The code expires in 10 minutes.
+                </p>
+
+                {/* 6-digit input boxes */}
+                <div className="flex gap-2.5">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <input
+                      key={i}
+                      ref={el => { codeRefs.current[i] = el }}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      value={resetCode[i] ?? ''}
+                      onChange={e => handleCodeDigit(i, e.target.value)}
+                      onKeyDown={e => handleCodeKeyDown(i, e)}
+                      disabled={resetStep === 'verifying'}
+                      className="w-11 h-14 text-center text-xl font-bold border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 disabled:opacity-50 text-slate-900"
+                    />
+                  ))}
+                </div>
+
+                {resetError && (
+                  <p className="text-sm text-red-600 flex items-center gap-1.5">
+                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                    {resetError}
+                  </p>
+                )}
+
+                {resetStep === 'verifying' && (
+                  <p className="text-sm text-slate-500 flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Verifying…
+                  </p>
+                )}
+
+                <div className="flex items-center gap-3 pt-1">
+                  <button
+                    onClick={verifyAndReset}
+                    disabled={resetCode.length !== 6 || resetStep === 'verifying'}
+                    className="bg-red-600 hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors"
+                  >
+                    Confirm reset
+                  </button>
+                  <button
+                    onClick={() => { setResetStep('idle'); setResetCode(''); setResetError('') }}
+                    className="text-sm text-slate-500 hover:text-slate-700 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+
+                <button
+                  onClick={sendResetCode}
+                  disabled={resetStep === 'verifying'}
+                  className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  Didn't receive a code? Resend
+                </button>
+              </div>
+            </Card>
+          )}
+
+          {/* ── Done ── */}
+          {resetStep === 'done' && (
+            <Card>
+              <CardHeader title="Data reset complete" icon={<CheckCircle className="w-4 h-4 text-green-600" />} />
+              <CardDivider />
+              <div className="space-y-4">
+                <p className="text-sm text-slate-600">
+                  All uploaded data has been permanently removed from your workspace.
+                  Connect a new data source or upload a file to get started again.
+                </p>
+                <button
+                  onClick={() => { setResetStep('idle'); setResetCode(''); setResetError('') }}
+                  className="text-sm font-medium text-emerald-700 hover:text-emerald-900 transition-colors"
+                >
+                  ← Back to data settings
+                </button>
+              </div>
+            </Card>
+          )}
+
+          {/* ── Error ── */}
+          {resetStep === 'error' && (
+            <Card>
+              <CardHeader title="Could not send code" icon={<AlertCircle className="w-4 h-4 text-red-600" />} />
+              <CardDivider />
+              <div className="space-y-4">
+                {resetError && <p className="text-sm text-red-600">{resetError}</p>}
+                <div className="flex gap-3">
+                  <button
+                    onClick={sendResetCode}
+                    className="text-sm font-semibold text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition-colors"
+                  >
+                    Try again
+                  </button>
+                  <button
+                    onClick={() => { setResetStep('idle'); setResetError('') }}
+                    className="text-sm text-slate-500 hover:text-slate-700 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </Card>
+          )}
+
         </div>
       )}
     </AppLayout>

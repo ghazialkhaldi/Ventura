@@ -114,8 +114,8 @@ export async function middleware(request: NextRequest) {
     return applySecurityHeaders(redirect)
   }
 
-  // Redirect authenticated users away from auth pages (except '/' which may be a landing page)
-  if (isAuthPage(pathname) && pathname !== '/' && user) {
+  // Redirect authenticated users away from auth/landing pages to dashboard
+  if (isAuthPage(pathname) && user) {
     const dashboardUrl = request.nextUrl.clone()
     dashboardUrl.pathname = '/dashboard'
     dashboardUrl.search = ''

@@ -195,7 +195,7 @@ export default function AnomaliesPage() {
               ? 'Anomaly detection runs automatically when you upload or connect financial data.'
               : 'Try adjusting the severity, status, or search filters above.'}
           </p>
-          {anomalies.length === 0 && (
+          {!isReady && (
             <Link href="/integrations" className="inline-flex items-center gap-1.5 mt-4 text-xs bg-[#0c1526] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#1a2640] transition-colors">
               Connect data source
             </Link>

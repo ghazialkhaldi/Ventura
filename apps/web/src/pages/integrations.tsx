@@ -6,6 +6,7 @@ import Button from '../components/ui/Button'
 import { Card, CardHeader, CardDivider } from '../components/ui/Card'
 import BrandIcon, { type BrandKey } from '../components/ui/BrandIcon'
 import ConnectModal, { INTEGRATION_CONFIGS } from '../components/ui/ConnectModal'
+import { clearDataset } from '../lib/dataStore'
 import {
   Plug, RefreshCw, Settings, Plus, Database, Shield,
   Link, Clock, ChevronRight, Search, Loader2, Trash2,
@@ -131,12 +132,8 @@ export default function IntegrationsPage() {
   }
 
   function handleDisconnect(id: string) {
-    try {
-      const stored = JSON.parse(localStorage.getItem('sf_connected') || '{}')
-      delete stored[id]
-      localStorage.setItem('sf_connected', JSON.stringify(stored))
-    } catch {}
-    setNewlyConnected(prev => prev.filter(x => x !== id))
+    clearDataset()
+    setNewlyConnected([])
   }
 
   const connectedCount = newlyConnected.length

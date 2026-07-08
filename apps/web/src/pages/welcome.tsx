@@ -3,6 +3,7 @@ import Link from 'next/link'
 import AppLayout from '../components/layout/AppLayout'
 import BrandIcon, { type BrandKey } from '../components/ui/BrandIcon'
 import ConnectModal from '../components/ui/ConnectModal'
+import { clearDataset } from '../lib/dataStore'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import {
   CheckCircle, ArrowRight, Upload,
@@ -69,12 +70,8 @@ export default function WelcomePage() {
   }
 
   function handleDisconnect(id: string) {
-    try {
-      const stored = JSON.parse(localStorage.getItem('sf_connected') || '{}')
-      delete stored[id]
-      localStorage.setItem('sf_connected', JSON.stringify(stored))
-    } catch {}
-    setConnected(prev => prev.filter(x => x !== id))
+    clearDataset()
+    setConnected([])
   }
 
   return (

@@ -1,6 +1,5 @@
-﻿import React, { useEffect } from 'react'
+﻿import React from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 import PublicLayout from '../components/layout/PublicLayout'
 import BrandIcon, { type BrandKey } from '../components/ui/BrandIcon'
 import {
@@ -103,10 +102,6 @@ const capabilities = [
 function fmtK(v: number) { return `$${v}K` }
 
 export default function HomePage() {
-  const router = useRouter()
-  useEffect(() => {
-    if (localStorage.getItem('sf_user')) router.replace('/dashboard')
-  }, [router])
   return (
     <PublicLayout title="Financial Operations Intelligence">
 

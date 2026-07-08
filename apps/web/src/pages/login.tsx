@@ -29,7 +29,7 @@ export default function LoginPage() {
   const supabase = createClient()
 
   useEffect(() => {
-    if (localStorage.getItem('sf_user')) router.replace('/dashboard')
+    if (localStorage.getItem('sf_user')) router.replace('/')
   }, [router])
 
   useEffect(() => {

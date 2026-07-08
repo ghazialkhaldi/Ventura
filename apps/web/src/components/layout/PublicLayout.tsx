@@ -39,7 +39,7 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
               )}
               {loggedIn ? (
                 <Link href="/dashboard" className="bg-emerald-700 hover:bg-emerald-800 text-white text-base font-semibold px-5 py-2.5 transition-colors">
-                  Go to dashboard
+                  View dashboard
                 </Link>
               ) : (
                 <Link href="/contact" className="bg-slate-900 hover:bg-slate-800 text-white text-base font-semibold px-5 py-2.5 transition-colors">

@@ -192,21 +192,81 @@ alter table pending_approvals   enable row level security;
 alter table ai_events           enable row level security;
 alter table audit_events        enable row level security;
 
--- Authenticated users can read everything (demo policy — tighten per workspace later)
-create policy "authenticated read all" on workspaces         for select to authenticated using (true);
-create policy "authenticated read all" on workspace_users    for select to authenticated using (true);
-create policy "authenticated read all" on anomalies          for select to authenticated using (true);
-create policy "authenticated read all" on workflows          for select to authenticated using (true);
-create policy "authenticated read all" on integrations       for select to authenticated using (true);
-create policy "authenticated read all" on monthly_spend      for select to authenticated using (true);
-create policy "authenticated read all" on category_spend     for select to authenticated using (true);
-create policy "authenticated read all" on savings_opportunities for select to authenticated using (true);
-create policy "authenticated read all" on pending_approvals  for select to authenticated using (true);
-create policy "authenticated read all" on ai_events          for select to authenticated using (true);
-create policy "authenticated read all" on audit_events       for select to authenticated using (true);
+-- ── Row-Level Security: workspace-scoped isolation ───────────────────────────
+-- Users can only access data belonging to their own workspace.
+-- The profiles table maps auth.uid() → workspace_id.
 
--- Own profile
-create policy "users read own profile"  on profiles for select  to authenticated using (auth.uid() = id);
+-- Helper: resolve the caller's workspace_id from their profile
+create or replace function auth_workspace_id()
+returns uuid language sql stable security definer as $$
+  select workspace_id from profiles where id = auth.uid() limit 1;
+$$;
+
+-- Workspaces: user can only see their own workspace
+create policy "workspace_scoped_select" on workspaces
+  for select to authenticated
+  using (id = auth_workspace_id());
+
+-- Workspace users: scoped to workspace
+create policy "workspace_scoped_select" on workspace_users
+  for select to authenticated
+  using (workspace_id = auth_workspace_id());
+
+-- Anomalies: scoped to workspace
+create policy "workspace_scoped_select" on anomalies
+  for select to authenticated
+  using (workspace_id = auth_workspace_id());
+
+create policy "workspace_scoped_insert" on anomalies
+  for insert to authenticated
+  with check (workspace_id = auth_workspace_id());
+
+create policy "workspace_scoped_update" on anomalies
+  for update to authenticated
+  using (workspace_id = auth_workspace_id());
+
+-- Workflows: scoped to workspace
+create policy "workspace_scoped_select" on workflows
+  for select to authenticated
+  using (workspace_id = auth_workspace_id());
+
+-- Integrations: scoped to workspace
+create policy "workspace_scoped_select" on integrations
+  for select to authenticated
+  using (workspace_id = auth_workspace_id());
+
+-- Monthly spend: scoped to workspace
+create policy "workspace_scoped_select" on monthly_spend
+  for select to authenticated
+  using (workspace_id = auth_workspace_id());
+
+-- Category spend: scoped to workspace
+create policy "workspace_scoped_select" on category_spend
+  for select to authenticated
+  using (workspace_id = auth_workspace_id());
+
+-- Savings opportunities: scoped to workspace
+create policy "workspace_scoped_select" on savings_opportunities
+  for select to authenticated
+  using (workspace_id = auth_workspace_id());
+
+-- Pending approvals: scoped to workspace
+create policy "workspace_scoped_select" on pending_approvals
+  for select to authenticated
+  using (workspace_id = auth_workspace_id());
+
+-- AI events: scoped to workspace
+create policy "workspace_scoped_select" on ai_events
+  for select to authenticated
+  using (workspace_id = auth_workspace_id());
+
+-- Audit events: scoped to workspace (admins only for full log)
+create policy "workspace_scoped_select" on audit_events
+  for select to authenticated
+  using (workspace_id = auth_workspace_id());
+
+-- Own profile: users can only read and update their own row
+create policy "users read own profile"   on profiles for select to authenticated using (auth.uid() = id);
 create policy "users update own profile" on profiles for update to authenticated using (auth.uid() = id);
 
 -- ── 3. Auto-create profile on sign-up ────────────────────────────────────────

@@ -6,19 +6,27 @@ const CODE_TTL_MS  = 10 * 60 * 1000
 const MAX_SENDS    = 3
 const WINDOW_MS    = 10 * 60 * 1000
 
+const EMAIL_REGEX = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end()
 
-  const { email } = req.body
-  if (!email || typeof email !== 'string') {
+  // Strict type + format validation — reject anything that isn't a well-formed email string
+  const raw = req.body?.email
+  if (!raw || typeof raw !== 'string' || raw.length > 320) {
     return res.status(400).json({ error: 'Email required' })
+  }
+  const email = raw.trim().toLowerCase()
+  if (!EMAIL_REGEX.test(email)) {
+    return res.status(400).json({ error: 'Invalid email address' })
   }
 
   const supabase = createClient({ req, res })
 
   // Confirm the caller has a live Supabase session (created by signInWithPassword)
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user || user.email !== email) {
+  // Compare normalized emails to prevent case-based session bypass
+  if (!user || user.email?.toLowerCase() !== email) {
     return res.status(401).json({ error: 'Session not found. Please sign in again.' })
   }
 

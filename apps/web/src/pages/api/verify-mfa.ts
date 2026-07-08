@@ -4,19 +4,35 @@ import { createClient } from '../../utils/supabase/server'
 
 const MAX_ATTEMPTS = 5
 
+const EMAIL_REGEX = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/
+const CODE_REGEX  = /^\d{6}$/
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end()
 
-  const { email, code } = req.body
-  if (!email || !code) {
+  // Strict input validation — reject malformed inputs before touching any auth state
+  const rawEmail = req.body?.email
+  const rawCode  = req.body?.code
+
+  if (!rawEmail || typeof rawEmail !== 'string' || rawEmail.length > 320) {
     return res.status(400).json({ error: 'Email and code required' })
+  }
+  const email = rawEmail.trim().toLowerCase()
+  if (!EMAIL_REGEX.test(email)) {
+    return res.status(400).json({ error: 'Email and code required' })
+  }
+
+  // Code must be exactly 6 digits — reject early to avoid wasting an attempt counter slot
+  const code = typeof rawCode === 'string' ? rawCode.trim() : String(rawCode ?? '')
+  if (!CODE_REGEX.test(code)) {
+    return res.status(400).json({ error: 'Invalid verification code format' })
   }
 
   const supabase = createClient({ req, res })
 
   // Fetch live user state (includes metadata written by send-mfa)
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user || user.email !== email) {
+  if (!user || user.email?.toLowerCase() !== email) {
     return res.status(401).json({ error: 'Session not found. Please sign in again.' })
   }
 

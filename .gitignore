@@ -7,3 +7,5 @@ data.db
 .env.local
 .env.*.local
 *.log
+*.pdf
+data.json

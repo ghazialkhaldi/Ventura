@@ -98,7 +98,41 @@ export default function EmployeeLoginPage() {
     router.push(companyMeta.admin_id ? '/dashboard' : '/join')
   }
 
-  // ── Sign up — step 1: validate form + send OTP ─────────────────────────────
+  // ── Sign up — shared verify helper ───────────────────────────────────────
+  async function verifyAndFinish(code: string) {
+    setLoading(true)
+    setError('')
+    try {
+      const { data, error: verifyErr } = await supabase.auth.verifyOtp({
+        email: suEmail,
+        token: code,
+        type:  'email',
+      })
+      if (verifyErr || !data.user) {
+        throw new Error(verifyErr?.message || 'Invalid or expired code. Please try again.')
+      }
+
+      // Set password + name on the newly verified account
+      await supabase.auth.updateUser({
+        password: suPw,
+        data: { first_name: firstName.trim(), last_name: lastName.trim() },
+      })
+
+      const u       = data.user
+      const meta    = (u.user_metadata || {}) as Record<string, string>
+      const fullName = [firstName.trim(), lastName.trim()].filter(Boolean).join(' ') || meta.first_name || u.email!
+      const cMeta   = (u.user_metadata?._company ?? {}) as Record<string, string>
+      saveUser({ email: u.email!, name: fullName, company: cMeta.company_name || 'Your Organization', role: 'employee' })
+      router.push('/join')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Verification failed')
+      setOtpDigits(['', '', '', '', '', ''])
+      setTimeout(() => otpRefs.current[0]?.focus(), 80)
+    }
+    setLoading(false)
+  }
+
+  // ── Sign up — step 1: validate form + send OTP via Supabase ──────────────
   async function handleSignUp(e: React.FormEvent) {
     e.preventDefault()
     setError('')
@@ -115,18 +149,19 @@ export default function EmployeeLoginPage() {
     if (suPw !== suPw2) { setError('Passwords do not match.'); return }
 
     setLoading(true)
-    try {
-      const res  = await fetch('/api/signup/send-otp', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ email: suEmail }),
-      })
-      const body = await res.json() as { ok?: boolean; error?: string }
-      if (!res.ok) throw new Error(body.error ?? 'Failed to send code')
-      setStep('verify')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to send verification code')
+    const { error: otpErr } = await supabase.auth.signInWithOtp({
+      email: suEmail,
+      options: {
+        shouldCreateUser: true,
+        data: { first_name: firstName.trim(), last_name: lastName.trim() },
+      },
+    })
+    if (otpErr) {
+      setError(otpErr.message || 'Failed to send verification code. Please try again.')
+      setLoading(false)
+      return
     }
+    setStep('verify')
     setLoading(false)
   }
 
@@ -134,46 +169,24 @@ export default function EmployeeLoginPage() {
   async function handleVerify() {
     const code = otpDigits.join('')
     if (code.length !== 6) { setError('Enter the full 6-digit code.'); return }
-    setError('')
-    setLoading(true)
-
-    try {
-      const res  = await fetch('/api/signup/verify-otp', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ email: suEmail, code, password: suPw, firstName: firstName.trim(), lastName: lastName.trim() }),
-      })
-      const body = await res.json() as { ok?: boolean; error?: string }
-      if (!res.ok) throw new Error(body.error ?? 'Verification failed')
-
-      // Account created — sign in automatically
-      const { data, error: signInErr } = await supabase.auth.signInWithPassword({ email: suEmail, password: suPw })
-      if (signInErr || !data.user) throw new Error('Account created but sign-in failed. Please sign in manually.')
-
-      const u    = data.user
-      const meta = (u.user_metadata || {}) as Record<string, string>
-      const fullName = [meta.first_name, meta.last_name].filter(Boolean).join(' ') || firstName + ' ' + lastName
-      saveUser({ email: u.email!, name: fullName.trim(), company: 'Your Organization', role: 'employee' })
-      router.push('/join')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Verification failed')
-    }
-    setLoading(false)
+    await verifyAndFinish(code)
   }
 
   async function resendCode() {
     setResending(true)
     setError('')
     setResentOk(false)
-    try {
-      const res = await fetch('/api/signup/send-otp', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ email: suEmail }),
-      })
-      if (res.ok) { setResentOk(true); setOtpDigits(['', '', '', '', '', '']); setTimeout(() => otpRefs.current[0]?.focus(), 80) }
-      else { const b = await res.json() as { error?: string }; setError(b.error ?? 'Failed to resend') }
-    } catch { setError('Failed to resend code') }
+    const { error: resendErr } = await supabase.auth.signInWithOtp({
+      email: suEmail,
+      options: { shouldCreateUser: true },
+    })
+    if (resendErr) {
+      setError(resendErr.message || 'Failed to resend code')
+    } else {
+      setResentOk(true)
+      setOtpDigits(['', '', '', '', '', ''])
+      setTimeout(() => otpRefs.current[0]?.focus(), 80)
+    }
     setResending(false)
   }
 
@@ -185,32 +198,7 @@ export default function EmployeeLoginPage() {
     if (digit && i < 5) otpRefs.current[i + 1]?.focus()
     if (next.join('').length === 6) {
       setError('')
-      // Auto-submit after brief render delay
-      setTimeout(async () => {
-        const code = next.join('')
-        setLoading(true)
-        try {
-          const res  = await fetch('/api/signup/verify-otp', {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ email: suEmail, code, password: suPw, firstName: firstName.trim(), lastName: lastName.trim() }),
-          })
-          const body = await res.json() as { ok?: boolean; error?: string }
-          if (!res.ok) throw new Error(body.error ?? 'Verification failed')
-          const { data, error: signInErr } = await supabase.auth.signInWithPassword({ email: suEmail, password: suPw })
-          if (signInErr || !data.user) throw new Error('Sign-in failed. Please try signing in manually.')
-          const u    = data.user
-          const meta = (u.user_metadata || {}) as Record<string, string>
-          const fullName = [meta.first_name, meta.last_name].filter(Boolean).join(' ') || firstName + ' ' + lastName
-          saveUser({ email: u.email!, name: fullName.trim(), company: 'Your Organization', role: 'employee' })
-          router.push('/join')
-        } catch (err) {
-          setError(err instanceof Error ? err.message : 'Verification failed')
-          setOtpDigits(['', '', '', '', '', ''])
-          setTimeout(() => otpRefs.current[0]?.focus(), 80)
-        }
-        setLoading(false)
-      }, 80)
+      setTimeout(() => verifyAndFinish(next.join('')), 80)
     }
   }
 
@@ -412,8 +400,11 @@ export default function EmployeeLoginPage() {
                   <div>
                     <p className="text-sm font-semibold text-slate-900 mb-1">Check your email</p>
                     <p className="text-xs text-slate-500 leading-relaxed">
-                      We sent a 6-digit code to <span className="font-semibold text-slate-700">{suEmail}</span>.
-                      Enter it below to verify your account.
+                      A 6-digit code was sent to <span className="font-semibold text-slate-700">{suEmail}</span>.
+                      Enter it below — it expires in 10 minutes.
+                    </p>
+                    <p className="text-[11px] text-slate-400 mt-1.5">
+                      Not in your inbox? Check your spam or junk folder.
                     </p>
                   </div>
 

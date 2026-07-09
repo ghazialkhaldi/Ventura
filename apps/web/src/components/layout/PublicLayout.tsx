@@ -36,7 +36,7 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
                 <>
                   <Link
                     href="/employee-login"
-                    className="hidden sm:block text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors"
+                    className="hidden sm:block text-sm font-semibold text-emerald-700 hover:text-emerald-800 border border-emerald-600 hover:border-emerald-700 hover:bg-emerald-50 px-4 py-2 transition-colors"
                   >
                     Employee portal
                   </Link>

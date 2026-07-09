@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
@@ -7,7 +7,6 @@ import { createClient } from '../utils/supabase/client'
 import { saveUser } from '../hooks/useCurrentUser'
 
 type Tab  = 'signin' | 'signup'
-type Step = 'form' | 'verify'
 
 function PasswordReq({ met, label }: { met: boolean; label: string }) {
   return (
@@ -20,7 +19,6 @@ function PasswordReq({ met, label }: { met: boolean; label: string }) {
 
 export default function EmployeeLoginPage() {
   const [tab,       setTab]       = useState<Tab>('signin')
-  const [step,      setStep]      = useState<Step>('form')
 
   // Sign-in fields
   const [siEmail,   setSiEmail]   = useState('')
@@ -36,12 +34,6 @@ export default function EmployeeLoginPage() {
   const [suShowPw,  setSuShowPw]  = useState(false)
   const [suShowPw2, setSuShowPw2] = useState(false)
 
-  // OTP verify
-  const [otpDigits, setOtpDigits] = useState(['', '', '', '', '', ''])
-  const [resending, setResending] = useState(false)
-  const [resentOk,  setResentOk]  = useState(false)
-  const otpRefs = useRef<(HTMLInputElement | null)[]>([])
-
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState('')
 
@@ -52,10 +44,6 @@ export default function EmployeeLoginPage() {
     if (localStorage.getItem('sf_user')) router.replace('/dashboard')
   }, [router])
 
-  useEffect(() => {
-    if (step === 'verify') setTimeout(() => otpRefs.current[0]?.focus(), 80)
-  }, [step])
-
   // Password strength rules
   const pwHasLength  = suPw.length >= 8
   const pwHasUpper   = /[A-Z]/.test(suPw)
@@ -64,10 +52,7 @@ export default function EmployeeLoginPage() {
 
   function switchTab(t: Tab) {
     setTab(t)
-    setStep('form')
     setError('')
-    setOtpDigits(['', '', '', '', '', ''])
-    setResentOk(false)
   }
 
   // ── Sign in ────────────────────────────────────────────────────────────────
@@ -98,41 +83,7 @@ export default function EmployeeLoginPage() {
     router.push(companyMeta.admin_id ? '/dashboard' : '/join')
   }
 
-  // ── Sign up — shared verify helper ───────────────────────────────────────
-  async function verifyAndFinish(code: string) {
-    setLoading(true)
-    setError('')
-    try {
-      const { data, error: verifyErr } = await supabase.auth.verifyOtp({
-        email: suEmail,
-        token: code,
-        type:  'email',
-      })
-      if (verifyErr || !data.user) {
-        throw new Error(verifyErr?.message || 'Invalid or expired code. Please try again.')
-      }
-
-      // Set password + name on the newly verified account
-      await supabase.auth.updateUser({
-        password: suPw,
-        data: { first_name: firstName.trim(), last_name: lastName.trim() },
-      })
-
-      const u       = data.user
-      const meta    = (u.user_metadata || {}) as Record<string, string>
-      const fullName = [firstName.trim(), lastName.trim()].filter(Boolean).join(' ') || meta.first_name || u.email!
-      const cMeta   = (u.user_metadata?._company ?? {}) as Record<string, string>
-      saveUser({ email: u.email!, name: fullName, company: cMeta.company_name || 'Your Organization', role: 'employee' })
-      router.push('/join')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Verification failed')
-      setOtpDigits(['', '', '', '', '', ''])
-      setTimeout(() => otpRefs.current[0]?.focus(), 80)
-    }
-    setLoading(false)
-  }
-
-  // ── Sign up — step 1: validate form + send OTP via Supabase ──────────────
+  // ── Sign up ────────────────────────────────────────────────────────────────
   async function handleSignUp(e: React.FormEvent) {
     e.preventDefault()
     setError('')
@@ -149,65 +100,28 @@ export default function EmployeeLoginPage() {
     if (suPw !== suPw2) { setError('Passwords do not match.'); return }
 
     setLoading(true)
-    const { error: otpErr } = await supabase.auth.signInWithOtp({
-      email: suEmail,
-      options: {
-        shouldCreateUser: true,
-        data: { first_name: firstName.trim(), last_name: lastName.trim() },
-      },
-    })
-    if (otpErr) {
-      setError(otpErr.message || 'Failed to send verification code. Please try again.')
-      setLoading(false)
-      return
+    try {
+      const res  = await fetch('/api/signup/create', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email: suEmail, password: suPw, firstName: firstName.trim(), lastName: lastName.trim() }),
+      })
+      const body = await res.json() as { ok?: boolean; error?: string }
+      if (!res.ok) throw new Error(body.error ?? 'Failed to create account')
+
+      // Auto sign-in
+      const { data, error: signInErr } = await supabase.auth.signInWithPassword({ email: suEmail, password: suPw })
+      if (signInErr || !data.user) throw new Error('Account created — please sign in.')
+
+      const u        = data.user
+      const fullName = [firstName.trim(), lastName.trim()].filter(Boolean).join(' ')
+      const cMeta    = (u.user_metadata?._company ?? {}) as Record<string, string>
+      saveUser({ email: u.email!, name: fullName, company: cMeta.company_name || 'Your Organization', role: 'employee' })
+      router.push('/join')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create account')
     }
-    setStep('verify')
     setLoading(false)
-  }
-
-  // ── Sign up — step 2: verify OTP ──────────────────────────────────────────
-  async function handleVerify() {
-    const code = otpDigits.join('')
-    if (code.length !== 6) { setError('Enter the full 6-digit code.'); return }
-    await verifyAndFinish(code)
-  }
-
-  async function resendCode() {
-    setResending(true)
-    setError('')
-    setResentOk(false)
-    const { error: resendErr } = await supabase.auth.signInWithOtp({
-      email: suEmail,
-      options: { shouldCreateUser: true },
-    })
-    if (resendErr) {
-      setError(resendErr.message || 'Failed to resend code')
-    } else {
-      setResentOk(true)
-      setOtpDigits(['', '', '', '', '', ''])
-      setTimeout(() => otpRefs.current[0]?.focus(), 80)
-    }
-    setResending(false)
-  }
-
-  function handleOtpDigit(i: number, val: string) {
-    const digit = val.replace(/\D/g, '').slice(-1)
-    const next  = [...otpDigits]
-    next[i]     = digit
-    setOtpDigits(next)
-    if (digit && i < 5) otpRefs.current[i + 1]?.focus()
-    if (next.join('').length === 6) {
-      setError('')
-      setTimeout(() => verifyAndFinish(next.join('')), 80)
-    }
-  }
-
-  function handleOtpKey(i: number, e: React.KeyboardEvent) {
-    if (e.key === 'Backspace' && !otpDigits[i] && i > 0) {
-      const next = [...otpDigits]; next[i - 1] = ''
-      setOtpDigits(next)
-      otpRefs.current[i - 1]?.focus()
-    }
   }
 
   return (
@@ -297,8 +211,8 @@ export default function EmployeeLoginPage() {
                 </form>
               )}
 
-              {/* ── Create account — form ── */}
-              {tab === 'signup' && step === 'form' && (
+              {/* ── Create account ── */}
+              {tab === 'signup' && (
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
@@ -394,63 +308,6 @@ export default function EmployeeLoginPage() {
                 </form>
               )}
 
-              {/* ── Create account — verify OTP ── */}
-              {tab === 'signup' && step === 'verify' && (
-                <div className="space-y-5">
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900 mb-1">Check your email</p>
-                    <p className="text-xs text-slate-500 leading-relaxed">
-                      A 6-digit code was sent to <span className="font-semibold text-slate-700">{suEmail}</span>.
-                      Enter it below — it expires in 10 minutes.
-                    </p>
-                    <p className="text-[11px] text-slate-400 mt-1.5">
-                      Not in your inbox? Check your spam or junk folder.
-                    </p>
-                  </div>
-
-                  {/* 6-digit boxes */}
-                  <div className="flex gap-2 justify-between">
-                    {Array.from({ length: 6 }).map((_, i) => (
-                      <input
-                        key={i}
-                        ref={el => { otpRefs.current[i] = el }}
-                        type="text"
-                        inputMode="numeric"
-                        maxLength={1}
-                        value={otpDigits[i] ?? ''}
-                        onChange={e => handleOtpDigit(i, e.target.value)}
-                        onKeyDown={e => handleOtpKey(i, e)}
-                        disabled={loading}
-                        className="w-11 h-14 text-center text-xl font-bold border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 disabled:opacity-50 text-slate-900"
-                      />
-                    ))}
-                  </div>
-
-                  <button
-                    onClick={handleVerify}
-                    disabled={loading || otpDigits.join('').length !== 6}
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition-colors text-sm shadow-sm"
-                  >
-                    {loading ? 'Verifying…' : 'Verify & Create Account'}
-                  </button>
-
-                  <div className="flex items-center justify-between text-xs">
-                    <button
-                      onClick={() => { setStep('form'); setOtpDigits(['', '', '', '', '', '']); setError('') }}
-                      className="text-slate-400 hover:text-slate-600 transition-colors"
-                    >
-                      ← Back
-                    </button>
-                    <button
-                      onClick={resendCode}
-                      disabled={resending}
-                      className="text-emerald-600 hover:text-emerald-800 font-medium transition-colors disabled:opacity-50"
-                    >
-                      {resending ? 'Sending…' : resentOk ? 'Code sent!' : "Didn't receive it? Resend"}
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 

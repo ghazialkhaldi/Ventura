@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { createHash, createHmac, timingSafeEqual } from 'crypto'
+import { createAdminClient } from '../../../utils/supabase/admin'
 
 const CODE_REGEX  = /^\d{6}$/
 const EMAIL_REGEX = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/
@@ -15,7 +16,7 @@ function signingSecret() {
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end()
 
-  const { email: rawEmail, code: rawCode } = req.body || {}
+  const { email: rawEmail, code: rawCode, password, firstName, lastName } = req.body || {}
 
   if (!rawEmail || typeof rawEmail !== 'string') return res.status(400).json({ error: 'Email is required' })
   const email = rawEmail.trim().toLowerCase()
@@ -23,6 +24,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const code = typeof rawCode === 'string' ? rawCode.trim() : ''
   if (!CODE_REGEX.test(code)) return res.status(400).json({ error: 'Enter a valid 6-digit code' })
+
+  if (!password || typeof password !== 'string' || password.length < 8) {
+    return res.status(400).json({ error: 'Password must be at least 8 characters' })
+  }
 
   // Read and validate the signed OTP cookie
   const raw = req.cookies['_su_otp']
@@ -55,6 +60,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // Clear the OTP cookie
   res.setHeader('Set-Cookie', '_su_otp=; HttpOnly; SameSite=Lax; Path=/api/signup; Max-Age=0')
+
+  // Create the Supabase account via admin API — email_confirm:true bypasses email
+  // confirmation since we already verified the address ourselves via Resend OTP.
+  let admin
+  try { admin = createAdminClient() } catch {
+    return res.status(503).json({ error: 'Account creation is not configured. Please ask your admin to set SUPABASE_SERVICE_ROLE_KEY.' })
+  }
+
+  const { data: created, error: createErr } = await admin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: {
+      first_name: typeof firstName === 'string' ? firstName.trim() : '',
+      last_name:  typeof lastName  === 'string' ? lastName.trim()  : '',
+    },
+  })
+
+  if (createErr) {
+    // Duplicate — account already exists
+    if (createErr.message?.toLowerCase().includes('already') || (createErr as { status?: number }).status === 422) {
+      return res.status(409).json({ error: 'An account with this email already exists. Please sign in.' })
+    }
+    console.error('[signup/verify-otp] createUser error:', createErr)
+    return res.status(500).json({ error: 'Failed to create account. Please try again.' })
+  }
+
+  if (!created?.user) return res.status(500).json({ error: 'Failed to create account. Please try again.' })
 
   res.json({ ok: true })
 }

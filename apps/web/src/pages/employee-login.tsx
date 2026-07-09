@@ -101,23 +101,27 @@ export default function EmployeeLoginPage() {
 
     setLoading(true)
     try {
-      const res  = await fetch('/api/signup/create', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ email: suEmail, password: suPw, firstName: firstName.trim(), lastName: lastName.trim() }),
+      const { data, error: signUpErr } = await supabase.auth.signUp({
+        email:   suEmail,
+        password: suPw,
+        options: { data: { first_name: firstName.trim(), last_name: lastName.trim() } },
       })
-      const body = await res.json() as { ok?: boolean; error?: string }
-      if (!res.ok) throw new Error(body.error ?? 'Failed to create account')
 
-      // Auto sign-in
-      const { data, error: signInErr } = await supabase.auth.signInWithPassword({ email: suEmail, password: suPw })
-      if (signInErr || !data.user) throw new Error('Account created — please sign in.')
+      if (signUpErr) throw new Error(signUpErr.message)
+      if (!data.user) throw new Error('Failed to create account. Please try again.')
 
-      const u        = data.user
-      const fullName = [firstName.trim(), lastName.trim()].filter(Boolean).join(' ')
-      const cMeta    = (u.user_metadata?._company ?? {}) as Record<string, string>
-      saveUser({ email: u.email!, name: fullName, company: cMeta.company_name || 'Your Organization', role: 'employee' })
-      router.push('/join')
+      if (data.session) {
+        // Email confirmations disabled — signed in immediately
+        const fullName = [firstName.trim(), lastName.trim()].filter(Boolean).join(' ')
+        const cMeta    = (data.user.user_metadata?._company ?? {}) as Record<string, string>
+        saveUser({ email: data.user.email!, name: fullName, company: cMeta.company_name || 'Your Organization', role: 'employee' })
+        router.push('/join')
+      } else {
+        // Supabase requires email confirmation — sign in after clicking the link
+        setError('Account created! Check your email for a confirmation link, then sign in here.')
+        switchTab('signin')
+        setSiEmail(suEmail)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create account')
     }

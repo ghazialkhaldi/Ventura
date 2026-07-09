@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import clsx from 'clsx'
+import VenturaLogo from '../VenturaLogo'
 import {
   Squares2X2Icon,
   ExclamationTriangleIcon,
@@ -97,7 +98,7 @@ export default function Sidebar() {
       {/* Brand */}
       <div className="h-14 flex items-center px-5 border-b border-[#1e2d47] flex-shrink-0">
         <div>
-          <span className="text-base font-black tracking-tight bg-gradient-to-r from-white via-slate-300 to-slate-500 bg-clip-text text-transparent">Ventura</span>
+          <VenturaLogo variant="light" size="1rem" />
           <span className="block text-[10px] text-[#4d6a8a] mt-0.5">Financial Operations</span>
         </div>
       </div>

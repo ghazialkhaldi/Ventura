@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import PublicLayout from '../components/layout/PublicLayout'
+import VenturaLogo from '../components/VenturaLogo'
 import {
   ArrowLeftIcon, ArrowRightIcon,
   ExclamationTriangleIcon, CheckCircleIcon,
@@ -218,7 +219,7 @@ export default function DemoPage() {
               {/* Brand */}
               <div className="h-14 flex items-center px-4 border-b border-[#1e2d47] flex-shrink-0">
                 <div>
-                  <span className="text-sm font-black tracking-tight bg-gradient-to-r from-white via-slate-300 to-slate-500 bg-clip-text text-transparent">Ventura</span>
+                  <VenturaLogo variant="light" size="0.875rem" />
                   <span className="block text-[10px] text-[#4d6a8a] mt-0.5">Financial Operations</span>
                 </div>
               </div>

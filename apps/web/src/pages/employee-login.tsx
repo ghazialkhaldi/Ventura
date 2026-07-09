@@ -5,6 +5,7 @@ import Head from 'next/head'
 import { Eye, EyeOff, AlertCircle, ArrowRight, Check, X, Mail } from 'lucide-react'
 import { createClient } from '../utils/supabase/client'
 import { saveUser } from '../hooks/useCurrentUser'
+import VenturaLogo from '../components/VenturaLogo'
 
 type Tab  = 'signin' | 'signup'
 type Step = 'form' | 'verify'
@@ -114,15 +115,14 @@ export default function EmployeeLoginPage() {
     if (suPw !== suPw2) { setError('Passwords do not match.'); return }
 
     setLoading(true)
-    const { error: otpErr } = await supabase.auth.signInWithOtp({
-      email: suEmail,
-      options: {
-        shouldCreateUser: true,
-        data: { first_name: firstName.trim(), last_name: lastName.trim() },
-      },
+    const res  = await fetch('/api/signup/send-otp', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ email: suEmail }),
     })
-    if (otpErr) {
-      setError(otpErr.message || 'Could not send verification code. Please try again.')
+    const body = await res.json() as { error?: string }
+    if (!res.ok) {
+      setError(body.error || 'Could not send verification code. Please try again.')
       setLoading(false)
       return
     }
@@ -134,26 +134,37 @@ export default function EmployeeLoginPage() {
   async function verifyCode(code: string) {
     setLoading(true)
     setError('')
-    const { data, error: verifyErr } = await supabase.auth.verifyOtp({
-      email: suEmail,
-      token: code,
-      type:  'email',
+    const res  = await fetch('/api/signup/verify-otp', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({
+        email:     suEmail,
+        code,
+        password:  suPw,
+        firstName: firstName.trim(),
+        lastName:  lastName.trim(),
+      }),
     })
-    if (verifyErr || !data.user) {
-      setError(verifyErr?.message || 'Incorrect or expired code.')
+    const body = await res.json() as { error?: string }
+    if (!res.ok) {
+      setError(body.error || 'Incorrect or expired code.')
       setDigits(['', '', '', '', '', ''])
       setTimeout(() => refs.current[0]?.focus(), 80)
       setLoading(false)
       return
     }
-    // Set password + names on the verified account
-    await supabase.auth.updateUser({
-      password: suPw,
-      data: { first_name: firstName.trim(), last_name: lastName.trim() },
-    })
+    // Sign in with the newly created account
+    const { data, error: signInErr } = await supabase.auth.signInWithPassword({ email: suEmail, password: suPw })
+    if (signInErr || !data.user) {
+      setError('Account created! Please sign in.')
+      setLoading(false)
+      return
+    }
+    const u        = data.user
+    const meta     = (u.user_metadata || {}) as Record<string, string>
     const fullName = [firstName.trim(), lastName.trim()].filter(Boolean).join(' ')
-    const cMeta    = (data.user.user_metadata?._company ?? {}) as Record<string, string>
-    saveUser({ email: data.user.email!, name: fullName, company: cMeta.company_name || 'Your Organization', role: 'employee' })
+    const cMeta    = (u.user_metadata?._company ?? {}) as Record<string, string>
+    saveUser({ email: u.email!, name: fullName, company: cMeta.company_name || 'Your Organization', role: 'employee' })
     router.push('/join')
   }
 
@@ -178,11 +189,13 @@ export default function EmployeeLoginPage() {
     setResending(true)
     setError('')
     setResentOk(false)
-    const { error: err } = await supabase.auth.signInWithOtp({
-      email: suEmail,
-      options: { shouldCreateUser: true },
+    const res  = await fetch('/api/signup/send-otp', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ email: suEmail }),
     })
-    if (err) setError(err.message || 'Failed to resend.')
+    const body = await res.json() as { error?: string }
+    if (!res.ok) setError(body.error || 'Failed to resend.')
     else { setResentOk(true); setDigits(['', '', '', '', '', '']); setTimeout(() => refs.current[0]?.focus(), 80) }
     setResending(false)
   }
@@ -193,9 +206,7 @@ export default function EmployeeLoginPage() {
 
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-4 py-10">
         <Link href="/" className="mb-8 no-underline">
-          <span className="text-[2rem] font-black tracking-tight bg-gradient-to-r from-black via-slate-700 to-slate-400 bg-clip-text text-transparent">
-            Ventura
-          </span>
+          <VenturaLogo variant="dark" size="2rem" />
         </Link>
 
         <div className="w-full max-w-sm">
@@ -343,7 +354,7 @@ export default function EmployeeLoginPage() {
                       <Mail className="w-6 h-6 text-emerald-600" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-slate-900">Check your email</p>
+                      <p className="text-sm font-bold text-slate-900">Email sent — wait up to 2 minutes</p>
                       <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                         A 6-digit code was sent to<br />
                         <span className="font-semibold text-slate-700">{suEmail}</span>
@@ -351,8 +362,8 @@ export default function EmployeeLoginPage() {
                     </div>
                   </div>
 
-                  <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5 text-[11px] text-amber-700 leading-relaxed">
-                    <strong>Not seeing it?</strong> Check your <strong>spam / junk</strong> folder. The email comes from Supabase and may take up to 2 minutes.
+                  <div className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-[11px] text-slate-600 leading-relaxed">
+                    <strong>Not seeing it?</strong> Check your <strong>spam / junk</strong> folder. The code expires in 10 minutes.
                   </div>
 
                   <div className="flex gap-2 justify-between">

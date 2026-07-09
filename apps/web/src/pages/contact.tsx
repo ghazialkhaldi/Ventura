@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import { CheckCircleIcon, ArrowLeftIcon } from '@heroicons/react/24/outline'
+import VenturaLogo from '../components/VenturaLogo'
 
 const COMPANY_SIZES = [
   '1–10 employees',
@@ -63,7 +64,7 @@ export default function ContactPage() {
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
         <div className="h-16 px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 flex items-center justify-between">
           <Link href="/" className="no-underline">
-            <span className="text-[1.75rem] font-black tracking-tight bg-gradient-to-r from-black via-slate-700 to-slate-400 bg-clip-text text-transparent">Ventura</span>
+            <VenturaLogo variant="dark" size="1.75rem" />
           </Link>
           <div className="flex items-center gap-4">
             <Link href="/login" className="text-base font-medium text-slate-600 hover:text-slate-900 transition-colors">Sign in</Link>
@@ -87,7 +88,7 @@ export default function ContactPage() {
           </Link>
 
           {/* Wordmark */}
-          <p className="text-[3.5rem] font-black tracking-tight leading-none mb-6 bg-gradient-to-r from-white via-slate-300 to-slate-500 bg-clip-text text-transparent">Ventura</p>
+          <VenturaLogo variant="light" size="3.5rem" className="mb-6" />
           <p className="text-[#8ea4c0] text-base text-center leading-relaxed max-w-xs mb-12">
             Financial operations intelligence for enterprise finance teams.
           </p>

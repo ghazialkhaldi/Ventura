@@ -5,6 +5,7 @@ import Head from 'next/head'
 import { Eye, EyeOff, AlertCircle, ArrowRight, CheckCircle, ShieldCheck, Mail } from 'lucide-react'
 import { saveUser } from '../hooks/useCurrentUser'
 import { createClient } from '../utils/supabase/client'
+import VenturaLogo from '../components/VenturaLogo'
 
 export async function getServerSideProps() {
   return { props: {} }
@@ -210,7 +211,7 @@ export default function LoginPage() {
         {/* ── Left panel ── */}
         <div className="hidden lg:flex lg:w-[420px] xl:w-[480px] bg-[#0c1526] flex-col justify-between p-10 flex-shrink-0">
           <Link href="/" className="no-underline">
-            <span className="text-base font-black tracking-tight bg-gradient-to-r from-white via-slate-300 to-slate-500 bg-clip-text text-transparent">Ventura</span>
+            <VenturaLogo variant="light" size="1rem" />
           </Link>
 
           {step === 'creds' ? (
@@ -280,7 +281,7 @@ export default function LoginPage() {
         <div className="flex-1 flex flex-col bg-white">
           <header className="lg:hidden h-14 border-b border-slate-200 flex items-center px-6">
             <Link href="/" className="no-underline">
-              <span className="text-sm font-black tracking-tight bg-gradient-to-r from-black via-slate-700 to-slate-400 bg-clip-text text-transparent">Ventura</span>
+              <VenturaLogo variant="dark" size="0.875rem" />
             </Link>
           </header>
 

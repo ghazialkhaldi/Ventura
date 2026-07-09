@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { AlertCircle, Check, Building2, ArrowRight, Loader2 } from 'lucide-react'
+import VenturaLogo from '../components/VenturaLogo'
 
 export default function JoinPage() {
   const router = useRouter()
@@ -83,9 +84,7 @@ export default function JoinPage() {
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-4">
         {/* Logo */}
         <Link href="/" className="mb-8 no-underline">
-          <span className="text-[2rem] font-black tracking-tight bg-gradient-to-r from-black via-slate-700 to-slate-400 bg-clip-text text-transparent">
-            Ventura
-          </span>
+          <VenturaLogo variant="dark" size="2rem" />
         </Link>
 
         <div className="w-full max-w-sm">

@@ -64,7 +64,7 @@ export default function ContactPage() {
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
         <div className="h-16 px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 flex items-center justify-between">
           <Link href="/" className="no-underline">
-            <VenturaLogo variant="dark" size="1.75rem" />
+            <VenturaLogo variant="dark" height={28} />
           </Link>
           <div className="flex items-center gap-4">
             <Link href="/login" className="text-base font-medium text-slate-600 hover:text-slate-900 transition-colors">Sign in</Link>
@@ -88,7 +88,7 @@ export default function ContactPage() {
           </Link>
 
           {/* Wordmark */}
-          <VenturaLogo variant="light" size="3.5rem" className="mb-6" />
+          <VenturaLogo variant="light" height={52} className="mb-6" />
           <p className="text-[#8ea4c0] text-base text-center leading-relaxed max-w-xs mb-12">
             Financial operations intelligence for enterprise finance teams.
           </p>

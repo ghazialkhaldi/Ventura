@@ -211,7 +211,7 @@ export default function LoginPage() {
         {/* ── Left panel ── */}
         <div className="hidden lg:flex lg:w-[420px] xl:w-[480px] bg-[#0c1526] flex-col justify-between p-10 flex-shrink-0">
           <Link href="/" className="no-underline">
-            <VenturaLogo variant="light" size="1rem" />
+            <VenturaLogo variant="light" height={22} />
           </Link>
 
           {step === 'creds' ? (
@@ -281,7 +281,7 @@ export default function LoginPage() {
         <div className="flex-1 flex flex-col bg-white">
           <header className="lg:hidden h-14 border-b border-slate-200 flex items-center px-6">
             <Link href="/" className="no-underline">
-              <VenturaLogo variant="dark" size="0.875rem" />
+              <VenturaLogo variant="dark" height={20} />
             </Link>
           </header>
 

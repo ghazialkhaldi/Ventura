@@ -84,7 +84,7 @@ export default function JoinPage() {
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-4">
         {/* Logo */}
         <Link href="/" className="mb-8 no-underline">
-          <VenturaLogo variant="dark" size="2rem" />
+          <VenturaLogo variant="dark" height={36} />
         </Link>
 
         <div className="w-full max-w-sm">

@@ -1,24 +1,26 @@
+import Image from 'next/image'
+
 interface VenturaLogoProps {
   variant?: 'dark' | 'light'
-  size?: string
+  height?: number
   className?: string
 }
 
-export default function VenturaLogo({ variant = 'dark', size = '1.5rem', className = '' }: VenturaLogoProps) {
+// Cropped logo dimensions: 2695 × 400
+const ASPECT = 2695 / 400
+
+export default function VenturaLogo({ variant = 'dark', height = 28, className = '' }: VenturaLogoProps) {
+  const width = Math.round(height * ASPECT)
+
   return (
-    <span
+    <Image
+      src="/ventura-logo.png"
+      alt="Ventura"
+      width={width}
+      height={height}
       className={className}
-      style={{
-        fontFamily: "'Rajdhani', sans-serif",
-        fontWeight: 700,
-        letterSpacing: '0.08em',
-        fontSize: size,
-        color: variant === 'light' ? '#ffffff' : '#0a0a0a',
-        lineHeight: 1,
-        display: 'inline-block',
-      }}
-    >
-      VENTURA
-    </span>
+      style={variant === 'light' ? { filter: 'invert(1)', mixBlendMode: 'screen' } : undefined}
+      priority
+    />
   )
 }

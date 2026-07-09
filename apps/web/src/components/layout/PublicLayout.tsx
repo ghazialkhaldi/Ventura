@@ -26,7 +26,7 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
         <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
           <div className="h-16 px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 flex items-center justify-between">
             <Link href="/" className="no-underline">
-              <VenturaLogo variant="dark" size="1.75rem" />
+              <VenturaLogo variant="dark" height={28} />
             </Link>
 
             <div className="flex items-center gap-3">
@@ -70,7 +70,7 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
             <div className="grid md:grid-cols-4 gap-8 mb-8">
               <div>
                 <div className="mb-3">
-                  <VenturaLogo variant="light" size="0.875rem" />
+                  <VenturaLogo variant="light" height={18} />
                 </div>
                 <p className="text-xs text-slate-500 leading-relaxed">
                   Financial operations intelligence for enterprise finance teams.

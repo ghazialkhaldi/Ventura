@@ -9,17 +9,18 @@ interface VenturaLogoProps {
 // Cropped logo dimensions: 2695 × 400
 const ASPECT = 2695 / 400
 
-export default function VenturaLogo({ variant = 'dark', height = 28, className = '' }: VenturaLogoProps) {
+export default function VenturaLogo({ variant = 'dark', height = 32, className = '' }: VenturaLogoProps) {
   const width = Math.round(height * ASPECT)
+  const src   = variant === 'light' ? '/ventura-logo-white.png' : '/ventura-logo.png'
 
   return (
     <Image
-      src="/ventura-logo.png"
+      src={src}
       alt="Ventura"
       width={width}
       height={height}
       className={className}
-      style={variant === 'light' ? { filter: 'invert(1)', mixBlendMode: 'screen' } : undefined}
+      style={{ display: 'block' }}
       priority
     />
   )

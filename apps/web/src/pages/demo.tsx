@@ -219,7 +219,7 @@ export default function DemoPage() {
               {/* Brand */}
               <div className="h-14 flex items-center px-4 border-b border-[#1e2d47] flex-shrink-0">
                 <div>
-                  <VenturaLogo variant="light" height={22} />
+                  <VenturaLogo variant="light" height={26} />
                   <span className="block text-[10px] text-[#4d6a8a] mt-0.5">Financial Operations</span>
                 </div>
               </div>

@@ -30,6 +30,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <title>Ventura — Financial Intelligence Platform</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="description" content="AI-powered financial operations intelligence for enterprise finance teams." />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" type="image/png" href="/favicon.png" />
         <link rel="apple-touch-icon" href="/favicon.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />

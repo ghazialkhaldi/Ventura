@@ -14,6 +14,7 @@ import {
 
 type SettingsTab = 'users' | 'roles' | 'security' | 'tenant' | 'data'
 type ResetStep   = 'idle' | 'confirm' | 'sending' | 'verify' | 'verifying' | 'done' | 'error'
+type InviteState = 'idle' | 'loading' | 'ready'
 
 const roles = [
   { name: 'Admin',           desc: 'Full access — manage users, settings, AI governance, all data',    color: 'bg-red-50 text-red-700 border-red-200'             },
@@ -35,6 +36,40 @@ export default function SettingsPage() {
   const [tenantName,  setTenantName]  = useState('')
   const [timezone,    setTimezone]    = useState('America/New_York')
   const [plan]                        = useState('Enterprise')
+
+  // Invite modal state
+  const [inviteOpen,   setInviteOpen]   = useState(false)
+  const [inviteState,  setInviteState]  = useState<InviteState>('idle')
+  const [inviteCode,   setInviteCode]   = useState<string | null>(null)
+  const [inviteError,  setInviteError]  = useState('')
+  const [inviteCopied, setInviteCopied] = useState<'code' | 'link' | null>(null)
+
+  async function openInviteModal() {
+    setInviteOpen(true)
+    setInviteError('')
+    setInviteState('loading')
+    try {
+      const res  = await fetch('/api/invite/generate', { method: 'POST' })
+      const body = await res.json() as { code?: string; error?: string }
+      if (!res.ok) throw new Error(body.error ?? 'Failed to generate invite')
+      setInviteCode(body.code ?? null)
+      setInviteState('ready')
+    } catch (e) {
+      setInviteError(e instanceof Error ? e.message : 'Failed to generate invite link')
+      setInviteState('idle')
+    }
+  }
+
+  function copyInvite(type: 'code' | 'link') {
+    if (!inviteCode) return
+    const text = type === 'code'
+      ? inviteCode
+      : `${typeof window !== 'undefined' ? window.location.origin : ''}/join?code=${inviteCode}`
+    navigator.clipboard.writeText(text).then(() => {
+      setInviteCopied(type)
+      setTimeout(() => setInviteCopied(null), 2000)
+    })
+  }
 
   // ── Reset data flow ──────────────────────────────────────────────────────────
   const [resetStep,  setResetStep]  = useState<ResetStep>('idle')
@@ -169,12 +204,87 @@ export default function SettingsPage() {
         ))}
       </div>
 
+      {/* ── Invite modal ── */}
+      {inviteOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]" onClick={() => setInviteOpen(false)} />
+          <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+              <div>
+                <p className="text-sm font-semibold text-slate-900">Invite team member</p>
+                <p className="text-xs text-slate-500 mt-0.5">Share this link with employees to join your workspace</p>
+              </div>
+              <button onClick={() => setInviteOpen(false)} className="text-slate-400 hover:text-slate-600 p-1 rounded transition-colors">
+                <RefreshCw className="w-4 h-4 opacity-0" />
+                ✕
+              </button>
+            </div>
+            <div className="px-5 py-5 space-y-4">
+              {inviteState === 'loading' && (
+                <div className="flex items-center gap-3 py-4">
+                  <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
+                  <p className="text-sm text-slate-500">Generating invite link…</p>
+                </div>
+              )}
+              {inviteError && (
+                <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 rounded-lg px-3 py-2.5 text-xs">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <span>{inviteError}</span>
+                </div>
+              )}
+              {inviteState === 'ready' && inviteCode && (
+                <>
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Invite code</p>
+                    <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5">
+                      <code className="text-xs text-slate-600 font-mono flex-1 truncate">{inviteCode}</code>
+                      <button
+                        onClick={() => copyInvite('code')}
+                        className="flex-shrink-0 text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1 transition-colors"
+                      >
+                        {inviteCopied === 'code' ? <><CheckCircle className="w-3.5 h-3.5 text-green-500" /> Copied</> : 'Copy'}
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Invite link</p>
+                    <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5">
+                      <span className="text-xs text-slate-400 flex-1 truncate font-mono">
+                        {typeof window !== 'undefined' ? window.location.origin : ''}/join?code={inviteCode}
+                      </span>
+                      <button
+                        onClick={() => copyInvite('link')}
+                        className="flex-shrink-0 text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1 transition-colors"
+                      >
+                        {inviteCopied === 'link' ? <><CheckCircle className="w-3.5 h-3.5 text-green-500" /> Copied</> : 'Copy'}
+                      </button>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    Anyone with this link can join your workspace as a Viewer. You can change their role from the dashboard.
+                    Regenerating the link invalidates the previous one.
+                  </p>
+                  <div className="flex gap-3 pt-1">
+                    <button
+                      onClick={openInviteModal}
+                      className="flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-800 transition-colors"
+                    >
+                      <RefreshCw className="w-3 h-3" /> Regenerate link
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Users ── */}
       {activeTab === 'users' && (
         <div>
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm text-slate-600">1 user · 1 active</p>
-            <Button variant="primary" size="sm" icon={<Plus className="w-3.5 h-3.5" />}>
+            <Button variant="primary" size="sm" icon={<Plus className="w-3.5 h-3.5" />} onClick={openInviteModal}>
               Invite user
             </Button>
           </div>

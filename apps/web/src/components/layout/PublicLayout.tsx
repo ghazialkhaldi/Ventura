@@ -28,21 +28,32 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
               <span className="text-[1.75rem] font-black tracking-tight bg-gradient-to-r from-black via-slate-700 to-slate-400 bg-clip-text text-transparent">Ventura</span>
             </Link>
 
-            <div className="flex items-center gap-5">
-              <Link href="/demo" className="hidden sm:block text-base font-medium text-slate-500 hover:text-slate-900 transition-colors">
+            <div className="flex items-center gap-3">
+              <Link href="/demo" className="hidden sm:block text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
                 Demo
               </Link>
               {!loggedIn && (
-                <Link href="/login" className="text-base font-medium text-slate-600 hover:text-slate-900 transition-colors">
-                  Sign in
-                </Link>
+                <>
+                  <Link
+                    href="/employee-login"
+                    className="hidden sm:block text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors"
+                  >
+                    Employee portal
+                  </Link>
+                  <Link
+                    href="/login"
+                    className="text-sm font-semibold text-slate-700 hover:text-slate-900 border border-slate-300 hover:border-slate-400 px-4 py-2 transition-colors"
+                  >
+                    Sign in
+                  </Link>
+                </>
               )}
               {loggedIn ? (
-                <Link href="/dashboard" className="bg-emerald-700 hover:bg-emerald-800 text-white text-base font-semibold px-5 py-2.5 transition-colors">
+                <Link href="/dashboard" className="bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold px-5 py-2.5 transition-colors">
                   View dashboard
                 </Link>
               ) : (
-                <Link href="/contact" className="bg-slate-900 hover:bg-slate-800 text-white text-base font-semibold px-5 py-2.5 transition-colors">
+                <Link href="/contact" className="bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold px-5 py-2.5 transition-colors">
                   Get started
                 </Link>
               )}

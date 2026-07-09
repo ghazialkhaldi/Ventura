@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+﻿import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import AppLayout from '../components/layout/AppLayout'
 import Badge from '../components/ui/Badge'
@@ -23,6 +23,7 @@ import {
   ChartBarIcon,
   InboxIcon,
 } from '@heroicons/react/24/outline'
+import { Copy, RefreshCw, Trash2, UserPlus, Check, Shield } from 'lucide-react'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -81,12 +82,42 @@ const SEV_LABEL: Record<string, string> = {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
+interface TeamMember {
+  user_id: string
+  email: string
+  name: string
+  role: string
+  joined_at: string
+}
+
+const ROLE_COLORS: Record<string, string> = {
+  admin:   'bg-purple-50 text-purple-700 border-purple-200',
+  editor:  'bg-blue-50 text-blue-700 border-blue-200',
+  analyst: 'bg-amber-50 text-amber-700 border-amber-200',
+  viewer:  'bg-slate-100 text-slate-600 border-slate-200',
+}
+
+function fmtJoined(iso: string): string {
+  try { return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }
+  catch { return '—' }
+}
+
 export default function DashboardPage() {
   const user = useCurrentUser()
   const { isReady, mounted, markReady } = useDataReady()
   const [dataset,     setDataset]     = useState<Dataset | null>(null)
   const [tierSummary, setTierSummary] = useState<TierSummary | null>(null)
   const [testMode,    setTestMode]    = useState<string>('live')
+
+  // Team state
+  const [members,        setMembers]        = useState<TeamMember[]>([])
+  const [inviteCode,     setInviteCode]     = useState<string | null>(null)
+  const [teamLoading,    setTeamLoading]    = useState(false)
+  const [generating,     setGenerating]     = useState(false)
+  const [copied,         setCopied]         = useState<'code' | 'link' | null>(null)
+  const [removingId,     setRemovingId]     = useState<string | null>(null)
+  const [updatingRole,   setUpdatingRole]   = useState<string | null>(null)
+
   const company = user?.company || 'Your Organization'
 
   useEffect(() => {
@@ -99,6 +130,66 @@ export default function DashboardPage() {
       }
     }
   }, [isReady])
+
+  const loadTeam = useCallback(async () => {
+    setTeamLoading(true)
+    try {
+      const res = await fetch('/api/team/members')
+      if (res.ok) {
+        const body = await res.json() as { members: TeamMember[]; inviteCode: string | null }
+        setMembers(body.members)
+        setInviteCode(body.inviteCode)
+      }
+    } catch {}
+    setTeamLoading(false)
+  }, [])
+
+  useEffect(() => { loadTeam() }, [loadTeam])
+
+  async function generateInvite() {
+    setGenerating(true)
+    try {
+      const res = await fetch('/api/invite/generate', { method: 'POST' })
+      if (res.ok) {
+        const body = await res.json() as { code: string }
+        setInviteCode(body.code)
+      }
+    } catch {}
+    setGenerating(false)
+  }
+
+  function copyToClipboard(text: string, type: 'code' | 'link') {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(type)
+      setTimeout(() => setCopied(null), 2000)
+    })
+  }
+
+  async function removeMember(userId: string) {
+    setRemovingId(userId)
+    try {
+      const res = await fetch('/api/team/remove', {
+        method:  'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ userId }),
+      })
+      if (res.ok) setMembers(prev => prev.filter(m => m.user_id !== userId))
+    } catch {}
+    setRemovingId(null)
+  }
+
+  async function updateRole(userId: string, role: string) {
+    setUpdatingRole(userId)
+    try {
+      const res = await fetch('/api/team/update-role', {
+        method:  'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ userId, role }),
+      })
+      if (res.ok) setMembers(prev => prev.map(m => m.user_id === userId ? { ...m, role } : m))
+    } catch {}
+    setUpdatingRole(null)
+  }
 
   if (!mounted) return <AppLayout title="Dashboard"><div className="h-96" /></AppLayout>
 
@@ -592,7 +683,7 @@ export default function DashboardPage() {
 
       {/* ── Processing log ── */}
       {recentAudit.length > 0 && (
-        <div className="bg-white border border-slate-200 shadow-card overflow-hidden">
+        <div className="bg-white border border-slate-200 shadow-card overflow-hidden mb-6">
           <div className="px-5 py-3.5 flex items-center justify-between border-b border-slate-100">
             <p className="text-sm font-semibold text-slate-900">Processing Log</p>
             <Link href="/audit-logs" className="text-xs text-slate-600 hover:text-slate-900 flex items-center gap-0.5 transition-colors">
@@ -611,6 +702,146 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+
+      {/* ── Team ── */}
+      <div className="bg-white border border-slate-200 shadow-card overflow-hidden">
+        <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold text-slate-900">Team Access</p>
+            <p className="text-xs text-slate-500">
+              {members.length === 0 ? 'No members yet' : `${members.length} member${members.length !== 1 ? 's' : ''}`}
+            </p>
+          </div>
+          <Link
+            href="/employee-login"
+            className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-800 border border-slate-200 px-3 py-1.5 bg-white hover:bg-slate-50 transition-colors"
+          >
+            <UserPlus className="w-3 h-3" /> Employee portal
+          </Link>
+        </div>
+
+        <div className="p-5 space-y-5">
+          {/* Invite code card */}
+          <div className="border border-slate-200 rounded-lg p-4 bg-slate-50">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-semibold text-slate-700">Invite link</p>
+              <button
+                onClick={generateInvite}
+                disabled={generating}
+                className="flex items-center gap-1.5 text-[11px] text-slate-500 hover:text-slate-800 transition-colors disabled:opacity-50"
+              >
+                <RefreshCw className={`w-3 h-3 ${generating ? 'animate-spin' : ''}`} />
+                {inviteCode ? 'Regenerate' : 'Generate'}
+              </button>
+            </div>
+
+            {inviteCode ? (
+              <div className="space-y-2">
+                {/* Code display */}
+                <div className="flex items-center gap-2 bg-white border border-slate-200 rounded px-3 py-2">
+                  <code className="text-[11px] text-slate-600 flex-1 truncate font-mono">{inviteCode}</code>
+                  <button
+                    onClick={() => copyToClipboard(inviteCode, 'code')}
+                    className="flex-shrink-0 text-slate-400 hover:text-slate-700 transition-colors"
+                    title="Copy invite code"
+                  >
+                    {copied === 'code' ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+                {/* Link display */}
+                <div className="flex items-center gap-2 bg-white border border-slate-200 rounded px-3 py-2">
+                  <span className="text-[11px] text-slate-400 flex-1 truncate">
+                    {typeof window !== 'undefined' ? `${window.location.origin}/join?code=${inviteCode}` : `/join?code=${inviteCode}`}
+                  </span>
+                  <button
+                    onClick={() => copyToClipboard(
+                      `${typeof window !== 'undefined' ? window.location.origin : ''}/join?code=${inviteCode}`,
+                      'link'
+                    )}
+                    className="flex-shrink-0 text-slate-400 hover:text-slate-700 transition-colors"
+                    title="Copy invite link"
+                  >
+                    {copied === 'link' ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  Share this link with employees. Regenerating the link invalidates the old one.
+                </p>
+              </div>
+            ) : (
+              <p className="text-xs text-slate-400">
+                No invite link yet.{' '}
+                <button onClick={generateInvite} className="text-emerald-600 hover:text-emerald-800 font-medium transition-colors">
+                  Generate one
+                </button>{' '}
+                to let employees join this workspace.
+              </p>
+            )}
+          </div>
+
+          {/* Members table */}
+          {teamLoading ? (
+            <p className="text-xs text-slate-400 py-2">Loading team…</p>
+          ) : members.length === 0 ? (
+            <div className="text-center py-6">
+              <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-2">
+                <Shield className="w-5 h-5 text-slate-300" />
+              </div>
+              <p className="text-sm font-medium text-slate-500">No team members yet</p>
+              <p className="text-xs text-slate-400 mt-1">
+                Generate an invite link above and share it with your team.
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-slate-100">
+                    <th className="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider pb-2 pr-4">Member</th>
+                    <th className="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider pb-2 pr-4">Role</th>
+                    <th className="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wider pb-2 pr-4">Joined</th>
+                    <th className="pb-2" />
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {members.map(m => (
+                    <tr key={m.user_id} className="group">
+                      <td className="py-2.5 pr-4">
+                        <p className="font-medium text-slate-800">{m.name}</p>
+                        <p className="text-slate-400">{m.email}</p>
+                      </td>
+                      <td className="py-2.5 pr-4">
+                        <select
+                          value={m.role}
+                          onChange={e => updateRole(m.user_id, e.target.value)}
+                          disabled={updatingRole === m.user_id}
+                          className={`text-[11px] font-semibold border rounded px-2 py-0.5 focus:outline-none cursor-pointer disabled:opacity-50 ${ROLE_COLORS[m.role] ?? ROLE_COLORS['viewer']}`}
+                        >
+                          <option value="admin">Admin</option>
+                          <option value="editor">Editor</option>
+                          <option value="analyst">Analyst</option>
+                          <option value="viewer">Viewer</option>
+                        </select>
+                      </td>
+                      <td className="py-2.5 pr-4 text-slate-400 whitespace-nowrap">{fmtJoined(m.joined_at)}</td>
+                      <td className="py-2.5 text-right">
+                        <button
+                          onClick={() => removeMember(m.user_id)}
+                          disabled={removingId === m.user_id}
+                          className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 transition-all disabled:opacity-50"
+                          title="Remove member"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
     </AppLayout>
   )
 }

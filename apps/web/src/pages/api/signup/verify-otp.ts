@@ -75,6 +75,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     user_metadata: {
       first_name: typeof firstName === 'string' ? firstName.trim() : '',
       last_name:  typeof lastName  === 'string' ? lastName.trim()  : '',
+      user_type:  'employee',
     },
   })
 

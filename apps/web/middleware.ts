@@ -114,13 +114,32 @@ export async function middleware(request: NextRequest) {
     return applySecurityHeaders(redirect)
   }
 
-  // Redirect authenticated users away from auth/landing pages to dashboard
+  // Employee guard: employees without a joined workspace can't access the dashboard
+  if (user && isProtected(pathname)) {
+    const meta    = (user.user_metadata || {}) as Record<string, unknown>
+    const isEmp   = meta.user_type === 'employee'
+    const company = meta._company as Record<string, string> | undefined
+    if (isEmp && !company?.admin_id) {
+      const joinUrl = request.nextUrl.clone()
+      joinUrl.pathname = '/join'
+      joinUrl.search = ''
+      const redirect = NextResponse.redirect(joinUrl)
+      return applySecurityHeaders(redirect)
+    }
+  }
+
+  // Redirect authenticated admin users away from auth/landing pages to dashboard
+  // (employees are handled by their own login page)
   if (isAuthPage(pathname) && user) {
-    const dashboardUrl = request.nextUrl.clone()
-    dashboardUrl.pathname = '/dashboard'
-    dashboardUrl.search = ''
-    const redirect = NextResponse.redirect(dashboardUrl)
-    return applySecurityHeaders(redirect)
+    const meta  = (user.user_metadata || {}) as Record<string, unknown>
+    const isEmp = meta.user_type === 'employee'
+    if (!isEmp) {
+      const dashboardUrl = request.nextUrl.clone()
+      dashboardUrl.pathname = '/dashboard'
+      dashboardUrl.search = ''
+      const redirect = NextResponse.redirect(dashboardUrl)
+      return applySecurityHeaders(redirect)
+    }
   }
 
   return applySecurityHeaders(supabaseResponse)

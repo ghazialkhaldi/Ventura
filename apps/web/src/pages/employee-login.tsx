@@ -134,16 +134,12 @@ export default function EmployeeLoginPage() {
   async function verifyCode(code: string) {
     setLoading(true)
     setError('')
+
+    // Step 1: verify the OTP code server-side
     const res  = await fetch('/api/signup/verify-otp', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({
-        email:     suEmail,
-        code,
-        password:  suPw,
-        firstName: firstName.trim(),
-        lastName:  lastName.trim(),
-      }),
+      body:    JSON.stringify({ email: suEmail, code }),
     })
     const body = await res.json() as { error?: string }
     if (!res.ok) {
@@ -153,18 +149,46 @@ export default function EmployeeLoginPage() {
       setLoading(false)
       return
     }
-    // Sign in with the newly created account
-    const { data, error: signInErr } = await supabase.auth.signInWithPassword({ email: suEmail, password: suPw })
-    if (signInErr || !data.user) {
-      setError('Account created! Please sign in.')
+
+    // Step 2: create the account (or sign in if it already exists)
+    const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({
+      email:   suEmail,
+      password: suPw,
+      options: { data: { first_name: firstName.trim(), last_name: lastName.trim() } },
+    })
+
+    if (signUpErr) {
+      // If the account already exists, try signing in directly
+      if (signUpErr.message?.toLowerCase().includes('already registered') || signUpErr.status === 400) {
+        const { data: siData, error: siErr } = await supabase.auth.signInWithPassword({ email: suEmail, password: suPw })
+        if (siErr || !siData.user) { setError('An account with this email already exists. Please sign in.'); setLoading(false); return }
+        const fullName = [firstName.trim(), lastName.trim()].filter(Boolean).join(' ')
+        saveUser({ email: siData.user.email!, name: fullName, company: 'Your Organization', role: 'employee' })
+        router.push('/join')
+        return
+      }
+      setError(signUpErr.message || 'Failed to create account. Please try again.')
       setLoading(false)
       return
     }
-    const u        = data.user
-    const meta     = (u.user_metadata || {}) as Record<string, string>
+
     const fullName = [firstName.trim(), lastName.trim()].filter(Boolean).join(' ')
-    const cMeta    = (u.user_metadata?._company ?? {}) as Record<string, string>
-    saveUser({ email: u.email!, name: fullName, company: cMeta.company_name || 'Your Organization', role: 'employee' })
+
+    // If session is returned immediately (email confirmations disabled in Supabase)
+    if (signUpData.session) {
+      saveUser({ email: suEmail, name: fullName, company: 'Your Organization', role: 'employee' })
+      router.push('/join')
+      return
+    }
+
+    // Email confirmations are enabled — sign in after signUp creates the user
+    const { data: siData, error: siErr } = await supabase.auth.signInWithPassword({ email: suEmail, password: suPw })
+    if (siErr || !siData.user) {
+      setError('Account created! Please sign in using your new password.')
+      setLoading(false)
+      return
+    }
+    saveUser({ email: siData.user.email!, name: fullName, company: 'Your Organization', role: 'employee' })
     router.push('/join')
   }
 

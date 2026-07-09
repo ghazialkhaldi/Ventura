@@ -48,7 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     <tr><td align="center" style="padding:0 24px;">
       <table width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;">
         <tr><td style="padding:0 0 40px;">
-          <p style="margin:0;font-size:20px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">Ventura</p>
+          <img src="${process.env.NEXT_PUBLIC_APP_URL ?? 'https://venturafinance.net'}/ventura-logo-white.png" alt="Ventura" height="28" style="display:block;height:28px;width:auto;" />
         </td></tr>
         <tr><td style="background:#111d2e;border:1px solid #1e3048;border-radius:12px;overflow:hidden;">
           <table width="100%" cellpadding="0" cellspacing="0">

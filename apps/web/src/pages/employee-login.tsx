@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
-import { Eye, EyeOff, AlertCircle, ArrowRight, Check, X } from 'lucide-react'
+import { Eye, EyeOff, AlertCircle, ArrowRight, Check, X, Mail } from 'lucide-react'
 import { createClient } from '../utils/supabase/client'
 import { saveUser } from '../hooks/useCurrentUser'
 
 type Tab  = 'signin' | 'signup'
+type Step = 'form' | 'verify'
 
 function PasswordReq({ met, label }: { met: boolean; label: string }) {
   return (
@@ -18,7 +19,8 @@ function PasswordReq({ met, label }: { met: boolean; label: string }) {
 }
 
 export default function EmployeeLoginPage() {
-  const [tab,       setTab]       = useState<Tab>('signin')
+  const [tab,  setTab]  = useState<Tab>('signin')
+  const [step, setStep] = useState<Step>('form')
 
   // Sign-in fields
   const [siEmail,   setSiEmail]   = useState('')
@@ -34,6 +36,12 @@ export default function EmployeeLoginPage() {
   const [suShowPw,  setSuShowPw]  = useState(false)
   const [suShowPw2, setSuShowPw2] = useState(false)
 
+  // OTP
+  const [digits,    setDigits]    = useState(['', '', '', '', '', ''])
+  const [resending, setResending] = useState(false)
+  const [resentOk,  setResentOk]  = useState(false)
+  const refs = useRef<(HTMLInputElement | null)[]>([])
+
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState('')
 
@@ -44,7 +52,10 @@ export default function EmployeeLoginPage() {
     if (localStorage.getItem('sf_user')) router.replace('/dashboard')
   }, [router])
 
-  // Password strength rules
+  useEffect(() => {
+    if (step === 'verify') setTimeout(() => refs.current[0]?.focus(), 80)
+  }, [step])
+
   const pwHasLength  = suPw.length >= 8
   const pwHasUpper   = /[A-Z]/.test(suPw)
   const pwHasSpecial = /[^A-Za-z0-9]/.test(suPw)
@@ -52,7 +63,10 @@ export default function EmployeeLoginPage() {
 
   function switchTab(t: Tab) {
     setTab(t)
+    setStep('form')
     setError('')
+    setDigits(['', '', '', '', '', ''])
+    setResentOk(false)
   }
 
   // ── Sign in ────────────────────────────────────────────────────────────────
@@ -74,16 +88,16 @@ export default function EmployeeLoginPage() {
     const fullName = [meta.first_name, meta.last_name].filter(Boolean).join(' ')
       || u.email?.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
       || 'Employee'
-    const companyMeta = (u.user_metadata?._company ?? {}) as Record<string, string>
-    const companyName = companyMeta.company_name
+    const cMeta = (u.user_metadata?._company ?? {}) as Record<string, string>
+    const company = cMeta.company_name
       || u.email?.split('@')[1]?.split('.')[0].replace(/\b\w/g, c => c.toUpperCase())
       || 'Your Organization'
 
-    saveUser({ email: u.email!, name: fullName, company: companyName, role: 'employee' })
-    router.push(companyMeta.admin_id ? '/dashboard' : '/join')
+    saveUser({ email: u.email!, name: fullName, company, role: 'employee' })
+    router.push(cMeta.admin_id ? '/dashboard' : '/join')
   }
 
-  // ── Sign up ────────────────────────────────────────────────────────────────
+  // ── Sign up: send OTP ──────────────────────────────────────────────────────
   async function handleSignUp(e: React.FormEvent) {
     e.preventDefault()
     setError('')
@@ -94,38 +108,83 @@ export default function EmployeeLoginPage() {
       setError('Enter a valid email address.'); return
     }
     if (!pwStrong) {
-      setError('Password must be at least 8 characters with one uppercase letter and one special character.')
+      setError('Password must be at least 8 characters, include one uppercase letter and one special character.')
       return
     }
     if (suPw !== suPw2) { setError('Passwords do not match.'); return }
 
     setLoading(true)
-    try {
-      const { data, error: signUpErr } = await supabase.auth.signUp({
-        email:   suEmail,
-        password: suPw,
-        options: { data: { first_name: firstName.trim(), last_name: lastName.trim() } },
-      })
-
-      if (signUpErr) throw new Error(signUpErr.message)
-      if (!data.user) throw new Error('Failed to create account. Please try again.')
-
-      if (data.session) {
-        // Email confirmations disabled — signed in immediately
-        const fullName = [firstName.trim(), lastName.trim()].filter(Boolean).join(' ')
-        const cMeta    = (data.user.user_metadata?._company ?? {}) as Record<string, string>
-        saveUser({ email: data.user.email!, name: fullName, company: cMeta.company_name || 'Your Organization', role: 'employee' })
-        router.push('/join')
-      } else {
-        // Supabase requires email confirmation — sign in after clicking the link
-        setError('Account created! Check your email for a confirmation link, then sign in here.')
-        switchTab('signin')
-        setSiEmail(suEmail)
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create account')
+    const { error: otpErr } = await supabase.auth.signInWithOtp({
+      email: suEmail,
+      options: {
+        shouldCreateUser: true,
+        data: { first_name: firstName.trim(), last_name: lastName.trim() },
+      },
+    })
+    if (otpErr) {
+      setError(otpErr.message || 'Could not send verification code. Please try again.')
+      setLoading(false)
+      return
     }
+    setStep('verify')
     setLoading(false)
+  }
+
+  // ── OTP verify ─────────────────────────────────────────────────────────────
+  async function verifyCode(code: string) {
+    setLoading(true)
+    setError('')
+    const { data, error: verifyErr } = await supabase.auth.verifyOtp({
+      email: suEmail,
+      token: code,
+      type:  'email',
+    })
+    if (verifyErr || !data.user) {
+      setError(verifyErr?.message || 'Incorrect or expired code.')
+      setDigits(['', '', '', '', '', ''])
+      setTimeout(() => refs.current[0]?.focus(), 80)
+      setLoading(false)
+      return
+    }
+    // Set password + names on the verified account
+    await supabase.auth.updateUser({
+      password: suPw,
+      data: { first_name: firstName.trim(), last_name: lastName.trim() },
+    })
+    const fullName = [firstName.trim(), lastName.trim()].filter(Boolean).join(' ')
+    const cMeta    = (data.user.user_metadata?._company ?? {}) as Record<string, string>
+    saveUser({ email: data.user.email!, name: fullName, company: cMeta.company_name || 'Your Organization', role: 'employee' })
+    router.push('/join')
+  }
+
+  function handleDigit(i: number, val: string) {
+    const d    = val.replace(/\D/g, '').slice(-1)
+    const next = [...digits]
+    next[i]    = d
+    setDigits(next)
+    if (d && i < 5) refs.current[i + 1]?.focus()
+    if (next.join('').length === 6) setTimeout(() => verifyCode(next.join('')), 60)
+  }
+
+  function handleKey(i: number, e: React.KeyboardEvent) {
+    if (e.key === 'Backspace' && !digits[i] && i > 0) {
+      const next = [...digits]; next[i - 1] = ''
+      setDigits(next)
+      refs.current[i - 1]?.focus()
+    }
+  }
+
+  async function resend() {
+    setResending(true)
+    setError('')
+    setResentOk(false)
+    const { error: err } = await supabase.auth.signInWithOtp({
+      email: suEmail,
+      options: { shouldCreateUser: true },
+    })
+    if (err) setError(err.message || 'Failed to resend.')
+    else { setResentOk(true); setDigits(['', '', '', '', '', '']); setTimeout(() => refs.current[0]?.focus(), 80) }
+    setResending(false)
   }
 
   return (
@@ -142,25 +201,26 @@ export default function EmployeeLoginPage() {
         <div className="w-full max-w-sm">
           <div className="bg-white border border-slate-200 shadow-sm overflow-hidden">
 
-            {/* Header + tabs */}
-            <div className="px-6 pt-6 pb-0">
-              <h1 className="text-lg font-bold text-slate-900">Employee Portal</h1>
-              <p className="text-xs text-slate-500 mt-0.5">Access your company's financial workspace</p>
-
-              <div className="flex gap-0 mt-5 border-b border-slate-200">
-                {(['signin', 'signup'] as Tab[]).map(t => (
-                  <button
-                    key={t}
-                    onClick={() => switchTab(t)}
-                    className={`flex-1 py-2.5 text-sm font-semibold transition-colors border-b-2 -mb-px ${
-                      tab === t ? 'text-slate-900 border-slate-900' : 'text-slate-400 border-transparent hover:text-slate-600'
-                    }`}
-                  >
-                    {t === 'signin' ? 'Sign In' : 'Create Account'}
-                  </button>
-                ))}
+            {/* Tabs — hidden during verify step */}
+            {step === 'form' && (
+              <div className="px-6 pt-6 pb-0">
+                <h1 className="text-lg font-bold text-slate-900">Employee Portal</h1>
+                <p className="text-xs text-slate-500 mt-0.5">Access your company's financial workspace</p>
+                <div className="flex gap-0 mt-5 border-b border-slate-200">
+                  {(['signin', 'signup'] as Tab[]).map(t => (
+                    <button
+                      key={t}
+                      onClick={() => switchTab(t)}
+                      className={`flex-1 py-2.5 text-sm font-semibold transition-colors border-b-2 -mb-px ${
+                        tab === t ? 'text-slate-900 border-slate-900' : 'text-slate-400 border-transparent hover:text-slate-600'
+                      }`}
+                    >
+                      {t === 'signin' ? 'Sign In' : 'Create Account'}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="px-6 py-6">
               {error && (
@@ -171,29 +231,22 @@ export default function EmployeeLoginPage() {
               )}
 
               {/* ── Sign in ── */}
-              {tab === 'signin' && (
+              {tab === 'signin' && step === 'form' && (
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1.5">Email</label>
                     <input
-                      type="email"
-                      value={siEmail}
-                      onChange={e => setSiEmail(e.target.value)}
-                      placeholder="you@company.com"
-                      autoComplete="email"
+                      type="email" value={siEmail} onChange={e => setSiEmail(e.target.value)}
+                      placeholder="you@company.com" autoComplete="email"
                       className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                     />
                   </div>
-
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1.5">Password</label>
                     <div className="relative">
                       <input
-                        type={siShowPw ? 'text' : 'password'}
-                        value={siPw}
-                        onChange={e => setSiPw(e.target.value)}
-                        placeholder="••••••••"
-                        autoComplete="current-password"
+                        type={siShowPw ? 'text' : 'password'} value={siPw} onChange={e => setSiPw(e.target.value)}
+                        placeholder="••••••••" autoComplete="current-password"
                         className="w-full border border-slate-300 rounded-lg px-3 py-2.5 pr-10 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                       />
                       <button type="button" onClick={() => setSiShowPw(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
@@ -204,10 +257,7 @@ export default function EmployeeLoginPage() {
                       <Link href="/forgot-password" className="text-[11px] text-slate-400 hover:text-slate-600 transition-colors">Forgot password?</Link>
                     </div>
                   </div>
-
-                  <button
-                    type="submit"
-                    disabled={loading}
+                  <button type="submit" disabled={loading}
                     className="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition-colors text-sm flex items-center justify-center gap-2 shadow-sm"
                   >
                     {loading ? 'Signing in…' : <>Sign In <ArrowRight className="w-4 h-4" /></>}
@@ -215,29 +265,21 @@ export default function EmployeeLoginPage() {
                 </form>
               )}
 
-              {/* ── Create account ── */}
-              {tab === 'signup' && (
+              {/* ── Create account — form ── */}
+              {tab === 'signup' && step === 'form' && (
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-semibold text-slate-700 mb-1.5">First name</label>
-                      <input
-                        type="text"
-                        value={firstName}
-                        onChange={e => setFirstName(e.target.value)}
-                        placeholder="Jane"
-                        autoComplete="given-name"
+                      <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)}
+                        placeholder="Jane" autoComplete="given-name"
                         className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-slate-700 mb-1.5">Last name</label>
-                      <input
-                        type="text"
-                        value={lastName}
-                        onChange={e => setLastName(e.target.value)}
-                        placeholder="Smith"
-                        autoComplete="family-name"
+                      <input type="text" value={lastName} onChange={e => setLastName(e.target.value)}
+                        placeholder="Smith" autoComplete="family-name"
                         className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                       />
                     </div>
@@ -245,12 +287,8 @@ export default function EmployeeLoginPage() {
 
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1.5">Work email</label>
-                    <input
-                      type="email"
-                      value={suEmail}
-                      onChange={e => setSuEmail(e.target.value)}
-                      placeholder="you@company.com"
-                      autoComplete="email"
+                    <input type="email" value={suEmail} onChange={e => setSuEmail(e.target.value)}
+                      placeholder="you@company.com" autoComplete="email"
                       className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                     />
                   </div>
@@ -258,19 +296,14 @@ export default function EmployeeLoginPage() {
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1.5">Password</label>
                     <div className="relative">
-                      <input
-                        type={suShowPw ? 'text' : 'password'}
-                        value={suPw}
-                        onChange={e => setSuPw(e.target.value)}
-                        placeholder="Create a strong password"
-                        autoComplete="new-password"
+                      <input type={suShowPw ? 'text' : 'password'} value={suPw} onChange={e => setSuPw(e.target.value)}
+                        placeholder="Create a strong password" autoComplete="new-password"
                         className="w-full border border-slate-300 rounded-lg px-3 py-2.5 pr-10 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                       />
                       <button type="button" onClick={() => setSuShowPw(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                         {suShowPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
-                    {/* Password requirements */}
                     {suPw.length > 0 && (
                       <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1">
                         <PasswordReq met={pwHasLength}  label="8+ characters" />
@@ -283,28 +316,18 @@ export default function EmployeeLoginPage() {
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1.5">Re-enter password</label>
                     <div className="relative">
-                      <input
-                        type={suShowPw2 ? 'text' : 'password'}
-                        value={suPw2}
-                        onChange={e => setSuPw2(e.target.value)}
-                        placeholder="Confirm password"
-                        autoComplete="new-password"
-                        className={`w-full border rounded-lg px-3 py-2.5 pr-10 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${
-                          suPw2 && suPw !== suPw2 ? 'border-red-400' : 'border-slate-300'
-                        }`}
+                      <input type={suShowPw2 ? 'text' : 'password'} value={suPw2} onChange={e => setSuPw2(e.target.value)}
+                        placeholder="Confirm password" autoComplete="new-password"
+                        className={`w-full border rounded-lg px-3 py-2.5 pr-10 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 ${suPw2 && suPw !== suPw2 ? 'border-red-400' : 'border-slate-300'}`}
                       />
                       <button type="button" onClick={() => setSuShowPw2(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                         {suShowPw2 ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
-                    {suPw2 && suPw !== suPw2 && (
-                      <p className="text-[11px] text-red-500 mt-1">Passwords do not match</p>
-                    )}
+                    {suPw2 && suPw !== suPw2 && <p className="text-[11px] text-red-500 mt-1">Passwords do not match</p>}
                   </div>
 
-                  <button
-                    type="submit"
-                    disabled={loading}
+                  <button type="submit" disabled={loading}
                     className="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition-colors text-sm shadow-sm"
                   >
                     {loading ? 'Sending code…' : 'Create Account'}
@@ -312,6 +335,61 @@ export default function EmployeeLoginPage() {
                 </form>
               )}
 
+              {/* ── Verify OTP ── */}
+              {step === 'verify' && (
+                <div className="space-y-5">
+                  <div className="flex flex-col items-center text-center gap-3 py-2">
+                    <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center">
+                      <Mail className="w-6 h-6 text-emerald-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-slate-900">Check your email</p>
+                      <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                        A 6-digit code was sent to<br />
+                        <span className="font-semibold text-slate-700">{suEmail}</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5 text-[11px] text-amber-700 leading-relaxed">
+                    <strong>Not seeing it?</strong> Check your <strong>spam / junk</strong> folder. The email comes from Supabase and may take up to 2 minutes.
+                  </div>
+
+                  <div className="flex gap-2 justify-between">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <input
+                        key={i}
+                        ref={el => { refs.current[i] = el }}
+                        type="text" inputMode="numeric" maxLength={1}
+                        value={digits[i] ?? ''}
+                        onChange={e => handleDigit(i, e.target.value)}
+                        onKeyDown={e => handleKey(i, e)}
+                        disabled={loading}
+                        className="w-11 h-14 text-center text-xl font-bold border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 disabled:opacity-50 text-slate-900"
+                      />
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={() => verifyCode(digits.join(''))}
+                    disabled={loading || digits.join('').length !== 6}
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition-colors text-sm shadow-sm"
+                  >
+                    {loading ? 'Verifying…' : 'Verify & Create Account'}
+                  </button>
+
+                  <div className="flex items-center justify-between text-xs">
+                    <button onClick={() => { setStep('form'); setDigits(['', '', '', '', '', '']); setError('') }}
+                      className="text-slate-400 hover:text-slate-600 transition-colors">
+                      ← Back
+                    </button>
+                    <button onClick={resend} disabled={resending}
+                      className="text-emerald-600 hover:text-emerald-800 font-medium transition-colors disabled:opacity-50">
+                      {resending ? 'Sending…' : resentOk ? '✓ Code resent' : "Resend code"}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

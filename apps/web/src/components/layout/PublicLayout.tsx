@@ -9,13 +9,32 @@ interface PublicLayoutProps {
   title?: string
 }
 
+interface StoredUser {
+  role?:    string
+  company?: string
+  email?:   string
+}
+
 export default function PublicLayout({ children, title }: PublicLayoutProps) {
-  const [loggedIn,     setLoggedIn]     = useState(false)
-  const [drawerOpen,   setDrawerOpen]   = useState(false)
+  const [sfUser,     setSfUser]     = useState<StoredUser | null>(null)
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   useEffect(() => {
-    setLoggedIn(!!localStorage.getItem('sf_user'))
+    try {
+      const raw = localStorage.getItem('sf_user')
+      if (raw) setSfUser(JSON.parse(raw) as StoredUser)
+    } catch {}
   }, [])
+
+  const isEmployee   = sfUser?.role === 'employee'
+  const hasWorkspace = isEmployee && !!sfUser?.company
+  const loggedIn     = !!sfUser
+
+  // Where the "View dashboard" / "Join workspace" button takes the user
+  const portalHref = isEmployee
+    ? (hasWorkspace ? '/employee-dashboard' : '/join')
+    : '/dashboard'
+  const portalLabel = isEmployee && !hasWorkspace ? 'Join workspace' : 'View dashboard'
 
   // Prevent body scroll when drawer is open
   useEffect(() => {
@@ -58,9 +77,10 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
                   </Link>
                 </>
               )}
+              {/* Logged-in employees: show their portal link only, no sign-in links */}
               {loggedIn ? (
-                <Link href="/dashboard" className="bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold px-5 py-2.5 transition-colors">
-                  View dashboard
+                <Link href={portalHref} className="bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold px-5 py-2.5 transition-colors">
+                  {portalLabel}
                 </Link>
               ) : (
                 <Link href="/contact" className="bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold px-5 py-2.5 transition-colors">
@@ -134,11 +154,11 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
             <div className="mt-2">
               {loggedIn ? (
                 <Link
-                  href="/dashboard"
+                  href={portalHref}
                   onClick={() => setDrawerOpen(false)}
                   className="block px-4 py-3 text-sm font-semibold text-white bg-emerald-700 hover:bg-emerald-800 transition-colors text-center"
                 >
-                  View dashboard
+                  {portalLabel}
                 </Link>
               ) : (
                 <Link

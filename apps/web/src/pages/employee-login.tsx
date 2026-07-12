@@ -8,7 +8,7 @@ import { saveUser } from '../hooks/useCurrentUser'
 import VenturaLogo from '../components/VenturaLogo'
 
 type Tab  = 'signin' | 'signup'
-type Step = 'form' | 'verify'
+type Step = 'form' | 'verify' | 'mfa'
 
 function PasswordReq({ met, label }: { met: boolean; label: string }) {
   return (
@@ -46,6 +46,11 @@ export default function EmployeeLoginPage() {
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState('')
 
+  // Pending sign-in data — stored between password auth and MFA verification
+  const [siPendingData, setSiPendingData] = useState<{
+    email: string; name: string; company: string; adminId: string
+  } | null>(null)
+
   const router   = useRouter()
   const supabase = createClient()
 
@@ -54,7 +59,7 @@ export default function EmployeeLoginPage() {
   }, [router])
 
   useEffect(() => {
-    if (step === 'verify') setTimeout(() => refs.current[0]?.focus(), 80)
+    if (step === 'verify' || step === 'mfa') setTimeout(() => refs.current[0]?.focus(), 80)
   }, [step])
 
   const pwHasLength  = suPw.length >= 8
@@ -62,12 +67,14 @@ export default function EmployeeLoginPage() {
   const pwHasSpecial = /[^A-Za-z0-9]/.test(suPw)
   const pwStrong     = pwHasLength && pwHasUpper && pwHasSpecial
 
-  function switchTab(t: Tab) {
+  async function switchTab(t: Tab) {
+    if (step === 'mfa') await supabase.auth.signOut()
     setTab(t)
     setStep('form')
     setError('')
     setDigits(['', '', '', '', '', ''])
     setResentOk(false)
+    setSiPendingData(null)
   }
 
   // ── Sign in ────────────────────────────────────────────────────────────────
@@ -77,6 +84,7 @@ export default function EmployeeLoginPage() {
     if (!siEmail || !siPw) { setError('Please enter your email and password.'); return }
     setLoading(true)
 
+    // Step 1: verify password credentials
     const { data, error: authErr } = await supabase.auth.signInWithPassword({ email: siEmail, password: siPw })
     if (authErr || !data.user) {
       setError(authErr?.message || 'Incorrect email or password.')
@@ -84,18 +92,62 @@ export default function EmployeeLoginPage() {
       return
     }
 
-    const u    = data.user
-    const meta = (u.user_metadata || {}) as Record<string, string>
+    const u        = data.user
+    const meta     = (u.user_metadata || {}) as Record<string, string>
     const fullName = [meta.first_name, meta.last_name].filter(Boolean).join(' ')
       || u.email?.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
       || 'Employee'
-    const cMeta = (u.user_metadata?._company ?? {}) as Record<string, string>
+    const cMeta   = (u.user_metadata?._company ?? {}) as Record<string, string>
     const company = cMeta.company_name
       || u.email?.split('@')[1]?.split('.')[0].replace(/\b\w/g, c => c.toUpperCase())
       || 'Your Organization'
 
-    saveUser({ email: u.email!, name: fullName, company, role: 'employee' })
-    router.push(cMeta.admin_id ? '/employee-dashboard' : '/join')
+    // Stash resolved data — only persist to localStorage after MFA passes
+    setSiPendingData({ email: u.email!, name: fullName, company, adminId: cMeta.admin_id ?? '' })
+
+    // Step 2: send MFA code to verify it's really them
+    const mfaRes  = await fetch('/api/send-mfa', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ email: siEmail }),
+    })
+    const mfaBody = await mfaRes.json() as { error?: string }
+    if (!mfaRes.ok) {
+      // MFA send failed — don't block sign-in, but warn
+      setError(mfaBody.error || 'Could not send verification code. Try again.')
+      await supabase.auth.signOut()
+      setLoading(false)
+      return
+    }
+
+    setDigits(['', '', '', '', '', ''])
+    setStep('mfa')
+    setLoading(false)
+  }
+
+  // ── Sign-in MFA verify ─────────────────────────────────────────────────────
+  async function verifyMfa(code: string) {
+    if (!siPendingData) return
+    setLoading(true)
+    setError('')
+
+    const res  = await fetch('/api/verify-mfa', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ email: siPendingData.email, code }),
+    })
+    const body = await res.json() as { error?: string }
+    if (!res.ok) {
+      setError(body.error || 'Incorrect code. Check your email and try again.')
+      setDigits(['', '', '', '', '', ''])
+      setTimeout(() => refs.current[0]?.focus(), 80)
+      setLoading(false)
+      return
+    }
+
+    // MFA passed — persist user and redirect
+    saveUser({ email: siPendingData.email, name: siPendingData.name, company: siPendingData.company, role: 'employee' })
+    router.push(siPendingData.adminId ? '/employee-dashboard' : '/join')
   }
 
   // ── Sign up: send OTP ──────────────────────────────────────────────────────
@@ -176,7 +228,12 @@ export default function EmployeeLoginPage() {
     next[i]    = d
     setDigits(next)
     if (d && i < 5) refs.current[i + 1]?.focus()
-    if (next.join('').length === 6) setTimeout(() => verifyCode(next.join('')), 60)
+    if (next.join('').length === 6) {
+      setTimeout(() => {
+        if (step === 'verify') verifyCode(next.join(''))
+        else if (step === 'mfa') verifyMfa(next.join(''))
+      }, 60)
+    }
   }
 
   function handleKey(i: number, e: React.KeyboardEvent) {
@@ -191,10 +248,13 @@ export default function EmployeeLoginPage() {
     setResending(true)
     setError('')
     setResentOk(false)
-    const res  = await fetch('/api/signup/send-otp', {
+    const isMfa  = step === 'mfa'
+    const email  = isMfa ? siEmail : suEmail
+    const url    = isMfa ? '/api/send-mfa' : '/api/signup/send-otp'
+    const res    = await fetch(url, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ email: suEmail }),
+      body:    JSON.stringify({ email }),
     })
     const body = await res.json() as { error?: string }
     if (!res.ok) setError(body.error || 'Failed to resend.')
@@ -348,8 +408,8 @@ export default function EmployeeLoginPage() {
                 </form>
               )}
 
-              {/* ── Verify OTP ── */}
-              {step === 'verify' && (
+              {/* ── OTP / MFA verify (shared UI for both sign-up verify and sign-in MFA) ── */}
+              {(step === 'verify' || step === 'mfa') && (
                 <div className="space-y-5">
                   <div className="flex flex-col items-center text-center gap-3 py-2">
                     <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center">
@@ -359,7 +419,7 @@ export default function EmployeeLoginPage() {
                       <p className="text-sm font-bold text-slate-900">Email sent — wait up to 2 minutes</p>
                       <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                         A 6-digit code was sent to<br />
-                        <span className="font-semibold text-slate-700">{suEmail}</span>
+                        <span className="font-semibold text-slate-700">{step === 'mfa' ? siEmail : suEmail}</span>
                       </p>
                     </div>
                   </div>
@@ -384,21 +444,32 @@ export default function EmployeeLoginPage() {
                   </div>
 
                   <button
-                    onClick={() => verifyCode(digits.join(''))}
+                    onClick={() => step === 'mfa' ? verifyMfa(digits.join('')) : verifyCode(digits.join(''))}
                     disabled={loading || digits.join('').length !== 6}
                     className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition-colors text-sm shadow-sm"
                   >
-                    {loading ? 'Verifying…' : 'Verify & Create Account'}
+                    {loading ? 'Verifying…' : step === 'mfa' ? 'Verify & Sign In' : 'Verify & Create Account'}
                   </button>
 
                   <div className="flex items-center justify-between text-xs">
-                    <button onClick={() => { setStep('form'); setDigits(['', '', '', '', '', '']); setError('') }}
-                      className="text-slate-400 hover:text-slate-600 transition-colors">
+                    <button
+                      onClick={async () => {
+                        if (step === 'mfa') {
+                          // Cancel MFA → sign out the pending session
+                          await supabase.auth.signOut()
+                          setSiPendingData(null)
+                        }
+                        setStep('form')
+                        setDigits(['', '', '', '', '', ''])
+                        setError('')
+                      }}
+                      className="text-slate-400 hover:text-slate-600 transition-colors"
+                    >
                       ← Back
                     </button>
                     <button onClick={resend} disabled={resending}
                       className="text-emerald-600 hover:text-emerald-800 font-medium transition-colors disabled:opacity-50">
-                      {resending ? 'Sending…' : resentOk ? '✓ Code resent' : "Resend code"}
+                      {resending ? 'Sending…' : resentOk ? '✓ Code resent' : 'Resend code'}
                     </button>
                   </div>
                 </div>

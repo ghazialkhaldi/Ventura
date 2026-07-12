@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-// Routes that require an authenticated Supabase session
+// Routes that require an authenticated Supabase session (admin)
 const PROTECTED_PATHS = [
   '/dashboard',
   '/settings',
@@ -12,11 +12,18 @@ const PROTECTED_PATHS = [
   '/audit',
 ]
 
+// Routes only employees can access
+const EMPLOYEE_PATHS = ['/employee-dashboard']
+
 // Routes that should redirect authenticated users away (e.g. login)
 const AUTH_PATHS = ['/login', '/signup', '/']
 
 function isProtected(pathname: string): boolean {
   return PROTECTED_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'))
+}
+
+function isEmployeePage(pathname: string): boolean {
+  return EMPLOYEE_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'))
 }
 
 function isAuthPage(pathname: string): boolean {
@@ -106,39 +113,48 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   // Route protection: unauthenticated users can't access protected paths
-  if (isProtected(pathname) && !user) {
+  if ((isProtected(pathname) || isEmployeePage(pathname)) && !user) {
     const loginUrl = request.nextUrl.clone()
-    loginUrl.pathname = '/login'
+    loginUrl.pathname = isEmployeePage(pathname) ? '/employee-login' : '/login'
     loginUrl.searchParams.set('next', pathname)
-    const redirect = NextResponse.redirect(loginUrl)
-    return applySecurityHeaders(redirect)
+    return applySecurityHeaders(NextResponse.redirect(loginUrl))
   }
 
-  // Employee guard: employees without a joined workspace can't access the dashboard
-  if (user && isProtected(pathname)) {
+  if (user) {
     const meta    = (user.user_metadata || {}) as Record<string, unknown>
     const isEmp   = meta.user_type === 'employee'
     const company = meta._company as Record<string, string> | undefined
-    if (isEmp && !company?.admin_id) {
+
+    // Employee trying to access admin routes → redirect to their portal
+    if (isEmp && isProtected(pathname)) {
+      const dest = request.nextUrl.clone()
+      dest.pathname = company?.admin_id ? '/employee-dashboard' : '/join'
+      dest.search   = ''
+      return applySecurityHeaders(NextResponse.redirect(dest))
+    }
+
+    // Employee without a workspace trying to access employee pages → /join
+    if (isEmp && isEmployeePage(pathname) && !company?.admin_id) {
       const joinUrl = request.nextUrl.clone()
       joinUrl.pathname = '/join'
-      joinUrl.search = ''
-      const redirect = NextResponse.redirect(joinUrl)
-      return applySecurityHeaders(redirect)
+      joinUrl.search   = ''
+      return applySecurityHeaders(NextResponse.redirect(joinUrl))
     }
-  }
 
-  // Redirect authenticated admin users away from auth/landing pages to dashboard
-  // (employees are handled by their own login page)
-  if (isAuthPage(pathname) && user) {
-    const meta  = (user.user_metadata || {}) as Record<string, unknown>
-    const isEmp = meta.user_type === 'employee'
-    if (!isEmp) {
+    // Non-employee trying to access employee pages → their dashboard
+    if (!isEmp && isEmployeePage(pathname)) {
+      const dest = request.nextUrl.clone()
+      dest.pathname = '/dashboard'
+      dest.search   = ''
+      return applySecurityHeaders(NextResponse.redirect(dest))
+    }
+
+    // Redirect authenticated admin users away from auth/landing pages to dashboard
+    if (isAuthPage(pathname) && !isEmp) {
       const dashboardUrl = request.nextUrl.clone()
       dashboardUrl.pathname = '/dashboard'
-      dashboardUrl.search = ''
-      const redirect = NextResponse.redirect(dashboardUrl)
-      return applySecurityHeaders(redirect)
+      dashboardUrl.search   = ''
+      return applySecurityHeaders(NextResponse.redirect(dashboardUrl))
     }
   }
 

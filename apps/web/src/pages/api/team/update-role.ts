@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { createClient } from '../../../utils/supabase/server'
+import { createAdminClient } from '../../../utils/supabase/admin'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'PUT') return res.status(405).end()
@@ -14,7 +15,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const validRoles = ['admin', 'editor', 'analyst', 'viewer']
   if (!validRoles.includes(role)) return res.status(400).json({ error: 'Invalid role' })
 
-  const meta = (user.user_metadata || {}) as Record<string, unknown>
+  // Update admin's _team_members
+  const meta    = (user.user_metadata || {}) as Record<string, unknown>
   const members = ((meta._team_members ?? []) as Array<{ user_id: string; role: string }>).map(m =>
     m.user_id === userId ? { ...m, role } : m
   )
@@ -23,6 +25,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     data: { ...meta, _team_members: members },
   })
   if (error) return res.status(500).json({ error: 'Failed to update role' })
+
+  // Also update the employee's own _company.role so they get the live change
+  try {
+    const admin = createAdminClient()
+    const { data: emp } = await admin.auth.admin.getUserById(userId)
+    if (emp?.user) {
+      const empMeta    = (emp.user.user_metadata || {}) as Record<string, unknown>
+      const company    = (empMeta._company as Record<string, string> | undefined) ?? {}
+      await admin.auth.admin.updateUserById(userId, {
+        user_metadata: { ...empMeta, _company: { ...company, role } },
+      })
+    }
+  } catch {
+    // Non-fatal: admin client may not be available; employee will see role on next full reload
+  }
 
   res.json({ ok: true })
 }

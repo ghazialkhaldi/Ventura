@@ -50,7 +50,7 @@ export default function EmployeeLoginPage() {
   const supabase = createClient()
 
   useEffect(() => {
-    if (localStorage.getItem('sf_user')) router.replace('/dashboard')
+    if (localStorage.getItem('sf_user')) router.replace('/employee-dashboard')
   }, [router])
 
   useEffect(() => {
@@ -95,7 +95,7 @@ export default function EmployeeLoginPage() {
       || 'Your Organization'
 
     saveUser({ email: u.email!, name: fullName, company, role: 'employee' })
-    router.push(cMeta.admin_id ? '/dashboard' : '/join')
+    router.push(cMeta.admin_id ? '/employee-dashboard' : '/join')
   }
 
   // ── Sign up: send OTP ──────────────────────────────────────────────────────
@@ -167,7 +167,7 @@ export default function EmployeeLoginPage() {
     saveUser({ email: u.email!, name: fullName, company, role: 'employee' })
 
     // Route: if already part of a workspace go to dashboard, otherwise join first
-    router.push(cMeta.admin_id ? '/dashboard' : '/join')
+    router.push(cMeta.admin_id ? '/employee-dashboard' : '/join')
   }
 
   function handleDigit(i: number, val: string) {

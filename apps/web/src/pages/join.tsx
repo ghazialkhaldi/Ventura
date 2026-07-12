@@ -67,7 +67,7 @@ export default function JoinPage() {
       } catch {}
 
       setJoined(true)
-      setTimeout(() => router.push('/dashboard'), 1800)
+      setTimeout(() => router.push('/employee-dashboard'), 1800)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to join')
     } finally {

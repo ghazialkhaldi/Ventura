@@ -1,4 +1,4 @@
-﻿import React from 'react'
+import React, { useState } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import {
@@ -6,6 +6,7 @@ import {
   MagnifyingGlassIcon,
   QuestionMarkCircleIcon,
   ArrowLeftIcon,
+  Bars3Icon,
 } from '@heroicons/react/24/outline'
 import Sidebar from './Sidebar'
 import { useCurrentUser, initials } from '../../hooks/useCurrentUser'
@@ -21,6 +22,8 @@ const TOP_LEVEL = ['/dashboard', '/anomalies', '/workflows', '/integrations', '/
 export default function AppLayout({ children, title }: AppLayoutProps) {
   const router = useRouter()
   const user = useCurrentUser()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
   const userInitials = user ? initials(user.name || user.email) : '??'
   const displayName  = user?.name  || user?.email || 'Your Account'
   const displayRole  = user?.role  || 'Admin'
@@ -33,43 +36,54 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
         <title>{title ? `${title} — Ventura` : 'Ventura — Financial Operations Intelligence'}</title>
       </Head>
       <div className="min-h-screen flex bg-white">
-        <Sidebar />
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-        <div className="flex-1 flex flex-col ml-64 min-h-screen">
+        <div className="flex-1 flex flex-col lg:ml-64 min-h-screen">
           {/* Top bar */}
-          <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 xl:px-8 2xl:px-10 flex-shrink-0 sticky top-0 z-20">
-            <div className="flex items-center gap-3">
+          <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 xl:px-8 2xl:px-10 flex-shrink-0 sticky top-0 z-10">
+            <div className="flex items-center gap-2 min-w-0">
+              {/* Hamburger — mobile only */}
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors flex-shrink-0 -ml-1"
+                aria-label="Open navigation"
+              >
+                <Bars3Icon className="w-5 h-5" />
+              </button>
+
               {showBack && (
                 <button
                   onClick={() => router.back()}
-                  className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors pr-3 border-r border-slate-200 mr-1"
+                  className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors pr-3 border-r border-slate-200 mr-1"
                   title="Go back"
                 >
                   <ArrowLeftIcon className="w-4 h-4" />
                   Back
                 </button>
               )}
-              <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 w-64">
+
+              {/* Search — hidden on small mobile to avoid overflow */}
+              <div className="hidden sm:flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 w-52 lg:w-64">
                 <MagnifyingGlassIcon className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
                 <input
                   type="text"
-                  placeholder="Search anomalies, vendors, workflows…"
+                  placeholder="Search anomalies, vendors…"
                   className="bg-transparent text-sm text-slate-700 placeholder-slate-400 outline-none w-full"
                 />
               </div>
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 flex-shrink-0">
               <button className="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors">
                 <BellIcon className="w-4 h-4" />
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
               </button>
-              <button className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors">
+              <button className="hidden sm:block p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors">
                 <QuestionMarkCircleIcon className="w-4 h-4" />
               </button>
               <div className="w-px h-5 bg-slate-200 mx-1" />
               <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-slate-50 cursor-pointer transition-colors">
-                <div className="w-6 h-6 bg-[#1a2d44] border border-[#2a3d5a] flex items-center justify-center">
+                <div className="w-6 h-6 bg-[#1a2d44] border border-[#2a3d5a] flex items-center justify-center flex-shrink-0">
                   <span className="text-white text-[10px] font-bold">{userInitials}</span>
                 </div>
                 <div className="hidden sm:block">
@@ -80,7 +94,7 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
             </div>
           </header>
 
-          <main className="flex-1 p-6 xl:p-8 2xl:p-10 overflow-auto">
+          <main className="flex-1 p-4 sm:p-6 xl:p-8 2xl:p-10 overflow-auto">
             {children}
           </main>
         </div>

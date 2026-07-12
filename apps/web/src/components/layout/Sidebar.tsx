@@ -1,7 +1,8 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import clsx from 'clsx'
+import { XMarkIcon } from '@heroicons/react/24/outline'
 import VenturaLogo from '../VenturaLogo'
 import {
   Squares2X2Icon,
@@ -20,11 +21,22 @@ import { useCurrentUser, clearUser, initials } from '../../hooks/useCurrentUser'
 import { loadDataset } from '../../lib/dataStore'
 import { createClient } from '../../utils/supabase/client'
 
-export default function Sidebar() {
+interface SidebarProps {
+  isOpen?: boolean
+  onClose?: () => void
+}
+
+export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const router = useRouter()
   const user = useCurrentUser()
   const [anomalyCount,  setAnomalyCount]  = useState(0)
   const [workflowCount, setWorkflowCount] = useState(0)
+
+  // Close on route change (handles mobile nav taps)
+  useEffect(() => {
+    onClose?.()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router.pathname])
 
   useEffect(() => {
     function refresh() {
@@ -93,84 +105,105 @@ export default function Sidebar() {
   ]
 
   return (
-    <aside className="fixed inset-y-0 left-0 w-64 flex flex-col bg-[#0c1526] z-30">
+    <>
+      {/* Mobile backdrop */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+          onClick={onClose}
+        />
+      )}
 
-      {/* Brand */}
-      <div className="h-14 flex items-center px-5 border-b border-[#1e2d47] flex-shrink-0">
-        <div>
-          <VenturaLogo variant="light" height={26} />
-          <span className="block text-[10px] text-[#4d6a8a] mt-0.5">Financial Operations</span>
-        </div>
-      </div>
+      <aside className={clsx(
+        'fixed inset-y-0 left-0 w-64 flex flex-col bg-[#0c1526] z-30 transition-transform duration-200',
+        'lg:translate-x-0',
+        isOpen ? 'translate-x-0' : '-translate-x-full',
+      )}>
 
-      {/* Workspace label */}
-      <div className="px-3 pt-3 pb-1">
-        <div className="flex items-center gap-2.5 px-3 py-2 border border-[#1e2d47]">
-          <BuildingOfficeIcon className="w-3.5 h-3.5 text-[#4d6a8a] flex-shrink-0" />
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-[#8ea4c0] truncate">{companyName}</p>
-            <p className="text-[10px] text-[#4d6a8a]">Enterprise</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto sidebar-scroll px-3 pt-3 pb-4 space-y-4">
-        {navSections.map((section) => (
-          <div key={section.label}>
-            <p className="px-3 mb-1 text-[10px] font-semibold tracking-widest text-[#4d6a8a] uppercase">
-              {section.label}
-            </p>
-            <ul className="space-y-px">
-              {section.items.map((item) => {
-                const active = isActive(item.href)
-                const Icon   = item.icon
-                return (
-                  <li key={item.label}>
-                    <Link
-                      href={item.href}
-                      className={clsx(
-                        'flex items-center gap-3 px-3 py-2 text-sm font-medium transition-colors',
-                        active
-                          ? 'bg-[#1a2d44] text-white border-l-2 border-[#8ea4c0] pl-[10px]'
-                          : 'text-[#8ea4c0] hover:text-slate-100 hover:bg-[#162036]',
-                      )}
-                    >
-                      <Icon className="w-4 h-4 flex-shrink-0" />
-                      <span className="flex-1 truncate">{item.label}</span>
-                      {!!item.badge && (
-                        <span className="min-w-[18px] h-4 px-1 text-[10px] font-semibold text-[#8ea4c0] bg-[#1e2d47] border border-[#2a3d5a] inline-flex items-center justify-center">
-                          {item.badge}
-                        </span>
-                      )}
-                    </Link>
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
-        ))}
-      </nav>
-
-      {/* User */}
-      <div className="border-t border-[#1e2d47] px-3 py-3">
-        <div className="flex items-center gap-2.5 px-3 py-2">
-          <div className="w-7 h-7 bg-[#1a2d44] border border-[#2a3d5a] flex items-center justify-center flex-shrink-0">
-            <span className="text-[#8ea4c0] text-[10px] font-semibold">{userInitials}</span>
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-[#8ea4c0] truncate">{displayName}</p>
-            <p className="text-[10px] text-[#4d6a8a]">{user?.role ?? 'Admin'}</p>
+        {/* Brand */}
+        <div className="h-14 flex items-center px-5 border-b border-[#1e2d47] flex-shrink-0">
+          <div className="flex-1">
+            <VenturaLogo variant="light" height={26} />
+            <span className="block text-[10px] text-[#4d6a8a] mt-0.5">Financial Operations</span>
           </div>
           <button
-            onClick={handleSignOut}
-            title="Sign out"
-            className="text-[#4d6a8a] hover:text-[#8ea4c0] transition-colors p-1"
+            onClick={onClose}
+            className="lg:hidden text-[#4d6a8a] hover:text-[#8ea4c0] p-1 transition-colors"
+            aria-label="Close navigation"
           >
-            <ArrowRightOnRectangleIcon className="w-3.5 h-3.5" />
+            <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
-      </div>
-    </aside>
+
+        {/* Workspace label */}
+        <div className="px-3 pt-3 pb-1">
+          <div className="flex items-center gap-2.5 px-3 py-2 border border-[#1e2d47]">
+            <BuildingOfficeIcon className="w-3.5 h-3.5 text-[#4d6a8a] flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-[#8ea4c0] truncate">{companyName}</p>
+              <p className="text-[10px] text-[#4d6a8a]">Enterprise</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto sidebar-scroll px-3 pt-3 pb-4 space-y-4">
+          {navSections.map((section) => (
+            <div key={section.label}>
+              <p className="px-3 mb-1 text-[10px] font-semibold tracking-widest text-[#4d6a8a] uppercase">
+                {section.label}
+              </p>
+              <ul className="space-y-px">
+                {section.items.map((item) => {
+                  const active = isActive(item.href)
+                  const Icon   = item.icon
+                  return (
+                    <li key={item.label}>
+                      <Link
+                        href={item.href}
+                        className={clsx(
+                          'flex items-center gap-3 px-3 py-2 text-sm font-medium transition-colors',
+                          active
+                            ? 'bg-[#1a2d44] text-white border-l-2 border-[#8ea4c0] pl-[10px]'
+                            : 'text-[#8ea4c0] hover:text-slate-100 hover:bg-[#162036]',
+                        )}
+                      >
+                        <Icon className="w-4 h-4 flex-shrink-0" />
+                        <span className="flex-1 truncate">{item.label}</span>
+                        {!!item.badge && (
+                          <span className="min-w-[18px] h-4 px-1 text-[10px] font-semibold text-[#8ea4c0] bg-[#1e2d47] border border-[#2a3d5a] inline-flex items-center justify-center">
+                            {item.badge}
+                          </span>
+                        )}
+                      </Link>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          ))}
+        </nav>
+
+        {/* User */}
+        <div className="border-t border-[#1e2d47] px-3 py-3">
+          <div className="flex items-center gap-2.5 px-3 py-2">
+            <div className="w-7 h-7 bg-[#1a2d44] border border-[#2a3d5a] flex items-center justify-center flex-shrink-0">
+              <span className="text-[#8ea4c0] text-[10px] font-semibold">{userInitials}</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-[#8ea4c0] truncate">{displayName}</p>
+              <p className="text-[10px] text-[#4d6a8a]">{user?.role ?? 'Admin'}</p>
+            </div>
+            <button
+              onClick={handleSignOut}
+              title="Sign out"
+              className="text-[#4d6a8a] hover:text-[#8ea4c0] transition-colors p-1"
+            >
+              <ArrowRightOnRectangleIcon className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      </aside>
+    </>
   )
 }

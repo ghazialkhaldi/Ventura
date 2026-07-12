@@ -1,6 +1,7 @@
-﻿import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import VenturaLogo from '../VenturaLogo'
 
 interface PublicLayoutProps {
@@ -9,11 +10,18 @@ interface PublicLayoutProps {
 }
 
 export default function PublicLayout({ children, title }: PublicLayoutProps) {
-  const [loggedIn, setLoggedIn] = useState(false)
+  const [loggedIn,     setLoggedIn]     = useState(false)
+  const [drawerOpen,   setDrawerOpen]   = useState(false)
 
   useEffect(() => {
     setLoggedIn(!!localStorage.getItem('sf_user'))
   }, [])
+
+  // Prevent body scroll when drawer is open
+  useEffect(() => {
+    document.body.style.overflow = drawerOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [drawerOpen])
 
   return (
     <>
@@ -22,22 +30,23 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
       </Head>
       <div className="min-h-screen flex flex-col bg-white">
 
-        {/* Top nav — logo + auth only */}
+        {/* Top nav */}
         <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
-          <div className="h-16 px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 flex items-center justify-between">
-            <Link href="/" className="no-underline">
+          <div className="h-16 px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 flex items-center justify-between">
+            <Link href="/" className="no-underline" onClick={() => setDrawerOpen(false)}>
               <VenturaLogo variant="dark" height={32} />
             </Link>
 
-            <div className="flex items-center gap-3">
-              <Link href="/demo" className="hidden sm:block text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
+            {/* Desktop nav */}
+            <div className="hidden sm:flex items-center gap-3">
+              <Link href="/demo" className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
                 Demo
               </Link>
               {!loggedIn && (
                 <>
                   <Link
                     href="/employee-login"
-                    className="hidden sm:block text-sm font-semibold text-emerald-700 hover:text-emerald-800 border border-emerald-600 hover:border-emerald-700 hover:bg-emerald-50 px-4 py-2 transition-colors"
+                    className="text-sm font-semibold text-emerald-700 hover:text-emerald-800 border border-emerald-600 hover:border-emerald-700 hover:bg-emerald-50 px-4 py-2 transition-colors"
                   >
                     Employee portal
                   </Link>
@@ -59,8 +68,90 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
                 </Link>
               )}
             </div>
+
+            {/* Mobile hamburger */}
+            <button
+              className="sm:hidden p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+              onClick={() => setDrawerOpen(true)}
+              aria-label="Open menu"
+            >
+              <Bars3Icon className="w-6 h-6" />
+            </button>
           </div>
         </header>
+
+        {/* Mobile drawer backdrop */}
+        {drawerOpen && (
+          <div
+            className="fixed inset-0 bg-black/40 z-50 sm:hidden"
+            onClick={() => setDrawerOpen(false)}
+          />
+        )}
+
+        {/* Mobile drawer */}
+        <div className={`fixed top-0 right-0 h-full w-72 bg-white z-50 flex flex-col shadow-2xl transition-transform duration-200 sm:hidden ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+          {/* Drawer header */}
+          <div className="h-16 flex items-center justify-between px-5 border-b border-slate-200">
+            <VenturaLogo variant="dark" height={28} />
+            <button
+              onClick={() => setDrawerOpen(false)}
+              className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+              aria-label="Close menu"
+            >
+              <XMarkIcon className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Drawer links */}
+          <nav className="flex-1 overflow-y-auto px-5 py-6 flex flex-col gap-2">
+            <Link
+              href="/demo"
+              onClick={() => setDrawerOpen(false)}
+              className="block px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+            >
+              Demo
+            </Link>
+
+            {!loggedIn && (
+              <>
+                <Link
+                  href="/employee-login"
+                  onClick={() => setDrawerOpen(false)}
+                  className="block px-4 py-3 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 border border-emerald-200 transition-colors"
+                >
+                  Employee portal
+                </Link>
+                <Link
+                  href="/login"
+                  onClick={() => setDrawerOpen(false)}
+                  className="block px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 border border-slate-200 transition-colors"
+                >
+                  Sign in
+                </Link>
+              </>
+            )}
+
+            <div className="mt-2">
+              {loggedIn ? (
+                <Link
+                  href="/dashboard"
+                  onClick={() => setDrawerOpen(false)}
+                  className="block px-4 py-3 text-sm font-semibold text-white bg-emerald-700 hover:bg-emerald-800 transition-colors text-center"
+                >
+                  View dashboard
+                </Link>
+              ) : (
+                <Link
+                  href="/contact"
+                  onClick={() => setDrawerOpen(false)}
+                  className="block px-4 py-3 text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 transition-colors text-center"
+                >
+                  Get started
+                </Link>
+              )}
+            </div>
+          </nav>
+        </div>
 
         <main className="flex-1">{children}</main>
 

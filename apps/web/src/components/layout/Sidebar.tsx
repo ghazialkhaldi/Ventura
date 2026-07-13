@@ -61,11 +61,13 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     return router.pathname.startsWith(href)
   }
 
+  const isEmployee = user?.role === 'employee'
+
   async function handleSignOut() {
     const supabase = createClient()
     await supabase.auth.signOut()
     clearUser()
-    router.push('/login')
+    router.push(isEmployee ? '/employee-login' : '/login')
   }
 
   const userInitials = user ? initials(user.name || user.email) : '?'
@@ -73,6 +75,13 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const companyName  = user?.company || 'Your Organization'
 
   const navSections = [
+    // Employees get a link back to their own portal home
+    ...(isEmployee ? [{
+      label: 'Portal',
+      items: [
+        { href: '/employee-dashboard', icon: Squares2X2Icon, label: 'My Workspace' },
+      ],
+    }] : []),
     {
       label: 'Workspace',
       items: [
@@ -98,8 +107,9 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     {
       label: 'Account',
       items: [
-        { href: '/settings', icon: Cog6ToothIcon, label: 'Settings'   },
-        { href: '/contact',  icon: EnvelopeIcon, label: 'Contact Us' },
+        // Settings is admin-only — employees are redirected by the middleware anyway
+        ...(isEmployee ? [] : [{ href: '/settings', icon: Cog6ToothIcon, label: 'Settings' }]),
+        { href: '/contact', icon: EnvelopeIcon, label: 'Contact Us' },
       ],
     },
   ]

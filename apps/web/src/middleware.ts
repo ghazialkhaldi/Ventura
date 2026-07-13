@@ -127,12 +127,18 @@ export async function middleware(request: NextRequest) {
     // record also marks them as an employee.
     const isEmp   = meta.user_type === 'employee' || !!company?.admin_id
 
-    // Employee trying to access admin routes → redirect to their portal
+    // Employees without a workspace can't access any workspace tabs → /join.
+    // Joined employees may browse workspace tabs (read-only enforced in-app),
+    // but /settings stays admin-only.
     if (isEmp && isProtected(pathname)) {
-      const dest = request.nextUrl.clone()
-      dest.pathname = company?.admin_id ? '/employee-dashboard' : '/join'
-      dest.search   = ''
-      return applySecurityHeaders(NextResponse.redirect(dest))
+      const joined      = !!company?.admin_id
+      const isSettings  = pathname === '/settings' || pathname.startsWith('/settings/')
+      if (!joined || isSettings) {
+        const dest = request.nextUrl.clone()
+        dest.pathname = joined ? '/employee-dashboard' : '/join'
+        dest.search   = ''
+        return applySecurityHeaders(NextResponse.redirect(dest))
+      }
     }
 
     // Employee without a workspace trying to access employee pages → /join

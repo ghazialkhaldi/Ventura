@@ -6,11 +6,17 @@ import clsx from 'clsx'
 import {
   Squares2X2Icon,
   BoltIcon,
-  ClockIcon,
   Bars3Icon,
   XMarkIcon,
   BuildingOfficeIcon,
   ArrowRightOnRectangleIcon,
+  ChartBarIcon,
+  ExclamationTriangleIcon,
+  ArrowsRightLeftIcon,
+  ScaleIcon,
+  DocumentTextIcon,
+  DocumentArrowDownIcon,
+  LockClosedIcon,
 } from '@heroicons/react/24/outline'
 import VenturaLogo from '../VenturaLogo'
 import { useCurrentUser, clearUser, initials } from '../../hooks/useCurrentUser'
@@ -62,8 +68,14 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
   const roleInfo     = ROLE_LABELS[role] ?? ROLE_LABELS.viewer
 
   const navItems = [
-    { href: '/employee-dashboard', icon: Squares2X2Icon, label: 'Workspace' },
-    { href: '/employee-dashboard/activity', icon: ClockIcon, label: 'My Activity' },
+    { href: '/employee-dashboard', icon: Squares2X2Icon,          label: 'My Workspace'  },
+    { href: '/dashboard',          icon: ChartBarIcon,            label: 'Dashboard'     },
+    { href: '/anomalies',          icon: ExclamationTriangleIcon, label: 'Anomalies'     },
+    { href: '/workflows',          icon: ArrowsRightLeftIcon,     label: 'Workflows'     },
+    { href: '/integrations',       icon: BoltIcon,                label: 'Integrations'  },
+    { href: '/ai-governance',      icon: ScaleIcon,               label: 'AI Governance' },
+    { href: '/audit-logs',         icon: DocumentTextIcon,        label: 'Audit Logs'    },
+    { href: '/reports',            icon: DocumentArrowDownIcon,   label: 'Reports'       },
   ]
 
   function isActive(href: string) {
@@ -117,18 +129,20 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
           )
         })}
 
-        {(role === 'editor' || role === 'analyst') && (
-          <Link
-            href="/employee-dashboard/integrations"
-            className={clsx(
-              'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-              router.pathname.includes('integrations') ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
-            )}
-          >
-            <BoltIcon className="w-4 h-4 flex-shrink-0" />
-            Integrations
-          </Link>
-        )}
+        {/* Access level notice */}
+        <div className="mt-4 mx-1 px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg">
+          <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide mb-1 flex items-center gap-1">
+            <LockClosedIcon className="w-3 h-3" />
+            Access level
+          </p>
+          <p className="text-[11px] text-slate-500 leading-relaxed">
+            {role === 'editor'
+              ? 'You can view and make changes across the workspace.'
+              : role === 'analyst'
+              ? 'You can view everything and comment on anomalies.'
+              : 'Read-only — you can view all tabs but not make changes.'}
+          </p>
+        </div>
       </nav>
 
       {/* User footer */}

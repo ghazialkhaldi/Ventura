@@ -112,7 +112,27 @@ export default function AnomaliesPage() {
           <h1 className="text-lg font-bold text-slate-900">Anomaly Investigation</h1>
           <p className="text-xs text-slate-500 mt-0.5">AI-detected spend anomalies, policy violations, and risk signals</p>
         </div>
-        <button className="inline-flex items-center gap-1.5 text-xs text-slate-500 border border-slate-200 rounded-lg px-3 py-1.5 bg-white hover:bg-slate-50 transition-colors">
+        <button
+          onClick={() => {
+            const rows = [
+              ['ID', 'Title', 'Type', 'Vendor', 'Amount', 'Severity', 'Status', 'Confidence', 'Detected At', 'Category'],
+              ...anomalies.map(a => [
+                a.id, a.title, a.type, a.vendor, String(a.amount), a.severity, a.status,
+                `${a.confidence}%`, a.detectedAt, a.category,
+              ]),
+            ]
+            const csv  = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n')
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+            const url  = URL.createObjectURL(blob)
+            const a    = document.createElement('a')
+            a.href     = url
+            a.download = `ventura-anomalies-${new Date().toISOString().slice(0, 10)}.csv`
+            a.click()
+            URL.revokeObjectURL(url)
+          }}
+          disabled={anomalies.length === 0}
+          className="inline-flex items-center gap-1.5 text-xs text-slate-500 border border-slate-200 rounded-lg px-3 py-1.5 bg-white hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        >
           <Download className="w-3 h-3" /> Export CSV
         </button>
       </div>

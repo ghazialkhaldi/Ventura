@@ -38,8 +38,52 @@ function severityTier(a: DetectedAnomaly): string {
 
 export default function AIGovernancePage() {
   const { isReady, mounted } = useDataReady()
+  const DEFAULT_RULES = [
+    { label: 'Require human approval for High-risk actions',     enabled: true  },
+    { label: 'Require human approval for Critical-risk actions', enabled: true  },
+    { label: 'Notify CISO on behavioral anomalies',              enabled: true  },
+    { label: 'Block AI from initiating any payments',            enabled: true  },
+    { label: 'Send Slack notification on blocked actions',       enabled: true  },
+    { label: 'Daily AI governance digest to VP Finance',         enabled: false },
+  ]
+
   const [activeTab,            setActiveTab]            = useState<AITab>('overview')
   const [confidenceThreshold,  setConfidenceThreshold]  = useState(85)
+  const [approvalRules,        setApprovalRules]        = useState(DEFAULT_RULES)
+  const [settingsSaved,        setSettingsSaved]        = useState(false)
+
+  // Restore persisted governance settings
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('sf_governance')
+      if (raw) {
+        const saved = JSON.parse(raw) as { threshold?: number; rules?: typeof DEFAULT_RULES }
+        if (typeof saved.threshold === 'number') setConfidenceThreshold(saved.threshold)
+        if (Array.isArray(saved.rules) && saved.rules.length === DEFAULT_RULES.length) setApprovalRules(saved.rules)
+      }
+    } catch {}
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  function toggleRule(index: number) {
+    setApprovalRules(prev => prev.map((r, i) => i === index ? { ...r, enabled: !r.enabled } : r))
+    setSettingsSaved(false)
+  }
+
+  function saveSettings() {
+    try {
+      localStorage.setItem('sf_governance', JSON.stringify({ threshold: confidenceThreshold, rules: approvalRules }))
+      setSettingsSaved(true)
+      setTimeout(() => setSettingsSaved(false), 2500)
+    } catch {}
+  }
+
+  function resetSettings() {
+    setConfidenceThreshold(85)
+    setApprovalRules(DEFAULT_RULES)
+    try { localStorage.removeItem('sf_governance') } catch {}
+    setSettingsSaved(false)
+  }
   const [auditLog,             setAuditLog]             = useState<AuditEntry[]>([])
   const [anomalies,            setAnomalies]            = useState<DetectedAnomaly[]>([])
 
@@ -322,26 +366,30 @@ export default function AIGovernancePage() {
             <CardHeader title="Human Approval Rules" icon={<Shield className="w-4 h-4" />} />
             <CardDivider />
             <div className="space-y-3">
-              {[
-                { label: 'Require human approval for High-risk actions', enabled: true },
-                { label: 'Require human approval for Critical-risk actions', enabled: true },
-                { label: 'Notify CISO on behavioral anomalies', enabled: true },
-                { label: 'Block AI from initiating any payments', enabled: true },
-                { label: 'Send Slack notification on blocked actions', enabled: true },
-                { label: 'Daily AI governance digest to VP Finance', enabled: false },
-              ].map((rule, i) => (
-                <div key={i} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
+              {approvalRules.map((rule, i) => (
+                <div key={rule.label} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0">
                   <span className="text-sm text-slate-700">{rule.label}</span>
-                  <button className={`w-9 h-5 rounded-full transition-colors relative ${rule.enabled ? 'bg-emerald-600' : 'bg-slate-300'}`}>
+                  <button
+                    onClick={() => toggleRule(i)}
+                    role="switch"
+                    aria-checked={rule.enabled}
+                    aria-label={rule.label}
+                    className={`w-9 h-5 rounded-full transition-colors relative ${rule.enabled ? 'bg-emerald-600' : 'bg-slate-300'}`}
+                  >
                     <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${rule.enabled ? 'translate-x-4' : 'translate-x-0.5'}`} />
                   </button>
                 </div>
               ))}
             </div>
           </Card>
-          <div className="flex gap-3">
-            <Button variant="primary" size="md">Save settings</Button>
-            <Button variant="secondary" size="md">Reset to defaults</Button>
+          <div className="flex items-center gap-3">
+            <Button variant="primary" size="md" onClick={saveSettings}>Save settings</Button>
+            <Button variant="secondary" size="md" onClick={resetSettings}>Reset to defaults</Button>
+            {settingsSaved && (
+              <span className="text-sm text-emerald-700 font-medium flex items-center gap-1.5">
+                <CheckCircle className="w-4 h-4" /> Settings saved
+              </span>
+            )}
           </div>
         </div>
       )}

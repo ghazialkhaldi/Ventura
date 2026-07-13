@@ -82,13 +82,13 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
                 <>
                   <Link
                     href="/employee-login"
-                    className="text-sm font-semibold text-emerald-700 hover:text-emerald-800 border border-emerald-600 hover:border-emerald-700 hover:bg-emerald-50 px-4 py-2 transition-colors"
+                    className="text-sm font-semibold text-emerald-700 hover:text-emerald-800 border border-emerald-600 hover:border-emerald-700 hover:bg-emerald-50 px-4 py-2 rounded-lg transition-colors"
                   >
                     Employee portal
                   </Link>
                   <Link
                     href="/login"
-                    className="text-sm font-semibold text-slate-700 hover:text-slate-900 border border-slate-300 hover:border-slate-400 px-4 py-2 transition-colors"
+                    className="text-sm font-semibold text-slate-700 hover:text-slate-900 border border-slate-300 hover:border-slate-400 px-4 py-2 rounded-lg transition-colors"
                   >
                     Sign in
                   </Link>
@@ -96,11 +96,11 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
               )}
               {/* Logged-in employees: show their portal link only, no sign-in links */}
               {loggedIn ? (
-                <Link href={portalHref} className="bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold px-5 py-2.5 transition-colors">
+                <Link href={portalHref} className="bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
                   {portalLabel}
                 </Link>
               ) : (
-                <Link href="/contact" className="bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold px-5 py-2.5 transition-colors">
+                <Link href="/contact" className="bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
                   Get started
                 </Link>
               )}
@@ -144,7 +144,7 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
             <Link
               href="/demo"
               onClick={() => setDrawerOpen(false)}
-              className="block px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+              className="block px-4 py-3 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors"
             >
               Demo
             </Link>
@@ -154,14 +154,14 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
                 <Link
                   href="/employee-login"
                   onClick={() => setDrawerOpen(false)}
-                  className="block px-4 py-3 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 border border-emerald-200 transition-colors"
+                  className="block px-4 py-3 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 border border-emerald-200 rounded-lg transition-colors"
                 >
                   Employee portal
                 </Link>
                 <Link
                   href="/login"
                   onClick={() => setDrawerOpen(false)}
-                  className="block px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 border border-slate-200 transition-colors"
+                  className="block px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors"
                 >
                   Sign in
                 </Link>
@@ -173,7 +173,7 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
                 <Link
                   href={portalHref}
                   onClick={() => setDrawerOpen(false)}
-                  className="block px-4 py-3 text-sm font-semibold text-white bg-emerald-700 hover:bg-emerald-800 transition-colors text-center"
+                  className="block px-4 py-3 text-sm font-semibold text-white bg-emerald-700 hover:bg-emerald-800 rounded-lg transition-colors text-center"
                 >
                   {portalLabel}
                 </Link>
@@ -181,7 +181,7 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
                 <Link
                   href="/contact"
                   onClick={() => setDrawerOpen(false)}
-                  className="block px-4 py-3 text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 transition-colors text-center"
+                  className="block px-4 py-3 text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition-colors text-center"
                 >
                   Get started
                 </Link>
@@ -207,8 +207,13 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
               <div>
                 <p className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-3">Product</p>
                 <ul className="space-y-2 text-xs">
-                  {['Anomaly Detection', 'Workflow Intelligence', 'AI Governance', 'Integrations'].map((l) => (
-                    <li key={l}><Link href="#" title="Coming soon" className="hover:text-slate-200 transition-colors">{l}</Link></li>
+                  {[
+                    { label: 'Anomaly Detection',     href: '/#anomaly'    },
+                    { label: 'Workflow Intelligence', href: '/#workflow'   },
+                    { label: 'AI Governance',         href: '/#governance' },
+                    { label: 'Integrations',          href: '/demo'        },
+                  ].map(({ label, href }) => (
+                    <li key={label}><Link href={href} className="hover:text-slate-200 transition-colors">{label}</Link></li>
                   ))}
                 </ul>
               </div>
@@ -216,20 +221,25 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
                 <p className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-3">Company</p>
                 <ul className="space-y-2 text-xs">
                   {[
-                    { label: 'About',            href: '#'        },
-                    { label: 'Security',         href: '#'        },
-                    { label: 'Privacy Policy',   href: '/privacy' },
-                    { label: 'Terms of Service', href: '#'        },
+                    { label: 'About',            href: '/about'    },
+                    { label: 'Security',         href: '/security' },
+                    { label: 'Privacy Policy',   href: '/privacy'  },
+                    { label: 'Terms of Service', href: '/terms'    },
                   ].map(({ label, href }) => (
-                    <li key={label}><Link href={href} title={href === '#' ? 'Coming soon' : undefined} className="hover:text-slate-200 transition-colors">{label}</Link></li>
+                    <li key={label}><Link href={href} className="hover:text-slate-200 transition-colors">{label}</Link></li>
                   ))}
                 </ul>
               </div>
               <div>
                 <p className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-3">Resources</p>
                 <ul className="space-y-2 text-xs">
-                  {['Documentation', 'API Reference', 'Status', 'Support'].map((l) => (
-                    <li key={l}><Link href="#" title="Coming soon" className="hover:text-slate-200 transition-colors">{l}</Link></li>
+                  {[
+                    { label: 'Documentation', href: '/docs'     },
+                    { label: 'API Reference', href: '/docs#api' },
+                    { label: 'Status',        href: '/status'   },
+                    { label: 'Support',       href: '/contact'  },
+                  ].map(({ label, href }) => (
+                    <li key={label}><Link href={href} className="hover:text-slate-200 transition-colors">{label}</Link></li>
                   ))}
                 </ul>
               </div>
@@ -237,10 +247,10 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
             <div className="border-t border-slate-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
               <p className="text-xs">© 2026 Ventura Financial Intelligence, Inc. All rights reserved.</p>
               <div className="flex items-center gap-1 text-xs">
-                <span className="inline-flex items-center gap-1.5 bg-green-900/40 text-green-400 border border-green-800/50 px-2 py-0.5 text-[10px] font-medium">
-                  <span className="w-1.5 h-1.5 bg-green-400 animate-pulse" />
+                <Link href="/status" className="inline-flex items-center gap-1.5 bg-green-900/40 text-green-400 border border-green-800/50 hover:border-green-700 px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
                   All systems operational
-                </span>
+                </Link>
               </div>
             </div>
           </div>

@@ -39,11 +39,31 @@ const ROLE_COLORS: Record<string, string> = {
 }
 
 const roles = [
-  { name: 'Admin',           desc: 'Full access — manage users, settings, AI governance, all data',    color: 'bg-red-50 text-red-700 border-red-200'             },
-  { name: 'Finance Manager', desc: 'Approve anomalies, manage workflows, view all spend data',         color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  { name: 'Finance Analyst', desc: 'View and comment on anomalies, read-only workflow access',         color: 'bg-purple-50 text-purple-700 border-purple-200'    },
-  { name: 'Read-Only',       desc: 'View dashboards and reports. No approval or action capabilities.', color: 'bg-slate-100 text-slate-600 border-slate-200'      },
-  { name: 'System',          desc: 'Ventura AI service account — non-human, cannot log in directly.',  color: 'bg-green-50 text-green-700 border-green-200'       },
+  {
+    name: 'Admin', desc: 'Full access — manage users, settings, AI governance, all data',
+    color: 'bg-red-50 text-red-700 border-red-200',
+    permissions: ['Manage team members and roles', 'Configure workspace settings and billing', 'Full read/write on all data', 'Manage AI governance rules', 'Generate and revoke invite codes'],
+  },
+  {
+    name: 'Finance Manager', desc: 'Approve anomalies, manage workflows, view all spend data',
+    color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    permissions: ['Approve, dismiss, and resolve anomalies', 'Create and edit workflows', 'View all spend data and reports', 'Export data'],
+  },
+  {
+    name: 'Finance Analyst', desc: 'View and comment on anomalies, read-only workflow access',
+    color: 'bg-purple-50 text-purple-700 border-purple-200',
+    permissions: ['View and comment on anomalies', 'Read-only workflow access', 'View dashboards and reports'],
+  },
+  {
+    name: 'Read-Only', desc: 'View dashboards and reports. No approval or action capabilities.',
+    color: 'bg-slate-100 text-slate-600 border-slate-200',
+    permissions: ['View dashboards', 'View reports', 'View integrations status'],
+  },
+  {
+    name: 'System', desc: 'Ventura AI service account — non-human, cannot log in directly.',
+    color: 'bg-green-50 text-green-700 border-green-200',
+    permissions: ['Automated anomaly detection', 'Workflow execution within governance rules', 'Cannot log in interactively'],
+  },
 ]
 
 const statusColor: Record<string, string> = {
@@ -70,6 +90,54 @@ export default function SettingsPage() {
 
   // Role change state
   const [updatingRole, setUpdatingRole] = useState<string | null>(null)
+
+  // Roles tab — expandable permission details
+  const [expandedRole, setExpandedRole] = useState<string | null>(null)
+
+  // Security tab — IP allowlist (persisted locally) + API key display
+  const [ipRules,    setIpRules]    = useState<string[]>([])
+  const [ipFormOpen, setIpFormOpen] = useState(false)
+  const [ipInput,    setIpInput]    = useState('')
+  const [ipError,    setIpError]    = useState('')
+  const [apiKey,        setApiKey]        = useState('optm_live_4kd92mfh37sla09xnvb128fhxY2q')
+  const [apiKeyVisible, setApiKeyVisible] = useState(false)
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('sf_ip_rules')
+      if (raw) setIpRules(JSON.parse(raw))
+    } catch {}
+  }, [])
+
+  function persistIpRules(rules: string[]) {
+    setIpRules(rules)
+    try { localStorage.setItem('sf_ip_rules', JSON.stringify(rules)) } catch {}
+  }
+
+  function addIpRule() {
+    const value = ipInput.trim()
+    // Basic CIDR / IP validation
+    if (!/^(\d{1,3}\.){3}\d{1,3}(\/\d{1,2})?$/.test(value)) {
+      setIpError('Enter a valid IPv4 address or CIDR range, e.g. 203.0.113.0/24')
+      return
+    }
+    if (ipRules.includes(value)) { setIpError('This rule already exists.'); return }
+    persistIpRules([...ipRules, value])
+    setIpInput('')
+    setIpFormOpen(false)
+    setIpError('')
+  }
+
+  function removeIpRule(rule: string) {
+    persistIpRules(ipRules.filter(r => r !== rule))
+  }
+
+  function generateApiKey() {
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
+    let body = ''
+    for (let i = 0; i < 28; i++) body += chars[Math.floor(Math.random() * chars.length)]
+    return `optm_live_${body}`
+  }
 
   // Invite modal state
   const [inviteOpen,   setInviteOpen]   = useState(false)
@@ -140,6 +208,22 @@ export default function SettingsPage() {
       }
     } catch {}
     setUpdatingRole(null)
+  }
+
+  const [removing, setRemoving] = useState<string | null>(null)
+
+  async function removeMember(member: TeamMember) {
+    if (!window.confirm(`Remove ${member.name || member.email} from the workspace? They will need a new invite code to rejoin.`)) return
+    setRemoving(member.user_id)
+    try {
+      const res = await fetch('/api/team/remove', {
+        method:  'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ userId: member.user_id }),
+      })
+      if (res.ok) setMembers(prev => prev.filter(m => m.user_id !== member.user_id))
+    } catch {}
+    setRemoving(null)
   }
 
   async function openEmployeeLogs(member: TeamMember) {
@@ -472,7 +556,16 @@ export default function SettingsPage() {
                       </button>
                     </td>
                     <td className="px-4 py-3.5">
-                      <Button variant="ghost" size="sm" icon={<Trash2 className="w-3.5 h-3.5 text-red-400" />} />
+                      <button
+                        onClick={() => removeMember(member)}
+                        disabled={removing === member.user_id}
+                        title="Remove from workspace"
+                        className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded disabled:opacity-40 transition-colors"
+                      >
+                        {removing === member.user_id
+                          ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          : <Trash2 className="w-3.5 h-3.5" />}
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -543,20 +636,38 @@ export default function SettingsPage() {
       {activeTab === 'roles' && (
         <div className="space-y-3">
           {roles.map((role) => (
-            <div key={role.name} className="bg-white border border-slate-200 rounded-lg p-4 shadow-card flex items-center gap-4">
-              <span className={`text-xs font-semibold px-3 py-1.5 rounded-full border w-36 text-center flex-shrink-0 ${role.color}`}>
-                {role.name}
-              </span>
-              <p className="text-sm text-slate-600 flex-1">{role.desc}</p>
-              <div className="flex gap-1 flex-shrink-0">
-                <Button variant="ghost" size="sm" icon={<Eye className="w-3.5 h-3.5" />}>View</Button>
-                <Button variant="ghost" size="sm" icon={<Edit className="w-3.5 h-3.5" />} />
+            <div key={role.name} className="bg-white border border-slate-200 rounded-lg shadow-card overflow-hidden">
+              <div className="p-4 flex items-center gap-4">
+                <span className={`text-xs font-semibold px-3 py-1.5 rounded-full border w-36 text-center flex-shrink-0 ${role.color}`}>
+                  {role.name}
+                </span>
+                <p className="text-sm text-slate-600 flex-1">{role.desc}</p>
+                <Button
+                  variant="ghost" size="sm" icon={<Eye className="w-3.5 h-3.5" />}
+                  onClick={() => setExpandedRole(prev => prev === role.name ? null : role.name)}
+                >
+                  {expandedRole === role.name ? 'Hide' : 'View'}
+                </Button>
               </div>
+              {expandedRole === role.name && (
+                <div className="px-4 pb-4 pt-1 border-t border-slate-100 bg-slate-50/50">
+                  <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mt-3 mb-2">Permissions</p>
+                  <ul className="space-y-1.5">
+                    {role.permissions.map(p => (
+                      <li key={p} className="flex items-center gap-2 text-sm text-slate-600">
+                        <CheckCircle className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                        {p}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           ))}
-          <Button variant="secondary" size="sm" icon={<Plus className="w-3.5 h-3.5" />} className="mt-2">
-            Create custom role
-          </Button>
+          <p className="text-xs text-slate-400 mt-3">
+            Need a custom role for your organization?{' '}
+            <a href="/contact" className="text-emerald-600 hover:text-emerald-800 font-medium">Contact us</a> — custom roles are available on Enterprise plans.
+          </p>
         </div>
       )}
 
@@ -580,7 +691,6 @@ export default function SettingsPage() {
                   </div>
                   <div className="text-right flex-shrink-0">
                     <p className={`text-xs font-semibold ${item.status === 'on' || item.status === 'ok' ? 'text-green-700' : 'text-emerald-700'}`}>{item.value}</p>
-                    <button className="text-xs text-emerald-600 hover:text-emerald-800 mt-0.5">Configure</button>
                   </div>
                 </div>
               ))}
@@ -594,9 +704,46 @@ export default function SettingsPage() {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm font-semibold text-slate-800">IP allowlist</p>
-                  <Button variant="secondary" size="sm" icon={<Plus className="w-3.5 h-3.5" />}>Add</Button>
+                  <Button
+                    variant="secondary" size="sm" icon={<Plus className="w-3.5 h-3.5" />}
+                    onClick={() => setIpFormOpen(o => !o)}
+                  >
+                    Add
+                  </Button>
                 </div>
-                <p className="text-xs text-slate-500 italic py-2">No IP rules configured. Add CIDR ranges to restrict access to specific networks.</p>
+
+                {ipFormOpen && (
+                  <div className="flex gap-2 mb-3">
+                    <input
+                      value={ipInput}
+                      onChange={e => { setIpInput(e.target.value); setIpError('') }}
+                      onKeyDown={e => { if (e.key === 'Enter') addIpRule() }}
+                      placeholder="e.g. 203.0.113.0/24"
+                      className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm font-mono text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                    <Button variant="primary" size="sm" onClick={addIpRule}>Save</Button>
+                  </div>
+                )}
+                {ipError && <p className="text-xs text-red-600 mb-2">{ipError}</p>}
+
+                {ipRules.length === 0 ? (
+                  <p className="text-xs text-slate-500 italic py-2">No IP rules configured. Add CIDR ranges to restrict access to specific networks.</p>
+                ) : (
+                  <ul className="space-y-1.5">
+                    {ipRules.map(rule => (
+                      <li key={rule} className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+                        <code className="text-xs text-slate-700 font-mono">{rule}</code>
+                        <button
+                          onClick={() => removeIpRule(rule)}
+                          className="text-slate-400 hover:text-red-600 p-0.5 transition-colors"
+                          title="Remove rule"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </div>
           </Card>
@@ -605,14 +752,28 @@ export default function SettingsPage() {
             <CardHeader title="API Access" icon={<Key className="w-4 h-4" />} />
             <CardDivider />
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-lg">
-                <div>
+              <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-lg gap-3">
+                <div className="min-w-0">
                   <p className="text-sm font-medium text-slate-800">API Key — Production</p>
-                  <p className="text-xs font-mono text-slate-400 mt-0.5">optm_live_••••••••••••••••••••••••••xY2q</p>
+                  <p className="text-xs font-mono text-slate-400 mt-0.5 truncate">
+                    {apiKeyVisible ? apiKey : `${apiKey.slice(0, 10)}${'•'.repeat(26)}${apiKey.slice(-4)}`}
+                  </p>
                 </div>
-                <div className="flex gap-2">
-                  <Button variant="ghost" size="sm" icon={<Eye className="w-3.5 h-3.5" />} />
-                  <Button variant="ghost" size="sm" icon={<RefreshCw className="w-3.5 h-3.5" />} />
+                <div className="flex gap-2 flex-shrink-0">
+                  <Button
+                    variant="ghost" size="sm" icon={<Eye className="w-3.5 h-3.5" />}
+                    onClick={() => setApiKeyVisible(v => !v)}
+                  />
+                  <Button
+                    variant="ghost" size="sm"
+                    icon={<RefreshCw className="w-3.5 h-3.5" />}
+                    onClick={() => {
+                      if (window.confirm('Regenerate the production API key? The current key will stop working immediately.')) {
+                        setApiKey(generateApiKey())
+                        setApiKeyVisible(true)
+                      }
+                    }}
+                  />
                 </div>
               </div>
               <p className="text-xs text-slate-500 flex items-center gap-1.5">
@@ -680,9 +841,11 @@ export default function SettingsPage() {
                 </div>
               ))}
             </div>
-            <div className="mt-4 flex gap-2">
-              <Button variant="secondary" size="sm">Upgrade plan</Button>
-              <Button variant="ghost" size="sm">Billing portal</Button>
+            <div className="mt-4 flex items-center gap-3">
+              <p className="text-xs text-slate-500">
+                You're on the highest tier. Questions about billing?{' '}
+                <a href="/contact" className="text-emerald-600 hover:text-emerald-800 font-medium">Contact us</a>
+              </p>
             </div>
           </Card>
         </div>

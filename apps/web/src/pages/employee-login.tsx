@@ -55,7 +55,14 @@ export default function EmployeeLoginPage() {
   const supabase = createClient()
 
   useEffect(() => {
-    if (localStorage.getItem('sf_user')) router.replace('/employee-dashboard')
+    if (!localStorage.getItem('sf_user')) return
+    // Ask the server whether this employee has joined a workspace —
+    // route to the join prompt if not, never flash the dashboard.
+    fetch('/api/team/get-role').then(r => {
+      if (r.ok)                   router.replace('/employee-dashboard')
+      else if (r.status === 404)  router.replace('/join')
+      else                        localStorage.removeItem('sf_user') // stale login, stay here
+    }).catch(() => {})
   }, [router])
 
   useEffect(() => {
@@ -101,6 +108,12 @@ export default function EmployeeLoginPage() {
     const company = cMeta.company_name
       || u.email?.split('@')[1]?.split('.')[0].replace(/\b\w/g, c => c.toUpperCase())
       || 'Your Organization'
+
+    // Older employee accounts were created without the user_type tag the
+    // middleware relies on — heal them on sign-in through the employee portal.
+    if (meta.user_type !== 'employee') {
+      await supabase.auth.updateUser({ data: { user_type: 'employee' } })
+    }
 
     // Stash resolved data — only persist to localStorage after MFA passes
     setSiPendingData({ email: u.email!, name: fullName, company, adminId: cMeta.admin_id ?? '' })

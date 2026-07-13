@@ -122,8 +122,10 @@ export async function middleware(request: NextRequest) {
 
   if (user) {
     const meta    = (user.user_metadata || {}) as Record<string, unknown>
-    const isEmp   = meta.user_type === 'employee'
     const company = meta._company as Record<string, string> | undefined
+    // Older employee accounts lack the user_type tag — having a _company
+    // record also marks them as an employee.
+    const isEmp   = meta.user_type === 'employee' || !!company?.admin_id
 
     // Employee trying to access admin routes → redirect to their portal
     if (isEmp && isProtected(pathname)) {

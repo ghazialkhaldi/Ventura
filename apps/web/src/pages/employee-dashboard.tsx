@@ -81,27 +81,38 @@ function formatTs(ts: string) {
 export default function EmployeeDashboard() {
   const router  = useRouter()
   const user    = useCurrentUser()
+  const [ready,      setReady]      = useState(false)
   const [info,       setInfo]       = useState<WorkspaceInfo | null>(null)
   const [activity,   setActivity]   = useState<ActivityEntry[]>([])
   const [roleChanged, setRoleChanged] = useState(false)
   const prevRole = useRef<string | null>(null)
 
-  // Load workspace info + activity log
+  // Verify workspace membership before showing anything — no dashboard flash
   useEffect(() => {
-    fetch('/api/team/get-role')
-      .then(r => r.json())
-      .then(d => {
-        if (d.error) { router.push('/join'); return }
+    let cancelled = false
+    async function check() {
+      try {
+        const r = await fetch('/api/team/get-role')
+        if (cancelled) return
+        if (r.status === 401) { router.replace('/employee-login'); return }
+        if (!r.ok)            { router.replace('/join'); return }
+        const d = await r.json()
         const ws: WorkspaceInfo = { role: d.role ?? 'viewer', company: d.company ?? '', adminId: d.adminId ?? '', joinedAt: d.joinedAt }
         setInfo(ws)
         prevRole.current = ws.role
-      })
-      .catch(() => {})
+        setReady(true)
+      } catch {
+        if (!cancelled) router.replace('/join')
+      }
+    }
+    check()
 
     fetch('/api/audit/my-log')
       .then(r => r.json())
       .then(d => { if (Array.isArray(d.logs)) setActivity(d.logs.slice().reverse()) })
       .catch(() => {})
+
+    return () => { cancelled = true }
   }, [router])
 
   // Log this page view once
@@ -132,6 +143,15 @@ export default function EmployeeDashboard() {
   }, [])
 
   const roleMeta = ROLE_META[info?.role ?? 'viewer'] ?? ROLE_META.viewer
+
+  // Blank screen with spinner until membership is confirmed — never flash the dashboard
+  if (!ready) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <ArrowPathIcon className="w-6 h-6 text-slate-300 animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <EmployeeLayout title="Workspace">

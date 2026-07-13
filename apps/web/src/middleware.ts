@@ -57,10 +57,10 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
     [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline'",   // unsafe-inline needed for Next.js inline scripts
-      "style-src 'self' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob:",
-      "font-src 'self'",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.resend.com",
+      "font-src 'self' https://fonts.gstatic.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.resend.com https://vitals.vercel-insights.com",
       "frame-ancestors 'none'",
       "object-src 'none'",
       "base-uri 'self'",
@@ -69,9 +69,9 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
     ].join('; ')
   )
 
-  // Cross-origin isolation
+  // Cross-origin isolation — no COEP require-corp: it blocks Google Fonts
+  // and other cross-origin resources that don't send CORP headers
   h.set('Cross-Origin-Opener-Policy', 'same-origin')
-  h.set('Cross-Origin-Embedder-Policy', 'require-corp')
   h.set('Cross-Origin-Resource-Policy', 'same-origin')
 
   // Remove server fingerprinting headers

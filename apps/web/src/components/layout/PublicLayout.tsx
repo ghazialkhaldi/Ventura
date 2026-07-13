@@ -3,6 +3,7 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import VenturaLogo from '../VenturaLogo'
+import { createClient } from '../../utils/supabase/client'
 
 interface PublicLayoutProps {
   children: React.ReactNode
@@ -16,25 +17,41 @@ interface StoredUser {
 }
 
 export default function PublicLayout({ children, title }: PublicLayoutProps) {
-  const [sfUser,     setSfUser]     = useState<StoredUser | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
+  // Resolved portal destination — only set once the real session is verified,
+  // so the button never points somewhere the middleware will bounce it from.
+  const [dest, setDest] = useState<{ href: string; label: string } | null>(null)
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('sf_user')
-      if (raw) setSfUser(JSON.parse(raw) as StoredUser)
-    } catch {}
+    let stored: StoredUser | null = null
+    try { stored = JSON.parse(localStorage.getItem('sf_user') ?? 'null') } catch {}
+    if (!stored) return
+
+    const supabase = createClient()
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      // Stale localStorage with no real session — show logged-out state
+      if (!session) {
+        localStorage.removeItem('sf_user')
+        return
+      }
+      if (stored?.role === 'employee') {
+        try {
+          const r = await fetch('/api/team/get-role')
+          if (r.ok)                  setDest({ href: '/employee-dashboard', label: 'View dashboard' })
+          else if (r.status === 404) setDest({ href: '/join', label: 'Join workspace' })
+          else                       localStorage.removeItem('sf_user')
+        } catch {
+          setDest({ href: '/join', label: 'Join workspace' })
+        }
+      } else {
+        setDest({ href: '/dashboard', label: 'View dashboard' })
+      }
+    })
   }, [])
 
-  const isEmployee   = sfUser?.role === 'employee'
-  const hasWorkspace = isEmployee && !!sfUser?.company
-  const loggedIn     = !!sfUser
-
-  // Where the "View dashboard" / "Join workspace" button takes the user
-  const portalHref = isEmployee
-    ? (hasWorkspace ? '/employee-dashboard' : '/join')
-    : '/dashboard'
-  const portalLabel = isEmployee && !hasWorkspace ? 'Join workspace' : 'View dashboard'
+  const loggedIn    = !!dest
+  const portalHref  = dest?.href  ?? '/dashboard'
+  const portalLabel = dest?.label ?? 'View dashboard'
 
   // Prevent body scroll when drawer is open
   useEffect(() => {
@@ -100,16 +117,16 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
           </div>
         </header>
 
-        {/* Mobile drawer backdrop */}
+        {/* Mobile drawer backdrop — below the drawer so it never eats taps on links */}
         {drawerOpen && (
           <div
-            className="fixed inset-0 bg-black/40 z-50 sm:hidden"
+            className="fixed inset-0 bg-black/40 z-[60] sm:hidden"
             onClick={() => setDrawerOpen(false)}
           />
         )}
 
         {/* Mobile drawer */}
-        <div className={`fixed top-0 right-0 h-full w-72 bg-white z-50 flex flex-col shadow-2xl transition-transform duration-200 sm:hidden ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className={`fixed top-0 right-0 h-full w-72 bg-white z-[70] flex flex-col shadow-2xl transition-transform duration-200 sm:hidden ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
           {/* Drawer header */}
           <div className="h-16 flex items-center justify-between px-5 border-b border-slate-200">
             <VenturaLogo variant="dark" height={28} />

@@ -144,6 +144,20 @@ export default function EmployeeLoginPage() {
     setLoading(true)
     setError('')
 
+    // Session cookie may have been lost while typing the code — re-establish
+    // it silently using the credentials still held in memory.
+    const { data: { user: sessionUser } } = await supabase.auth.getUser()
+    if (!sessionUser) {
+      const { error: reAuthErr } = await supabase.auth.signInWithPassword({ email: siEmail, password: siPw })
+      if (reAuthErr) {
+        setLoading(false)
+        setDigits(['', '', '', '', '', ''])
+        setStep('form')
+        setError('Your session expired. Please sign in again.')
+        return
+      }
+    }
+
     const res  = await fetch('/api/verify-mfa', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },

@@ -156,6 +156,21 @@ export default function LoginPage() {
     if (code.length < 6) { setError('Enter all 6 digits.'); return }
     setLoading(true)
 
+    // The session cookie can be lost while the user types the code (e.g. a
+    // stale client in another tab failing a token refresh and clearing auth
+    // cookies). Credentials are still in memory — silently re-establish it.
+    const { data: { user: sessionUser } } = await supabase.auth.getUser()
+    if (!sessionUser) {
+      const { error: reAuthErr } = await supabase.auth.signInWithPassword({ email, password })
+      if (reAuthErr) {
+        setLoading(false)
+        setMfaCode('')
+        setStep('creds')
+        setError('Your session expired. Please sign in again.')
+        return
+      }
+    }
+
     if (factorId && challengeId) {
       // Real TOTP (authenticator app enrolled)
       const { error: verifyError } = await supabase.auth.mfa.verify({ factorId, challengeId, code })

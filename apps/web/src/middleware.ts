@@ -112,12 +112,23 @@ export async function middleware(request: NextRequest) {
   // Refresh session — IMPORTANT: do not remove, required for SSR auth
   const { data: { user } } = await supabase.auth.getUser()
 
+  // Redirects MUST carry any refreshed session cookies from supabaseResponse.
+  // Supabase refresh tokens are single-use: if getUser() rotated the token and
+  // we redirect without the new cookies, the browser keeps dead tokens and the
+  // session is permanently lost ("Session not found").
+  function redirectTo(pathnameDest: string, opts?: { next?: string }) {
+    const url = request.nextUrl.clone()
+    url.pathname = pathnameDest
+    url.search   = ''
+    if (opts?.next) url.searchParams.set('next', opts.next)
+    const redirect = NextResponse.redirect(url)
+    supabaseResponse.cookies.getAll().forEach(c => redirect.cookies.set(c))
+    return applySecurityHeaders(redirect)
+  }
+
   // Route protection: unauthenticated users can't access protected paths
   if ((isProtected(pathname) || isEmployeePage(pathname)) && !user) {
-    const loginUrl = request.nextUrl.clone()
-    loginUrl.pathname = isEmployeePage(pathname) ? '/employee-login' : '/login'
-    loginUrl.searchParams.set('next', pathname)
-    return applySecurityHeaders(NextResponse.redirect(loginUrl))
+    return redirectTo(isEmployeePage(pathname) ? '/employee-login' : '/login', { next: pathname })
   }
 
   if (user) {
@@ -134,35 +145,23 @@ export async function middleware(request: NextRequest) {
       const joined      = !!company?.admin_id
       const isSettings  = pathname === '/settings' || pathname.startsWith('/settings/')
       if (!joined || isSettings) {
-        const dest = request.nextUrl.clone()
-        dest.pathname = joined ? '/employee-dashboard' : '/join'
-        dest.search   = ''
-        return applySecurityHeaders(NextResponse.redirect(dest))
+        return redirectTo(joined ? '/employee-dashboard' : '/join')
       }
     }
 
     // Employee without a workspace trying to access employee pages → /join
     if (isEmp && isEmployeePage(pathname) && !company?.admin_id) {
-      const joinUrl = request.nextUrl.clone()
-      joinUrl.pathname = '/join'
-      joinUrl.search   = ''
-      return applySecurityHeaders(NextResponse.redirect(joinUrl))
+      return redirectTo('/join')
     }
 
     // Non-employee trying to access employee pages → their dashboard
     if (!isEmp && isEmployeePage(pathname)) {
-      const dest = request.nextUrl.clone()
-      dest.pathname = '/dashboard'
-      dest.search   = ''
-      return applySecurityHeaders(NextResponse.redirect(dest))
+      return redirectTo('/dashboard')
     }
 
     // Redirect authenticated admin users away from auth/landing pages to dashboard
     if (isAuthPage(pathname) && !isEmp) {
-      const dashboardUrl = request.nextUrl.clone()
-      dashboardUrl.pathname = '/dashboard'
-      dashboardUrl.search   = ''
-      return applySecurityHeaders(NextResponse.redirect(dashboardUrl))
+      return redirectTo('/dashboard')
     }
   }
 

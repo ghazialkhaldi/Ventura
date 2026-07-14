@@ -59,7 +59,7 @@ export default function LoginPage() {
 
     setLoading(true)
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password })
 
     if (signInError) {
       setLoading(false)
@@ -69,6 +69,17 @@ export default function LoginPage() {
           : signInError.message
       )
       return
+    }
+
+    // Repair admin accounts mis-tagged as employees during earlier testing:
+    // an account with admin markers (invite code / team members) that never
+    // joined a workspace as an employee is an admin — clear the wrong tag so
+    // the middleware stops routing it to employee pages.
+    const m = (signInData.user?.user_metadata || {}) as Record<string, unknown>
+    const hasAdminMarkers = !!m._invite || !!m._team_members
+    const joinedCompany   = (m._company as Record<string, string> | undefined)?.admin_id
+    if (m.user_type === 'employee' && hasAdminMarkers && !joinedCompany) {
+      await supabase.auth.updateUser({ data: { user_type: null } })
     }
 
     // Use local variables — React state updates are async and can't be read

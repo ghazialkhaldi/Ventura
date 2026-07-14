@@ -111,7 +111,11 @@ export default function EmployeeLoginPage() {
 
     // Older employee accounts were created without the user_type tag the
     // middleware relies on — heal them on sign-in through the employee portal.
-    if (meta.user_type !== 'employee') {
+    // Never tag accounts with admin markers (invite codes / team members):
+    // an admin testing this portal must not get locked out of their dashboard.
+    const rawMeta = (u.user_metadata || {}) as Record<string, unknown>
+    const looksLikeAdmin = !!rawMeta._invite || !!rawMeta._team_members
+    if (meta.user_type !== 'employee' && !looksLikeAdmin) {
       await supabase.auth.updateUser({ data: { user_type: 'employee' } })
     }
 

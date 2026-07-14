@@ -3,7 +3,7 @@ import { randomInt, createHash } from 'crypto'
 import { createClient } from '../../utils/supabase/server'
 
 const CODE_TTL_MS  = 10 * 60 * 1000
-const MAX_SENDS    = 3
+const MAX_SENDS    = 5
 const WINDOW_MS    = 10 * 60 * 1000
 
 const EMAIL_REGEX = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/
@@ -37,7 +37,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const recentSends = sendLog.filter((t: number) => t > windowStart)
 
   if (recentSends.length >= MAX_SENDS) {
-    return res.status(429).json({ error: 'Too many codes requested. Please wait a few minutes.' })
+    // Tell the user exactly how long until the oldest send falls out of the window
+    const oldestRecent  = Math.min(...recentSends)
+    const waitMs        = oldestRecent + WINDOW_MS - Date.now()
+    const waitMin       = Math.max(1, Math.ceil(waitMs / 60000))
+    return res.status(429).json({
+      error: `Too many codes requested. Please wait ${waitMin} minute${waitMin === 1 ? '' : 's'} and try again.`,
+    })
   }
 
   // Cryptographically secure code + SHA-256 hash (never store plaintext)

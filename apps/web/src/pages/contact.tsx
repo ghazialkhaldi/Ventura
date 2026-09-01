@@ -20,7 +20,7 @@ export default function ContactPage() {
   const [form, setForm] = useState({
     name: '', email: '', businessName: '', companySize: '', message: '',
   })
-
+ 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }))
   }
@@ -96,9 +96,9 @@ export default function ContactPage() {
           {/* Trust points */}
           <div className="space-y-4 w-full max-w-xs">
             {[
-              'SOC 2 Type II certified',
-              'SAML 2.0 / SCIM provisioning',
-              'Immutable AI audit trail',
+              'Okta SAML 2.0 SSO integration',
+              'Role-based access control',
+              'Append-only server-side audit trail',
               'Response within one business day',
             ].map(point => (
               <div key={point} className="flex items-center gap-3">

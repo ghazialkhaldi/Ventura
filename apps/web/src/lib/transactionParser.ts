@@ -93,15 +93,27 @@ export function rowsToTransactions(
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i]
 
-    // Amount: try combined amount, then debit/credit columns
+    // Amount: try combined amount, then debit/credit columns.
+    // A combined "Amount" column is always treated as spend (direction: debit) —
+    // that's the dominant convention for AP/invoice/vendor-payment exports.
+    // Separate Debit/Credit columns have unambiguous semantics: Debit = money
+    // paid out (spend), Credit = money received (refund/rebate/reversal). These
+    // must NOT be merged — a credit is not vendor spend and must never be
+    // counted toward spend totals or fed into spend-anomaly detection.
     let amount = 0
+    let direction: 'debit' | 'credit' = 'debit'
     if (mapping.amount && row[mapping.amount]) {
-      amount = parseAmount(row[mapping.amount])
+      amount = Math.abs(parseAmount(row[mapping.amount]))
     } else {
       const debit  = mapping.debit  && row[mapping.debit]  ? parseAmount(row[mapping.debit])  : 0
       const credit = mapping.credit && row[mapping.credit] ? parseAmount(row[mapping.credit]) : 0
-      // Use whichever is non-zero; prefer debit (outflow = spend)
-      amount = Math.abs(debit) || Math.abs(credit)
+      if (Math.abs(debit) > 0) {
+        amount = Math.abs(debit)
+        direction = 'debit'
+      } else if (Math.abs(credit) > 0) {
+        amount = Math.abs(credit)
+        direction = 'credit'
+      }
     }
 
     // Skip rows with no meaningful amount
@@ -125,6 +137,7 @@ export function rowsToTransactions(
       category,
       account,
       rowIndex:    i,
+      direction,
     })
   }
 

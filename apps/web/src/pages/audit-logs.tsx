@@ -1,14 +1,14 @@
-﻿import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import AppLayout from '../components/layout/AppLayout'
 import PageHeader from '../components/ui/PageHeader'
 import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
-import DataEmptyState from '../components/ui/DataEmptyState'
 import { useDataReady } from '../hooks/useDataReady'
 import { loadDataset } from '../lib/dataStore'
 import type { AuditEntry } from '../lib/dataStore'
-import { Search, Download, AlertTriangle, Info, AlertCircle } from 'lucide-react'
+import type { AuditEventRow } from '../lib/auditServer'
+import { Search, Download, AlertTriangle, Info, AlertCircle, Laptop } from 'lucide-react'
 
 const severityIcon = {
   info:     <Info className="w-3.5 h-3.5 text-slate-400" />,
@@ -17,50 +17,61 @@ const severityIcon = {
 }
 
 export default function AuditLogsPage() {
-  const { isReady, mounted } = useDataReady()
-  const [entries,   setEntries]  = useState<AuditEntry[]>([])
+  const { isReady } = useDataReady()
+  const [serverEvents, setServerEvents] = useState<AuditEventRow[]>([])
+  const [serverLoading, setServerLoading] = useState(true)
+  const [localEntries,  setLocalEntries] = useState<AuditEntry[]>([])
   const [search,    setSearch]   = useState('')
   const [sevFilter, setSev]      = useState<'All' | 'info' | 'warning' | 'critical'>('All')
+
+  // Real, server-side, append-only trail — independent of whether any
+  // financial data has been uploaded (MFA, team, and connection events all
+  // happen before that). See supabase/migrations/002_security_audit_log.sql
+  // and src/lib/auditServer.ts.
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch('/api/audit/list')
+        if (res.ok) {
+          const body = await res.json() as { events: AuditEventRow[] }
+          if (!cancelled) setServerEvents(body.events ?? [])
+        }
+      } catch {}
+      if (!cancelled) setServerLoading(false)
+    })()
+    return () => { cancelled = true }
+  }, [])
 
   useEffect(() => {
     if (isReady) {
       const ds = loadDataset()
-      setEntries(ds?.auditLog ?? [])
+      setLocalEntries(ds?.auditLog ?? [])
     }
   }, [isReady])
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
-    return entries.filter(ev => {
-      if (q && !ev.detail.toLowerCase().includes(q) && !ev.actor.toLowerCase().includes(q) && !ev.resource.toLowerCase().includes(q) && !ev.event.toLowerCase().includes(q)) return false
+    return serverEvents.filter(ev => {
+      const detail = ev.detail ?? '', resource = ev.resource ?? '', actor = ev.actor_email ?? ''
+      if (q && !detail.toLowerCase().includes(q) && !actor.toLowerCase().includes(q) && !resource.toLowerCase().includes(q) && !ev.event.toLowerCase().includes(q)) return false
       if (sevFilter !== 'All' && ev.severity !== sevFilter) return false
       return true
     })
-  }, [entries, search, sevFilter])
+  }, [serverEvents, search, sevFilter])
 
   const stats = useMemo(() => ({
-    total:    entries.length,
-    critical: entries.filter(e => e.severity === 'critical').length,
-    warning:  entries.filter(e => e.severity === 'warning').length,
-    info:     entries.filter(e => e.severity === 'info').length,
-  }), [entries])
-
-  if (mounted && !isReady) {
-    return (
-      <AppLayout title="Audit Logs">
-        <DataEmptyState
-          title="No audit events yet"
-          description="Upload your financial data or connect a data source on the Dashboard. All system activity, anomaly actions, user logins, and data sync events will appear here once data is flowing."
-        />
-      </AppLayout>
-    )
-  }
+    total:    serverEvents.length,
+    critical: serverEvents.filter(e => e.severity === 'critical').length,
+    warning:  serverEvents.filter(e => e.severity === 'warning').length,
+    info:     serverEvents.filter(e => e.severity === 'info').length,
+  }), [serverEvents])
 
   return (
     <AppLayout title="Audit Logs">
       <PageHeader
         title="Audit Logs"
-        subtitle="Immutable record of all system, AI, and user actions"
+        subtitle="Server-side, append-only record of security-relevant account and workspace actions"
         actions={
           <Button variant="secondary" size="sm" icon={<Download className="w-3.5 h-3.5" />}>
             Export logs
@@ -84,11 +95,13 @@ export default function AuditLogsPage() {
         ))}
       </div>
 
-      {/* Immutability notice */}
+      {/* Immutability notice — true today: writes go through a service-role
+          API route with no UPDATE/DELETE endpoint anywhere in the app, and
+          the table's RLS grants zero access to the browser's anon key. */}
       <div className="flex items-start gap-2.5 bg-emerald-50 border border-emerald-200 rounded-lg px-4 py-3 mb-4">
         <Info className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
         <p className="text-xs text-emerald-800">
-          <span className="font-semibold">Append-only log.</span> Events are generated automatically by Ventura during data processing, anomaly detection, and user actions. Entries cannot be modified or deleted.
+          <span className="font-semibold">Append-only.</span> Written server-side when security-relevant actions occur (MFA verification, team role changes, member removal, workspace joins, integration connections). No update or delete path exists in the application for these rows.
         </p>
       </div>
 
@@ -120,7 +133,7 @@ export default function AuditLogsPage() {
       </Card>
 
       {/* Table */}
-      <div className="bg-white border border-slate-200 rounded-lg shadow-card overflow-hidden">
+      <div className="bg-white border border-slate-200 rounded-lg shadow-card overflow-hidden mb-8">
         <table className="w-full data-table">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-200">
@@ -136,8 +149,10 @@ export default function AuditLogsPage() {
             {filtered.length === 0 ? (
               <tr>
                 <td colSpan={6} className="text-center py-12 text-sm text-slate-500">
-                  {entries.length === 0
-                    ? 'No events recorded yet.'
+                  {serverLoading
+                    ? 'Loading…'
+                    : serverEvents.length === 0
+                    ? 'No security events recorded yet. Events appear here as your team signs in, changes roles, or connects integrations.'
                     : 'No events match the current filters.'}
                 </td>
               </tr>
@@ -147,25 +162,56 @@ export default function AuditLogsPage() {
                   {severityIcon[ev.severity]}
                 </td>
                 <td className="px-4 py-3 text-xs text-slate-500 whitespace-nowrap font-mono">
-                  {new Date(ev.ts).toLocaleString()}
+                  {new Date(ev.created_at).toLocaleString()}
                 </td>
                 <td className="px-4 py-3">
-                  <p className="text-xs font-semibold text-slate-800">{ev.actor}</p>
+                  <p className="text-xs font-semibold text-slate-800">{ev.actor_email ?? '—'}</p>
                 </td>
                 <td className="px-4 py-3">
                   <Badge variant="auditSeverity" value={ev.severity}>{ev.event}</Badge>
                 </td>
                 <td className="px-4 py-3">
-                  <span className="text-xs font-mono text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">{ev.resource}</span>
+                  {ev.resource && <span className="text-xs font-mono text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">{ev.resource}</span>}
                 </td>
                 <td className="px-4 py-3 text-sm text-slate-700 max-w-md">
-                  <p className="truncate" title={ev.detail}>{ev.detail}</p>
+                  <p className="truncate" title={ev.detail ?? ''}>{ev.detail}</p>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {/* Local processing log — clearly separated. This is NOT the
+          compliance-grade trail above: it's regenerated in your browser
+          from whatever data you've uploaded, stored in localStorage, and
+          (unlike the table above) can be cleared by clearing browser data
+          or edited via devtools. It exists for quick visibility into what
+          the anomaly engine did with your last upload, not as an audit
+          record. */}
+      {localEntries.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <Laptop className="w-4 h-4 text-slate-400" />
+            <p className="text-sm font-semibold text-slate-900">Local processing log</p>
+          </div>
+          <p className="text-xs text-slate-500 mb-3 max-w-2xl">
+            Generated in this browser while parsing and analyzing your uploaded files. Stored locally on this
+            device only — it is not part of the server-side security audit trail above, is not shared across
+            devices or team members, and is cleared if you clear browser data.
+          </p>
+          <div className="bg-white border border-slate-200 rounded-lg shadow-card overflow-hidden divide-y divide-slate-100">
+            {localEntries.slice(0, 20).map((item, i) => (
+              <div key={i} className="flex items-center gap-3 px-4 py-2.5">
+                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${item.severity === 'critical' ? 'bg-red-500' : item.severity === 'warning' ? 'bg-amber-500' : 'bg-slate-400'}`} />
+                <p className="text-xs font-medium text-slate-700 flex-1 truncate">{item.event}</p>
+                <p className="text-xs text-slate-400 flex-shrink-0 hidden sm:block">{item.actor}</p>
+                <p className="text-[10px] text-slate-400 flex-shrink-0 font-mono">{new Date(item.ts).toLocaleString()}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </AppLayout>
   )
 }

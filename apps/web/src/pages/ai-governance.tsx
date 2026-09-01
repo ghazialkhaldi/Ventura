@@ -8,6 +8,7 @@ import DataEmptyState from '../components/ui/DataEmptyState'
 import { useDataReady } from '../hooks/useDataReady'
 import { loadDataset } from '../lib/dataStore'
 import type { AuditEntry, DetectedAnomaly } from '../lib/dataStore'
+import { DEFAULT_CONFIDENCE_THRESHOLD } from '../lib/governance'
 import {
   Zap, Shield, AlertTriangle, CheckCircle, Clock,
   Settings, ChevronRight, BarChart2, XCircle, Info,
@@ -48,7 +49,7 @@ export default function AIGovernancePage() {
   ]
 
   const [activeTab,            setActiveTab]            = useState<AITab>('overview')
-  const [confidenceThreshold,  setConfidenceThreshold]  = useState(85)
+  const [confidenceThreshold,  setConfidenceThreshold]  = useState(DEFAULT_CONFIDENCE_THRESHOLD)
   const [approvalRules,        setApprovalRules]        = useState(DEFAULT_RULES)
   const [settingsSaved,        setSettingsSaved]        = useState(false)
 
@@ -79,7 +80,7 @@ export default function AIGovernancePage() {
   }
 
   function resetSettings() {
-    setConfidenceThreshold(85)
+    setConfidenceThreshold(DEFAULT_CONFIDENCE_THRESHOLD)
     setApprovalRules(DEFAULT_RULES)
     try { localStorage.removeItem('sf_governance') } catch {}
     setSettingsSaved(false)
@@ -218,15 +219,22 @@ export default function AIGovernancePage() {
             </Card>
           </div>
           <Card>
-            <CardHeader title="Active governance rules" subtitle="Currently enforced" icon={<Shield className="w-4 h-4" />} />
+            <CardHeader title="Governance rules" subtitle="What's actually active today vs. planned" icon={<Shield className="w-4 h-4" />} />
             <CardDivider />
             <div className="space-y-2">
               {[
-                { rule: 'High-risk AI actions require human approval before execution', status: 'Enforced', icon: CheckCircle, color: 'text-green-600' },
-                { rule: `Minimum confidence threshold: ${confidenceThreshold}% for auto-approval`, status: 'Enforced', icon: CheckCircle, color: 'text-green-600' },
-                { rule: 'Critical-tier: always route to CISO + CFO review', status: 'Enforced', icon: CheckCircle, color: 'text-green-600' },
-                { rule: 'AI cannot initiate payments — humans must approve', status: 'Enforced', icon: CheckCircle, color: 'text-green-600' },
-                { rule: 'All AI inferences are logged with full provenance', status: 'Enforced', icon: CheckCircle, color: 'text-green-600' },
+                // "Enforced" here is used carefully: these two are backed by
+                // real code (getConfidenceThreshold() in src/lib/governance.ts,
+                // and the simple fact that status changes are only ever
+                // written by explicit user actions — nothing in the codebase
+                // changes an anomaly's status autonomously).
+                { rule: `Anomalies at or above ${confidenceThreshold}% confidence are flagged high-confidence for priority review`, status: 'Enforced', icon: CheckCircle, color: 'text-green-600' },
+                { rule: 'No automated action is ever taken on an anomaly — every status change is a manual, logged user action', status: 'Enforced', icon: CheckCircle, color: 'text-green-600' },
+                // These describe a routing/notification/provenance system
+                // that does not exist yet — previously shown as "Enforced"
+                // with a green checkmark, which was inaccurate.
+                { rule: 'Critical-tier anomalies automatically routed to CISO + CFO for review', status: 'Not implemented', icon: Clock, color: 'text-amber-600' },
+                { rule: 'Per-finding AI provenance log (model, prompt, confidence)', status: 'Not implemented — findings are produced by a deterministic rule engine, not a model', icon: Clock, color: 'text-amber-600' },
                 { rule: 'Model explanations required before human approval UI', status: 'Draft', icon: Clock, color: 'text-amber-600' },
               ].map((r, i) => {
                 const Icon = r.icon
@@ -245,6 +253,13 @@ export default function AIGovernancePage() {
 
       {/* ── Model routing ── */}
       {activeTab === 'routing' && (
+        <div>
+          <div className="flex items-start gap-2.5 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-4">
+            <Info className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-amber-800">
+              <span className="font-semibold">Policy reference, not a live routing log.</span> Anomaly detection in Ventura today runs on a deterministic rule engine (statistical outliers, duplicate matching, threshold checks) — it does not call the language models listed below. This table documents the intended routing policy for a future model-backed detection layer; it does not reflect requests actually being made.
+            </p>
+          </div>
         <div className="bg-white border border-slate-200 rounded-lg shadow-card overflow-hidden">
           <table className="w-full">
             <thead>
@@ -277,6 +292,7 @@ export default function AIGovernancePage() {
               ))}
             </tbody>
           </table>
+        </div>
         </div>
       )}
 

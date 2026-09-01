@@ -27,40 +27,53 @@ function stdDev(nums: number[]): number {
 
 // ─── Detection algorithms ─────────────────────────────────────────────────────
 
-/** 1. Exact and near-duplicates: same vendor + same amount within 30 days */
+/**
+ * 1. Exact and near-duplicates: same vendor + same amount within 30 days.
+ *
+ * Bucketed by vendor+amount instead of comparing every pair in the dataset —
+ * a naive O(n²) scan over all transactions is fine for a few hundred rows but
+ * becomes minutes of blocked UI (or a crashed tab) at real enterprise volume
+ * (tens of thousands of rows). Money amounts are compared to the cent via
+ * toFixed(2), which is both faster and the semantically correct definition
+ * of "same amount" (the old 0.01 tolerance was there to absorb float
+ * rounding noise, not to intentionally match amounts a penny apart).
+ */
 function detectDuplicates(txs: StoredTransaction[]): DetectedAnomaly[] {
   const anomalies: DetectedAnomaly[] = []
-  const reported = new Set<string>()
+  const buckets = new Map<string, StoredTransaction[]>()
 
-  for (let i = 0; i < txs.length; i++) {
-    for (let j = i + 1; j < txs.length; j++) {
-      const a = txs[i], b = txs[j]
-      if (a.vendor.toLowerCase() !== b.vendor.toLowerCase()) continue
-      if (Math.abs(a.amount - b.amount) > 0.01) continue
+  for (const tx of txs) {
+    const key = `${tx.vendor.toLowerCase()}|${tx.amount.toFixed(2)}`
+    let bucket = buckets.get(key)
+    if (!bucket) { bucket = []; buckets.set(key, bucket) }
+    bucket.push(tx)
+  }
 
-      const days = daysBetween(a.date, b.date)
-      if (days > 30) continue
+  for (const group of buckets.values()) {
+    if (group.length < 2) continue
+    for (let i = 0; i < group.length; i++) {
+      for (let j = i + 1; j < group.length; j++) {
+        const a = group[i], b = group[j]
+        const days = daysBetween(a.date, b.date)
+        if (days > 30) continue
 
-      const key = [a.id, b.id].sort().join('|')
-      if (reported.has(key)) continue
-      reported.add(key)
-
-      const isExact = days < 2
-      anomalies.push({
-        id:          nextId(),
-        title:       `${isExact ? 'Duplicate' : 'Near-duplicate'} payment — ${a.vendor}`,
-        type:        'duplicate',
-        vendor:      a.vendor,
-        amount:      a.amount,
-        severity:    severity(isExact ? 'CRITICAL' : 'HIGH'),
-        status:      'Open',
-        confidence:  isExact ? 98 : 88,
-        detectedAt:  new Date().toISOString(),
-        description: `Two payments to ${a.vendor} for ${fmtAmt(a.amount)} ${isExact ? 'on the same day' : `within ${Math.round(days)} days`} (rows ${a.rowIndex + 2} and ${b.rowIndex + 2}).`,
-        reasoning:   `Both transactions share the same vendor name and amount. ${isExact ? 'Same-day duplicates indicate a likely double-submission.' : `Payments ${Math.round(days)} days apart for identical amounts warrant review.`}`,
-        rowRefs:     [a.id, b.id],
-        category:    a.category || 'Uncategorized',
-      })
+        const isExact = days < 2
+        anomalies.push({
+          id:          nextId(),
+          title:       `${isExact ? 'Duplicate' : 'Near-duplicate'} payment — ${a.vendor}`,
+          type:        'duplicate',
+          vendor:      a.vendor,
+          amount:      a.amount,
+          severity:    severity(isExact ? 'CRITICAL' : 'HIGH'),
+          status:      'Open',
+          confidence:  isExact ? 98 : 88,
+          detectedAt:  new Date().toISOString(),
+          description: `Two payments to ${a.vendor} for ${fmtAmt(a.amount)} ${isExact ? 'on the same day' : `within ${Math.round(days)} days`} (rows ${a.rowIndex + 2} and ${b.rowIndex + 2}).`,
+          reasoning:   `Both transactions share the same vendor name and amount. ${isExact ? 'Same-day duplicates indicate a likely double-submission.' : `Payments ${Math.round(days)} days apart for identical amounts warrant review.`}`,
+          rowRefs:     [a.id, b.id],
+          category:    a.category || 'Uncategorized',
+        })
+      }
     }
   }
   return anomalies
@@ -117,20 +130,26 @@ function detectLargeTransactions(txs: StoredTransaction[]): DetectedAnomaly[] {
   const medianAmount = sorted[Math.floor(sorted.length / 2)].amount
   const threshold = Math.max(25_000, medianAmount * 5)
 
+  // Previously capped at HIGH no matter how extreme the amount — a $10M
+  // rogue wire against a $25K threshold got the same priority as a $75K one.
+  // A genuinely extreme outlier (>=$1M, or >=10x threshold) needs to outrank
+  // ordinary large transactions so it isn't buried in the queue.
   for (const tx of txs) {
     if (tx.amount < threshold) continue
+    const isExtreme = tx.amount >= 1_000_000 || tx.amount > threshold * 10
+    const sev: Severity = isExtreme ? 'CRITICAL' : tx.amount > threshold * 3 ? 'HIGH' : 'MEDIUM'
     anomalies.push({
       id:          nextId(),
       title:       `Large transaction — ${tx.vendor}`,
       type:        'large_amount',
       vendor:      tx.vendor,
       amount:      tx.amount,
-      severity:    severity(tx.amount > threshold * 3 ? 'HIGH' : 'MEDIUM'),
+      severity:    severity(sev),
       status:      'Open',
       confidence:  85,
       detectedAt:  new Date().toISOString(),
       description: `Payment of ${fmtAmt(tx.amount)} to ${tx.vendor} on ${tx.date} exceeds the large-transaction threshold of ${fmtAmt(threshold)} (row ${tx.rowIndex + 2}).`,
-      reasoning:   `Dataset median payment is ${fmtAmt(medianAmount)}. This transaction is ${(tx.amount / medianAmount).toFixed(1)}× the median, triggering the large-transaction flag. Large transactions warrant CFO or Finance Director approval verification.`,
+      reasoning:   `Dataset median payment is ${fmtAmt(medianAmount)}. This transaction is ${(tx.amount / medianAmount).toFixed(1)}× the median, triggering the large-transaction flag. ${isExtreme ? 'The amount is extreme enough to warrant immediate CFO verification before any further processing. ' : ''}Large transactions warrant CFO or Finance Director approval verification.`,
       rowRefs:     [tx.id],
       category:    tx.category || 'Uncategorized',
     })
@@ -180,10 +199,19 @@ function detectHighFrequency(txs: StoredTransaction[]): DetectedAnomaly[] {
     if (group.length < 5) continue
     const sorted = [...group].sort((a, b) => a.date.localeCompare(b.date))
 
-    // Sliding 14-day window
+    // Sliding 14-day window, anchored at each transaction in turn (matches
+    // the count a naive O(k²) all-pairs scan would produce), computed with a
+    // two-pointer sweep instead — O(k) instead of O(k²) per vendor. Both
+    // pointers only move forward as the anchor `i` advances because dates
+    // are sorted, which is what makes the two-pointer technique valid here.
+    let hi = 0, lo = 0
     for (let i = 0; i < sorted.length; i++) {
-      const window = sorted.filter(t => daysBetween(sorted[i].date, t.date) <= 14)
-      if (window.length < 5) continue
+      if (hi < i) hi = i
+      while (hi + 1 < sorted.length && daysBetween(sorted[i].date, sorted[hi + 1].date) <= 14) hi++
+      while (lo < i && daysBetween(sorted[i].date, sorted[lo].date) > 14) lo++
+
+      if (hi - lo + 1 < 5) continue
+      const window = sorted.slice(lo, hi + 1)
 
       const total = window.reduce((s, t) => s + t.amount, 0)
       const vendor = sorted[i].vendor
@@ -235,8 +263,16 @@ function detectMissingVendor(txs: StoredTransaction[]): DetectedAnomaly[] {
 
 // ─── Main entry point ─────────────────────────────────────────────────────────
 
-export function runAnomalyDetection(txs: StoredTransaction[]): DetectedAnomaly[] {
+export function runAnomalyDetection(allTxs: StoredTransaction[]): DetectedAnomaly[] {
   idCounter = 0 // reset counter for each run
+
+  // Defense in depth: every detector here reasons about vendor *spend*.
+  // Credits (refunds, rebates, reversals) are not spend and must never reach
+  // these checks — a refund landing on the same day as its original charge
+  // is not a "duplicate payment", and inflows shouldn't skew outlier/median
+  // math. The upload pipeline already filters these before calling in, but
+  // this function stays correct even if called directly with mixed data.
+  const txs = allTxs.filter(t => t.direction !== 'credit')
 
   const results: DetectedAnomaly[] = [
     ...detectDuplicates(txs),

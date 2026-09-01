@@ -34,8 +34,23 @@ const TESTING_MODE_KEY = 'sf_testing_mode'
 const PREFIXES = ['National', 'Premier', 'Allied', 'Consolidated', 'United', 'Pacific', 'Continental', 'Global', 'Meridian', 'Apex', 'Summit', 'Pinnacle', 'Vanguard', 'Sentinel', 'Nexus']
 const SUFFIXES = ['Commerce Holdings', 'Financial Services', 'Capital Group', 'Systems Corp', 'Solutions Inc', 'Technologies LLC', 'Advisory Partners', 'Management Co', 'Enterprises Ltd', 'Group International']
 
-function syntheticVendorName(seed: number): string {
-  return `${PREFIXES[seed % PREFIXES.length]} ${SUFFIXES[Math.floor(seed / PREFIXES.length) % SUFFIXES.length]}`
+// FNV-1a — small, dependency-free, deterministic. Used to fold the masking
+// profile's referential_masking_key into the pseudonym seed so the key isn't
+// just a display string: rotating it actually reshuffles the masked output,
+// while keeping it fixed keeps the same vendor mapped to the same synthetic
+// name run after run (the "referential" part of referential masking).
+function hashKey(key: string): number {
+  let h = 0x811c9dc5
+  for (let i = 0; i < key.length; i++) {
+    h ^= key.charCodeAt(i)
+    h = Math.imul(h, 0x01000193)
+  }
+  return h >>> 0
+}
+
+function syntheticVendorName(seed: number, referentialKey: string): string {
+  const salted = (seed + hashKey(referentialKey)) >>> 0
+  return `${PREFIXES[salted % PREFIXES.length]} ${SUFFIXES[Math.floor(salted / PREFIXES.length) % SUFFIXES.length]}`
 }
 
 function maskAccount(account: string): string {
@@ -64,7 +79,7 @@ export function maskTransaction(
 
   if (profile.masked_fields.includes('vendor')) {
     const seed = seedMap.get(tx.vendor.toLowerCase()) ?? (tx.vendor.charCodeAt(0) % 100)
-    m.vendor = syntheticVendorName(seed)
+    m.vendor = syntheticVendorName(seed, profile.referential_masking_key)
   }
   if (profile.masked_fields.includes('amount')) {
     // Round to nearest $500 — preserves statistical distribution shape
@@ -92,7 +107,7 @@ export function maskDataset(dataset: Dataset, profile: MaskingProfile): Dataset 
     const seed = seedMap.get(v.vendor.toLowerCase()) ?? 0
     return {
       ...v,
-      vendor: profile.masked_fields.includes('vendor') ? syntheticVendorName(seed) : v.vendor,
+      vendor: profile.masked_fields.includes('vendor') ? syntheticVendorName(seed, profile.referential_masking_key) : v.vendor,
       total:  profile.masked_fields.includes('amount') ? Math.round(v.total / 500) * 500 : v.total,
     }
   })

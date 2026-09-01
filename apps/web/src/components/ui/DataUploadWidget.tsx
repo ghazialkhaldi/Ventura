@@ -24,7 +24,11 @@ const STEP_LABELS = [
   'Saving results…',
 ]
 
-const ACCEPTED_EXTS = '.csv,.tsv,.txt,.xlsx,.xls,.xlsm,.xlsb,.qbo,.ofx,.qfx,.pdf,.json,.zip'
+// Keep in sync with the extensions transactionParser.ts actually parses
+// (EXCEL_EXTS / CSV_EXTS / PDF_EXTS). Do not advertise formats that aren't
+// implemented — .qbo/.ofx/.qfx/.json/.zip previously appeared here and in the
+// file picker but parseFile() rejects all of them with "Unsupported file type".
+const ACCEPTED_EXTS = '.csv,.tsv,.txt,.xlsx,.xls,.xlsm,.xlsb,.pdf'
 
 function fmtBytes(b: number): string {
   if (b >= 1_073_741_824) return (b / 1_073_741_824).toFixed(1) + ' GB'
@@ -130,32 +134,51 @@ export default function DataUploadWidget({ onReady }: Props) {
       return
     }
 
+    // Split spend (debit) from credits (refunds/rebates/reversals) before any
+    // aggregation — credits are not vendor spend and must not feed spend
+    // totals, vendor/category/monthly stats, or spend-anomaly detection.
+    const spendTransactions = allTransactions.filter(t => t.direction !== 'credit')
+    const creditTransactions = allTransactions.filter(t => t.direction === 'credit')
+
     // Step 3: anomaly detection
     setStepIdx(3)
     setProgress(55)
     await new Promise(r => setTimeout(r, 200))
-    const anomalies = runAnomalyDetection(allTransactions)
+    const anomalies = runAnomalyDetection(spendTransactions)
 
     auditLog.unshift({
       id: `AUD-${Date.now()}-detect`,
       ts: new Date().toISOString(),
       actor: 'Ventura AI',
       event: 'Anomaly Detection Complete',
-      detail: `Analyzed ${allTransactions.length.toLocaleString()} transactions — ${anomalies.length} anomalies detected (${anomalies.filter(a => a.severity === 'CRITICAL').length} critical, ${anomalies.filter(a => a.severity === 'HIGH').length} high)`,
+      detail: `Analyzed ${spendTransactions.length.toLocaleString()} transactions — ${anomalies.length} anomalies detected (${anomalies.filter(a => a.severity === 'CRITICAL').length} critical, ${anomalies.filter(a => a.severity === 'HIGH').length} high)`,
       severity: anomalies.some(a => a.severity === 'CRITICAL') ? 'critical' : anomalies.length > 0 ? 'warning' : 'info',
       resource: 'Anomaly Engine',
     })
+
+    if (creditTransactions.length > 0) {
+      auditLog.push({
+        id: `AUD-${Date.now()}-credits`,
+        ts: new Date().toISOString(),
+        actor: 'Ventura',
+        event: 'Credits Excluded From Spend',
+        detail: `${creditTransactions.length.toLocaleString()} credit/refund row(s) totaling ${creditTransactions.reduce((s, t) => s + t.amount, 0).toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })} were identified via the Credit column and excluded from spend totals and anomaly detection.`,
+        severity: 'info',
+        resource: 'Anomaly Engine',
+      })
+    }
 
     // Step 4: statistics
     setStepIdx(4)
     setProgress(75)
     await new Promise(r => setTimeout(r, 150))
 
-    const totalSpend = allTransactions.reduce((s, t) => s + t.amount, 0)
+    const totalSpend   = spendTransactions.reduce((s, t) => s + t.amount, 0)
+    const totalCredits = creditTransactions.reduce((s, t) => s + t.amount, 0)
 
-    // Top vendors
+    // Top vendors (spend only)
     const vendorMap = new Map<string, { total: number; count: number; category: string }>()
-    for (const tx of allTransactions) {
+    for (const tx of spendTransactions) {
       const k = tx.vendor
       const v = vendorMap.get(k) ?? { total: 0, count: 0, category: tx.category }
       v.total += tx.amount
@@ -167,9 +190,9 @@ export default function DataUploadWidget({ onReady }: Props) {
       .sort((a, b) => b.total - a.total)
       .slice(0, 20)
 
-    // Category breakdown
+    // Category breakdown (spend only)
     const catMap = new Map<string, { total: number; count: number }>()
-    for (const tx of allTransactions) {
+    for (const tx of spendTransactions) {
       const k = tx.category || 'Uncategorized'
       const v = catMap.get(k) ?? { total: 0, count: 0 }
       v.total += tx.amount
@@ -180,9 +203,9 @@ export default function DataUploadWidget({ onReady }: Props) {
       .map(([category, v]) => ({ category, total: v.total, count: v.count }))
       .sort((a, b) => b.total - a.total)
 
-    // Monthly breakdown
+    // Monthly breakdown (spend only)
     const monthMap = new Map<string, MonthlyEntry>()
-    for (const tx of allTransactions) {
+    for (const tx of spendTransactions) {
       if (!tx.date) continue
       const d = new Date(tx.date)
       if (isNaN(d.getTime())) continue
@@ -197,7 +220,7 @@ export default function DataUploadWidget({ onReady }: Props) {
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([, v]) => v)
 
-    // Date range
+    // Date range (all ingested rows, spend and credit)
     const dates = allTransactions.map(t => t.date).filter(Boolean).sort()
     const dateRange = { from: dates[0] ?? '', to: dates[dates.length - 1] ?? '' }
 
@@ -233,6 +256,8 @@ export default function DataUploadWidget({ onReady }: Props) {
       columnMapping,
       totalTransactions: allTransactions.length,
       totalSpend,
+      totalCredits,
+      creditCount: creditTransactions.length,
       uniqueVendors,
       dateRange,
       topVendors,
@@ -245,7 +270,7 @@ export default function DataUploadWidget({ onReady }: Props) {
 
     saveDataset(dataset)
     setProgress(100)
-    setSummary({ txCount: allTransactions.length, anomalyCount: anomalies.length })
+    setSummary({ txCount: spendTransactions.length, anomalyCount: anomalies.length })
     setStage('done')
 
     setTimeout(() => onReady(), 1200)
@@ -310,10 +335,10 @@ export default function DataUploadWidget({ onReady }: Props) {
           <p className="text-sm font-semibold text-slate-700 mb-1">
             Drop files here or <span className="text-emerald-600 underline underline-offset-2">browse to upload</span>
           </p>
-          <p className="text-xs text-slate-400 mb-4">CSV · XLSX · XLS · PDF · QBO · OFX · QFX · JSON · ZIP</p>
+          <p className="text-xs text-slate-400 mb-4">CSV · TSV · XLSX · XLS · PDF</p>
           <div className="inline-flex items-center gap-2 text-[11px] text-slate-400 bg-slate-50 border border-slate-200 rounded-full px-3 py-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0" />
-            No file size limit · Multiple files · Enterprise encryption in transit
+            Multiple files · Processed in your browser · Encrypted in transit
           </div>
         </div>
       )}

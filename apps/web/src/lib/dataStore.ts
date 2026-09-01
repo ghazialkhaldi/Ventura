@@ -8,6 +8,9 @@ export type { NormalizedInvoice, ImportBatch, FieldMapping, LineItem } from './i
 
 export type Severity = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW'
 export type AnomalyStatus = 'Open' | 'Under Review' | 'Resolved' | 'Dismissed'
+// Used by Badge.tsx for workflow/integration status color mapping.
+export type WorkflowStatus = 'On Track' | 'Warning' | 'Bottleneck' | 'Critical'
+export type IntegrationStatus = 'Connected' | 'Disconnected' | 'Degraded' | 'Pending' | 'Not connected'
 export type AnomalyType =
   | 'duplicate'
   | 'outlier'
@@ -25,6 +28,11 @@ export interface StoredTransaction {
   category: string
   account: string
   rowIndex: number
+  // 'debit' = money paid out (spend). 'credit' = money received (refund, rebate,
+  // reversal, deposit). Only meaningful when the source file had separate
+  // Debit/Credit columns — a single combined Amount column is always spend.
+  // Absent on data saved before this field existed; treat as 'debit'.
+  direction?: 'debit' | 'credit'
 }
 
 export interface DetectedAnomaly {
@@ -102,6 +110,11 @@ export interface Dataset {
   columnMapping: ColumnMapping
   totalTransactions: number
   totalSpend: number
+  // Credits (refunds, rebates, reversals) found in Debit/Credit-column sources.
+  // Excluded from totalSpend and anomaly detection — tracked here so nothing
+  // is silently dropped. Absent/0 on data saved before this field existed.
+  totalCredits?: number
+  creditCount?: number
   uniqueVendors: number
   dateRange: { from: string; to: string }
   topVendors: VendorStat[]
@@ -177,6 +190,8 @@ function mergeSourceDatasets(sources: Dataset[]): Dataset {
     columnMapping:      sources[0].columnMapping,
     totalTransactions:  sources.reduce((n, s) => n + s.totalTransactions, 0),
     totalSpend:         sources.reduce((n, s) => n + s.totalSpend, 0),
+    totalCredits:       sources.reduce((n, s) => n + (s.totalCredits ?? 0), 0),
+    creditCount:        sources.reduce((n, s) => n + (s.creditCount ?? 0), 0),
     uniqueVendors:      vendorMap.size,
     dateRange:          { from: allDates[0] ?? '', to: allDates[allDates.length - 1] ?? '' },
     topVendors:         [...vendorMap.values()].sort((a, b) => b.total - a.total).slice(0, 20),

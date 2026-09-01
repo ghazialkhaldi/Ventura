@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { createClient } from '../../../utils/supabase/server'
+import { writeAuditEvent, resolveTenantId, clientIp } from '../../../lib/auditServer'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'DELETE') return res.status(405).end()
@@ -19,6 +20,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     data: { ...meta, _team_members: members },
   })
   if (error) return res.status(500).json({ error: 'Failed to remove member' })
+
+  void writeAuditEvent({
+    tenantId: resolveTenantId(user), actorId: user.id, actorEmail: user.email ?? null,
+    event: 'Team member removed', resource: userId, severity: 'warning', ip: clientIp(req),
+  })
 
   res.json({ ok: true })
 }

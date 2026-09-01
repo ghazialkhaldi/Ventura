@@ -254,8 +254,8 @@ export default function LoginPage() {
                 {[
                   'Automated anomaly detection across all spend',
                   'Approval workflow enforcement with SLA tracking',
-                  'Explainable AI decisions with full audit trail',
-                  'SOC 2 Type II · SAML 2.0 · RBAC',
+                  'Explainable decisions with full audit trail',
+                  'Role-based access control · Okta SAML SSO',
                 ].map(item => (
                   <li key={item} className="flex items-start gap-2.5 text-sm text-slate-300">
                     <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
@@ -289,7 +289,7 @@ export default function LoginPage() {
                   'MFA enforced for all workspace members',
                   mfaIsEmail ? 'Email verification code sent securely' : 'TOTP authenticator app support',
                   'Each session verified independently',
-                  'SOC 2 Type II · SAML 2.0 · RBAC',
+                  'Role-based access control · Okta SAML SSO',
                 ].map(item => (
                   <li key={item} className="flex items-start gap-2.5 text-sm text-slate-300">
                     <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />

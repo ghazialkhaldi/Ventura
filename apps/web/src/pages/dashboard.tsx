@@ -10,6 +10,7 @@ import type { Dataset } from '../lib/dataStore'
 import { computeTierSummary, loadTierConfig, tierLabel, tierColor, tierDot } from '../lib/dataLayers'
 import type { TierSummary } from '../lib/dataLayers'
 import { getTestingMode } from '../lib/dataMasking'
+import { getConfidenceThreshold } from '../lib/governance'
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts'
@@ -195,6 +196,29 @@ export default function DashboardPage() {
 
   // ── Onboarding / empty state ───────────────────────────────────────────────
   if (!isReady || !dataset) {
+    // Financial data currently lives in this browser's local storage, not a
+    // shared backend — an employee signing in on their own device has never
+    // uploaded anything themselves, so this is never "their" data to
+    // connect. Showing them the admin's upload flow implied they were the
+    // ones expected to connect a data source, which is both wrong and (for
+    // viewer/analyst roles) not something they're even permitted to do.
+    if (user?.role === 'employee') {
+      return (
+        <AppLayout title="Dashboard">
+          <div className="max-w-lg mx-auto py-16 text-center">
+            <div className="w-14 h-14 bg-slate-100 border border-slate-200 flex items-center justify-center mx-auto mb-4">
+              <InboxIcon className="w-7 h-7 text-slate-500" />
+            </div>
+            <h1 className="text-xl font-bold text-slate-900 mb-2">No data on this device yet</h1>
+            <p className="text-sm text-slate-500 max-w-sm mx-auto">
+              Financial data is uploaded per-device by your workspace admin and hasn&apos;t been loaded in this
+              browser. Ask your admin to upload from your device, or check back after they&apos;ve connected data
+              from theirs.
+            </p>
+          </div>
+        </AppLayout>
+      )
+    }
     return (
       <AppLayout title="Dashboard">
         <div className="max-w-lg mx-auto py-16">
@@ -212,7 +236,7 @@ export default function DashboardPage() {
             {[
               { n: 1, text: 'Upload a transaction export or connect your accounting system', href: '/integrations', cta: 'Connect data' },
               { n: 2, text: 'Ventura normalizes and scans transactions for anomalies automatically' },
-              { n: 3, text: 'Review AI findings — approve, escalate, or dismiss each alert' },
+              { n: 3, text: 'Review findings — approve, escalate, or dismiss each alert' },
               { n: 4, text: 'Monitor spend trends, vendor risk, and savings opportunities' },
             ].map(s => (
               <div key={s.n} className="flex items-center gap-3 p-3.5 bg-white border border-slate-200">
@@ -244,7 +268,7 @@ export default function DashboardPage() {
   const topSeverity        = criticalCount > 0 ? 'CRITICAL' : highCount > 0 ? 'HIGH' : 'MEDIUM'
   const duplicates         = openAnomalies.filter(a => a.type === 'duplicate')
   const duplicateSavings   = duplicates.reduce((s, a) => s + a.amount, 0)
-  const highConf           = openAnomalies.filter(a => a.confidence >= 85)
+  const highConf           = openAnomalies.filter(a => a.confidence >= getConfidenceThreshold())
   const topVendors         = dataset.topVendors.slice(0, 8)
   const categories         = dataset.categoryBreakdown.slice(0, 8)
   const maxCat             = categories[0]?.total ?? 1
@@ -274,6 +298,11 @@ export default function DashboardPage() {
         {testMode !== 'live' && (
           <span className="bg-amber-50 border border-amber-200 text-amber-700 font-bold px-2 py-0.5 rounded-full uppercase tracking-wide text-[10px]">
             {testMode === 'masked' ? 'Masked mode active' : 'Synthetic mode active'}
+          </span>
+        )}
+        {(dataset.creditCount ?? 0) > 0 && (
+          <span title="Credit/refund rows identified via a Debit/Credit column split — excluded from spend totals and anomaly detection so refunds don't get counted as vendor spend.">
+            {dataset.creditCount} credit{dataset.creditCount !== 1 ? 's' : ''} excluded ({fmtC(dataset.totalCredits ?? 0)})
           </span>
         )}
         {tierSummary && (

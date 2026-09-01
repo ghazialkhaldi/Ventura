@@ -21,6 +21,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: 'Invalid email address' })
   }
 
+  // Fail fast and clearly if email sending isn't configured — previously this
+  // fell through to the Resend call, which failed with an opaque
+  // "Failed to send verification email" that looked like a transient
+  // delivery problem instead of a missing environment variable.
+  if (!process.env.RESEND_API_KEY) {
+    return res.status(503).json({ error: 'Email verification is not configured on this server. Set RESEND_API_KEY.' })
+  }
+
   const supabase = createClient({ req, res })
 
   // Confirm the caller has a live Supabase session (created by signInWithPassword)

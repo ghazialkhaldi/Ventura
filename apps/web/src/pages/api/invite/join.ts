@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { createClient } from '../../../utils/supabase/server'
 import { createAdminClient } from '../../../utils/supabase/admin'
+import { writeAuditEvent, clientIp } from '../../../lib/auditServer'
 
 interface TeamMember {
   user_id: string
@@ -92,6 +93,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const empMeta = user.user_metadata || {}
   await supabase.auth.updateUser({
     data: { ...empMeta, _company: { admin_id: adminId, company_name: companyName, role: 'viewer', joined_at: new Date().toISOString() } },
+  })
+
+  // Logged against the workspace being joined (adminId), not the employee —
+  // resolveTenantId(user) would still resolve to the employee's own id at
+  // this point since _company was just set locally, not yet reflected in
+  // the session's JWT claims.
+  void writeAuditEvent({
+    tenantId: adminId, actorId: user.id, actorEmail: user.email ?? null,
+    event: 'Employee joined workspace', resource: companyName, severity: 'info', ip: clientIp(req),
   })
 
   res.json({ ok: true, company: companyName })

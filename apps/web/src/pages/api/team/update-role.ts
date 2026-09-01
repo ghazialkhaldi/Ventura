@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { createClient } from '../../../utils/supabase/server'
 import { createAdminClient } from '../../../utils/supabase/admin'
+import { writeAuditEvent, resolveTenantId, clientIp } from '../../../lib/auditServer'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'PUT') return res.status(405).end()
@@ -40,6 +41,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } catch {
     // Non-fatal: admin client may not be available; employee will see role on next full reload
   }
+
+  void writeAuditEvent({
+    tenantId: resolveTenantId(user), actorId: user.id, actorEmail: user.email ?? null,
+    event: 'Team member role changed', resource: userId, detail: `New role: ${role}`,
+    severity: 'warning', ip: clientIp(req),
+  })
 
   res.json({ ok: true })
 }

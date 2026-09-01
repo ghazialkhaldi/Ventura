@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { createHash, timingSafeEqual } from 'crypto'
 import { createClient } from '../../utils/supabase/server'
+import { writeAuditEvent, resolveTenantId, clientIp } from '../../lib/auditServer'
 
 const MAX_ATTEMPTS = 5
 
@@ -68,6 +69,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const remaining = MAX_ATTEMPTS - (attempts + 1)
     if (remaining <= 0) {
       await supabase.auth.updateUser({ data: { _mfa_hash: null, _mfa_exp: null, _mfa_attempts: null } })
+      void writeAuditEvent({
+        tenantId: resolveTenantId(user), actorId: user.id, actorEmail: user.email ?? null,
+        event: 'MFA verification locked out', detail: `${MAX_ATTEMPTS} incorrect codes entered`,
+        severity: 'warning', ip: clientIp(req),
+      })
     }
     return res.status(400).json({
       error: remaining > 0
@@ -78,6 +84,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // Single-use: clear the code immediately on success
   await supabase.auth.updateUser({ data: { _mfa_hash: null, _mfa_exp: null, _mfa_attempts: null } })
+
+  void writeAuditEvent({
+    tenantId: resolveTenantId(user), actorId: user.id, actorEmail: user.email ?? null,
+    event: 'MFA verification succeeded', resource: 'Login', severity: 'info', ip: clientIp(req),
+  })
 
   res.json({ ok: true })
 }

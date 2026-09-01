@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { createCipheriv, randomBytes } from 'crypto'
 import { createClient } from '../../../utils/supabase/server'
+import { writeAuditEvent, resolveTenantId, clientIp } from '../../../lib/auditServer'
 
 function encryptValue(plain: string): { encrypted: string; iv: string; tag: string } {
   const key = Buffer.from(process.env.TOKEN_ENCRYPTION_KEY!, 'hex')
@@ -35,29 +36,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return res.status(401).json({ error: 'Not authenticated' })
 
+  // Fail closed. Base64 is encoding, not encryption — it's trivially
+  // reversible by anyone who can read the stored record, so silently
+  // "falling back" to it for vendor API keys and OAuth client secrets was a
+  // real vulnerability, not a degraded convenience. Refuse to store
+  // integration credentials at all rather than store them unprotected.
+  if (!hasEncryptionKey) {
+    console.error('[connections/save] TOKEN_ENCRYPTION_KEY is not configured — refusing to store credentials in plaintext-equivalent form.')
+    return res.status(503).json({ error: 'Integration credential storage is not configured. Ask your administrator to set TOKEN_ENCRYPTION_KEY.' })
+  }
+
   const record: Record<string, string> = {
     connected_at: new Date().toISOString(),
-    storage_mode: hasEncryptionKey ? 'aes-256-gcm' : 'base64',
+    storage_mode: 'aes-256-gcm',
   }
 
   for (const [fieldKey, value] of Object.entries(credentials)) {
     if (typeof value !== 'string' || !value.trim()) continue
 
-    if (hasEncryptionKey) {
-      try {
-        const enc = encryptValue(value.trim())
-        record[`${fieldKey}_encrypted`] = enc.encrypted
-        record[`${fieldKey}_iv`]        = enc.iv
-        record[`${fieldKey}_tag`]       = enc.tag
-      } catch (e) {
-        console.error(`[connections/save] encryption failed for ${fieldKey}:`, e)
-        return res.status(500).json({ error: 'Encryption failed. Contact your administrator.' })
-      }
-    } else {
-      // TOKEN_ENCRYPTION_KEY not set — store base64-obfuscated as a fallback.
-      // Set TOKEN_ENCRYPTION_KEY in your environment for AES-256-GCM encryption.
-      console.warn(`[connections/save] TOKEN_ENCRYPTION_KEY not configured — ${fieldKey} stored as base64`)
-      record[`${fieldKey}_b64`] = Buffer.from(value.trim()).toString('base64')
+    try {
+      const enc = encryptValue(value.trim())
+      record[`${fieldKey}_encrypted`] = enc.encrypted
+      record[`${fieldKey}_iv`]        = enc.iv
+      record[`${fieldKey}_tag`]       = enc.tag
+    } catch (e) {
+      console.error(`[connections/save] encryption failed for ${fieldKey}:`, e)
+      return res.status(500).json({ error: 'Encryption failed. Contact your administrator.' })
     }
   }
 
@@ -74,5 +78,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: 'Failed to save connection. Please try again.' })
   }
 
-  res.json({ ok: true, encrypted: hasEncryptionKey })
+  void writeAuditEvent({
+    tenantId: resolveTenantId(user), actorId: user.id, actorEmail: user.email ?? null,
+    event: 'Integration connected', resource: provider, severity: 'info', ip: clientIp(req),
+  })
+
+  res.json({ ok: true, encrypted: true })
 }

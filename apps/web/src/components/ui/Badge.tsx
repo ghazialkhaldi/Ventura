@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import type { Severity, AnomalyStatus, WorkflowStatus, IntegrationStatus } from '../../data/mockData'
+import type { Severity, AnomalyStatus, WorkflowStatus, IntegrationStatus } from '../../lib/dataStore'
 
 // Severity — muted, professional
 const severityMap: Record<Severity, string> = {

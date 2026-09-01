@@ -46,25 +46,25 @@ const sections = [
 export default function TermsPage() {
   return (
     <PublicLayout title="Terms of Service">
-      <section className="py-14 bg-white">
+      <section className="py-14 bg-surface-raised">
         <div className="max-w-3xl mx-auto px-6">
-          <p className="text-xs font-semibold text-emerald-700 uppercase tracking-widest mb-3">Legal</p>
-          <h1 className="text-3xl font-bold text-slate-900">Terms of Service</h1>
-          <p className="text-sm text-slate-400 mt-2">Last updated: July 2026</p>
+          <p className="text-xs font-semibold text-accent-400 uppercase tracking-widest mb-3">Legal</p>
+          <h1 className="text-3xl font-bold text-text-primary">Terms of Service</h1>
+          <p className="text-sm text-text-muted mt-2">Last updated: July 2026</p>
 
           <div className="mt-10 space-y-8">
             {sections.map(s => (
               <div key={s.title}>
-                <h2 className="text-base font-bold text-slate-900 mb-2">{s.title}</h2>
-                <p className="text-sm text-slate-600 leading-relaxed">{s.body}</p>
+                <h2 className="text-base font-bold text-text-primary mb-2">{s.title}</h2>
+                <p className="text-sm text-text-secondary leading-relaxed">{s.body}</p>
               </div>
             ))}
           </div>
 
-          <div className="mt-12 pt-8 border-t border-slate-200">
-            <p className="text-sm text-slate-500">
+          <div className="mt-12 pt-8 border-t border-border">
+            <p className="text-sm text-text-muted">
               Questions about these terms?{' '}
-              <a href="/contact" className="text-emerald-600 hover:text-emerald-800 font-medium">Contact us</a>
+              <a href="/contact" className="text-accent-400 hover:text-accent-300 font-medium">Contact us</a>
             </p>
           </div>
         </div>

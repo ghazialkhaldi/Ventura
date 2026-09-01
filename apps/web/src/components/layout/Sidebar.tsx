@@ -125,20 +125,20 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       )}
 
       <aside className={clsx(
-        'fixed inset-y-0 left-0 w-64 flex flex-col bg-[#0c1526] z-30 transition-transform duration-200',
+        'fixed inset-y-0 left-0 w-64 flex flex-col bg-sidebar-bg z-30 transition-transform duration-200',
         'lg:translate-x-0',
         isOpen ? 'translate-x-0' : '-translate-x-full',
       )}>
 
         {/* Brand */}
-        <div className="h-14 flex items-center px-5 border-b border-[#1e2d47] flex-shrink-0">
+        <div className="h-14 flex items-center px-5 border-b border-sidebar-border flex-shrink-0">
           <div className="flex-1">
             <VenturaLogo variant="light" height={26} />
-            <span className="block text-[10px] text-[#4d6a8a] mt-0.5">Financial Operations</span>
+            <span className="block text-[10px] text-sidebar-muted mt-0.5">Financial Operations</span>
           </div>
           <button
             onClick={onClose}
-            className="lg:hidden text-[#4d6a8a] hover:text-[#8ea4c0] p-1 transition-colors"
+            className="lg:hidden text-sidebar-muted hover:text-sidebar-text p-1 transition-colors"
             aria-label="Close navigation"
           >
             <XMarkIcon className="w-5 h-5" />
@@ -147,11 +147,11 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
 
         {/* Workspace label */}
         <div className="px-3 pt-3 pb-1">
-          <div className="flex items-center gap-2.5 px-3 py-2 border border-[#1e2d47]">
-            <BuildingOfficeIcon className="w-3.5 h-3.5 text-[#4d6a8a] flex-shrink-0" />
+          <div className="flex items-center gap-2.5 px-3 py-2 border border-sidebar-border">
+            <BuildingOfficeIcon className="w-3.5 h-3.5 text-sidebar-muted flex-shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-[#8ea4c0] truncate">{companyName}</p>
-              <p className="text-[10px] text-[#4d6a8a]">Enterprise</p>
+              <p className="text-xs font-medium text-sidebar-text truncate">{companyName}</p>
+              <p className="text-[10px] text-sidebar-muted">Enterprise</p>
             </div>
           </div>
         </div>
@@ -160,7 +160,7 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         <nav className="flex-1 overflow-y-auto sidebar-scroll px-3 pt-3 pb-4 space-y-4">
           {navSections.map((section) => (
             <div key={section.label}>
-              <p className="px-3 mb-1 text-[10px] font-semibold tracking-widest text-[#4d6a8a] uppercase">
+              <p className="px-3 mb-1 text-[10px] font-semibold tracking-widest text-sidebar-muted uppercase">
                 {section.label}
               </p>
               <ul className="space-y-px">
@@ -174,14 +174,14 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                         className={clsx(
                           'flex items-center gap-3 px-3 py-2 text-sm font-medium transition-colors',
                           active
-                            ? 'bg-[#1a2d44] text-white border-l-2 border-[#8ea4c0] pl-[10px]'
-                            : 'text-[#8ea4c0] hover:text-slate-100 hover:bg-[#162036]',
+                            ? 'bg-sidebar-active text-white border-l-2 border-accent-500 pl-[10px]'
+                            : 'text-sidebar-text hover:text-white hover:bg-sidebar-hover',
                         )}
                       >
                         <Icon className="w-4 h-4 flex-shrink-0" />
                         <span className="flex-1 truncate">{item.label}</span>
                         {!!item.badge && (
-                          <span className="min-w-[18px] h-4 px-1 text-[10px] font-semibold text-[#8ea4c0] bg-[#1e2d47] border border-[#2a3d5a] inline-flex items-center justify-center">
+                          <span className="min-w-[18px] h-4 px-1 text-[10px] font-semibold text-sidebar-text bg-sidebar-border border border-border-strong inline-flex items-center justify-center">
                             {item.badge}
                           </span>
                         )}
@@ -195,19 +195,19 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         </nav>
 
         {/* User */}
-        <div className="border-t border-[#1e2d47] px-3 py-3">
+        <div className="border-t border-sidebar-border px-3 py-3">
           <div className="flex items-center gap-2.5 px-3 py-2">
-            <div className="w-7 h-7 bg-[#1a2d44] border border-[#2a3d5a] flex items-center justify-center flex-shrink-0">
-              <span className="text-[#8ea4c0] text-[10px] font-semibold">{userInitials}</span>
+            <div className="w-7 h-7 bg-sidebar-active border border-border-strong flex items-center justify-center flex-shrink-0">
+              <span className="text-sidebar-text text-[10px] font-semibold">{userInitials}</span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-[#8ea4c0] truncate">{displayName}</p>
-              <p className="text-[10px] text-[#4d6a8a]">{user?.role ?? 'Admin'}</p>
+              <p className="text-xs font-medium text-sidebar-text truncate">{displayName}</p>
+              <p className="text-[10px] text-sidebar-muted">{user?.role ?? 'Admin'}</p>
             </div>
             <button
               onClick={handleSignOut}
               title="Sign out"
-              className="text-[#4d6a8a] hover:text-[#8ea4c0] transition-colors p-1"
+              className="text-sidebar-muted hover:text-sidebar-text transition-colors p-1"
             >
               <ArrowRightOnRectangleIcon className="w-3.5 h-3.5" />
             </button>

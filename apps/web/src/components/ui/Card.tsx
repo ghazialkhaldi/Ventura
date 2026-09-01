@@ -10,7 +10,7 @@ interface CardProps {
 export function Card({ children, className, padding = 'md' }: CardProps) {
   const p = { none: '', sm: 'p-4', md: 'p-6', lg: 'p-8' }[padding]
   return (
-    <div className={clsx('bg-white border border-slate-200 rounded-lg shadow-card', p, className)}>
+    <div className={clsx('bg-surface-raised border border-border rounded-lg', p, className)}>
       {children}
     </div>
   )
@@ -29,13 +29,13 @@ export function CardHeader({ title, subtitle, action, icon, className }: CardHea
     <div className={clsx('flex items-start justify-between', className)}>
       <div className="flex items-center gap-3">
         {icon && (
-          <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 flex-shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-accent-500/10 flex items-center justify-center text-accent-400 flex-shrink-0">
             {icon}
           </div>
         )}
         <div>
-          <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
-          {subtitle && <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>}
+          <h3 className="text-sm font-semibold text-text-primary">{title}</h3>
+          {subtitle && <p className="text-xs text-text-muted mt-0.5">{subtitle}</p>}
         </div>
       </div>
       {action && <div className="flex-shrink-0 ml-4">{action}</div>}
@@ -44,5 +44,5 @@ export function CardHeader({ title, subtitle, action, icon, className }: CardHea
 }
 
 export function CardDivider() {
-  return <div className="border-t border-slate-100 -mx-6 my-4" />
+  return <div className="border-t border-border-subtle -mx-6 my-4" />
 }

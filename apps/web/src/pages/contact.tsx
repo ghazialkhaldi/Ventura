@@ -61,14 +61,14 @@ export default function ContactPage() {
       </Head>
 
       {/* Nav header */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
+      <header className="sticky top-0 z-50 bg-surface/95 backdrop-blur border-b border-border">
         <div className="h-16 px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 flex items-center justify-between">
           <Link href="/" className="no-underline">
-            <VenturaLogo variant="dark" height={32} />
+            <VenturaLogo variant="light" height={28} />
           </Link>
           <div className="flex items-center gap-4">
-            <Link href="/login" className="text-base font-medium text-slate-600 hover:text-slate-900 transition-colors">Sign in</Link>
-            <Link href="/contact" className="bg-slate-900 hover:bg-slate-800 text-white text-base font-semibold px-5 py-2.5 transition-colors">Get started</Link>
+            <Link href="/login" className="text-base font-medium text-text-secondary hover:text-text-primary transition-colors">Sign in</Link>
+            <Link href="/contact" className="bg-accent-500 hover:bg-accent-600 text-white text-base font-semibold px-5 py-2.5 transition-colors">Get started</Link>
           </div>
         </div>
       </header>
@@ -88,7 +88,7 @@ export default function ContactPage() {
           </Link>
 
           {/* Wordmark */}
-          <VenturaLogo variant="light" height={60} className="mb-6" />
+          <VenturaLogo variant="light" height={52} className="mb-6" />
           <p className="text-[#8ea4c0] text-base text-center leading-relaxed max-w-xs mb-12">
             Financial operations intelligence for enterprise finance teams.
           </p>
@@ -102,7 +102,7 @@ export default function ContactPage() {
               'Response within one business day',
             ].map(point => (
               <div key={point} className="flex items-center gap-3">
-                <CheckCircleIcon className="w-4 h-4 text-green-400 flex-shrink-0" />
+                <CheckCircleIcon className="w-4 h-4 text-emerald-400 flex-shrink-0" />
                 <span className="text-sm text-[#8ea4c0]">{point}</span>
               </div>
             ))}
@@ -115,58 +115,58 @@ export default function ContactPage() {
         </div>
 
         {/* ── Right panel: form ── */}
-        <div className="flex-1 flex flex-col justify-center bg-white px-8 sm:px-14 lg:px-16 py-12 overflow-y-auto">
+        <div className="flex-1 flex flex-col justify-center bg-surface px-8 sm:px-14 lg:px-16 py-12 overflow-y-auto">
 
           <div className="max-w-md w-full mx-auto lg:mx-0">
 
             <div className="mb-8">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">Get in touch</p>
-              <h1 className="text-[1.9rem] font-bold text-slate-900 leading-tight mb-3">
+              <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-3">Get in touch</p>
+              <h1 className="text-[1.9rem] font-bold text-text-primary leading-tight mb-3">
                 Talk to our team
               </h1>
-              <p className="text-sm text-slate-500 leading-relaxed">
+              <p className="text-sm text-text-muted leading-relaxed">
                 Tell us about your finance team and we'll show you how Ventura can help.
               </p>
             </div>
 
             {submitted ? (
-              <div className="bg-slate-50 border border-slate-200 p-10 text-center">
-                <CheckCircleIcon className="w-10 h-10 text-green-500 mx-auto mb-4" />
-                <h2 className="text-lg font-bold text-slate-900 mb-2">Message sent</h2>
-                <p className="text-sm text-slate-500 max-w-xs mx-auto">
+              <div className="bg-surface-raised border border-border p-10 text-center">
+                <CheckCircleIcon className="w-10 h-10 text-emerald-400 mx-auto mb-4" />
+                <h2 className="text-lg font-bold text-text-primary mb-2">Message sent</h2>
+                <p className="text-sm text-text-muted max-w-xs mx-auto">
                   Thanks for reaching out. We'll be in touch within one business day.
                 </p>
                 <button
                   onClick={() => { setSubmitted(false); setForm({ name: '', email: '', businessName: '', companySize: '', message: '' }) }}
-                  className="mt-5 text-sm text-slate-600 font-semibold hover:text-slate-900 transition-colors"
+                  className="mt-5 text-sm text-text-secondary font-semibold hover:text-text-primary transition-colors"
                 >
                   Send another message
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="bg-white border border-slate-200 overflow-hidden">
+              <form onSubmit={handleSubmit} className="bg-surface-raised border border-border overflow-hidden">
                 <div className="p-7 space-y-5">
 
                   {/* Row 1 */}
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+                      <label className="block text-xs font-bold text-text-muted uppercase tracking-widest mb-1.5">
                         Full Name <span className="text-red-400">*</span>
                       </label>
                       <input
                         required type="text" name="name" value={form.name}
                         onChange={handleChange} placeholder="Jane Smith"
-                        className="w-full border border-slate-300 px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500 transition-colors bg-white"
+                        className="w-full border border-border-strong px-3 py-2.5 text-sm text-text-primary placeholder-text-muted outline-none focus:border-accent-500 focus:ring-1 focus:ring-accent-500 transition-colors bg-surface-raised"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+                      <label className="block text-xs font-bold text-text-muted uppercase tracking-widest mb-1.5">
                         Work Email <span className="text-red-400">*</span>
                       </label>
                       <input
                         required type="email" name="email" value={form.email}
                         onChange={handleChange} placeholder="jane@company.com"
-                        className="w-full border border-slate-300 px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500 transition-colors bg-white"
+                        className="w-full border border-border-strong px-3 py-2.5 text-sm text-text-primary placeholder-text-muted outline-none focus:border-accent-500 focus:ring-1 focus:ring-accent-500 transition-colors bg-surface-raised"
                       />
                     </div>
                   </div>
@@ -174,23 +174,23 @@ export default function ContactPage() {
                   {/* Row 2 */}
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+                      <label className="block text-xs font-bold text-text-muted uppercase tracking-widest mb-1.5">
                         Business Name <span className="text-red-400">*</span>
                       </label>
                       <input
                         required type="text" name="businessName" value={form.businessName}
                         onChange={handleChange} placeholder="Acme Corp"
-                        className="w-full border border-slate-300 px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500 transition-colors bg-white"
+                        className="w-full border border-border-strong px-3 py-2.5 text-sm text-text-primary placeholder-text-muted outline-none focus:border-accent-500 focus:ring-1 focus:ring-accent-500 transition-colors bg-surface-raised"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+                      <label className="block text-xs font-bold text-text-muted uppercase tracking-widest mb-1.5">
                         Company Size <span className="text-red-400">*</span>
                       </label>
                       <select
                         required name="companySize" value={form.companySize}
                         onChange={handleChange}
-                        className="w-full border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500 transition-colors bg-white appearance-none"
+                        className="w-full border border-border-strong px-3 py-2.5 text-sm text-text-primary outline-none focus:border-accent-500 focus:ring-1 focus:ring-accent-500 transition-colors bg-surface-raised appearance-none"
                       >
                         <option value="">Select size…</option>
                         {COMPANY_SIZES.map(s => <option key={s} value={s}>{s}</option>)}
@@ -200,28 +200,28 @@ export default function ContactPage() {
 
                   {/* Message */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+                    <label className="block text-xs font-bold text-text-muted uppercase tracking-widest mb-1.5">
                       Message <span className="text-red-400">*</span>
                     </label>
                     <textarea
                       required name="message" value={form.message}
                       onChange={handleChange} rows={5}
                       placeholder="Tell us about your use case, the size of your finance team, or any questions you have…"
-                      className="w-full border border-slate-300 px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500 transition-colors bg-white resize-none"
+                      className="w-full border border-border-strong px-3 py-2.5 text-sm text-text-primary placeholder-text-muted outline-none focus:border-accent-500 focus:ring-1 focus:ring-accent-500 transition-colors bg-surface-raised resize-none"
                     />
                   </div>
                 </div>
 
                 {/* Footer */}
-                <div className="border-t border-slate-100 px-7 py-4 bg-slate-50 flex items-center justify-between gap-4">
-                  <p className="text-xs text-slate-400 leading-snug">
+                <div className="border-t border-border-subtle px-7 py-4 bg-surface-raised flex items-center justify-between gap-4">
+                  <p className="text-xs text-text-muted leading-snug">
                     By submitting you agree to our{' '}
-                    <Link href="/privacy" className="underline hover:text-slate-600 transition-colors">privacy policy</Link>. We never share your data.
+                    <Link href="/privacy" className="underline hover:text-text-secondary transition-colors">privacy policy</Link>. We never share your data.
                   </p>
                   <button
                     type="submit"
                     disabled={sending}
-                    className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 disabled:opacity-60 text-white text-sm font-bold px-5 py-2.5 transition-colors flex-shrink-0"
+                    className="inline-flex items-center gap-2 bg-accent-500 hover:bg-accent-600 disabled:opacity-60 text-white text-sm font-bold px-5 py-2.5 transition-colors flex-shrink-0"
                   >
                     {sending ? (
                       <>
@@ -235,8 +235,8 @@ export default function ContactPage() {
                   </button>
                 </div>
                 {submitError && (
-                  <div className="px-7 py-3 bg-red-50 border-t border-red-100">
-                    <p className="text-xs text-red-700">{submitError}</p>
+                  <div className="px-7 py-3 bg-red-500/10 border-t border-red-500/20">
+                    <p className="text-xs text-red-400">{submitError}</p>
                   </div>
                 )}
               </form>

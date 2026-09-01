@@ -61,17 +61,17 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
       <Head>
         <title>{title ? `${title} — Ventura` : 'Ventura — Financial Operations Intelligence'}</title>
       </Head>
-      <div className="min-h-screen flex bg-white">
+      <div className="min-h-screen flex bg-surface">
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
         <div className="flex-1 flex flex-col lg:ml-64 min-h-screen">
           {/* Top bar */}
-          <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 xl:px-8 2xl:px-10 flex-shrink-0 sticky top-0 z-10">
+          <header className="h-16 bg-surface-raised border-b border-border flex items-center justify-between px-4 xl:px-8 2xl:px-10 flex-shrink-0 sticky top-0 z-10">
             <div className="flex items-center gap-2 min-w-0">
               {/* Hamburger — mobile only */}
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors flex-shrink-0 -ml-1"
+                className="lg:hidden p-2 text-text-muted hover:text-text-secondary hover:bg-surface-overlay transition-colors flex-shrink-0 -ml-1"
                 aria-label="Open navigation"
               >
                 <Bars3Icon className="w-5 h-5" />
@@ -80,7 +80,7 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
               {showBack && (
                 <button
                   onClick={() => router.back()}
-                  className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors pr-3 border-r border-slate-200 mr-1"
+                  className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-text-muted hover:text-text-primary transition-colors pr-3 border-r border-border mr-1"
                   title="Go back"
                 >
                   <ArrowLeftIcon className="w-4 h-4" />
@@ -89,32 +89,32 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
               )}
 
               {/* Search — hidden on small mobile to avoid overflow */}
-              <div className="hidden sm:flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 w-52 lg:w-64">
-                <MagnifyingGlassIcon className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+              <div className="hidden sm:flex items-center gap-2 bg-surface-overlay border border-border px-3 py-1.5 w-52 lg:w-64">
+                <MagnifyingGlassIcon className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />
                 <input
                   type="text"
                   placeholder="Search anomalies, vendors…"
-                  className="bg-transparent text-sm text-slate-700 placeholder-slate-400 outline-none w-full"
+                  className="bg-transparent text-sm text-text-secondary placeholder-text-muted outline-none w-full"
                 />
               </div>
             </div>
 
             <div className="flex items-center gap-1 flex-shrink-0">
-              <button className="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors">
+              <button className="relative p-2 text-text-muted hover:text-text-secondary hover:bg-surface-overlay transition-colors">
                 <BellIcon className="w-4 h-4" />
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
               </button>
-              <button className="hidden sm:block p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors">
+              <button className="hidden sm:block p-2 text-text-muted hover:text-text-secondary hover:bg-surface-overlay transition-colors">
                 <QuestionMarkCircleIcon className="w-4 h-4" />
               </button>
-              <div className="w-px h-5 bg-slate-200 mx-1" />
-              <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-slate-50 cursor-pointer transition-colors">
-                <div className="w-6 h-6 bg-[#1a2d44] border border-[#2a3d5a] flex items-center justify-center flex-shrink-0">
+              <div className="w-px h-5 bg-border mx-1" />
+              <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-surface-overlay cursor-pointer transition-colors">
+                <div className="w-6 h-6 bg-sidebar-active border border-border-strong flex items-center justify-center flex-shrink-0">
                   <span className="text-white text-[10px] font-bold">{userInitials}</span>
                 </div>
                 <div className="hidden sm:block">
-                  <p className="text-xs font-medium text-slate-700 leading-none">{displayName}</p>
-                  <p className="text-[10px] text-slate-400 mt-0.5">{displayRole}</p>
+                  <p className="text-xs font-medium text-text-secondary leading-none">{displayName}</p>
+                  <p className="text-[10px] text-text-muted mt-0.5">{displayRole}</p>
                 </div>
               </div>
             </div>
@@ -123,12 +123,12 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
           {/* Employee access banner */}
           {isEmployee && wsRole && (
             wsRole === 'editor' ? (
-              <div className="flex items-center gap-2 bg-emerald-50 border-b border-emerald-200 text-emerald-800 px-4 sm:px-6 py-2 text-xs font-medium">
+              <div className="flex items-center gap-2 bg-emerald-500/10 border-b border-emerald-500/30 text-emerald-300 px-4 sm:px-6 py-2 text-xs font-medium">
                 <PencilSquareIcon className="w-3.5 h-3.5 flex-shrink-0" />
                 Editor access — you can view and make changes in this workspace.
               </div>
             ) : (
-              <div className="flex items-center gap-2 bg-amber-50 border-b border-amber-200 text-amber-800 px-4 sm:px-6 py-2 text-xs font-medium">
+              <div className="flex items-center gap-2 bg-amber-500/10 border-b border-amber-500/30 text-amber-300 px-4 sm:px-6 py-2 text-xs font-medium">
                 <EyeIcon className="w-3.5 h-3.5 flex-shrink-0" />
                 {wsRole === 'analyst'
                   ? 'Analyst access — you can view everything and comment on anomalies. Ask your admin for edit permission.'

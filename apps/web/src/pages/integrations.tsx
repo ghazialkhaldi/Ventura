@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import AppLayout from '../components/layout/AppLayout'
 import PageHeader from '../components/ui/PageHeader'
 import Badge from '../components/ui/Badge'
@@ -193,20 +193,20 @@ export default function IntegrationsPage() {
 
       {/* Add integration panel */}
       {showAddPanel && (
-        <div className="mb-6 bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
-            <p className="text-sm font-semibold text-slate-900">Add a new integration</p>
-            <button onClick={() => setShowAddPanel(false)} className="text-slate-400 hover:text-slate-600 text-xs">Close</button>
+        <div className="mb-6 bg-surface-raised border border-border rounded-lg shadow-sm overflow-hidden">
+          <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+            <p className="text-sm font-semibold text-text-primary">Add a new integration</p>
+            <button onClick={() => setShowAddPanel(false)} className="text-text-muted hover:text-text-secondary text-xs">Close</button>
           </div>
           <div className="px-5 py-4">
-            <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-md px-3 py-2 mb-4 max-w-xs">
-              <Search className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+            <div className="flex items-center gap-2 bg-surface-sunken border border-border rounded-md px-3 py-2 mb-4 max-w-xs">
+              <Search className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />
               <input
                 type="text"
                 placeholder="Search integrations…"
                 value={addSearch}
                 onChange={e => setAddSearch(e.target.value)}
-                className="bg-transparent text-sm text-slate-700 placeholder-slate-400 outline-none w-full"
+                className="bg-transparent text-sm text-text-secondary placeholder-text-muted outline-none w-full"
               />
             </div>
             <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3">
@@ -214,11 +214,11 @@ export default function IntegrationsPage() {
                 <button
                   key={opt.id}
                   onClick={() => { setShowAddPanel(false); setActiveModal(opt.id) }}
-                  className="flex flex-col items-center gap-2 p-3 rounded-lg border border-slate-200 hover:border-emerald-300 hover:shadow-sm transition-all text-center group"
+                  className="flex flex-col items-center gap-2 p-3 rounded-lg border border-border hover:border-accent-400 hover:shadow-sm transition-all text-center group"
                 >
                   <BrandIcon brand={opt.brand} size={36} />
-                  <p className="text-xs font-semibold text-slate-800 group-hover:text-emerald-700 transition-colors leading-snug">{opt.name}</p>
-                  <p className="text-[10px] text-slate-400">{opt.desc}</p>
+                  <p className="text-xs font-semibold text-text-secondary group-hover:text-accent-400 transition-colors leading-snug">{opt.name}</p>
+                  <p className="text-[10px] text-text-muted">{opt.desc}</p>
                 </button>
               ))}
             </div>
@@ -229,9 +229,9 @@ export default function IntegrationsPage() {
       {/* Summary stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
         {[
-          { label: 'Connected sources', value: `${connectedCount} / ${INTEGRATION_CATALOG.length}`, icon: Plug,     color: 'text-green-700',  bg: 'bg-green-50',  border: 'border-green-200'  },
-          { label: 'Available sources',  value: INTEGRATION_CATALOG.length,                          icon: Database, color: 'text-emerald-700',   bg: 'bg-emerald-50',   border: 'border-emerald-200'   },
-          { label: 'File upload',        value: 'Supported',                                          icon: Shield,   color: 'text-slate-700',  bg: 'bg-slate-50',  border: 'border-slate-200'  },
+          { label: 'Connected sources', value: `${connectedCount} / ${INTEGRATION_CATALOG.length}`, icon: Plug,     color: 'text-emerald-400',  bg: 'bg-emerald-500/10',  border: 'border-emerald-500/30'  },
+          { label: 'Available sources',  value: INTEGRATION_CATALOG.length,                          icon: Database, color: 'text-emerald-400',   bg: 'bg-emerald-500/10',   border: 'border-emerald-500/30'   },
+          { label: 'File upload',        value: 'Supported',                                          icon: Shield,   color: 'text-text-secondary',  bg: 'bg-surface-raised',  border: 'border-border'  },
         ].map((s) => {
           const Icon = s.icon
           return (
@@ -239,7 +239,7 @@ export default function IntegrationsPage() {
               <Icon className={`w-5 h-5 ${s.color} flex-shrink-0`} />
               <div>
                 <p className={`text-base font-bold ${s.color}`}>{s.value}</p>
-                <p className="text-xs text-slate-500">{s.label}</p>
+                <p className="text-xs text-text-muted">{s.label}</p>
               </div>
             </div>
           )
@@ -255,15 +255,15 @@ export default function IntegrationsPage() {
           const isConnected = newlyConnected.includes(modalId)
           const status = isConnected ? 'Connected' : 'Not connected'
           return (
-            <div key={intg.id} className="bg-white border border-slate-200 rounded-lg shadow-card p-5 flex flex-col min-h-[220px]">
+            <div key={intg.id} className="bg-surface-raised border border-border rounded-lg p-5 flex flex-col min-h-[220px]">
               {processingCard === modalId ? (
                 <div className="flex flex-col items-center justify-center flex-1 gap-3 py-4">
-                  <div className="w-10 h-10 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center">
-                    <Loader2 className="w-5 h-5 text-emerald-600 animate-spin" />
+                  <div className="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
+                    <Loader2 className="w-5 h-5 text-emerald-400 animate-spin" />
                   </div>
                   <div className="text-center">
-                    <p className="text-sm font-semibold text-slate-900">Refreshing…</p>
-                    <p className="text-xs text-slate-500 mt-0.5">Syncing latest records from {intg.name}</p>
+                    <p className="text-sm font-semibold text-text-primary">Refreshing…</p>
+                    <p className="text-xs text-text-muted mt-0.5">Syncing latest records from {intg.name}</p>
                   </div>
                 </div>
               ) : (
@@ -272,14 +272,14 @@ export default function IntegrationsPage() {
                     <div className="flex items-center gap-3">
                       <BrandIcon brand={brand} size={40} />
                       <div>
-                        <p className="text-sm font-semibold text-slate-900">{intg.name}</p>
-                        <p className="text-xs text-slate-500">{intg.type}</p>
+                        <p className="text-sm font-semibold text-text-primary">{intg.name}</p>
+                        <p className="text-xs text-text-muted">{intg.type}</p>
                       </div>
                     </div>
                     <Badge variant="integration" value={status} dot>{status}</Badge>
                   </div>
 
-                  <p className="text-xs text-slate-600 leading-relaxed mb-4 flex-1">{intg.description}</p>
+                  <p className="text-xs text-text-muted leading-relaxed mb-4 flex-1">{intg.description}</p>
 
                   <div className="space-y-1.5 mb-4">
                     {[
@@ -287,13 +287,13 @@ export default function IntegrationsPage() {
                       { label: 'Records',     value: isConnected ? 'Synced' : '—' },
                     ].map((row) => (
                       <div key={row.label} className="flex justify-between text-xs">
-                        <span className="text-slate-400">{row.label}</span>
-                        <span className="text-slate-700 font-medium">{row.value}</span>
+                        <span className="text-text-muted">{row.label}</span>
+                        <span className="text-text-secondary font-medium">{row.value}</span>
                       </div>
                     ))}
                   </div>
 
-                  <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
+                  <div className="flex items-center gap-2 pt-3 border-t border-border-subtle">
                     {isConnected ? (
                       <>
                         <Button
@@ -307,7 +307,7 @@ export default function IntegrationsPage() {
                         </Button>
                         <button
                           onClick={() => handleDisconnect(modalId)}
-                          className="flex items-center gap-1 text-xs font-medium text-red-500 hover:text-red-700 hover:bg-red-50 px-2.5 py-1.5 rounded-md transition-colors border border-transparent hover:border-red-200"
+                          className="flex items-center gap-1 text-xs font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10 px-2.5 py-1.5 rounded-md transition-colors border border-transparent hover:border-red-500/30"
                         >
                           <Trash2 className="w-3 h-3" />
                           Reset
@@ -383,21 +383,21 @@ export default function IntegrationsPage() {
           ].map((item) => {
             const Icon = item.icon
             return (
-              <div key={item.title} className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+              <div key={item.title} className="bg-surface-sunken border border-border rounded-lg p-4">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2.5">
                     <BrandIcon brand={item.brand} size={28} />
                     <div>
-                      <p className="text-sm font-semibold text-slate-800">{item.title}</p>
-                      <p className="text-xs text-slate-400">via {item.provider}</p>
+                      <p className="text-sm font-semibold text-text-secondary">{item.title}</p>
+                      <p className="text-xs text-text-muted">via {item.provider}</p>
                     </div>
                   </div>
                   <Badge variant="green">{item.status}</Badge>
                 </div>
-                <p className="text-xs text-slate-500 leading-relaxed mb-3">{item.description}</p>
+                <p className="text-xs text-text-muted leading-relaxed mb-3">{item.description}</p>
                 <button
                   onClick={() => setActiveModal('okta')}
-                  className="text-xs text-emerald-600 hover:text-emerald-800 font-medium flex items-center gap-1 transition-colors"
+                  className="text-xs text-accent-400 hover:text-accent-300 font-medium flex items-center gap-1 transition-colors"
                 >
                   Configure <Settings className="w-3 h-3" />
                 </button>

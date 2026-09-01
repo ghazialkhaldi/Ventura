@@ -89,18 +89,18 @@ export default function WelcomePage() {
       <div className="mb-8">
         <div className="flex items-start justify-between gap-6">
           <div>
-            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest mb-2">Setup &amp; Onboarding</p>
-            <h1 className="text-2xl font-bold text-slate-900 mb-1.5">
+            <p className="text-[11px] font-semibold text-text-muted uppercase tracking-widest mb-2">Setup &amp; Onboarding</p>
+            <h1 className="text-2xl font-bold text-text-primary mb-1.5">
               Welcome to Ventura{companyDisplay !== 'Your Organization' ? `, ${companyDisplay}` : ''}
             </h1>
-            <p className="text-sm text-slate-500 max-w-xl leading-relaxed">
+            <p className="text-sm text-text-muted max-w-xl leading-relaxed">
               Connect your financial data sources to begin. Most organizations surface their first anomalies
               and savings opportunities within 24 hours of their first sync.
             </p>
           </div>
           <Link
             href="/dashboard"
-            className="flex-shrink-0 inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-700 border border-slate-200 rounded-md px-3 py-2 bg-white transition-colors"
+            className="flex-shrink-0 inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-text-secondary border border-border rounded-md px-3 py-2 bg-surface-raised transition-colors"
           >
             Skip to dashboard
             <ChevronRight className="w-3.5 h-3.5" />
@@ -117,19 +117,19 @@ export default function WelcomePage() {
                     step.done
                       ? 'bg-green-500 border-green-500 text-white'
                       : step.current
-                      ? 'bg-white border-emerald-600 text-emerald-600'
-                      : 'bg-white border-slate-300 text-slate-400'
+                      ? 'bg-surface-raised border-emerald-600 text-emerald-600'
+                      : 'bg-surface-raised border-border-strong text-text-muted'
                   }`}>
                     {step.done ? <CheckCircle className="w-4 h-4" /> : <span>{step.id}</span>}
                   </div>
                   <p className={`text-[10px] mt-1.5 text-center max-w-[72px] leading-tight font-medium ${
-                    step.done ? 'text-green-600' : step.current ? 'text-emerald-700' : 'text-slate-400'
+                    step.done ? 'text-green-600' : step.current ? 'text-emerald-700' : 'text-text-muted'
                   }`}>
                     {step.label}
                   </p>
                 </div>
                 {i < SETUP_STEPS.length - 1 && (
-                  <div className={`flex-1 h-0.5 mt-3.5 mx-1 ${step.done ? 'bg-green-300' : 'bg-slate-200'}`} />
+                  <div className={`flex-1 h-0.5 mt-3.5 mx-1 ${step.done ? 'bg-emerald-500/40' : 'bg-border'}`} />
                 )}
               </React.Fragment>
             ))}
@@ -147,8 +147,8 @@ export default function WelcomePage() {
               <span className="text-white text-xs font-bold">2</span>
             </div>
             <div>
-              <p className="text-sm font-semibold text-slate-900">Connect a data source</p>
-              <p className="text-xs text-slate-500">Select your primary financial system to begin ingestion</p>
+              <p className="text-sm font-semibold text-text-primary">Connect a data source</p>
+              <p className="text-xs text-text-muted">Select your primary financial system to begin ingestion</p>
             </div>
           </div>
 
@@ -158,16 +158,16 @@ export default function WelcomePage() {
               return (
                 <div
                   key={src.id}
-                  className={`bg-white border rounded-lg p-4 flex flex-col gap-3 transition-all ${
-                    isConnected ? 'border-green-200 ring-1 ring-green-200' : 'border-slate-200 hover:border-slate-300 hover:shadow-sm'
+                  className={`bg-surface-raised border rounded-lg p-4 flex flex-col gap-3 transition-all ${
+                    isConnected ? 'border-green-200 ring-1 ring-green-200' : 'border-border hover:border-border-strong hover:shadow-sm'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2.5">
                       <BrandIcon brand={src.brand} size={36} />
                       <div>
-                        <p className="text-xs font-semibold text-slate-800 leading-snug">{src.name}</p>
-                        <p className="text-[10px] text-slate-400 mt-0.5">{src.category}</p>
+                        <p className="text-xs font-semibold text-text-secondary leading-snug">{src.name}</p>
+                        <p className="text-[10px] text-text-muted mt-0.5">{src.category}</p>
                       </div>
                     </div>
                     {src.popular && !isConnected && (
@@ -177,7 +177,7 @@ export default function WelcomePage() {
                       <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
                     )}
                   </div>
-                  <p className="text-[11px] text-slate-500 leading-snug">{src.desc}</p>
+                  <p className="text-[11px] text-text-muted leading-snug">{src.desc}</p>
                   <div className="flex gap-1.5">
                     <button
                       onClick={() => !isConnected && setActiveModal(src.id)}
@@ -239,9 +239,9 @@ export default function WelcomePage() {
           )}
 
           {/* Remaining steps */}
-          <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-            <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
-              <p className="text-xs font-semibold text-slate-700">Remaining setup steps</p>
+          <div className="bg-surface-raised border border-border rounded-lg overflow-hidden">
+            <div className="px-4 py-3 bg-surface-raised border-b border-border">
+              <p className="text-xs font-semibold text-text-secondary">Remaining setup steps</p>
             </div>
             {[
               { icon: Upload,    step: 3, title: 'Import or sync transactions',   desc: 'Bulk CSV import or live feed from connected sources' },
@@ -251,15 +251,15 @@ export default function WelcomePage() {
             ].map((item, i, arr) => {
               const Icon = item.icon
               return (
-                <div key={item.step} className={`flex items-start gap-3 px-4 py-3 ${i < arr.length - 1 ? 'border-b border-slate-100' : ''}`}>
-                  <div className="w-6 h-6 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-[10px] font-bold text-slate-500">{item.step}</span>
+                <div key={item.step} className={`flex items-start gap-3 px-4 py-3 ${i < arr.length - 1 ? 'border-b border-border-subtle' : ''}`}>
+                  <div className="w-6 h-6 rounded-full bg-surface-overlay border border-border flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-[10px] font-bold text-text-muted">{item.step}</span>
                   </div>
                   <div className="flex-1">
-                    <p className="text-xs font-semibold text-slate-700">{item.title}</p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">{item.desc}</p>
+                    <p className="text-xs font-semibold text-text-secondary">{item.title}</p>
+                    <p className="text-[11px] text-text-muted mt-0.5">{item.desc}</p>
                   </div>
-                  <Icon className="w-4 h-4 text-slate-300 flex-shrink-0 mt-0.5" />
+                  <Icon className="w-4 h-4 text-text-muted flex-shrink-0 mt-0.5" />
                 </div>
               )
             })}
@@ -268,9 +268,9 @@ export default function WelcomePage() {
 
         {/* Right: preview of what's coming */}
         <div className="flex flex-col gap-4">
-          <div className="bg-white border border-slate-200 rounded-lg p-4">
-            <p className="text-xs font-semibold text-slate-700 mb-1.5">What you&apos;ll see after connecting</p>
-            <p className="text-[11px] text-slate-500 leading-relaxed">
+          <div className="bg-surface-raised border border-border rounded-lg p-4">
+            <p className="text-xs font-semibold text-text-secondary mb-1.5">What you&apos;ll see after connecting</p>
+            <p className="text-[11px] text-text-muted leading-relaxed">
               Once your data syncs, your dashboard will show live spend metrics, anomaly findings,
               workflow status, and savings opportunities — refreshed on every sync cycle.
             </p>
@@ -279,42 +279,42 @@ export default function WelcomePage() {
           {/* Ghost metric cards */}
           <div className="grid grid-cols-2 gap-2">
             {GHOST_METRICS.map(m => (
-              <div key={m.label} className="bg-white border border-slate-200 rounded-lg p-3">
-                <p className="text-[10px] text-slate-400 mb-2 font-medium">{m.label}</p>
-                <div className={`h-5 ${m.wVal} bg-slate-100 rounded animate-pulse mb-1.5`} />
-                <div className={`h-2.5 ${m.wSub} bg-slate-100 rounded animate-pulse`} />
+              <div key={m.label} className="bg-surface-raised border border-border rounded-lg p-3">
+                <p className="text-[10px] text-text-muted mb-2 font-medium">{m.label}</p>
+                <div className={`h-5 ${m.wVal} bg-surface-overlay rounded animate-pulse mb-1.5`} />
+                <div className={`h-2.5 ${m.wSub} bg-surface-overlay rounded animate-pulse`} />
               </div>
             ))}
           </div>
 
           {/* Ghost anomaly list */}
-          <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-            <div className="px-3 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center gap-2 justify-between">
-              <p className="text-[11px] font-semibold text-slate-500">Anomaly findings</p>
-              <span className="text-[10px] text-slate-400 italic">pending first sync</span>
+          <div className="bg-surface-raised border border-border rounded-lg overflow-hidden">
+            <div className="px-3 py-2.5 bg-surface-raised border-b border-border flex items-center gap-2 justify-between">
+              <p className="text-[11px] font-semibold text-text-muted">Anomaly findings</p>
+              <span className="text-[10px] text-text-muted italic">pending first sync</span>
             </div>
             {[1, 2, 3, 4].map(i => (
-              <div key={i} className="flex items-center gap-2.5 px-3 py-2.5 border-b border-slate-100 last:border-0">
-                <div className="w-14 h-3 bg-slate-100 rounded animate-pulse flex-shrink-0" />
-                <div className="flex-1 h-3 bg-slate-100 rounded animate-pulse" />
-                <div className="w-12 h-3 bg-slate-100 rounded animate-pulse flex-shrink-0" />
+              <div key={i} className="flex items-center gap-2.5 px-3 py-2.5 border-b border-border-subtle last:border-0">
+                <div className="w-14 h-3 bg-surface-overlay rounded animate-pulse flex-shrink-0" />
+                <div className="flex-1 h-3 bg-surface-overlay rounded animate-pulse" />
+                <div className="w-12 h-3 bg-surface-overlay rounded animate-pulse flex-shrink-0" />
               </div>
             ))}
           </div>
 
           {/* Ghost savings */}
-          <div className="bg-white border border-slate-200 rounded-lg p-3">
+          <div className="bg-surface-raised border border-border rounded-lg p-3">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-[11px] font-semibold text-slate-500">Savings opportunities</p>
-              <span className="text-[10px] text-slate-400 italic">pending first sync</span>
+              <p className="text-[11px] font-semibold text-text-muted">Savings opportunities</p>
+              <span className="text-[10px] text-text-muted italic">pending first sync</span>
             </div>
             {[1, 2].map(i => (
-              <div key={i} className="flex items-center gap-2.5 py-2 border-b border-slate-100 last:border-0">
+              <div key={i} className="flex items-center gap-2.5 py-2 border-b border-border-subtle last:border-0">
                 <div className="flex-1">
-                  <div className="h-2.5 bg-slate-100 rounded animate-pulse mb-1.5" />
-                  <div className="h-2 w-20 bg-slate-100 rounded animate-pulse" />
+                  <div className="h-2.5 bg-surface-overlay rounded animate-pulse mb-1.5" />
+                  <div className="h-2 w-20 bg-surface-overlay rounded animate-pulse" />
                 </div>
-                <div className="w-14 h-4 bg-slate-100 rounded animate-pulse flex-shrink-0" />
+                <div className="w-14 h-4 bg-surface-overlay rounded animate-pulse flex-shrink-0" />
               </div>
             ))}
           </div>
@@ -322,13 +322,13 @@ export default function WelcomePage() {
           {/* Navigate to existing workspace */}
           <div className="bg-[#0c1526] rounded-lg p-4">
             <p className="text-xs font-semibold text-white mb-1.5">Returning user?</p>
-            <p className="text-[11px] text-slate-400 mb-3 leading-relaxed">
+            <p className="text-[11px] text-text-muted mb-3 leading-relaxed">
               If your data is already connected, navigate directly to your workspace to view
               current findings and workflows.
             </p>
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-1.5 bg-white text-slate-900 text-xs font-semibold px-4 py-2 rounded-md hover:bg-slate-100 transition-colors"
+              className="inline-flex items-center gap-1.5 bg-surface-raised text-text-primary text-xs font-semibold px-4 py-2 rounded-md hover:bg-surface-hover transition-colors"
             >
               Open workspace <ArrowRight className="w-3.5 h-3.5" />
             </Link>

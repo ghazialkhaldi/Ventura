@@ -279,15 +279,15 @@ export default function DataUploadWidget({ onReady }: Props) {
   if (stage === 'done' && summary) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center max-w-md mx-auto">
-        <div className="w-16 h-16 rounded-full bg-green-100 border-2 border-green-300 flex items-center justify-center mb-5">
-          <CheckCircle className="w-8 h-8 text-green-600" />
+        <div className="w-16 h-16 rounded-full bg-emerald-500/10 border-2 border-emerald-500/30 flex items-center justify-center mb-5">
+          <CheckCircle className="w-8 h-8 text-emerald-400" />
         </div>
-        <p className="text-lg font-semibold text-slate-900 mb-1">Data processed</p>
-        <p className="text-sm text-slate-500 mb-4">
+        <p className="text-lg font-semibold text-text-primary mb-1">Data processed</p>
+        <p className="text-sm text-text-muted mb-4">
           {summary.txCount.toLocaleString()} transactions analyzed ·{' '}
           {summary.anomalyCount} anomali{summary.anomalyCount !== 1 ? 'es' : 'y'} detected
         </p>
-        <p className="text-xs text-slate-400">Loading your workspace…</p>
+        <p className="text-xs text-text-muted">Loading your workspace…</p>
       </div>
     )
   }
@@ -298,11 +298,11 @@ export default function DataUploadWidget({ onReady }: Props) {
     <div className="w-full max-w-3xl mx-auto">
       {/* Header */}
       <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#0c1526] mb-4">
-          <Upload className="w-6 h-6 text-slate-300" />
+        <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent-500 mb-4">
+          <Upload className="w-6 h-6 text-white" />
         </div>
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">Upload your financial data</h2>
-        <p className="text-sm text-slate-500 max-w-lg mx-auto leading-relaxed">
+        <h2 className="text-2xl font-bold text-text-primary mb-2">Upload your financial data</h2>
+        <p className="text-sm text-text-muted max-w-lg mx-auto leading-relaxed">
           Import GL exports, bank statements, payroll files, vendor data, or any transaction report.
           Ventura will parse your data, detect anomalies, and build your analytics — no manual setup required.
         </p>
@@ -312,7 +312,7 @@ export default function DataUploadWidget({ onReady }: Props) {
       {!isProcessing && (
         <div
           className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-colors mb-4 ${
-            dragOver ? 'border-emerald-400 bg-emerald-50' : 'border-slate-300 hover:border-slate-400 bg-white'
+            dragOver ? 'border-emerald-400 bg-emerald-500/10' : 'border-border-strong hover:border-accent-500/50 bg-surface-raised'
           }`}
           onClick={() => inputRef.current?.click()}
           onDragOver={e => { e.preventDefault(); setDragOver(true) }}
@@ -331,12 +331,12 @@ export default function DataUploadWidget({ onReady }: Props) {
             className="hidden"
             onChange={e => { addFiles(e.target.files); if (inputRef.current) inputRef.current.value = '' }}
           />
-          <Upload className="w-9 h-9 text-slate-400 mx-auto mb-3" />
-          <p className="text-sm font-semibold text-slate-700 mb-1">
-            Drop files here or <span className="text-emerald-600 underline underline-offset-2">browse to upload</span>
+          <Upload className="w-9 h-9 text-text-muted mx-auto mb-3" />
+          <p className="text-sm font-semibold text-text-secondary mb-1">
+            Drop files here or <span className="text-emerald-400 underline underline-offset-2">browse to upload</span>
           </p>
-          <p className="text-xs text-slate-400 mb-4">CSV · TSV · XLSX · XLS · PDF</p>
-          <div className="inline-flex items-center gap-2 text-[11px] text-slate-400 bg-slate-50 border border-slate-200 rounded-full px-3 py-1.5">
+          <p className="text-xs text-text-muted mb-4">CSV · TSV · XLSX · XLS · PDF</p>
+          <div className="inline-flex items-center gap-2 text-[11px] text-text-muted bg-surface-overlay border border-border rounded-full px-3 py-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0" />
             Multiple files · Processed in your browser · Encrypted in transit
           </div>
@@ -345,35 +345,35 @@ export default function DataUploadWidget({ onReady }: Props) {
 
       {/* File list */}
       {entries.length > 0 && !isProcessing && (
-        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden mb-4">
-          <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-            <p className="text-xs font-semibold text-slate-600">
+        <div className="bg-surface-raised border border-border rounded-xl overflow-hidden mb-4">
+          <div className="px-4 py-2.5 bg-surface-overlay border-b border-border flex items-center justify-between">
+            <p className="text-xs font-semibold text-text-secondary">
               {entries.length} file{entries.length !== 1 ? 's' : ''} selected ·{' '}
               {fmtBytes(entries.reduce((s, e) => s + e.file.size, 0))} total
             </p>
             <button
               onClick={() => { setEntries([]); setStage('idle'); setGlobalErr('') }}
-              className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+              className="text-xs text-text-muted hover:text-text-secondary transition-colors"
             >
               Clear all
             </button>
           </div>
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-border-subtle">
             {entries.map(e => (
               <div key={e.file.name} className="flex items-center gap-3 px-4 py-3">
-                <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200 flex items-center justify-center flex-shrink-0">
-                  <FileText className="w-4 h-4 text-slate-500" />
+                <div className="w-8 h-8 rounded-md bg-surface-overlay border border-border flex items-center justify-center flex-shrink-0">
+                  <FileText className="w-4 h-4 text-text-muted" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-800 truncate">{e.file.name}</p>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-sm font-medium text-text-primary truncate">{e.file.name}</p>
+                  <p className="text-xs text-text-muted">
                     {fmtBytes(e.file.size)}
-                    {e.error && <span className="text-red-500 ml-2">— {e.error}</span>}
+                    {e.error && <span className="text-red-400 ml-2">— {e.error}</span>}
                   </p>
                 </div>
                 <button
                   onClick={() => removeFile(e.file.name)}
-                  className="text-slate-400 hover:text-red-500 transition-colors p-1"
+                  className="text-text-muted hover:text-red-400 transition-colors p-1"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -385,23 +385,23 @@ export default function DataUploadWidget({ onReady }: Props) {
 
       {/* Processing progress */}
       {isProcessing && (
-        <div className="bg-white border border-slate-200 rounded-xl p-8 mb-4">
+        <div className="bg-surface-raised border border-border rounded-xl p-8 mb-4">
           <div className="space-y-4">
             {entries.map(e => (
               <div key={e.file.name} className="flex items-center gap-3">
                 <div className="flex-shrink-0">
                   {e.status === 'done'
-                    ? <CheckCircle className="w-4 h-4 text-green-500" />
+                    ? <CheckCircle className="w-4 h-4 text-emerald-400" />
                     : e.status === 'error'
-                    ? <AlertCircle className="w-4 h-4 text-red-500" />
+                    ? <AlertCircle className="w-4 h-4 text-red-400" />
                     : e.status === 'parsing'
-                    ? <svg className="animate-spin w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
-                    : <div className="w-4 h-4 rounded-full border-2 border-slate-300" />}
+                    ? <svg className="animate-spin w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                    : <div className="w-4 h-4 rounded-full border-2 border-border-strong" />}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-800 truncate">{e.file.name}</p>
+                  <p className="text-sm font-medium text-text-primary truncate">{e.file.name}</p>
                   {e.rowCount != null && (
-                    <p className="text-xs text-slate-400">{e.rowCount.toLocaleString()} rows</p>
+                    <p className="text-xs text-text-muted">{e.rowCount.toLocaleString()} rows</p>
                   )}
                 </div>
               </div>
@@ -410,12 +410,12 @@ export default function DataUploadWidget({ onReady }: Props) {
 
           <div className="mt-6">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-medium text-slate-700">{STEP_LABELS[stepIdx] ?? 'Processing…'}</p>
-              <span className="text-sm font-mono text-slate-500">{progress}%</span>
+              <p className="text-sm font-medium text-text-secondary">{STEP_LABELS[stepIdx] ?? 'Processing…'}</p>
+              <span className="text-sm font-mono text-text-muted">{progress}%</span>
             </div>
-            <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div className="h-2 bg-surface-overlay rounded-full overflow-hidden">
               <div
-                className="h-full bg-emerald-600 rounded-full transition-all duration-300"
+                className="h-full bg-emerald-500 rounded-full transition-all duration-300"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -424,11 +424,11 @@ export default function DataUploadWidget({ onReady }: Props) {
       )}
 
       {globalErr && (
-        <div className="flex items-start gap-2.5 bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm mb-4">
+        <div className="flex items-start gap-2.5 bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg px-4 py-3 text-sm mb-4">
           <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-medium">Could not process files</p>
-            <p className="text-red-600 text-xs mt-0.5">{globalErr}</p>
+            <p className="text-red-400/80 text-xs mt-0.5">{globalErr}</p>
           </div>
         </div>
       )}
@@ -440,23 +440,23 @@ export default function DataUploadWidget({ onReady }: Props) {
             <button
               onClick={handleProcess}
               disabled={entries.length === 0 || entries.every(e => e.status === 'error')}
-              className="flex-1 bg-[#0c1526] hover:bg-[#1a2640] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2"
+              className="flex-1 bg-accent-500 hover:bg-accent-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2"
             >
               <Upload className="w-4 h-4" />
               {entries.length === 0
                 ? 'Select files to process'
                 : `Process ${entries.length} file${entries.length !== 1 ? 's' : ''}`}
             </button>
-            <div className="text-slate-300 text-sm font-medium select-none">or</div>
+            <div className="text-text-muted text-sm font-medium select-none">or</div>
             <Link
               href="/integrations"
-              className="flex items-center gap-2 border border-slate-300 hover:border-slate-400 text-slate-700 font-semibold py-3 px-5 rounded-xl transition-colors text-sm bg-white"
+              className="flex items-center gap-2 border border-border-strong hover:border-border text-text-secondary font-semibold py-3 px-5 rounded-xl transition-colors text-sm bg-surface-raised"
             >
               <Plug className="w-4 h-4" />
               Connect integration
             </Link>
           </div>
-          <p className="text-center text-xs text-slate-400 mt-4 leading-relaxed">
+          <p className="text-center text-xs text-text-muted mt-4 leading-relaxed">
             Supports QuickBooks, NetSuite, SAP, Xero, ADP, Gusto, Plaid, Stripe exports and any standard GL/ledger CSV.
             Column auto-detection handles most export formats without configuration.
           </p>

@@ -10,11 +10,11 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variants = {
-  primary:   'bg-slate-900 text-white hover:bg-slate-800 border border-slate-900',
-  secondary: 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-300',
-  ghost:     'bg-transparent text-slate-600 hover:bg-slate-100 border border-transparent',
+  primary:   'bg-accent-500 text-white hover:bg-accent-600 border border-accent-500',
+  secondary: 'bg-surface-raised text-text-secondary hover:bg-surface-hover border border-border-strong',
+  ghost:     'bg-transparent text-text-muted hover:bg-surface-overlay border border-transparent',
   danger:    'bg-red-700 text-white hover:bg-red-800 border border-red-700',
-  outline:   'bg-transparent text-slate-700 hover:bg-slate-50 border border-slate-300',
+  outline:   'bg-transparent text-text-secondary hover:bg-surface-hover border border-border-strong',
 }
 
 const sizes = {
@@ -39,7 +39,7 @@ export default function Button({
       {...props}
       disabled={disabled || loading}
       className={clsx(
-        'inline-flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-1 disabled:opacity-40 disabled:cursor-not-allowed',
+        'inline-flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-1 focus-visible:ring-offset-surface disabled:opacity-40 disabled:cursor-not-allowed',
         variants[variant],
         sizes[size],
         className,

@@ -15,22 +15,26 @@ module.exports = {
     },
     extend: {
       fontFamily: {
-        sans: ['DM Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       colors: {
-        brand: {
-          50:  '#f0fdf4',
-          100: '#dcfce7',
-          200: '#bbf7d0',
-          300: '#86efac',
-          400: '#4ade80',
-          500: '#22c55e',
-          600: '#16a34a',
-          700: '#15803d',
-          800: '#166534',
-          900: '#14532d',
-          950: '#052e16',
+        // Steel-blue accent — replaces the previous emerald `brand` scale.
+        // Deliberately desaturated: this is the single biggest lever for
+        // reading as enterprise infrastructure (IBM/Intel) rather than a
+        // bright-green "AI startup" product.
+        accent: {
+          50:  '#eef4fb',
+          100: '#d9e6f6',
+          200: '#aec9ea',
+          300: '#7ea9dc',
+          400: '#4f88cb',
+          500: '#3574b8',
+          600: '#285d97',
+          700: '#204a79',
+          800: '#1a3b60',
+          900: '#152f4d',
+          950: '#0d1e33',
         },
         sidebar: {
           bg:     '#0c1526',
@@ -39,6 +43,27 @@ module.exports = {
           border: '#1e2d47',
           text:   '#8ea4c0',
           muted:  '#4d6a8a',
+        },
+        // Semantic surface/border/text tokens for the site-wide dark theme.
+        // surface.DEFAULT intentionally matches sidebar.bg's family so the
+        // sidebar stops reading as a separate dark island.
+        surface: {
+          DEFAULT: '#0b1220',
+          raised:  '#111a2c',
+          overlay: '#182338',
+          hover:   '#1c2840',
+          sunken:  '#070c16',
+        },
+        border: {
+          DEFAULT: '#22304a',
+          subtle:  '#182338',
+          strong:  '#31456b',
+        },
+        text: {
+          primary:   '#e8edf5',
+          secondary: '#a9b8cf',
+          muted:     '#7186a3',
+          inverse:   '#0b1220',
         },
       },
       boxShadow: {

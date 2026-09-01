@@ -41,29 +41,29 @@ const guides = [
 export default function DocsPage() {
   return (
     <PublicLayout title="Documentation">
-      <section className="bg-gradient-to-b from-white to-slate-50 border-b border-slate-200 py-14">
+      <section className="bg-gradient-to-b from-surface-raised to-surface border-b border-border py-14">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <p className="text-xs font-semibold text-emerald-700 uppercase tracking-widest mb-3">Documentation</p>
-          <h1 className="text-3xl font-bold text-slate-900">Learn Ventura</h1>
-          <p className="text-base text-slate-500 mt-3">
+          <p className="text-xs font-semibold text-accent-400 uppercase tracking-widest mb-3">Documentation</p>
+          <h1 className="text-3xl font-bold text-text-primary">Learn Ventura</h1>
+          <p className="text-base text-text-muted mt-3">
             Everything you need to set up your workspace, connect data, and put AI-powered
             financial intelligence to work.
           </p>
         </div>
       </section>
 
-      <section className="py-14 bg-white">
+      <section className="py-14 bg-surface-raised">
         <div className="max-w-5xl mx-auto px-6">
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {guides.map(g => (
-              <div key={g.title} id={g.title === 'API reference' ? 'api' : undefined} className="border border-slate-200 rounded-lg p-5 hover:border-slate-300 hover:shadow-sm transition-all">
-                <g.icon className="w-5 h-5 text-emerald-700 mb-3" />
-                <h3 className="text-sm font-bold text-slate-900 mb-1.5">{g.title}</h3>
-                <p className="text-xs text-slate-500 leading-relaxed mb-3">{g.desc}</p>
+              <div key={g.title} id={g.title === 'API reference' ? 'api' : undefined} className="border border-border rounded-lg p-5 hover:border-border-strong hover:shadow-sm transition-all">
+                <g.icon className="w-5 h-5 text-accent-400 mb-3" />
+                <h3 className="text-sm font-bold text-text-primary mb-1.5">{g.title}</h3>
+                <p className="text-xs text-text-muted leading-relaxed mb-3">{g.desc}</p>
                 <ol className="space-y-1.5">
                   {g.steps.map((s, i) => (
-                    <li key={s} className="flex items-start gap-2 text-xs text-slate-600">
-                      <span className="w-4 h-4 rounded-full bg-slate-100 text-slate-500 text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-px">{i + 1}</span>
+                    <li key={s} className="flex items-start gap-2 text-xs text-text-secondary">
+                      <span className="w-4 h-4 rounded-full bg-surface-overlay text-text-muted text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-px">{i + 1}</span>
                       {s}
                     </li>
                   ))}
@@ -73,11 +73,11 @@ export default function DocsPage() {
           </div>
 
           <div className="mt-10 text-center">
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-text-muted">
               Can't find what you need?{' '}
-              <Link href="/contact" className="text-emerald-600 hover:text-emerald-800 font-medium">Contact support</Link>
+              <Link href="/contact" className="text-accent-400 hover:text-accent-300 font-medium">Contact support</Link>
               {' '}or{' '}
-              <Link href="/demo" className="text-emerald-600 hover:text-emerald-800 font-medium">explore the interactive demo</Link>.
+              <Link href="/demo" className="text-accent-400 hover:text-accent-300 font-medium">explore the interactive demo</Link>.
             </p>
           </div>
         </div>

@@ -1,55 +1,55 @@
 import clsx from 'clsx'
 import type { Severity, AnomalyStatus, WorkflowStatus, IntegrationStatus } from '../../lib/dataStore'
 
-// Severity — muted, professional
+// Severity — translucent tinted chips, tuned for dark surfaces
 const severityMap: Record<Severity, string> = {
-  CRITICAL: 'bg-red-50 text-red-700 border border-red-200',
-  HIGH:     'bg-orange-50 text-orange-700 border border-orange-200',
-  MEDIUM:   'bg-amber-50 text-amber-700 border border-amber-200',
-  LOW:      'bg-slate-50 text-slate-600 border border-slate-200',
+  CRITICAL: 'bg-red-500/10 text-red-400 border border-red-500/30',
+  HIGH:     'bg-orange-500/10 text-orange-400 border border-orange-500/30',
+  MEDIUM:   'bg-amber-500/10 text-amber-400 border border-amber-500/30',
+  LOW:      'bg-slate-400/10 text-slate-400 border border-slate-400/25',
 }
 
 // Status — understated
 const statusMap: Record<AnomalyStatus, string> = {
-  'Open':         'bg-red-50 text-red-700 border border-red-200',
-  'Under Review': 'bg-amber-50 text-amber-700 border border-amber-200',
-  'Resolved':     'bg-green-50 text-green-700 border border-green-200',
-  'Dismissed':    'bg-slate-100 text-slate-500 border border-slate-200',
+  'Open':         'bg-red-500/10 text-red-400 border border-red-500/30',
+  'Under Review': 'bg-amber-500/10 text-amber-400 border border-amber-500/30',
+  'Resolved':     'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30',
+  'Dismissed':    'bg-slate-500/10 text-slate-400 border border-slate-500/25',
 }
 
 const workflowMap: Record<WorkflowStatus, string> = {
-  'Critical':   'bg-red-50 text-red-700 border border-red-200',
-  'Bottleneck': 'bg-orange-50 text-orange-700 border border-orange-200',
-  'Warning':    'bg-amber-50 text-amber-700 border border-amber-200',
-  'On Track':   'bg-green-50 text-green-700 border border-green-200',
+  'Critical':   'bg-red-500/10 text-red-400 border border-red-500/30',
+  'Bottleneck': 'bg-orange-500/10 text-orange-400 border border-orange-500/30',
+  'Warning':    'bg-amber-500/10 text-amber-400 border border-amber-500/30',
+  'On Track':   'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30',
 }
 
 const integrationMap: Record<IntegrationStatus, string> = {
-  'Connected':    'bg-green-50 text-green-700 border border-green-200',
-  'Disconnected': 'bg-red-50 text-red-700 border border-red-200',
-  'Degraded':     'bg-amber-50 text-amber-700 border border-amber-200',
-  'Pending':      'bg-slate-100 text-slate-600 border border-slate-200',
-  'Not connected':'bg-slate-100 text-slate-500 border border-slate-200',
+  'Connected':    'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30',
+  'Disconnected': 'bg-red-500/10 text-red-400 border border-red-500/30',
+  'Degraded':     'bg-amber-500/10 text-amber-400 border border-amber-500/30',
+  'Pending':      'bg-slate-500/10 text-slate-400 border border-slate-500/25',
+  'Not connected':'bg-slate-500/10 text-slate-400 border border-slate-500/25',
 }
 
 const aiStatusMap: Record<string, string> = {
-  'auto-approved':  'bg-green-50 text-green-700 border border-green-200',
-  'human-approved': 'bg-green-50 text-green-700 border border-green-200',
-  'blocked':        'bg-red-50 text-red-700 border border-red-200',
-  'pending':        'bg-amber-50 text-amber-700 border border-amber-200',
+  'auto-approved':  'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30',
+  'human-approved': 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30',
+  'blocked':        'bg-red-500/10 text-red-400 border border-red-500/30',
+  'pending':        'bg-amber-500/10 text-amber-400 border border-amber-500/30',
 }
 
 const auditSeverityMap: Record<string, string> = {
-  'info':     'bg-slate-50 text-slate-600 border border-slate-200',
-  'warning':  'bg-amber-50 text-amber-700 border border-amber-200',
-  'critical': 'bg-red-50 text-red-700 border border-red-200',
+  'info':     'bg-slate-400/10 text-slate-400 border border-slate-400/25',
+  'warning':  'bg-amber-500/10 text-amber-400 border border-amber-500/30',
+  'critical': 'bg-red-500/10 text-red-400 border border-red-500/30',
 }
 
 const dotColor: Record<string, string> = {
   CRITICAL: 'bg-red-500', HIGH: 'bg-orange-500', MEDIUM: 'bg-amber-500', LOW: 'bg-slate-400',
-  Open: 'bg-red-500', 'Under Review': 'bg-amber-500', Resolved: 'bg-green-500', Dismissed: 'bg-slate-400',
-  Critical: 'bg-red-500', Bottleneck: 'bg-orange-500', Warning: 'bg-amber-500', 'On Track': 'bg-green-500',
-  Connected: 'bg-green-500', Disconnected: 'bg-red-500', Degraded: 'bg-amber-500', Pending: 'bg-slate-400',
+  Open: 'bg-red-500', 'Under Review': 'bg-amber-500', Resolved: 'bg-emerald-500', Dismissed: 'bg-slate-400',
+  Critical: 'bg-red-500', Bottleneck: 'bg-orange-500', Warning: 'bg-amber-500', 'On Track': 'bg-emerald-500',
+  Connected: 'bg-emerald-500', Disconnected: 'bg-red-500', Degraded: 'bg-amber-500', Pending: 'bg-slate-400',
   'Not connected': 'bg-slate-400',
 }
 
@@ -73,11 +73,11 @@ export default function Badge({ children, variant = 'neutral', value, className,
   }
   else if (variant === 'aiStatus' && value)      classes += ' ' + (aiStatusMap[value] || aiStatusMap.pending)
   else if (variant === 'auditSeverity' && value) classes += ' ' + (auditSeverityMap[value] || auditSeverityMap.info)
-  else if (variant === 'blue')   classes += ' bg-blue-50 text-blue-700 border border-blue-200'
-  else if (variant === 'green')  classes += ' bg-green-50 text-green-700 border border-green-200'
-  else if (variant === 'red')    classes += ' bg-red-50 text-red-700 border border-red-200'
-  else if (variant === 'amber')  classes += ' bg-amber-50 text-amber-700 border border-amber-200'
-  else classes += ' bg-slate-100 text-slate-600 border border-slate-200'
+  else if (variant === 'blue')   classes += ' bg-accent-500/10 text-accent-300 border border-accent-500/30'
+  else if (variant === 'green')  classes += ' bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+  else if (variant === 'red')    classes += ' bg-red-500/10 text-red-400 border border-red-500/30'
+  else if (variant === 'amber')  classes += ' bg-amber-500/10 text-amber-400 border border-amber-500/30'
+  else classes += ' bg-surface-overlay text-text-muted border border-border'
 
   return (
     <span className={clsx(classes, className)}>

@@ -64,8 +64,8 @@ const capabilities = [
       'Transaction evidence references on every finding',
     ],
     icon: ExclamationTriangleIcon,
-    iconBg: 'bg-orange-50',
-    iconColor: 'text-orange-600',
+    iconBg: 'bg-orange-500/10',
+    iconColor: 'text-orange-400',
   },
   {
     id: 'workflow',
@@ -79,8 +79,8 @@ const capabilities = [
       'Status tracking across Open, Under Review, and Resolved',
     ],
     icon: ArrowsRightLeftIcon,
-    iconBg: 'bg-slate-100',
-    iconColor: 'text-slate-600',
+    iconBg: 'bg-surface-overlay',
+    iconColor: 'text-text-secondary',
   },
   {
     id: 'governance',
@@ -94,8 +94,8 @@ const capabilities = [
       'Append-only server-side audit trail for security-relevant events',
     ],
     icon: ScaleIcon,
-    iconBg: 'bg-slate-100',
-    iconColor: 'text-slate-600',
+    iconBg: 'bg-surface-overlay',
+    iconColor: 'text-text-secondary',
   },
 ]
 
@@ -106,18 +106,18 @@ export default function HomePage() {
     <PublicLayout title="Financial Operations Intelligence">
 
       {/* ── Hero ── */}
-      <section className="bg-gradient-to-b from-white to-slate-50 border-b border-slate-200 pt-10 pb-12">
+      <section className="bg-gradient-to-b from-surface-raised to-surface border-b border-border pt-10 pb-12">
         <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
           <div className="grid lg:grid-cols-[1fr_1fr] gap-12 items-start">
 
             {/* Left: copy */}
             <div className="pt-2">
-              <h1 className="text-[3rem] font-bold leading-[1.08] tracking-tight mb-5 bg-gradient-to-br from-slate-900 via-slate-700 to-slate-500 bg-clip-text text-transparent">
+              <h1 className="text-[3rem] font-bold leading-[1.08] tracking-tight mb-5 bg-gradient-to-br from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
                 Detect spend anomalies.<br />
                 Enforce approval controls.<br />
                 Protect your operations.
               </h1>
-              <p className="text-lg text-slate-600 leading-relaxed mb-7 max-w-xl">
+              <p className="text-lg text-text-secondary leading-relaxed mb-7 max-w-xl">
                 Ventura connects to your ERP, bank feeds, payroll, and card data to surface financial risk
                 and workflow bottlenecks — with explainable AI decisions and a complete audit trail built
                 for enterprise compliance requirements.
@@ -126,9 +126,9 @@ export default function HomePage() {
               <div className="flex flex-wrap items-center gap-x-2 gap-y-2 mb-8">
                 {['AI Anomaly Detection', 'Approval Workflows', 'Immutable Audit Log', 'Explainable AI'].map((cert, i) => (
                   <React.Fragment key={cert}>
-                    {i > 0 && <span className="text-slate-300 select-none" aria-hidden="true">·</span>}
-                    <span className="inline-flex items-center gap-1.5 text-sm text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 font-medium">
-                      <CheckCircleIcon className="w-4 h-4 text-green-500 flex-shrink-0" />
+                    {i > 0 && <span className="text-text-muted select-none" aria-hidden="true">·</span>}
+                    <span className="inline-flex items-center gap-1.5 text-sm text-text-secondary bg-surface-raised border border-border px-3 py-1.5 font-medium">
+                      <CheckCircleIcon className="w-4 h-4 text-emerald-400 flex-shrink-0" />
                       {cert}
                     </span>
                   </React.Fragment>
@@ -136,10 +136,10 @@ export default function HomePage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-4">
-                <Link href="/contact" className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold px-6 py-3 text-base transition-colors">
+                <Link href="/contact" className="inline-flex items-center gap-2 bg-accent-500 hover:bg-accent-600 text-white font-semibold px-6 py-3 text-base transition-colors">
                   Get started
                 </Link>
-                <Link href="/demo" className="inline-flex items-center gap-1.5 text-base font-medium text-slate-600 hover:text-slate-900 transition-colors">
+                <Link href="/demo" className="inline-flex items-center gap-1.5 text-base font-medium text-text-secondary hover:text-text-primary transition-colors">
                   View a demo <ArrowRightIcon className="w-4 h-4" />
                 </Link>
               </div>
@@ -147,13 +147,13 @@ export default function HomePage() {
 
             {/* Right: demo chart */}
             <div className="lg:pt-2">
-              <div className="bg-white border border-slate-200 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.10)] overflow-hidden">
-                <div className="px-4 py-3 bg-white border-b border-slate-200 flex items-center justify-between">
+              <div className="bg-surface-raised border border-border shadow-[0_4px_24px_-4px_rgba(0,0,0,0.10)] overflow-hidden">
+                <div className="px-4 py-3 bg-surface-raised border-b border-border flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-semibold text-slate-800">Spend & Anomaly Overview</p>
-                    <p className="text-[10px] text-slate-400 mt-0.5">Monthly spend · risk exposure · savings identified</p>
+                    <p className="text-xs font-semibold text-text-secondary">Spend & Anomaly Overview</p>
+                    <p className="text-[10px] text-text-muted mt-0.5">Monthly spend · risk exposure · savings identified</p>
                   </div>
-                  <span className="text-[10px] text-slate-400 border border-slate-200 px-2 py-0.5 font-medium">
+                  <span className="text-[10px] text-text-muted border border-border px-2 py-0.5 font-medium">
                     Illustrative example
                   </span>
                 </div>
@@ -162,8 +162,8 @@ export default function HomePage() {
                     <ComposedChart data={DEMO_DATA} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                       <defs>
                         <linearGradient id="spendGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%"  stopColor="#10b981" stopOpacity={0.14} />
-                          <stop offset="95%" stopColor="#10b981" stopOpacity={0.01} />
+                          <stop offset="5%"  stopColor="#4f88cb" stopOpacity={0.14} />
+                          <stop offset="95%" stopColor="#4f88cb" stopOpacity={0.01} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
@@ -185,14 +185,14 @@ export default function HomePage() {
                           </span>
                         )}
                       />
-                      <Area yAxisId="spend" type="monotone" dataKey="spend" stroke="#10b981" strokeWidth={1.5} fill="url(#spendGrad)" />
+                      <Area yAxisId="spend" type="monotone" dataKey="spend" stroke="#4f88cb" strokeWidth={1.5} fill="url(#spendGrad)" />
                       <Bar yAxisId="risk" dataKey="anomalyExposure" fill="#f87171" maxBarSize={14} opacity={0.8} />
                       <Bar yAxisId="risk" dataKey="savingsFound" fill="#34d399" maxBarSize={14} opacity={0.8} />
                     </ComposedChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="px-4 py-2.5 bg-slate-50 border-t border-slate-200">
-                  <p className="text-[10px] text-slate-400">Connect your data to see real spend trends and detected anomalies</p>
+                <div className="px-4 py-2.5 bg-surface-overlay border-t border-border">
+                  <p className="text-[10px] text-text-muted">Connect your data to see real spend trends and detected anomalies</p>
                 </div>
               </div>
             </div>
@@ -201,26 +201,26 @@ export default function HomePage() {
       </section>
 
       {/* ── Integration logo stream ── */}
-      <section className="bg-slate-50 border-b border-slate-200 py-6">
+      <section className="bg-surface border-b border-border py-6">
         <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 mb-5 flex items-center justify-between flex-wrap gap-2">
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Native integrations</p>
-            <p className="text-base font-semibold text-slate-700">Connects to your existing financial stack</p>
+            <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1">Native integrations</p>
+            <p className="text-base font-semibold text-text-secondary">Connects to your existing financial stack</p>
           </div>
-          <p className="text-xs text-slate-400">Also available: REST API · Webhook · SFTP · Custom ETL</p>
+          <p className="text-xs text-text-muted">Also available: REST API · Webhook · SFTP · Custom ETL</p>
         </div>
 
         <div className="relative overflow-hidden select-none">
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-24 z-10 bg-gradient-to-r from-slate-50 to-transparent" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-24 z-10 bg-gradient-to-l from-slate-50 to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-24 z-10 bg-gradient-to-r from-surface to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-24 z-10 bg-gradient-to-l from-surface to-transparent" />
           <div className="animate-marquee flex gap-4 w-max px-4">
             {[...STREAM_BRANDS, ...STREAM_BRANDS].map((b, i) => (
               <div
                 key={`${b.id}-${i}`}
-                className="flex items-center gap-3 bg-white border border-slate-200 px-5 py-3 shadow-sm flex-shrink-0"
+                className="flex items-center gap-3 bg-surface-raised border border-border px-5 py-3 shadow-sm flex-shrink-0"
               >
                 <BrandIcon brand={b.brand} size={30} />
-                <span className="text-sm font-semibold text-slate-600 whitespace-nowrap">{b.name}</span>
+                <span className="text-sm font-semibold text-text-secondary whitespace-nowrap">{b.name}</span>
               </div>
             ))}
           </div>
@@ -232,26 +232,26 @@ export default function HomePage() {
         const Icon = cap.icon
         const isEven = i % 2 === 0
         return (
-          <section key={cap.id} id={cap.id} className={`py-14 border-b border-slate-200 ${isEven ? 'bg-white' : 'bg-slate-50'}`}>
+          <section key={cap.id} id={cap.id} className={`py-14 border-b border-border ${isEven ? 'bg-surface-raised' : 'bg-surface'}`}>
             <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
               <div className="grid lg:grid-cols-2 gap-14 items-center">
                 <div className={!isEven ? 'lg:order-2' : ''}>
-                  <div className={`w-11 h-11 ${cap.iconBg} border border-slate-200 flex items-center justify-center mb-5`}>
+                  <div className={`w-11 h-11 ${cap.iconBg} border border-border flex items-center justify-center mb-5`}>
                     <Icon className={`w-6 h-6 ${cap.iconColor}`} />
                   </div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">{cap.eyebrow}</p>
-                  <h2 className="text-[2rem] font-bold text-slate-900 mb-4 leading-snug">{cap.title}</h2>
-                  <p className="text-base text-slate-600 leading-relaxed mb-6">{cap.body}</p>
+                  <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-3">{cap.eyebrow}</p>
+                  <h2 className="text-[2rem] font-bold text-text-primary mb-4 leading-snug">{cap.title}</h2>
+                  <p className="text-base text-text-secondary leading-relaxed mb-6">{cap.body}</p>
                   <ul className="space-y-3">
                     {cap.bullets.map(b => (
-                      <li key={b} className="flex items-start gap-3 text-base text-slate-700">
-                        <CheckCircleIcon className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                      <li key={b} className="flex items-start gap-3 text-base text-text-secondary">
+                        <CheckCircleIcon className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
                         {b}
                       </li>
                     ))}
                   </ul>
                   <div className="mt-7">
-                    <Link href="/demo" className="inline-flex items-center gap-1.5 text-base font-semibold text-slate-600 hover:text-slate-900 transition-colors">
+                    <Link href="/demo" className="inline-flex items-center gap-1.5 text-base font-semibold text-text-secondary hover:text-text-primary transition-colors">
                       See it in action <ArrowRightIcon className="w-5 h-5" />
                     </Link>
                   </div>
@@ -268,15 +268,15 @@ export default function HomePage() {
       })}
 
       {/* ── Transparency & Audit Trail ── */}
-      <section id="security" className="py-14 bg-white border-b border-slate-200">
+      <section id="security" className="py-14 bg-surface-raised border-b border-border">
         <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
           <div className="grid md:grid-cols-2 gap-14 items-start">
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4">Transparency & Audit Trail</p>
-              <h2 className="text-[2rem] font-bold text-slate-900 mb-4 leading-snug">
+              <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-4">Transparency & Audit Trail</p>
+              <h2 className="text-[2rem] font-bold text-text-primary mb-4 leading-snug">
                 Every AI decision is explainable, logged, and traceable to source transactions
               </h2>
-              <p className="text-base text-slate-600 leading-relaxed mb-8">
+              <p className="text-base text-text-secondary leading-relaxed mb-8">
                 Ventura doesn't just flag anomalies — it shows its reasoning. Every finding includes a
                 confidence score, a plain-language explanation, and direct references to the underlying
                 transactions, so your team can investigate, approve, or dismiss with full context.
@@ -291,12 +291,12 @@ export default function HomePage() {
                   const IIcon = item.icon
                   return (
                     <div key={item.title} className="flex gap-4 items-start">
-                      <div className="w-10 h-10 bg-slate-100 border border-slate-200 flex items-center justify-center flex-shrink-0">
-                        <IIcon className="w-5 h-5 text-slate-600" />
+                      <div className="w-10 h-10 bg-surface-overlay border border-border flex items-center justify-center flex-shrink-0">
+                        <IIcon className="w-5 h-5 text-text-secondary" />
                       </div>
                       <div>
-                        <p className="text-base font-semibold text-slate-800">{item.title}</p>
-                        <p className="text-sm text-slate-500 mt-1 leading-relaxed">{item.body}</p>
+                        <p className="text-base font-semibold text-text-secondary">{item.title}</p>
+                        <p className="text-sm text-text-muted mt-1 leading-relaxed">{item.body}</p>
                       </div>
                     </div>
                   )
@@ -304,8 +304,8 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="bg-[#0f1923] border border-slate-700 p-6">
-              <p className="text-slate-500 mb-4 text-[10px] font-mono uppercase tracking-wider">// AI decision log — structure</p>
+            <div className="bg-[#0f1923] border border-border p-6">
+              <p className="text-text-muted mb-4 text-[10px] font-mono uppercase tracking-wider">// AI decision log — structure</p>
               <div className="space-y-1.5 font-mono text-[12px] leading-relaxed">
                 {[
                   { k: 'event',      v: '"anomaly.detected"',          c: 'text-green-400' },
@@ -315,17 +315,17 @@ export default function HomePage() {
                   { k: 'action',     v: '"human_approval_required"',   c: 'text-amber-300' },
                   { k: 'actor',      v: '"finance@yourcompany.com"',   c: 'text-green-300' },
                   { k: 'immutable',  v: 'true',                        c: 'text-emerald-400' },
-                  { k: 'log_id',     v: '"evt_xxxxxxxxxx"',            c: 'text-slate-400' },
+                  { k: 'log_id',     v: '"evt_xxxxxxxxxx"',            c: 'text-text-muted' },
                 ].map(row => (
                   <div key={row.k} className="flex gap-3">
-                    <span className="text-slate-500 select-none">{row.k}:</span>
+                    <span className="text-text-muted select-none">{row.k}:</span>
                     <span className={row.c}>{row.v}</span>
                   </div>
                 ))}
               </div>
-              <div className="mt-4 pt-4 border-t border-slate-700 flex items-center gap-2">
+              <div className="mt-4 pt-4 border-t border-border flex items-center gap-2">
                 <span className="w-1.5 h-1.5 bg-emerald-400 animate-pulse" />
-                <span className="text-[10px] text-slate-400 font-mono">tamper-evident · append-only · exportable</span>
+                <span className="text-[10px] text-text-muted font-mono">tamper-evident · append-only · exportable</span>
               </div>
             </div>
           </div>
@@ -337,20 +337,21 @@ export default function HomePage() {
         <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
           <div className="grid md:grid-cols-[1fr_auto] gap-10 items-center">
             <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">Get started</p>
+              <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-4">Get started</p>
               <h2 className="text-[2rem] font-bold text-white mb-4 leading-snug">
                 Purpose-built for enterprise finance operations
               </h2>
-              <p className="text-base text-slate-400 leading-relaxed max-w-lg">
+              <p className="text-base text-text-muted leading-relaxed max-w-lg">
                 Connect your accounting system and Ventura will scan your transactions automatically.
                 Most finance teams identify their first findings within hours of their first sync.
               </p>
             </div>
             <div className="flex flex-col gap-3 md:flex-shrink-0">
+              {/* Intentional inverted fill: light button reads as the strong CTA against this dark banner */}
               <Link href="/contact" className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-100 text-slate-900 font-semibold px-7 py-3 text-base transition-colors">
                 Talk to us
               </Link>
-              <Link href="/contact" className="inline-flex items-center justify-center gap-2 bg-[#1a2640] text-slate-200 font-medium px-7 py-3 text-base border border-slate-700 hover:bg-[#1e3a6e] transition-colors">
+              <Link href="/contact" className="inline-flex items-center justify-center gap-2 bg-[#1a2640] text-slate-200 font-medium px-7 py-3 text-base border border-border hover:bg-[#1e3a6e] transition-colors">
                 Sign up for access <ArrowRightIcon className="w-4 h-4" />
               </Link>
             </div>
@@ -366,27 +367,27 @@ export default function HomePage() {
 
 function AnomalyPreviewPanel() {
   const rows = [
-    { title: 'Duplicate invoice — same vendor, same amount', type: 'Duplicate',      sev: 'HIGH',     sevCls: 'border-orange-200 bg-orange-50 text-orange-700' },
-    { title: 'Statistical outlier — payment 4× vendor baseline', type: 'Outlier',   sev: 'CRITICAL', sevCls: 'border-red-200 bg-red-50 text-red-700' },
-    { title: 'Round-number transaction above $10,000',         type: 'Round Number', sev: 'MEDIUM',   sevCls: 'border-amber-200 bg-amber-50 text-amber-700' },
+    { title: 'Duplicate invoice — same vendor, same amount', type: 'Duplicate',      sev: 'HIGH',     sevCls: 'border-orange-500/30 bg-orange-500/10 text-orange-400' },
+    { title: 'Statistical outlier — payment 4× vendor baseline', type: 'Outlier',   sev: 'CRITICAL', sevCls: 'border-red-500/30 bg-red-500/10 text-red-400' },
+    { title: 'Round-number transaction above $10,000',         type: 'Round Number', sev: 'MEDIUM',   sevCls: 'border-amber-500/30 bg-amber-500/10 text-amber-400' },
   ]
   return (
-    <div className="bg-white border border-slate-200 shadow-sm overflow-hidden">
-      <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-        <p className="text-xs font-semibold text-slate-700">Anomaly Detection Results</p>
-        <span className="text-[10px] text-slate-400 border border-slate-200 px-2 py-0.5">Example</span>
+    <div className="bg-surface-raised border border-border shadow-sm overflow-hidden">
+      <div className="px-4 py-3 border-b border-border flex items-center justify-between bg-surface-overlay">
+        <p className="text-xs font-semibold text-text-secondary">Anomaly Detection Results</p>
+        <span className="text-[10px] text-text-muted border border-border px-2 py-0.5">Example</span>
       </div>
       {rows.map((row, i) => (
-        <div key={i} className={`px-4 py-3 flex items-start gap-3 ${i < rows.length - 1 ? 'border-b border-slate-100' : ''}`}>
+        <div key={i} className={`px-4 py-3 flex items-start gap-3 ${i < rows.length - 1 ? 'border-b border-border-subtle' : ''}`}>
           <span className={`text-[10px] font-semibold px-2 py-0.5 border flex-shrink-0 mt-0.5 ${row.sevCls}`}>{row.sev}</span>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-slate-800 leading-snug">{row.title}</p>
-            <p className="text-[10px] text-slate-400 mt-0.5">{row.type}</p>
+            <p className="text-xs font-medium text-text-secondary leading-snug">{row.title}</p>
+            <p className="text-[10px] text-text-muted mt-0.5">{row.type}</p>
           </div>
         </div>
       ))}
-      <div className="px-4 py-2.5 bg-slate-50 border-t border-slate-200">
-        <p className="text-[10px] text-slate-400">AI evidence chain and suggested actions available per finding</p>
+      <div className="px-4 py-2.5 bg-surface-overlay border-t border-border">
+        <p className="text-[10px] text-text-muted">AI evidence chain and suggested actions available per finding</p>
       </div>
     </div>
   )
@@ -401,32 +402,32 @@ function WorkflowPreviewPanel() {
     { step: 'Payment release',          status: 'wait',  actor: 'Finance',    time: '—'   },
   ]
   const statusStyle: Record<string, string> = {
-    done:  'bg-green-50 border-green-200 text-green-700',
-    stuck: 'bg-red-50 border-red-200 text-red-700',
-    wait:  'bg-slate-100 border-slate-200 text-slate-500',
+    done:  'bg-emerald-500/10 border-emerald-500/30 text-emerald-400',
+    stuck: 'bg-red-500/10 border-red-500/30 text-red-400',
+    wait:  'bg-surface-overlay border-border text-text-muted',
   }
   const statusLabel: Record<string, string> = { done: 'Done', stuck: 'Overdue', wait: 'Waiting' }
 
   return (
-    <div className="bg-white border border-slate-200 shadow-sm overflow-hidden">
-      <div className="px-4 py-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-        <p className="text-xs font-semibold text-slate-700">Invoice Approval Workflow</p>
-        <span className="text-[10px] font-semibold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5">SLA breach</span>
+    <div className="bg-surface-raised border border-border shadow-sm overflow-hidden">
+      <div className="px-4 py-3 border-b border-border bg-surface-overlay flex items-center justify-between">
+        <p className="text-xs font-semibold text-text-secondary">Invoice Approval Workflow</p>
+        <span className="text-[10px] font-semibold text-red-400 bg-red-500/10 border border-red-500/30 px-2 py-0.5">SLA breach</span>
       </div>
       {steps.map((s, i) => (
-        <div key={s.step} className={`flex items-center gap-3 px-4 py-2.5 ${i < steps.length - 1 ? 'border-b border-slate-100' : ''}`}>
-          <div className={`w-5 h-5 flex items-center justify-center flex-shrink-0 text-[9px] font-bold ${s.status === 'done' ? 'bg-green-500 text-white' : s.status === 'stuck' ? 'bg-red-100 text-red-600 border border-red-300' : 'bg-slate-100 text-slate-400 border border-slate-200'}`}>
+        <div key={s.step} className={`flex items-center gap-3 px-4 py-2.5 ${i < steps.length - 1 ? 'border-b border-border-subtle' : ''}`}>
+          <div className={`w-5 h-5 flex items-center justify-center flex-shrink-0 text-[9px] font-bold ${s.status === 'done' ? 'bg-emerald-500 text-white' : s.status === 'stuck' ? 'bg-red-500/20 text-red-400 border border-red-500/40' : 'bg-surface-overlay text-text-muted border border-border'}`}>
             {i + 1}
           </div>
-          <p className="text-xs text-slate-700 flex-1">{s.step}</p>
+          <p className="text-xs text-text-secondary flex-1">{s.step}</p>
           <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
-            <span className="text-[10px] text-slate-400">{s.actor}</span>
+            <span className="text-[10px] text-text-muted">{s.actor}</span>
             <span className={`text-[10px] font-semibold px-1.5 py-0.5 border ${statusStyle[s.status]}`}>{statusLabel[s.status]}</span>
           </div>
         </div>
       ))}
-      <div className="px-4 py-2.5 bg-amber-50 border-t border-amber-200">
-        <p className="text-[10px] text-amber-800 font-medium">Bottleneck detected at step 3 — SLA target: 48h, approval pending for 6 days</p>
+      <div className="px-4 py-2.5 bg-amber-500/10 border-t border-amber-500/30">
+        <p className="text-[10px] text-amber-400 font-medium">Bottleneck detected at step 3 — SLA target: 48h, approval pending for 6 days</p>
       </div>
     </div>
   )
@@ -440,22 +441,22 @@ function GovernancePreviewPanel() {
     { ts: 'Today', type: 'HUMAN_APPROVED', tier: 'High',     conf: 85, action: 'Budget overrun escalated and reviewed'      },
   ]
   const typeCls: Record<string, string> = {
-    AUTO_APPROVED:  'bg-green-50 text-green-700 border-green-200',
-    HUMAN_REQUIRED: 'bg-red-50 text-red-700 border-red-200',
-    HUMAN_APPROVED: 'bg-green-50 text-green-700 border-green-200',
+    AUTO_APPROVED:  'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+    HUMAN_REQUIRED: 'bg-red-500/10 text-red-400 border-red-500/30',
+    HUMAN_APPROVED: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
   }
   return (
-    <div className="bg-white border border-slate-200 shadow-sm overflow-hidden">
-      <div className="px-4 py-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-        <p className="text-xs font-semibold text-slate-700">AI Governance Log</p>
-        <span className="text-[10px] text-slate-400 border border-slate-200 px-2 py-0.5">Example</span>
+    <div className="bg-surface-raised border border-border shadow-sm overflow-hidden">
+      <div className="px-4 py-3 border-b border-border bg-surface-overlay flex items-center justify-between">
+        <p className="text-xs font-semibold text-text-secondary">AI Governance Log</p>
+        <span className="text-[10px] text-text-muted border border-border px-2 py-0.5">Example</span>
       </div>
       {events.map((e, i) => (
-        <div key={i} className={`px-4 py-2.5 ${i < events.length - 1 ? 'border-b border-slate-100' : ''}`}>
+        <div key={i} className={`px-4 py-2.5 ${i < events.length - 1 ? 'border-b border-border-subtle' : ''}`}>
           <div className="flex items-start gap-2.5">
             <div className="flex-1 min-w-0">
-              <p className="text-[11px] font-medium text-slate-800 leading-snug">{e.action}</p>
-              <p className="text-[9px] text-slate-400 mt-1">Risk tier: {e.tier} · Confidence {e.conf}%</p>
+              <p className="text-[11px] font-medium text-text-secondary leading-snug">{e.action}</p>
+              <p className="text-[9px] text-text-muted mt-1">Risk tier: {e.tier} · Confidence {e.conf}%</p>
             </div>
             <span className={`text-[9px] font-semibold px-1.5 py-0.5 border flex-shrink-0 ${typeCls[e.type]}`}>
               {e.type.replace('_', ' ')}
@@ -463,8 +464,8 @@ function GovernancePreviewPanel() {
           </div>
         </div>
       ))}
-      <div className="px-4 py-2.5 bg-slate-50 border-t border-slate-200">
-        <p className="text-[10px] text-slate-400">Every AI action is logged · human approval gates enforced by policy</p>
+      <div className="px-4 py-2.5 bg-surface-overlay border-t border-border">
+        <p className="text-[10px] text-text-muted">Every AI action is logged · human approval gates enforced by policy</p>
       </div>
     </div>
   )

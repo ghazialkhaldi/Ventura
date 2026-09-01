@@ -14,41 +14,41 @@ const practices = [
 export default function SecurityPage() {
   return (
     <PublicLayout title="Security">
-      <section className="bg-gradient-to-b from-white to-slate-50 border-b border-slate-200 py-16">
+      <section className="bg-gradient-to-b from-surface-raised to-surface border-b border-border py-16">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <p className="text-xs font-semibold text-emerald-700 uppercase tracking-widest mb-3">Security</p>
-          <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 leading-tight">
+          <p className="text-xs font-semibold text-accent-400 uppercase tracking-widest mb-3">Security</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-text-primary leading-tight">
             Your financial data, protected at every layer
           </h1>
-          <p className="text-base text-slate-500 mt-4 leading-relaxed">
+          <p className="text-base text-text-muted mt-4 leading-relaxed">
             Security isn't a feature at Ventura — it's the foundation. Here's how we protect
             the data enterprise finance teams trust us with.
           </p>
         </div>
       </section>
 
-      <section className="py-14 bg-white border-b border-slate-200">
+      <section className="py-14 bg-surface-raised border-b border-border">
         <div className="max-w-4xl mx-auto px-6">
           <div className="grid sm:grid-cols-2 gap-5">
             {practices.map(p => (
-              <div key={p.title} className="border border-slate-200 rounded-lg p-5 hover:border-slate-300 transition-colors">
-                <p.icon className="w-5 h-5 text-emerald-700 mb-3" />
-                <h3 className="text-sm font-bold text-slate-900 mb-1.5">{p.title}</h3>
-                <p className="text-sm text-slate-500 leading-relaxed">{p.desc}</p>
+              <div key={p.title} className="border border-border rounded-lg p-5 hover:border-border-strong transition-colors">
+                <p.icon className="w-5 h-5 text-accent-400 mb-3" />
+                <h3 className="text-sm font-bold text-text-primary mb-1.5">{p.title}</h3>
+                <p className="text-sm text-text-muted leading-relaxed">{p.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-14 bg-slate-50">
+      <section className="py-14 bg-surface">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <h2 className="text-xl font-bold text-slate-900 mb-3">Reporting a vulnerability</h2>
-          <p className="text-sm text-slate-500 mb-6 leading-relaxed">
+          <h2 className="text-xl font-bold text-text-primary mb-3">Reporting a vulnerability</h2>
+          <p className="text-sm text-text-muted mb-6 leading-relaxed">
             We take security reports seriously. If you believe you've found a vulnerability in Ventura,
             please reach out and our team will respond promptly.
           </p>
-          <Link href="/contact" className="inline-block bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
+          <Link href="/contact" className="inline-block bg-accent-500 hover:bg-accent-600 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
             Contact security team
           </Link>
         </div>

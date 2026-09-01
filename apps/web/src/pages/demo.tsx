@@ -125,19 +125,19 @@ const SEV_LEFT: Record<string, string> = {
   CRITICAL: 'border-l-red-600',
   HIGH:     'border-l-orange-500',
   MEDIUM:   'border-l-amber-400',
-  LOW:      'border-l-slate-300',
+  LOW:      'border-l-border-strong',
 }
 const SEV_AMT: Record<string, string> = {
-  CRITICAL: 'text-red-700',
-  HIGH:     'text-orange-700',
-  MEDIUM:   'text-amber-700',
-  LOW:      'text-slate-500',
+  CRITICAL: 'text-red-400',
+  HIGH:     'text-orange-400',
+  MEDIUM:   'text-amber-400',
+  LOW:      'text-text-muted',
 }
 const SEV_BADGE: Record<string, string> = {
-  CRITICAL: 'bg-red-50 text-red-700 border-red-200',
-  HIGH:     'bg-orange-50 text-orange-700 border-orange-200',
-  MEDIUM:   'bg-amber-50 text-amber-700 border-amber-200',
-  LOW:      'bg-slate-100 text-slate-500 border-slate-200',
+  CRITICAL: 'bg-red-500/10 text-red-400 border-red-500/30',
+  HIGH:     'bg-orange-500/10 text-orange-400 border-orange-500/30',
+  MEDIUM:   'bg-amber-500/10 text-amber-400 border-amber-500/30',
+  LOW:      'bg-surface-overlay text-text-muted border-border',
 }
 const TYPE_COLORS: Record<string, string> = {
   duplicate:      '#ef4444',
@@ -160,31 +160,31 @@ export default function DemoPage() {
     <PublicLayout title="Product Demo">
 
       {/* ── Page header ── */}
-      <div className="border-b border-slate-200 bg-white px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 pt-8 pb-6">
-        <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900 transition-colors mb-5">
+      <div className="border-b border-border bg-surface-raised px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 pt-8 pb-6">
+        <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-text-primary transition-colors mb-5">
           <ArrowLeftIcon className="w-4 h-4" /> Back to home
         </Link>
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Product demo</p>
-            <h1 className="text-[1.9rem] font-bold text-slate-900 leading-tight">Your finance ops platform, live</h1>
-            <p className="text-sm text-slate-500 mt-1.5 max-w-xl">
+            <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-2">Product demo</p>
+            <h1 className="text-[1.9rem] font-bold text-text-primary leading-tight">Your finance ops platform, live</h1>
+            <p className="text-sm text-text-muted mt-1.5 max-w-xl">
               A full preview of Ventura with illustrative data — the exact interface your finance team would use.
               Connect your accounting stack to see real findings within hours.
             </p>
           </div>
-          <Link href="/contact" className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold px-5 py-2.5 text-sm transition-colors whitespace-nowrap">
+          <Link href="/contact" className="inline-flex items-center gap-2 bg-accent-500 hover:bg-accent-600 text-white font-semibold px-5 py-2.5 text-sm transition-colors whitespace-nowrap">
             Get started with your data <ArrowRightIcon className="w-4 h-4" />
           </Link>
         </div>
       </div>
 
       {/* ── Demo notice strip ── */}
-      <div className="bg-amber-50 border-b border-amber-200 px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 py-2.5 flex items-center gap-3">
+      <div className="bg-amber-500/10 border-b border-amber-500/30 px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 py-2.5 flex items-center gap-3">
         <span className="w-1.5 h-1.5 bg-amber-500 rounded-full flex-shrink-0" />
-        <p className="text-xs text-amber-800">
+        <p className="text-xs text-amber-400">
           <span className="font-semibold">Demo mode</span> — all figures are illustrative examples only.{' '}
-          <Link href="/contact" className="underline underline-offset-2 font-medium hover:text-amber-900 transition-colors">
+          <Link href="/contact" className="underline underline-offset-2 font-medium hover:text-amber-300 transition-colors">
             Talk to our team
           </Link>{' '}
           to connect your real financial data.
@@ -192,19 +192,19 @@ export default function DemoPage() {
       </div>
 
       {/* ── App window ── */}
-      <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 py-8 bg-slate-200">
-        <div className="border border-slate-400 shadow-2xl overflow-hidden h-[720px] flex flex-col">
+      <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 py-8 bg-surface-sunken">
+        <div className="border border-border-strong shadow-2xl overflow-hidden h-[720px] flex flex-col">
 
           {/* Browser chrome */}
-          <div className="h-9 bg-slate-300 border-b border-slate-400 flex items-center px-4 gap-3 flex-shrink-0">
+          <div className="h-9 bg-surface-overlay border-b border-border-strong flex items-center px-4 gap-3 flex-shrink-0">
             <div className="flex gap-1.5">
               <div className="w-2.5 h-2.5 bg-red-400 rounded-full" />
               <div className="w-2.5 h-2.5 bg-amber-400 rounded-full" />
               <div className="w-2.5 h-2.5 bg-green-400 rounded-full" />
             </div>
             <div className="flex-1 mx-3">
-              <div className="bg-white border border-slate-300 rounded text-[11px] text-slate-500 px-3 py-1 max-w-xs flex items-center gap-1.5 font-mono">
-                <span className="text-green-600 text-xs">🔒</span>
+              <div className="bg-surface-raised border border-border-strong rounded text-[11px] text-text-muted px-3 py-1 max-w-xs flex items-center gap-1.5 font-mono">
+                <span className="text-emerald-400 text-xs">🔒</span>
                 app.ventura.ai/dashboard
               </div>
             </div>
@@ -219,7 +219,7 @@ export default function DemoPage() {
               {/* Brand */}
               <div className="h-14 flex items-center px-4 border-b border-[#1e2d47] flex-shrink-0">
                 <div>
-                  <VenturaLogo variant="light" height={26} />
+                  <VenturaLogo variant="light" height={22} />
                   <span className="block text-[10px] text-[#4d6a8a] mt-0.5">Financial Operations</span>
                 </div>
               </div>
@@ -280,18 +280,18 @@ export default function DemoPage() {
             </div>
 
             {/* ── Dashboard content ── */}
-            <div className="flex-1 bg-slate-50 overflow-y-auto">
+            <div className="flex-1 bg-surface overflow-y-auto">
 
               {/* Data strip */}
-              <div className="flex flex-wrap items-center gap-x-5 gap-y-1 px-5 py-2.5 text-[11px] text-slate-500 border-b border-slate-200 bg-white flex-shrink-0">
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-1 px-5 py-2.5 text-[11px] text-text-muted border-b border-border bg-surface-raised flex-shrink-0">
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0" />
-                  <span className="font-semibold text-slate-700">Illustrative data</span>
+                  <span className="font-semibold text-text-secondary">Illustrative data</span>
                 </div>
                 <span className="flex items-center gap-1.5">
                   <ClockIcon className="w-3 h-3" />Last scanned just now
                 </span>
-                <span className="bg-amber-50 border border-amber-200 text-amber-700 font-bold px-2 py-0.5 rounded-full uppercase tracking-wide text-[10px]">
+                <span className="bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold px-2 py-0.5 rounded-full uppercase tracking-wide text-[10px]">
                   Demo mode
                 </span>
               </div>
@@ -299,46 +299,46 @@ export default function DemoPage() {
               <div className="px-5 py-4">
 
                 {/* Priority alert banner */}
-                <div className="bg-white border border-slate-200 border-l-4 border-l-red-600 overflow-hidden mb-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
-                  <div className="flex items-stretch divide-x divide-slate-200">
+                <div className="bg-surface-raised border border-border border-l-4 border-l-red-600 overflow-hidden mb-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+                  <div className="flex items-stretch divide-x divide-border">
                     <div className="flex-1 p-4 min-w-0">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-[10px] font-bold tracking-widest uppercase text-red-700">Critical — Immediate Action Required</span>
-                        <span className="text-[10px] text-slate-400">·</span>
-                        <span className="text-[10px] text-slate-500">{ANOMALIES.length} open alerts · 5 high-confidence</span>
+                        <span className="text-[10px] font-bold tracking-widest uppercase text-red-400">Critical — Immediate Action Required</span>
+                        <span className="text-[10px] text-text-muted">·</span>
+                        <span className="text-[10px] text-text-muted">{ANOMALIES.length} open alerts · 5 high-confidence</span>
                       </div>
-                      <p className="text-slate-900 font-semibold text-sm leading-snug">{ANOMALIES[0].title}</p>
-                      <p className="text-slate-500 text-xs mt-0.5">{ANOMALIES[0].vendor} · {ANOMALIES[0].category}</p>
-                      <p className="text-slate-600 text-xs mt-1.5 leading-relaxed line-clamp-2">
+                      <p className="text-text-primary font-semibold text-sm leading-snug">{ANOMALIES[0].title}</p>
+                      <p className="text-text-muted text-xs mt-0.5">{ANOMALIES[0].vendor} · {ANOMALIES[0].category}</p>
+                      <p className="text-text-secondary text-xs mt-1.5 leading-relaxed line-clamp-2">
                         Payment to Meridian Consulting is 4× the vendor&apos;s 90-day baseline. Ventura has flagged this as a statistical outlier requiring immediate review.
                       </p>
                     </div>
                     <div className="px-4 py-4 flex flex-col items-center justify-center gap-1 flex-shrink-0">
-                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">At Risk</p>
-                      <p className="text-xl font-bold text-red-700">{fmtC(ANOMALIES[0].amount)}</p>
+                      <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest">At Risk</p>
+                      <p className="text-xl font-bold text-red-400">{fmtC(ANOMALIES[0].amount)}</p>
                       <div className="flex items-center gap-1.5">
-                        <div className="w-14 h-1 bg-slate-200 overflow-hidden">
-                          <div className="h-full bg-slate-500" style={{ width: `${ANOMALIES[0].confidence}%` }} />
+                        <div className="w-14 h-1 bg-surface-overlay overflow-hidden">
+                          <div className="h-full bg-text-muted" style={{ width: `${ANOMALIES[0].confidence}%` }} />
                         </div>
-                        <span className="text-[10px] font-semibold text-slate-600">{ANOMALIES[0].confidence}%</span>
+                        <span className="text-[10px] font-semibold text-text-secondary">{ANOMALIES[0].confidence}%</span>
                       </div>
                     </div>
                     <div className="px-4 py-4 flex flex-col items-center justify-center gap-2.5 flex-shrink-0">
                       <span
                         title="Available in your connected workspace"
-                        className="flex items-center gap-1.5 bg-slate-900 text-white text-xs font-semibold px-4 py-2 opacity-60 cursor-not-allowed whitespace-nowrap"
+                        className="flex items-center gap-1.5 bg-accent-500 text-white text-xs font-semibold px-4 py-2 opacity-60 cursor-not-allowed whitespace-nowrap"
                       >
                         Investigate <ArrowRightIcon className="w-3 h-3" />
                       </span>
-                      <span className="text-[10px] text-slate-400">View all {ANOMALIES.length} alerts</span>
+                      <span className="text-[10px] text-text-muted">View all {ANOMALIES.length} alerts</span>
                     </div>
                   </div>
-                  <div className="border-t border-slate-200 px-4 py-2 flex items-center gap-5 overflow-x-auto bg-slate-50">
+                  <div className="border-t border-border px-4 py-2 flex items-center gap-5 overflow-x-auto bg-surface-raised">
                     {ANOMALIES.slice(1, 4).map(a => (
                       <div key={a.id} className="flex items-center gap-2 flex-shrink-0">
                         <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${a.sev === 'CRITICAL' ? 'bg-red-500' : a.sev === 'HIGH' ? 'bg-orange-400' : 'bg-amber-400'}`} />
-                        <span className="text-[11px] text-slate-600 truncate max-w-[150px]">{a.title}</span>
-                        <span className="text-[11px] font-semibold text-slate-500">{fmtC(a.amount)}</span>
+                        <span className="text-[11px] text-text-secondary truncate max-w-[150px]">{a.title}</span>
+                        <span className="text-[11px] font-semibold text-text-muted">{fmtC(a.amount)}</span>
                       </div>
                     ))}
                   </div>
@@ -347,37 +347,37 @@ export default function DemoPage() {
                 {/* Page sub-header */}
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h2 className="text-base font-bold text-slate-900">Acme Corporation</h2>
-                    <p className="text-xs text-slate-500 mt-0.5">Jul 2025 – Jun 2026 · 3 files · 1,284 transactions</p>
+                    <h2 className="text-base font-bold text-text-primary">Acme Corporation</h2>
+                    <p className="text-xs text-text-muted mt-0.5">Jul 2025 – Jun 2026 · 3 files · 1,284 transactions</p>
                   </div>
                 </div>
 
                 {/* KPI row */}
                 <div className="grid grid-cols-4 gap-3 mb-4">
                   {[
-                    { label: 'Total Spend',        value: fmtC(totalSpend),    sub: 'Jul 2025 – Jun 2026',              color: 'text-slate-900' },
-                    { label: 'Risk Exposure',      value: fmtC(totalExposure), sub: `${ANOMALIES.length} open anomalies`, color: 'text-red-700'   },
-                    { label: 'Savings Identified', value: fmtC(totalSavings),  sub: `${DUPLICATES.length} duplicate payments`, color: 'text-slate-900' },
-                    { label: 'Transactions',       value: '1,284',             sub: '22 unique vendors',                color: 'text-slate-900' },
+                    { label: 'Total Spend',        value: fmtC(totalSpend),    sub: 'Jul 2025 – Jun 2026',              color: 'text-text-primary' },
+                    { label: 'Risk Exposure',      value: fmtC(totalExposure), sub: `${ANOMALIES.length} open anomalies`, color: 'text-red-400'   },
+                    { label: 'Savings Identified', value: fmtC(totalSavings),  sub: `${DUPLICATES.length} duplicate payments`, color: 'text-text-primary' },
+                    { label: 'Transactions',       value: '1,284',             sub: '22 unique vendors',                color: 'text-text-primary' },
                   ].map(k => (
-                    <div key={k.label} className="bg-white border border-slate-200 px-4 py-3 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">{k.label}</p>
+                    <div key={k.label} className="bg-surface-raised border border-border px-4 py-3 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+                      <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5">{k.label}</p>
                       <p className={`text-2xl font-bold leading-none ${k.color}`}>{k.value}</p>
-                      <p className="text-xs text-slate-500 mt-1">{k.sub}</p>
+                      <p className="text-xs text-text-muted mt-1">{k.sub}</p>
                     </div>
                   ))}
                 </div>
 
                 {/* Risk & Savings chart */}
-                <div className="bg-white border border-slate-200 shadow-[0_1px_4px_rgba(0,0,0,0.06)] overflow-hidden mb-4">
-                  <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                <div className="bg-surface-raised border border-border shadow-[0_1px_4px_rgba(0,0,0,0.06)] overflow-hidden mb-4">
+                  <div className="px-4 py-3 border-b border-border-subtle flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-slate-900">Risk & Savings Overview</p>
-                      <p className="text-xs text-slate-500">Anomaly exposure vs recoverable savings by type</p>
+                      <p className="text-sm font-semibold text-text-primary">Risk & Savings Overview</p>
+                      <p className="text-xs text-text-muted">Anomaly exposure vs recoverable savings by type</p>
                     </div>
-                    <div className="flex items-center gap-4 text-xs text-slate-500">
+                    <div className="flex items-center gap-4 text-xs text-text-muted">
                       <span className="flex items-center gap-1.5 font-medium"><span className="w-2 h-2 bg-red-400 inline-block" /> Risk</span>
-                      <span className="flex items-center gap-1.5 font-medium"><span className="w-2 h-2 bg-slate-500 inline-block" /> Savings</span>
+                      <span className="flex items-center gap-1.5 font-medium"><span className="w-2 h-2 bg-text-muted inline-block" /> Savings</span>
                     </div>
                   </div>
                   <div className="px-2 py-3 h-44">
@@ -405,13 +405,13 @@ export default function DemoPage() {
                   <div className="col-span-3 space-y-4">
 
                     {/* Spend trend */}
-                    <div className="bg-white border border-slate-200 shadow-[0_1px_4px_rgba(0,0,0,0.06)] overflow-hidden">
-                      <div className="px-4 py-3 flex items-center justify-between border-b border-slate-100">
+                    <div className="bg-surface-raised border border-border shadow-[0_1px_4px_rgba(0,0,0,0.06)] overflow-hidden">
+                      <div className="px-4 py-3 flex items-center justify-between border-b border-border-subtle">
                         <div>
-                          <p className="text-sm font-semibold text-slate-900">Spend Trend</p>
-                          <p className="text-xs text-slate-500">12 months</p>
+                          <p className="text-sm font-semibold text-text-primary">Spend Trend</p>
+                          <p className="text-xs text-text-muted">12 months</p>
                         </div>
-                        <span className="text-xs font-bold text-slate-700">{fmtC(totalSpend)} total</span>
+                        <span className="text-xs font-bold text-text-secondary">{fmtC(totalSpend)} total</span>
                       </div>
                       <div className="px-2 py-3 h-36">
                         <ResponsiveContainer width="100%" height="100%">
@@ -436,31 +436,31 @@ export default function DemoPage() {
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <div>
-                          <p className="text-sm font-semibold text-slate-900">Open Anomalies</p>
-                          <p className="text-xs text-slate-500 mt-0.5">{ANOMALIES.length} require review · 5 high-confidence</p>
+                          <p className="text-sm font-semibold text-text-primary">Open Anomalies</p>
+                          <p className="text-xs text-text-muted mt-0.5">{ANOMALIES.length} require review · 5 high-confidence</p>
                         </div>
-                        <span className="text-xs text-slate-400 flex items-center gap-0.5 font-medium">
+                        <span className="text-xs text-text-muted flex items-center gap-0.5 font-medium">
                           All anomalies <ChevronRightIcon className="w-3 h-3" />
                         </span>
                       </div>
-                      <div className="bg-white border border-slate-200 divide-y divide-slate-100 shadow-[0_1px_4px_rgba(0,0,0,0.06)] overflow-hidden">
+                      <div className="bg-surface-raised border border-border divide-y divide-border-subtle shadow-[0_1px_4px_rgba(0,0,0,0.06)] overflow-hidden">
                         {ANOMALIES.map(a => (
-                          <div key={a.id} className={`flex items-center gap-3 border-l-4 ${SEV_LEFT[a.sev] ?? 'border-l-slate-300'} px-4 py-2.5`}>
+                          <div key={a.id} className={`flex items-center gap-3 border-l-4 ${SEV_LEFT[a.sev] ?? 'border-l-border-strong'} px-4 py-2.5`}>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-0.5">
                                 <span className={`text-[10px] font-bold px-1.5 py-0.5 border ${SEV_BADGE[a.sev]}`}>{a.sev}</span>
-                                <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wide">{a.type}</span>
+                                <span className="text-[10px] text-text-muted font-medium uppercase tracking-wide">{a.type}</span>
                               </div>
-                              <p className="text-xs font-medium text-slate-900 truncate">{a.title}</p>
-                              <p className="text-[11px] text-slate-500 truncate">{a.vendor} · {a.category}</p>
+                              <p className="text-xs font-medium text-text-primary truncate">{a.title}</p>
+                              <p className="text-[11px] text-text-muted truncate">{a.vendor} · {a.category}</p>
                             </div>
                             <div className="flex flex-col items-end gap-1 flex-shrink-0">
                               <p className={`text-xs font-bold ${SEV_AMT[a.sev]}`}>{fmtC(a.amount)}</p>
                               <div className="flex items-center gap-1">
-                                <div className="w-8 h-1 bg-slate-100 overflow-hidden">
-                                  <div className="h-full bg-slate-400" style={{ width: `${a.confidence}%` }} />
+                                <div className="w-8 h-1 bg-surface-overlay overflow-hidden">
+                                  <div className="h-full bg-text-muted" style={{ width: `${a.confidence}%` }} />
                                 </div>
-                                <span className="text-[10px] text-slate-400">{a.confidence}%</span>
+                                <span className="text-[10px] text-text-muted">{a.confidence}%</span>
                               </div>
                             </div>
                           </div>
@@ -473,36 +473,36 @@ export default function DemoPage() {
                   <div className="col-span-2 space-y-4">
 
                     {/* Savings */}
-                    <div className="bg-white border border-slate-200 shadow-[0_1px_4px_rgba(0,0,0,0.06)] overflow-hidden">
-                      <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                    <div className="bg-surface-raised border border-border shadow-[0_1px_4px_rgba(0,0,0,0.06)] overflow-hidden">
+                      <div className="px-4 py-3 border-b border-border-subtle flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-semibold text-slate-900">Savings Opportunities</p>
-                          <p className="text-xs text-slate-500">Duplicate & recoverable</p>
+                          <p className="text-sm font-semibold text-text-primary">Savings Opportunities</p>
+                          <p className="text-xs text-text-muted">Duplicate & recoverable</p>
                         </div>
-                        <p className="text-sm font-bold text-slate-900">{fmtC(totalSavings)}</p>
+                        <p className="text-sm font-bold text-text-primary">{fmtC(totalSavings)}</p>
                       </div>
                       <div className="p-4 space-y-2.5">
                         {DUPLICATES.map(d => (
                           <div key={d.vendor} className="flex items-center justify-between">
                             <div className="min-w-0">
-                              <p className="text-xs font-semibold text-slate-800 truncate">{d.vendor}</p>
-                              <p className="text-[10px] text-slate-400">{d.confidence}% confidence</p>
+                              <p className="text-xs font-semibold text-text-secondary truncate">{d.vendor}</p>
+                              <p className="text-[10px] text-text-muted">{d.confidence}% confidence</p>
                             </div>
-                            <span className="text-xs font-bold text-slate-900 flex-shrink-0 ml-3">{fmtC(d.amount)}</span>
+                            <span className="text-xs font-bold text-text-primary flex-shrink-0 ml-3">{fmtC(d.amount)}</span>
                           </div>
                         ))}
-                        <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between">
-                          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Total recoverable</span>
-                          <span className="text-xs font-bold text-slate-900">{fmtC(totalSavings)}</span>
+                        <div className="pt-2.5 border-t border-border-subtle flex items-center justify-between">
+                          <span className="text-[11px] font-bold text-text-muted uppercase tracking-wide">Total recoverable</span>
+                          <span className="text-xs font-bold text-text-primary">{fmtC(totalSavings)}</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Category breakdown */}
-                    <div className="bg-white border border-slate-200 shadow-[0_1px_4px_rgba(0,0,0,0.06)] overflow-hidden">
-                      <div className="px-4 py-3 border-b border-slate-100">
-                        <p className="text-sm font-semibold text-slate-900">Spend by Category</p>
-                        <p className="text-xs text-slate-500">Top {CATEGORIES.length}</p>
+                    <div className="bg-surface-raised border border-border shadow-[0_1px_4px_rgba(0,0,0,0.06)] overflow-hidden">
+                      <div className="px-4 py-3 border-b border-border-subtle">
+                        <p className="text-sm font-semibold text-text-primary">Spend by Category</p>
+                        <p className="text-xs text-text-muted">Top {CATEGORIES.length}</p>
                       </div>
                       <div className="p-4 space-y-2">
                         {CATEGORIES.map(cat => {
@@ -512,13 +512,13 @@ export default function DemoPage() {
                             <div key={cat.category}>
                               <div className="flex items-center justify-between mb-0.5">
                                 <div className="flex items-center gap-1 min-w-0">
-                                  <span className="text-xs text-slate-700 font-medium truncate max-w-[110px]">{cat.category}</span>
+                                  <span className="text-xs text-text-secondary font-medium truncate max-w-[110px]">{cat.category}</span>
                                   {hasAlert && <ExclamationTriangleIcon className="w-2.5 h-2.5 text-amber-500 flex-shrink-0" />}
                                 </div>
-                                <span className="text-xs font-semibold text-slate-700 ml-2">{fmtC(cat.total)}</span>
+                                <span className="text-xs font-semibold text-text-secondary ml-2">{fmtC(cat.total)}</span>
                               </div>
-                              <div className="h-1.5 bg-slate-100 overflow-hidden">
-                                <div className={`h-full ${hasAlert ? 'bg-amber-400' : 'bg-slate-400'}`} style={{ width: `${pct}%` }} />
+                              <div className="h-1.5 bg-surface-overlay overflow-hidden">
+                                <div className={`h-full ${hasAlert ? 'bg-amber-400' : 'bg-text-muted'}`} style={{ width: `${pct}%` }} />
                               </div>
                             </div>
                           )
@@ -527,13 +527,13 @@ export default function DemoPage() {
                     </div>
 
                     {/* Vendor concentration */}
-                    <div className="bg-white border border-slate-200 shadow-[0_1px_4px_rgba(0,0,0,0.06)] overflow-hidden">
-                      <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                    <div className="bg-surface-raised border border-border shadow-[0_1px_4px_rgba(0,0,0,0.06)] overflow-hidden">
+                      <div className="px-4 py-3 border-b border-border-subtle flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-semibold text-slate-900">Vendor Concentration</p>
-                          <p className="text-xs text-slate-500">Top vendors by spend</p>
+                          <p className="text-sm font-semibold text-text-primary">Vendor Concentration</p>
+                          <p className="text-xs text-text-muted">Top vendors by spend</p>
                         </div>
-                        <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5">
+                        <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5">
                           {topVendorShare}% top vendor
                         </span>
                       </div>
@@ -545,16 +545,16 @@ export default function DemoPage() {
                             <div key={v.vendor}>
                               <div className="flex items-center justify-between mb-0.5">
                                 <div className="flex items-center gap-1 min-w-0">
-                                  <span className="text-xs text-slate-700 font-medium truncate max-w-[110px]">{v.vendor}</span>
+                                  <span className="text-xs text-text-secondary font-medium truncate max-w-[110px]">{v.vendor}</span>
                                   {v.alert && <ExclamationTriangleIcon className="w-2.5 h-2.5 text-amber-500 flex-shrink-0" />}
                                 </div>
                                 <div className="flex items-center gap-1.5 ml-2">
-                                  <span className="text-[10px] text-slate-400">{share}%</span>
-                                  <span className="text-xs font-semibold text-slate-700">{fmtC(v.total)}</span>
+                                  <span className="text-[10px] text-text-muted">{share}%</span>
+                                  <span className="text-xs font-semibold text-text-secondary">{fmtC(v.total)}</span>
                                 </div>
                               </div>
-                              <div className="h-1.5 bg-slate-100 overflow-hidden">
-                                <div className={`h-full ${v.alert ? 'bg-amber-400' : 'bg-slate-400'}`} style={{ width: `${pct}%` }} />
+                              <div className="h-1.5 bg-surface-overlay overflow-hidden">
+                                <div className={`h-full ${v.alert ? 'bg-amber-400' : 'bg-text-muted'}`} style={{ width: `${pct}%` }} />
                               </div>
                             </div>
                           )
@@ -565,20 +565,20 @@ export default function DemoPage() {
                 </div>
 
                 {/* Processing log */}
-                <div className="bg-white border border-slate-200 shadow-[0_1px_4px_rgba(0,0,0,0.06)] overflow-hidden">
-                  <div className="px-4 py-3 flex items-center justify-between border-b border-slate-100">
-                    <p className="text-sm font-semibold text-slate-900">Processing Log</p>
-                    <span className="text-xs text-slate-400 flex items-center gap-0.5">
+                <div className="bg-surface-raised border border-border shadow-[0_1px_4px_rgba(0,0,0,0.06)] overflow-hidden">
+                  <div className="px-4 py-3 flex items-center justify-between border-b border-border-subtle">
+                    <p className="text-sm font-semibold text-text-primary">Processing Log</p>
+                    <span className="text-xs text-text-muted flex items-center gap-0.5">
                       Full audit log <ChevronRightIcon className="w-3 h-3" />
                     </span>
                   </div>
-                  <div className="divide-y divide-slate-100">
+                  <div className="divide-y divide-border-subtle">
                     {AUDIT_LOG.map((item, i) => (
                       <div key={i} className="flex items-center gap-3 px-4 py-2.5">
-                        <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${item.sev === 'critical' ? 'bg-red-500' : item.sev === 'warning' ? 'bg-amber-500' : 'bg-slate-400'}`} />
-                        <p className="text-xs font-medium text-slate-700 flex-1 truncate">{item.event}</p>
-                        <p className="text-xs text-slate-400 flex-shrink-0 hidden sm:block">{item.actor}</p>
-                        <p className="text-[10px] text-slate-400 flex-shrink-0">{item.ts}</p>
+                        <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${item.sev === 'critical' ? 'bg-red-500' : item.sev === 'warning' ? 'bg-amber-500' : 'bg-text-muted'}`} />
+                        <p className="text-xs font-medium text-text-secondary flex-1 truncate">{item.event}</p>
+                        <p className="text-xs text-text-muted flex-shrink-0 hidden sm:block">{item.actor}</p>
+                        <p className="text-[10px] text-text-muted flex-shrink-0">{item.ts}</p>
                       </div>
                     ))}
                   </div>
@@ -594,18 +594,19 @@ export default function DemoPage() {
       <div className="bg-[#0c1526] px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 py-14">
         <div className="grid md:grid-cols-[1fr_auto] gap-10 items-center">
           <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">Ready to go live?</p>
+            <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-4">Ready to go live?</p>
             <h2 className="text-2xl font-bold text-white mb-3">Connect your financial stack and see real findings</h2>
-            <p className="text-sm text-slate-400 leading-relaxed max-w-lg">
+            <p className="text-sm text-text-muted leading-relaxed max-w-lg">
               Most finance teams identify their first findings within hours of their first sync.
               Talk to our team and we&apos;ll get you set up with your real data.
             </p>
           </div>
           <div className="flex flex-col gap-3">
+            {/* Intentional inverted fill: light button reads as the strong CTA against this dark banner */}
             <Link href="/contact" className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-100 text-slate-900 font-semibold px-7 py-3 text-base transition-colors">
               Talk to our team
             </Link>
-            <Link href="/" className="inline-flex items-center justify-center gap-1.5 text-slate-400 hover:text-slate-200 text-sm font-medium transition-colors">
+            <Link href="/" className="inline-flex items-center justify-center gap-1.5 text-text-muted hover:text-text-secondary text-sm font-medium transition-colors">
               <ArrowLeftIcon className="w-4 h-4" /> Back to home
             </Link>
           </div>

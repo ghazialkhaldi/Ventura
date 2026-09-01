@@ -68,13 +68,13 @@ export default function UploadDataPage() {
             <button
               key={src.id}
               onClick={() => setActiveModal(src.id)}
-              className="group text-left bg-white border border-slate-200 rounded-xl p-5 hover:border-emerald-300 hover:shadow-md transition-all flex flex-col gap-3"
+              className="group text-left bg-surface-raised border border-border rounded-xl p-5 hover:border-accent-400 hover:shadow-md transition-all flex flex-col gap-3"
             >
               {/* Top row */}
               <div className="flex items-start justify-between">
                 <BrandIcon brand={src.brand} size={40} />
                 {isConnected && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-green-700 bg-green-50 border border-green-200 rounded-full px-2 py-0.5">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-2 py-0.5">
                     <CheckCircle className="w-2.5 h-2.5" />
                     Connected
                   </span>
@@ -83,18 +83,18 @@ export default function UploadDataPage() {
 
               {/* Name + type */}
               <div>
-                <p className="text-sm font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors leading-snug">
+                <p className="text-sm font-semibold text-text-primary group-hover:text-accent-400 transition-colors leading-snug">
                   {src.name}
                 </p>
-                <p className="text-[11px] text-slate-400 mt-0.5">{src.type}</p>
+                <p className="text-[11px] text-text-muted mt-0.5">{src.type}</p>
               </div>
 
               {/* Description */}
-              <p className="text-xs text-slate-500 leading-relaxed">{src.description}</p>
+              <p className="text-xs text-text-muted leading-relaxed">{src.description}</p>
 
               {/* CTA */}
               <div className="mt-auto">
-                <span className={`text-xs font-semibold ${isConnected ? 'text-green-600' : 'text-emerald-600 group-hover:text-emerald-800'}`}>
+                <span className={`text-xs font-semibold ${isConnected ? 'text-emerald-400' : 'text-accent-400 group-hover:text-accent-300'}`}>
                   {isConnected ? 'Reconfigure →' : 'Connect →'}
                 </span>
               </div>

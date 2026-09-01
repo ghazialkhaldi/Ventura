@@ -31,7 +31,7 @@ interface WorkspaceInfo {
 const ROLE_META: Record<string, { label: string; color: string; desc: string; permissions: string[] }> = {
   viewer: {
     label: 'Viewer',
-    color: 'bg-slate-100 text-slate-700 border-slate-200',
+    color: 'bg-slate-400/10 text-slate-400 border-slate-400/25',
     desc:  'Read-only access to workspace data.',
     permissions: [
       'View workspace dashboard',
@@ -40,7 +40,7 @@ const ROLE_META: Record<string, { label: string; color: string; desc: string; pe
   },
   analyst: {
     label: 'Analyst',
-    color: 'bg-amber-50 text-amber-800 border-amber-200',
+    color: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
     desc:  'Can view and comment on anomalies and reports.',
     permissions: [
       'View workspace dashboard',
@@ -51,7 +51,7 @@ const ROLE_META: Record<string, { label: string; color: string; desc: string; pe
   },
   editor: {
     label: 'Editor',
-    color: 'bg-blue-50 text-blue-800 border-blue-200',
+    color: 'bg-accent-500/10 text-accent-300 border-accent-500/30',
     desc:  'Can approve and manage anomalies and workflows.',
     permissions: [
       'View workspace dashboard',
@@ -64,7 +64,7 @@ const ROLE_META: Record<string, { label: string; color: string; desc: string; pe
   },
   admin: {
     label: 'Admin',
-    color: 'bg-purple-50 text-purple-800 border-purple-200',
+    color: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
     desc:  'Full workspace access.',
     permissions: [
       'Full workspace access including settings and billing',
@@ -147,8 +147,8 @@ export default function EmployeeDashboard() {
   // Blank screen with spinner until membership is confirmed — never flash the dashboard
   if (!ready) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <ArrowPathIcon className="w-6 h-6 text-slate-300 animate-spin" />
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <ArrowPathIcon className="w-6 h-6 text-text-muted animate-spin" />
       </div>
     )
   }
@@ -157,7 +157,7 @@ export default function EmployeeDashboard() {
     <EmployeeLayout title="Workspace">
       {/* Role-changed banner */}
       {roleChanged && (
-        <div className="mb-4 flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-lg text-sm">
+        <div className="mb-4 flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-4 py-3 rounded-lg text-sm">
           <ArrowPathIcon className="w-4 h-4 flex-shrink-0" />
           Your permissions were updated. You now have <strong>{roleMeta.label}</strong> access.
         </div>
@@ -166,32 +166,32 @@ export default function EmployeeDashboard() {
       <div className="grid lg:grid-cols-3 gap-5">
 
         {/* Workspace card */}
-        <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-5">
+        <div className="bg-surface-raised border border-border rounded-xl p-5">
           <div className="flex items-start gap-3 mb-4">
             <div className="w-10 h-10 rounded-xl bg-emerald-700 flex items-center justify-center flex-shrink-0">
               <BuildingOfficeIcon className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-xs text-slate-500 font-medium uppercase tracking-wide">Workspace</p>
-              <p className="text-base font-bold text-slate-900">{info?.company || user?.company || '—'}</p>
+              <p className="text-xs text-text-muted font-medium uppercase tracking-wide">Workspace</p>
+              <p className="text-base font-bold text-text-primary">{info?.company || user?.company || '—'}</p>
             </div>
           </div>
           <div className="space-y-2 text-sm">
-            <div className="flex items-center justify-between py-1.5 border-b border-slate-100">
-              <span className="text-slate-500 text-xs">Your role</span>
+            <div className="flex items-center justify-between py-1.5 border-b border-border-subtle">
+              <span className="text-text-muted text-xs">Your role</span>
               <span className={`text-xs font-semibold px-2.5 py-1 border rounded-full ${roleMeta.color}`}>
                 {roleMeta.label}
               </span>
             </div>
-            <div className="flex items-center justify-between py-1.5 border-b border-slate-100">
-              <span className="text-slate-500 text-xs">Member since</span>
-              <span className="text-xs text-slate-700 font-medium">
+            <div className="flex items-center justify-between py-1.5 border-b border-border-subtle">
+              <span className="text-text-muted text-xs">Member since</span>
+              <span className="text-xs text-text-secondary font-medium">
                 {info?.joinedAt ? new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(info.joinedAt)) : '—'}
               </span>
             </div>
             <div className="flex items-center justify-between py-1.5">
-              <span className="text-slate-500 text-xs">Status</span>
-              <span className="flex items-center gap-1.5 text-xs text-green-700 font-medium">
+              <span className="text-text-muted text-xs">Status</span>
+              <span className="flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
                 <CheckCircleIcon className="w-3.5 h-3.5" />
                 Active
               </span>
@@ -200,15 +200,15 @@ export default function EmployeeDashboard() {
         </div>
 
         {/* Permissions card */}
-        <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-5">
+        <div className="bg-surface-raised border border-border rounded-xl p-5">
           <div className="flex items-center gap-2 mb-1">
-            <ShieldCheckIcon className="w-4 h-4 text-slate-400" />
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Your Permissions</p>
+            <ShieldCheckIcon className="w-4 h-4 text-text-muted" />
+            <p className="text-xs font-semibold text-text-muted uppercase tracking-wide">Your Permissions</p>
           </div>
-          <p className="text-xs text-slate-400 mb-4">{roleMeta.desc}</p>
+          <p className="text-xs text-text-muted mb-4">{roleMeta.desc}</p>
           <ul className="space-y-2">
             {roleMeta.permissions.map(p => (
-              <li key={p} className="flex items-center gap-2 text-sm text-slate-700">
+              <li key={p} className="flex items-center gap-2 text-sm text-text-secondary">
                 <CheckCircleIcon className="w-4 h-4 text-emerald-500 flex-shrink-0" />
                 {p}
               </li>
@@ -217,14 +217,14 @@ export default function EmployeeDashboard() {
 
           {/* What they can't do */}
           {(info?.role === 'viewer' || info?.role === 'analyst') && (
-            <div className="mt-4 pt-4 border-t border-slate-100">
-              <p className="text-xs text-slate-400 mb-2 flex items-center gap-1.5">
+            <div className="mt-4 pt-4 border-t border-border-subtle">
+              <p className="text-xs text-text-muted mb-2 flex items-center gap-1.5">
                 <LockClosedIcon className="w-3 h-3" />
                 Requires editor or above
               </p>
               <ul className="space-y-1.5">
                 {['Approve / reject anomalies', 'Create and edit workflows'].map(p => (
-                  <li key={p} className="flex items-center gap-2 text-xs text-slate-400">
+                  <li key={p} className="flex items-center gap-2 text-xs text-text-muted">
                     <LockClosedIcon className="w-3.5 h-3.5 flex-shrink-0" />
                     {p}
                   </li>
@@ -237,14 +237,14 @@ export default function EmployeeDashboard() {
         {/* Quick stats */}
         <div className="space-y-3">
           {[
-            { icon: EyeIcon,          label: 'Access level',   value: roleMeta.label,                    color: 'text-slate-700' },
-            { icon: ChartBarIcon,     label: 'Data access',    value: info?.role === 'viewer' ? 'Read-only' : 'Read + Write', color: 'text-slate-700' },
-            { icon: PencilSquareIcon, label: 'Can create',     value: ['editor', 'admin'].includes(info?.role ?? '') ? 'Yes' : 'No', color: ['editor', 'admin'].includes(info?.role ?? '') ? 'text-emerald-700' : 'text-slate-400' },
+            { icon: EyeIcon,          label: 'Access level',   value: roleMeta.label,                    color: 'text-text-secondary' },
+            { icon: ChartBarIcon,     label: 'Data access',    value: info?.role === 'viewer' ? 'Read-only' : 'Read + Write', color: 'text-text-secondary' },
+            { icon: PencilSquareIcon, label: 'Can create',     value: ['editor', 'admin'].includes(info?.role ?? '') ? 'Yes' : 'No', color: ['editor', 'admin'].includes(info?.role ?? '') ? 'text-emerald-400' : 'text-text-muted' },
           ].map(item => (
-            <div key={item.label} className="bg-white border border-slate-200 rounded-xl shadow-sm p-4 flex items-center gap-3">
-              <item.icon className="w-5 h-5 text-slate-400 flex-shrink-0" />
+            <div key={item.label} className="bg-surface-raised border border-border rounded-xl p-4 flex items-center gap-3">
+              <item.icon className="w-5 h-5 text-text-muted flex-shrink-0" />
               <div>
-                <p className="text-[11px] text-slate-500">{item.label}</p>
+                <p className="text-[11px] text-text-muted">{item.label}</p>
                 <p className={`text-sm font-semibold ${item.color}`}>{item.value}</p>
               </div>
             </div>
@@ -253,11 +253,11 @@ export default function EmployeeDashboard() {
       </div>
 
       {/* Notice about workspace data */}
-      <div className="mt-5 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
-        <ChartBarIcon className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
+      <div className="mt-5 bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 flex items-start gap-3">
+        <ChartBarIcon className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
         <div>
-          <p className="text-sm font-semibold text-blue-900">Workspace data</p>
-          <p className="text-xs text-blue-700 mt-0.5 leading-relaxed">
+          <p className="text-sm font-semibold text-blue-300">Workspace data</p>
+          <p className="text-xs text-blue-400 mt-0.5 leading-relaxed">
             Live anomaly and spend data will appear here once your admin connects and syncs their data source.
             Your role determines which actions you can take on that data.
           </p>
@@ -265,25 +265,25 @@ export default function EmployeeDashboard() {
       </div>
 
       {/* Activity log */}
-      <div className="mt-5 bg-white border border-slate-200 rounded-xl shadow-sm">
-        <div className="flex items-center gap-2 px-5 py-4 border-b border-slate-100">
-          <ClockIcon className="w-4 h-4 text-slate-400" />
-          <p className="text-sm font-semibold text-slate-800">Your recent activity</p>
+      <div className="mt-5 bg-surface-raised border border-border rounded-xl">
+        <div className="flex items-center gap-2 px-5 py-4 border-b border-border-subtle">
+          <ClockIcon className="w-4 h-4 text-text-muted" />
+          <p className="text-sm font-semibold text-text-secondary">Your recent activity</p>
         </div>
         {activity.length === 0 ? (
-          <p className="text-sm text-slate-400 px-5 py-6 italic">No activity recorded yet.</p>
+          <p className="text-sm text-text-muted px-5 py-6 italic">No activity recorded yet.</p>
         ) : (
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-border-subtle">
             {activity.slice(0, 20).map((entry, i) => (
               <li key={i} className="px-5 py-3 flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <ClockIcon className="w-3 h-3 text-slate-400" />
+                <div className="w-6 h-6 rounded-full bg-surface-overlay flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <ClockIcon className="w-3 h-3 text-text-muted" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-slate-700">{entry.detail || entry.action}</p>
-                  {entry.resource && <p className="text-xs text-slate-400">{entry.resource}</p>}
+                  <p className="text-sm text-text-secondary">{entry.detail || entry.action}</p>
+                  {entry.resource && <p className="text-xs text-text-muted">{entry.resource}</p>}
                 </div>
-                <span className="text-[11px] text-slate-400 flex-shrink-0">{formatTs(entry.ts)}</span>
+                <span className="text-[11px] text-text-muted flex-shrink-0">{formatTs(entry.ts)}</span>
               </li>
             ))}
           </ul>

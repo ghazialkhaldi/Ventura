@@ -633,29 +633,29 @@ export default function ReportsPage() {
     <AppLayout title="Reports">
       <div className="max-w-3xl">
         <div className="mb-8">
-          <h1 className="text-lg font-bold text-slate-900">Reports</h1>
-          <p className="text-xs text-slate-500 mt-0.5">Download a professional PDF report directly to your computer</p>
+          <h1 className="text-lg font-bold text-text-primary">Reports</h1>
+          <p className="text-xs text-text-muted mt-0.5">Download a professional PDF report directly to your computer</p>
         </div>
 
-        <div className="bg-white border border-slate-200">
+        <div className="bg-surface-raised border border-border">
           {/* Header */}
-          <div className="px-6 py-5 border-b border-slate-200 flex items-start justify-between gap-6">
+          <div className="px-6 py-5 border-b border-border flex items-start justify-between gap-6">
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 bg-slate-900 flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 bg-accent-500 flex items-center justify-center flex-shrink-0">
                 <FileText className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="text-sm font-bold text-slate-900">Financial Intelligence Report</p>
-                <p className="text-xs text-slate-500 mt-0.5">{company} · {dateRange}</p>
-                <p className="text-xs text-slate-400 mt-0.5">Generated {today()}</p>
+                <p className="text-sm font-bold text-text-primary">Financial Intelligence Report</p>
+                <p className="text-xs text-text-muted mt-0.5">{company} · {dateRange}</p>
+                <p className="text-xs text-text-muted mt-0.5">Generated {today()}</p>
               </div>
             </div>
-            <span className="text-[10px] font-semibold text-slate-500 border border-slate-200 bg-slate-50 px-2 py-1 uppercase tracking-wider flex-shrink-0">PDF</span>
+            <span className="text-[10px] font-semibold text-text-muted border border-border bg-surface-overlay px-2 py-1 uppercase tracking-wider flex-shrink-0">PDF</span>
           </div>
 
           {/* Contents */}
-          <div className="px-6 py-5 border-b border-slate-200">
-            <p className="text-xs font-semibold text-slate-700 mb-4">Report contents</p>
+          <div className="px-6 py-5 border-b border-border">
+            <p className="text-xs font-semibold text-text-secondary mb-4">Report contents</p>
             <div className="grid sm:grid-cols-2 gap-3">
               {[
                 { icon: Building2,     label: 'Title page',        desc: `${company} · ${today()} · risk summary callout` },
@@ -667,13 +667,13 @@ export default function ReportsPage() {
               ].map(item => {
                 const Icon = item.icon
                 return (
-                  <div key={item.label} className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200">
-                    <Icon className="w-4 h-4 text-slate-500 flex-shrink-0" />
+                  <div key={item.label} className="flex items-center gap-3 p-3 bg-surface-sunken border border-border">
+                    <Icon className="w-4 h-4 text-text-muted flex-shrink-0" />
                     <div>
-                      <p className="text-xs font-semibold text-slate-800">{item.label}</p>
-                      <p className="text-[10px] text-slate-400 mt-0.5">{item.desc}</p>
+                      <p className="text-xs font-semibold text-text-secondary">{item.label}</p>
+                      <p className="text-[10px] text-text-muted mt-0.5">{item.desc}</p>
                     </div>
-                    <CheckCircle className="w-3.5 h-3.5 text-green-500 ml-auto flex-shrink-0" />
+                    <CheckCircle className="w-3.5 h-3.5 text-emerald-400 ml-auto flex-shrink-0" />
                   </div>
                 )
               })}
@@ -681,34 +681,34 @@ export default function ReportsPage() {
           </div>
 
           {/* Options */}
-          <div className="px-6 py-5 border-b border-slate-200">
-            <p className="text-xs font-semibold text-slate-700 mb-3">Options</p>
+          <div className="px-6 py-5 border-b border-border">
+            <p className="text-xs font-semibold text-text-secondary mb-3">Options</p>
             <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={includeAudit}
                 onChange={e => setIncludeAudit(e.target.checked)}
-                className="w-4 h-4 accent-slate-900"
+                className="w-4 h-4 accent-accent-500"
               />
               <div>
-                <p className="text-xs font-medium text-slate-800">Include audit log</p>
-                <p className="text-[10px] text-slate-400">Appends the last {Math.min(dataset.auditLog.length,25)} audit events as a final page</p>
+                <p className="text-xs font-medium text-text-secondary">Include audit log</p>
+                <p className="text-[10px] text-text-muted">Appends the last {Math.min(dataset.auditLog.length,25)} audit events as a final page</p>
               </div>
             </label>
           </div>
 
           {/* Download */}
-          <div className="px-6 py-5 flex items-center justify-between gap-4 bg-slate-50">
+          <div className="px-6 py-5 flex items-center justify-between gap-4 bg-surface-sunken">
             <div>
               {error
-                ? <p className="text-xs text-red-600">{error}</p>
-                : <p className="text-xs text-slate-500">Downloads directly to your computer as a PDF file</p>
+                ? <p className="text-xs text-red-400">{error}</p>
+                : <p className="text-xs text-text-muted">Downloads directly to your computer as a PDF file</p>
               }
             </div>
             <button
               onClick={handleGenerate}
               disabled={generating}
-              className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold px-5 py-2.5 text-sm transition-colors disabled:opacity-50 flex-shrink-0"
+              className="inline-flex items-center gap-2 bg-accent-500 hover:bg-accent-600 text-white font-semibold px-5 py-2.5 text-sm transition-colors disabled:opacity-50 flex-shrink-0"
             >
               {generating ? (
                 <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
@@ -724,13 +724,13 @@ export default function ReportsPage() {
         {/* Stats */}
         <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { label:'Transactions',  value:dataset.totalTransactions.toLocaleString(), color:'text-slate-900' },
-            { label:'Open findings', value:open.length.toString(),                     color:open.length>0    ?'text-red-700'    :'text-slate-900' },
-            { label:'Risk exposure', value:fmtFull(exposure),                          color:exposure>0       ?'text-orange-700' :'text-slate-900' },
-            { label:'Recoverable',   value:fmtFull(savings),                           color:savings>0        ?'text-green-700'  :'text-slate-500' },
+            { label:'Transactions',  value:dataset.totalTransactions.toLocaleString(), color:'text-text-primary' },
+            { label:'Open findings', value:open.length.toString(),                     color:open.length>0    ?'text-red-400'    :'text-text-primary' },
+            { label:'Risk exposure', value:fmtFull(exposure),                          color:exposure>0       ?'text-orange-400' :'text-text-primary' },
+            { label:'Recoverable',   value:fmtFull(savings),                           color:savings>0        ?'text-emerald-400'  :'text-text-muted' },
           ].map(s => (
-            <div key={s.label} className="bg-white border border-slate-200 px-4 py-3">
-              <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">{s.label}</p>
+            <div key={s.label} className="bg-surface-raised border border-border px-4 py-3">
+              <p className="text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-1">{s.label}</p>
               <p className={`text-base font-bold ${s.color} tabular-nums`}>{s.value}</p>
             </div>
           ))}

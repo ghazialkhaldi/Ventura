@@ -472,18 +472,18 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]" onClick={step === 'processing' ? undefined : onClose} />
 
-      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="relative bg-surface-raised rounded-xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-200 flex-shrink-0">
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-border flex-shrink-0">
           <BrandIcon brand={config.brand} size={32} contained />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-slate-900">
+            <p className="text-sm font-semibold text-text-primary">
               {isFileType ? 'Upload File' : `Connect ${config.name}`}
             </p>
-            <p className="text-[11px] text-slate-500">{authLabel}</p>
+            <p className="text-[11px] text-text-muted">{authLabel}</p>
           </div>
           {step !== 'processing' && (
-            <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors p-1 rounded">
+            <button onClick={onClose} className="text-text-muted hover:text-text-secondary transition-colors p-1 rounded">
               <X className="w-4 h-4" />
             </button>
           )}
@@ -498,13 +498,13 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
               {/* Instructions */}
               {config.instructions && (
                 <div className="mb-5">
-                  <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-3">
+                  <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider mb-3">
                     How to get your credentials
                   </p>
                   <ol className="space-y-2.5 mb-3">
                     {config.instructions.steps.map((s, i) => (
-                      <li key={i} className="flex gap-2.5 text-xs text-slate-700 leading-relaxed">
-                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-bold flex items-center justify-center mt-0.5">
+                      <li key={i} className="flex gap-2.5 text-xs text-text-secondary leading-relaxed">
+                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-accent-500/10 border border-accent-500/30 text-accent-400 text-[10px] font-bold flex items-center justify-center mt-0.5">
                           {i + 1}
                         </span>
                         <span>{s}</span>
@@ -513,9 +513,9 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
                   </ol>
 
                   {config.instructions.note && (
-                    <div className="text-[11px] bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3 leading-relaxed">
-                      <span className="font-semibold text-amber-700">Note: </span>
-                      <span className="text-amber-800">{config.instructions.note}</span>
+                    <div className="text-[11px] bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2 mb-3 leading-relaxed">
+                      <span className="font-semibold text-amber-400">Note: </span>
+                      <span className="text-amber-300">{config.instructions.note}</span>
                     </div>
                   )}
 
@@ -524,20 +524,20 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
                       href={config.instructions.link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs text-emerald-600 hover:text-emerald-800 transition-colors mb-1"
+                      className="inline-flex items-center gap-1.5 text-xs text-accent-400 hover:text-accent-300 transition-colors mb-1"
                     >
                       <ExternalLink className="w-3 h-3" />
                       {config.instructions.link.label}
                     </a>
                   )}
 
-                  <div className="border-t border-slate-100 mt-4 mb-5" />
+                  <div className="border-t border-border-subtle mt-4 mb-5" />
                 </div>
               )}
 
               {/* Error */}
               {error && (
-                <div className="flex items-start gap-2.5 bg-red-50 border border-red-200 text-red-700 rounded-lg px-3.5 py-3 text-xs mb-4">
+                <div className="flex items-start gap-2.5 bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg px-3.5 py-3 text-xs mb-4">
                   <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                   <span>{error}</span>
                 </div>
@@ -546,7 +546,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
               <form onSubmit={handleSubmit} className="space-y-4">
                 {isFileType ? (
                   <div
-                    className={`border-2 border-dashed rounded-lg px-4 py-8 text-center transition-colors cursor-pointer ${dragOver ? 'border-emerald-400 bg-emerald-50' : 'border-slate-300 hover:border-slate-400'}`}
+                    className={`border-2 border-dashed rounded-lg px-4 py-8 text-center transition-colors cursor-pointer ${dragOver ? 'border-emerald-400 bg-emerald-500/10' : 'border-border-strong hover:border-accent-500/50'}`}
                     onClick={() => fileRef.current?.click()}
                     onDragOver={e => { e.preventDefault(); setDragOver(true) }}
                     onDragLeave={() => setDragOver(false)}
@@ -561,31 +561,31 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
                     />
                     {uploadedFile ? (
                       <div className="flex flex-col items-center gap-2">
-                        <div className="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center">
-                          <FileText className="w-5 h-5 text-green-600" />
+                        <div className="w-9 h-9 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                          <FileText className="w-5 h-5 text-emerald-400" />
                         </div>
-                        <p className="text-sm font-medium text-slate-800">{uploadedFile.name}</p>
-                        <p className="text-xs text-slate-400">{fmtBytes(uploadedFile.size)} · Click to replace</p>
+                        <p className="text-sm font-medium text-text-primary">{uploadedFile.name}</p>
+                        <p className="text-xs text-text-muted">{fmtBytes(uploadedFile.size)} · Click to replace</p>
                       </div>
                     ) : (
                       <div className="flex flex-col items-center gap-2">
-                        <Upload className="w-7 h-7 text-slate-400" />
-                        <p className="text-sm font-medium text-slate-700">Drop file here or click to browse</p>
-                        <p className="text-xs text-slate-400">CSV · XLSX · PDF · QBO · OFX · TSV</p>
+                        <Upload className="w-7 h-7 text-text-muted" />
+                        <p className="text-sm font-medium text-text-secondary">Drop file here or click to browse</p>
+                        <p className="text-xs text-text-muted">CSV · XLSX · PDF · QBO · OFX · TSV</p>
                       </div>
                     )}
                   </div>
                 ) : (
                   config.fields.map(f => (
                     <div key={f.key}>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                        {f.label}{f.required && <span className="text-red-500 ml-0.5">*</span>}
+                      <label className="block text-xs font-semibold text-text-secondary mb-1.5">
+                        {f.label}{f.required && <span className="text-red-400 ml-0.5">*</span>}
                       </label>
                       {f.type === 'select' ? (
                         <select
                           value={values[f.key] || ''}
                           onChange={e => setValues(v => ({ ...v, [f.key]: e.target.value }))}
-                          className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                          className="w-full border border-border-strong rounded-lg px-3 py-2.5 text-sm text-text-primary bg-surface-raised focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
                         >
                           <option value="">Select…</option>
                           {f.options?.map(o => <option key={o} value={o}>{o}</option>)}
@@ -598,7 +598,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
                           placeholder={f.placeholder}
                           autoComplete="off"
                           spellCheck={false}
-                          className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 font-mono"
+                          className="w-full border border-border-strong rounded-lg px-3 py-2.5 text-sm text-text-primary placeholder-text-muted bg-surface-raised focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500 font-mono"
                         />
                       )}
                     </div>
@@ -608,14 +608,14 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
                 <div className="pt-1 flex items-center gap-3">
                   <button
                     type="submit"
-                    className="flex-1 bg-[#0c1526] hover:bg-[#1a2640] text-white font-semibold py-2.5 rounded-lg transition-colors text-sm"
+                    className="flex-1 bg-accent-500 hover:bg-accent-600 text-white font-semibold py-2.5 rounded-lg transition-colors text-sm"
                   >
                     {isFileType ? 'Process file' : 'Save & Connect'}
                   </button>
                   <button
                     type="button"
                     onClick={onClose}
-                    className="px-4 py-2.5 text-sm font-medium text-slate-600 hover:text-slate-800 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                    className="px-4 py-2.5 text-sm font-medium text-text-secondary hover:text-text-primary border border-border-strong rounded-lg hover:bg-surface-hover transition-colors"
                   >
                     Cancel
                   </button>
@@ -627,14 +627,14 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
           {/* ── Processing ── */}
           {step === 'processing' && (
             <div className="py-10 flex flex-col items-center gap-4 text-center">
-              <div className="w-14 h-14 rounded-full bg-emerald-50 border-2 border-emerald-200 flex items-center justify-center">
-                <Loader2 className="w-6 h-6 text-emerald-600 animate-spin" />
+              <div className="w-14 h-14 rounded-full bg-emerald-500/10 border-2 border-emerald-500/30 flex items-center justify-center">
+                <Loader2 className="w-6 h-6 text-emerald-400 animate-spin" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-900">
+                <p className="text-sm font-semibold text-text-primary">
                   {isFileType ? 'Processing your file…' : 'Saving connection…'}
                 </p>
-                <p className="text-xs text-slate-500 mt-1">{statusMsg}</p>
+                <p className="text-xs text-text-muted mt-1">{statusMsg}</p>
               </div>
             </div>
           )}
@@ -642,24 +642,24 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
           {/* ── Connected ── */}
           {step === 'connected' && (
             <div className="py-8 flex flex-col items-center gap-4 text-center">
-              <div className="w-14 h-14 rounded-full bg-green-50 border-2 border-green-300 flex items-center justify-center">
-                <Check className="w-7 h-7 text-green-600" />
+              <div className="w-14 h-14 rounded-full bg-emerald-500/10 border-2 border-emerald-500/30 flex items-center justify-center">
+                <Check className="w-7 h-7 text-emerald-400" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-900">
+                <p className="text-sm font-semibold text-text-primary">
                   {isFileType ? 'File processed' : `${config.name} connected`}
                 </p>
                 {result ? (
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="text-xs text-text-muted mt-1">
                     {result.txCount.toLocaleString()} transactions · {result.anomalyCount} anomal{result.anomalyCount !== 1 ? 'ies' : 'y'} detected
                   </p>
                 ) : (
-                  <p className="text-xs text-slate-500 mt-1">Credentials saved — initial sync will begin shortly</p>
+                  <p className="text-xs text-text-muted mt-1">Credentials saved — initial sync will begin shortly</p>
                 )}
               </div>
               <button
                 onClick={() => { onClose(); window.location.href = '/dashboard' }}
-                className="mt-2 bg-[#0c1526] hover:bg-[#1a2640] text-white font-semibold py-2.5 px-6 rounded-lg transition-colors text-sm"
+                className="mt-2 bg-accent-500 hover:bg-accent-600 text-white font-semibold py-2.5 px-6 rounded-lg transition-colors text-sm"
               >
                 {isFileType ? 'View dashboard' : 'Done'}
               </button>
@@ -669,20 +669,20 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
           {/* ── Unavailable ── */}
           {step === 'unavailable' && (
             <div className="py-8 flex flex-col items-center gap-4 text-center">
-              <div className="w-14 h-14 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center">
-                <Clock className="w-7 h-7 text-slate-400" />
+              <div className="w-14 h-14 rounded-full bg-surface-overlay border-2 border-border flex items-center justify-center">
+                <Clock className="w-7 h-7 text-text-muted" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-900">{config.name} coming soon</p>
-                <p className="text-xs text-slate-500 mt-2 max-w-xs leading-relaxed">
+                <p className="text-sm font-semibold text-text-primary">{config.name} coming soon</p>
+                <p className="text-xs text-text-muted mt-2 max-w-xs leading-relaxed">
                   Contact{' '}
-                  <a href="mailto:support@venturafinance.net" className="text-emerald-600 hover:underline">
+                  <a href="mailto:support@venturafinance.net" className="text-accent-400 hover:underline">
                     support@venturafinance.net
                   </a>{' '}
                   to enable {config.name} access on your account.
                 </p>
               </div>
-              <button onClick={onClose} className="mt-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2 px-6 rounded-lg transition-colors text-sm">
+              <button onClick={onClose} className="mt-1 bg-accent-500 hover:bg-accent-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors text-sm">
                 Close
               </button>
             </div>
@@ -691,16 +691,16 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
           {/* ── Error ── */}
           {step === 'error' && (
             <div className="py-8 flex flex-col items-center gap-4 text-center">
-              <div className="w-14 h-14 rounded-full bg-red-50 border-2 border-red-200 flex items-center justify-center">
-                <AlertCircle className="w-7 h-7 text-red-500" />
+              <div className="w-14 h-14 rounded-full bg-red-500/10 border-2 border-red-500/30 flex items-center justify-center">
+                <AlertCircle className="w-7 h-7 text-red-400" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-900">Connection failed</p>
-                <p className="text-xs text-red-600 mt-1 max-w-xs">{error}</p>
+                <p className="text-sm font-semibold text-text-primary">Connection failed</p>
+                <p className="text-xs text-red-400 mt-1 max-w-xs">{error}</p>
               </div>
               <button
                 onClick={() => { setStep('configure'); setError('') }}
-                className="mt-1 text-sm text-emerald-600 hover:text-emerald-800 underline"
+                className="mt-1 text-sm text-accent-400 hover:text-accent-300 underline"
               >
                 Try again
               </button>

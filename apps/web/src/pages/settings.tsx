@@ -32,44 +32,44 @@ interface ActivityEntry {
 }
 
 const ROLE_COLORS: Record<string, string> = {
-  admin:   'bg-purple-50 text-purple-700 border-purple-200',
-  editor:  'bg-blue-50 text-blue-700 border-blue-200',
-  analyst: 'bg-amber-50 text-amber-700 border-amber-200',
-  viewer:  'bg-slate-100 text-slate-600 border-slate-200',
+  admin:   'bg-purple-500/10 text-purple-400 border-purple-500/30',
+  editor:  'bg-accent-500/10 text-accent-300 border-accent-500/30',
+  analyst: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+  viewer:  'bg-surface-overlay text-text-muted border-border',
 }
 
 const roles = [
   {
     name: 'Admin', desc: 'Full access — manage users, settings, AI governance, all data',
-    color: 'bg-red-50 text-red-700 border-red-200',
+    color: 'bg-red-500/10 text-red-400 border-red-500/30',
     permissions: ['Manage team members and roles', 'Configure workspace settings and billing', 'Full read/write on all data', 'Manage AI governance rules', 'Generate and revoke invite codes'],
   },
   {
     name: 'Finance Manager', desc: 'Approve anomalies, manage workflows, view all spend data',
-    color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
     permissions: ['Approve, dismiss, and resolve anomalies', 'Create and edit workflows', 'View all spend data and reports', 'Export data'],
   },
   {
     name: 'Finance Analyst', desc: 'View and comment on anomalies, read-only workflow access',
-    color: 'bg-purple-50 text-purple-700 border-purple-200',
+    color: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
     permissions: ['View and comment on anomalies', 'Read-only workflow access', 'View dashboards and reports'],
   },
   {
     name: 'Read-Only', desc: 'View dashboards and reports. No approval or action capabilities.',
-    color: 'bg-slate-100 text-slate-600 border-slate-200',
+    color: 'bg-surface-overlay text-text-muted border-border',
     permissions: ['View dashboards', 'View reports', 'View integrations status'],
   },
   {
     name: 'System', desc: 'Ventura AI service account — non-human, cannot log in directly.',
-    color: 'bg-green-50 text-green-700 border-green-200',
+    color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
     permissions: ['Automated anomaly detection', 'Workflow execution within governance rules', 'Cannot log in interactively'],
   },
 ]
 
 const statusColor: Record<string, string> = {
-  Active:   'bg-green-50 text-green-700 border border-green-200',
-  Inactive: 'bg-slate-100 text-slate-500 border border-slate-200',
-  Pending:  'bg-amber-50 text-amber-700 border border-amber-200',
+  Active:   'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30',
+  Inactive: 'bg-surface-overlay text-text-muted border border-border',
+  Pending:  'bg-amber-500/10 text-amber-400 border border-amber-500/30',
 }
 
 export default function SettingsPage() {
@@ -78,6 +78,9 @@ export default function SettingsPage() {
   const [tenantName,  setTenantName]  = useState('')
   const [timezone,    setTimezone]    = useState('America/New_York')
   const [plan]                        = useState('Enterprise')
+  const [savingOrgName, setSavingOrgName] = useState(false)
+  const [orgNameSaved,  setOrgNameSaved]  = useState(false)
+  const [orgNameError,  setOrgNameError]  = useState('')
 
   // Team members
   const [members,      setMembers]      = useState<TeamMember[]>([])
@@ -352,13 +355,13 @@ export default function SettingsPage() {
       />
 
       {/* Tabs */}
-      <div className="flex items-center gap-0.5 mb-6 border-b border-slate-200">
+      <div className="flex items-center gap-0.5 mb-6 border-b border-border">
         {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
-              activeTab === tab.id ? 'border-emerald-600 text-emerald-700' : 'border-transparent text-slate-500 hover:text-slate-700'
+              activeTab === tab.id ? 'border-accent-500 text-accent-400' : 'border-transparent text-text-muted hover:text-text-secondary'
             }`}
           >
             {tab.icon}
@@ -371,13 +374,13 @@ export default function SettingsPage() {
       {inviteOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]" onClick={() => setInviteOpen(false)} />
-          <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+          <div className="relative bg-surface-raised rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border">
               <div>
-                <p className="text-sm font-semibold text-slate-900">Invite team member</p>
-                <p className="text-xs text-slate-500 mt-0.5">Share this link with employees to join your workspace</p>
+                <p className="text-sm font-semibold text-text-primary">Invite team member</p>
+                <p className="text-xs text-text-muted mt-0.5">Share this link with employees to join your workspace</p>
               </div>
-              <button onClick={() => setInviteOpen(false)} className="text-slate-400 hover:text-slate-600 p-1 rounded transition-colors">
+              <button onClick={() => setInviteOpen(false)} className="text-text-muted hover:text-text-secondary p-1 rounded transition-colors">
                 <RefreshCw className="w-4 h-4 opacity-0" />
                 ✕
               </button>
@@ -385,12 +388,12 @@ export default function SettingsPage() {
             <div className="px-5 py-5 space-y-4">
               {inviteState === 'loading' && (
                 <div className="flex items-center gap-3 py-4">
-                  <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
-                  <p className="text-sm text-slate-500">Generating invite link…</p>
+                  <Loader2 className="w-5 h-5 text-text-muted animate-spin" />
+                  <p className="text-sm text-text-muted">Generating invite link…</p>
                 </div>
               )}
               {inviteError && (
-                <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 rounded-lg px-3 py-2.5 text-xs">
+                <div className="flex items-start gap-2 bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg px-3 py-2.5 text-xs">
                   <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                   <span>{inviteError}</span>
                 </div>
@@ -398,39 +401,39 @@ export default function SettingsPage() {
               {inviteState === 'ready' && inviteCode && (
                 <>
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Invite code</p>
-                    <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5">
-                      <code className="text-xs text-slate-600 font-mono flex-1 truncate">{inviteCode}</code>
+                    <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Invite code</p>
+                    <div className="flex items-center gap-2 bg-surface-hover border border-border rounded-lg px-3 py-2.5">
+                      <code className="text-xs text-text-secondary font-mono flex-1 truncate">{inviteCode}</code>
                       <button
                         onClick={() => copyInvite('code')}
-                        className="flex-shrink-0 text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1 transition-colors"
+                        className="flex-shrink-0 text-xs font-semibold text-text-muted hover:text-text-secondary flex items-center gap-1 transition-colors"
                       >
-                        {inviteCopied === 'code' ? <><CheckCircle className="w-3.5 h-3.5 text-green-500" /> Copied</> : 'Copy'}
+                        {inviteCopied === 'code' ? <><CheckCircle className="w-3.5 h-3.5 text-emerald-500" /> Copied</> : 'Copy'}
                       </button>
                     </div>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Invite link</p>
-                    <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5">
-                      <span className="text-xs text-slate-400 flex-1 truncate font-mono">
+                    <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Invite link</p>
+                    <div className="flex items-center gap-2 bg-surface-hover border border-border rounded-lg px-3 py-2.5">
+                      <span className="text-xs text-text-muted flex-1 truncate font-mono">
                         {typeof window !== 'undefined' ? window.location.origin : ''}/join?code={inviteCode}
                       </span>
                       <button
                         onClick={() => copyInvite('link')}
-                        className="flex-shrink-0 text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1 transition-colors"
+                        className="flex-shrink-0 text-xs font-semibold text-text-muted hover:text-text-secondary flex items-center gap-1 transition-colors"
                       >
-                        {inviteCopied === 'link' ? <><CheckCircle className="w-3.5 h-3.5 text-green-500" /> Copied</> : 'Copy'}
+                        {inviteCopied === 'link' ? <><CheckCircle className="w-3.5 h-3.5 text-emerald-500" /> Copied</> : 'Copy'}
                       </button>
                     </div>
                   </div>
-                  <p className="text-xs text-slate-400 leading-relaxed">
+                  <p className="text-xs text-text-muted leading-relaxed">
                     Anyone with this link can join your workspace as a Viewer. You can change their role from the dashboard.
                     Regenerating the link invalidates the previous one.
                   </p>
                   <div className="flex gap-3 pt-1">
                     <button
                       onClick={openInviteModal}
-                      className="flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-800 transition-colors"
+                      className="flex items-center gap-1.5 text-xs font-medium text-text-muted hover:text-text-secondary transition-colors"
                     >
                       <RefreshCw className="w-3 h-3" /> Regenerate link
                     </button>
@@ -446,7 +449,7 @@ export default function SettingsPage() {
       {activeTab === 'users' && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-text-secondary">
               {1 + members.length} user{1 + members.length !== 1 ? 's' : ''} · {1 + members.length} active
             </p>
             <Button variant="primary" size="sm" icon={<Plus className="w-3.5 h-3.5" />} onClick={openInviteModal}>
@@ -454,19 +457,19 @@ export default function SettingsPage() {
             </Button>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-lg shadow-card overflow-hidden">
+          <div className="bg-surface-raised border border-border rounded-lg overflow-hidden">
             <table className="w-full">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200">
+                <tr className="bg-surface-overlay border-b border-border">
                   {['User', 'Role', 'Joined', 'Logs', ''].map(h => (
-                    <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">{h}</th>
+                    <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-border-subtle">
                 {/* Admin (current user) */}
                 {currentUser && (
-                  <tr className="hover:bg-slate-50 transition-colors">
+                  <tr className="hover:bg-surface-hover transition-colors">
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-emerald-700 flex items-center justify-center flex-shrink-0">
@@ -475,18 +478,18 @@ export default function SettingsPage() {
                           </span>
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-slate-900">{currentUser.name || '—'}</p>
-                          <p className="text-xs text-slate-500">{currentUser.email}</p>
+                          <p className="text-sm font-semibold text-text-primary">{currentUser.name || '—'}</p>
+                          <p className="text-xs text-text-muted">{currentUser.email}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-4 py-3.5">
-                      <span className="text-xs font-medium px-2.5 py-1 rounded-full border bg-red-50 text-red-700 border-red-200">
+                      <span className="text-xs font-medium px-2.5 py-1 rounded-full border bg-red-500/10 text-red-400 border-red-500/30">
                         Admin
                       </span>
                     </td>
                     <td className="px-4 py-3.5">
-                      <span className="text-xs text-slate-400">Workspace owner</span>
+                      <span className="text-xs text-text-muted">Workspace owner</span>
                     </td>
                     <td className="px-4 py-3.5" />
                     <td className="px-4 py-3.5" />
@@ -497,29 +500,29 @@ export default function SettingsPage() {
                 {!membersLoaded && (
                   <tr>
                     <td colSpan={5} className="px-4 py-6 text-center">
-                      <Loader2 className="w-4 h-4 text-slate-400 animate-spin inline-block" />
+                      <Loader2 className="w-4 h-4 text-text-muted animate-spin inline-block" />
                     </td>
                   </tr>
                 )}
                 {membersLoaded && members.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-4 py-6 text-center text-xs text-slate-400 italic">
+                    <td colSpan={5} className="px-4 py-6 text-center text-xs text-text-muted italic">
                       No team members yet. Share an invite link to add employees.
                     </td>
                   </tr>
                 )}
                 {members.map(member => (
-                  <tr key={member.user_id} className="hover:bg-slate-50 transition-colors">
+                  <tr key={member.user_id} className="hover:bg-surface-hover transition-colors">
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0">
-                          <span className="text-slate-600 text-[10px] font-bold">
+                        <div className="w-8 h-8 rounded-full bg-surface-overlay flex items-center justify-center flex-shrink-0">
+                          <span className="text-text-secondary text-[10px] font-bold">
                             {(member.name || member.email).slice(0, 2).toUpperCase()}
                           </span>
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-slate-900">{member.name || '—'}</p>
-                          <p className="text-xs text-slate-500">{member.email}</p>
+                          <p className="text-sm font-semibold text-text-primary">{member.name || '—'}</p>
+                          <p className="text-xs text-text-muted">{member.email}</p>
                         </div>
                       </div>
                     </td>
@@ -529,7 +532,7 @@ export default function SettingsPage() {
                           value={member.role}
                           onChange={e => updateMemberRole(member, e.target.value)}
                           disabled={updatingRole === member.user_id}
-                          className={`text-xs font-semibold px-2.5 py-1 pr-6 border rounded-full appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500 ${ROLE_COLORS[member.role] ?? ROLE_COLORS.viewer}`}
+                          className={`text-xs font-semibold px-2.5 py-1 pr-6 border rounded-full appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent-500 ${ROLE_COLORS[member.role] ?? ROLE_COLORS.viewer}`}
                         >
                           <option value="viewer">Viewer</option>
                           <option value="analyst">Analyst</option>
@@ -542,14 +545,14 @@ export default function SettingsPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3.5">
-                      <span className="text-xs text-slate-400">
+                      <span className="text-xs text-text-muted">
                         {member.joined_at ? new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(member.joined_at)) : '—'}
                       </span>
                     </td>
                     <td className="px-4 py-3.5">
                       <button
                         onClick={() => openEmployeeLogs(member)}
-                        className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-800 font-medium transition-colors"
+                        className="flex items-center gap-1 text-xs text-accent-400 hover:text-accent-300 font-medium transition-colors"
                       >
                         <Clock className="w-3.5 h-3.5" />
                         View logs
@@ -560,7 +563,7 @@ export default function SettingsPage() {
                         onClick={() => removeMember(member)}
                         disabled={removing === member.user_id}
                         title="Remove from workspace"
-                        className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded disabled:opacity-40 transition-colors"
+                        className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded disabled:opacity-40 transition-colors"
                       >
                         {removing === member.user_id
                           ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -577,21 +580,21 @@ export default function SettingsPage() {
           {logsEmployee && (
             <div className="fixed inset-0 z-50 flex">
               <div className="absolute inset-0 bg-black/40" onClick={() => setLogsEmployee(null)} />
-              <div className="relative ml-auto w-full max-w-md bg-white h-full flex flex-col shadow-2xl">
+              <div className="relative ml-auto w-full max-w-md bg-surface-raised h-full flex flex-col shadow-2xl">
                 {/* Panel header */}
-                <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-border">
                   <div>
-                    <p className="text-sm font-bold text-slate-900">{logsEmployee.name || logsEmployee.email}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">Activity log · {logsEmployee.email}</p>
+                    <p className="text-sm font-bold text-text-primary">{logsEmployee.name || logsEmployee.email}</p>
+                    <p className="text-xs text-text-muted mt-0.5">Activity log · {logsEmployee.email}</p>
                   </div>
-                  <button onClick={() => setLogsEmployee(null)} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded transition-colors">
+                  <button onClick={() => setLogsEmployee(null)} className="p-1.5 text-text-muted hover:text-text-secondary hover:bg-surface-overlay rounded transition-colors">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
 
                 {/* Role badge */}
-                <div className="px-5 py-3 border-b border-slate-100 flex items-center gap-2">
-                  <span className="text-[11px] text-slate-500">Current role:</span>
+                <div className="px-5 py-3 border-b border-border-subtle flex items-center gap-2">
+                  <span className="text-[11px] text-text-muted">Current role:</span>
                   <span className={`text-[11px] font-semibold px-2 py-0.5 border rounded-full ${ROLE_COLORS[logsEmployee.role] ?? ROLE_COLORS.viewer}`}>
                     {logsEmployee.role.charAt(0).toUpperCase() + logsEmployee.role.slice(1)}
                   </span>
@@ -601,26 +604,26 @@ export default function SettingsPage() {
                 <div className="flex-1 overflow-y-auto px-5 py-4">
                   {logsLoading ? (
                     <div className="flex items-center justify-center py-12">
-                      <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
+                      <Loader2 className="w-5 h-5 text-text-muted animate-spin" />
                     </div>
                   ) : logs.length === 0 ? (
                     <div className="text-center py-12">
-                      <Clock className="w-8 h-8 text-slate-200 mx-auto mb-3" />
-                      <p className="text-sm text-slate-400">No activity recorded yet.</p>
-                      <p className="text-xs text-slate-300 mt-1">Actions will appear here once the employee interacts with the workspace.</p>
+                      <Clock className="w-8 h-8 text-text-muted mx-auto mb-3" />
+                      <p className="text-sm text-text-muted">No activity recorded yet.</p>
+                      <p className="text-xs text-text-muted mt-1">Actions will appear here once the employee interacts with the workspace.</p>
                     </div>
                   ) : (
                     <ul className="space-y-2">
                       {logs.map((entry, i) => (
-                        <li key={i} className="flex items-start gap-3 py-2 border-b border-slate-50 last:border-0">
-                          <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <Clock className="w-3 h-3 text-slate-400" />
+                        <li key={i} className="flex items-start gap-3 py-2 border-b border-border-subtle last:border-0">
+                          <div className="w-6 h-6 rounded-full bg-surface-overlay flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <Clock className="w-3 h-3 text-text-muted" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm text-slate-800">{entry.detail || entry.action}</p>
-                            {entry.resource && <p className="text-xs text-slate-400 mt-0.5">{entry.resource}</p>}
+                            <p className="text-sm text-text-secondary">{entry.detail || entry.action}</p>
+                            {entry.resource && <p className="text-xs text-text-muted mt-0.5">{entry.resource}</p>}
                           </div>
-                          <span className="text-[11px] text-slate-400 flex-shrink-0 mt-0.5">{formatTs(entry.ts)}</span>
+                          <span className="text-[11px] text-text-muted flex-shrink-0 mt-0.5">{formatTs(entry.ts)}</span>
                         </li>
                       ))}
                     </ul>
@@ -636,12 +639,12 @@ export default function SettingsPage() {
       {activeTab === 'roles' && (
         <div className="space-y-3">
           {roles.map((role) => (
-            <div key={role.name} className="bg-white border border-slate-200 rounded-lg shadow-card overflow-hidden">
+            <div key={role.name} className="bg-surface-raised border border-border rounded-lg overflow-hidden">
               <div className="p-4 flex items-center gap-4">
                 <span className={`text-xs font-semibold px-3 py-1.5 rounded-full border w-36 text-center flex-shrink-0 ${role.color}`}>
                   {role.name}
                 </span>
-                <p className="text-sm text-slate-600 flex-1">{role.desc}</p>
+                <p className="text-sm text-text-secondary flex-1">{role.desc}</p>
                 <Button
                   variant="ghost" size="sm" icon={<Eye className="w-3.5 h-3.5" />}
                   onClick={() => setExpandedRole(prev => prev === role.name ? null : role.name)}
@@ -650,11 +653,11 @@ export default function SettingsPage() {
                 </Button>
               </div>
               {expandedRole === role.name && (
-                <div className="px-4 pb-4 pt-1 border-t border-slate-100 bg-slate-50/50">
-                  <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mt-3 mb-2">Permissions</p>
+                <div className="px-4 pb-4 pt-1 border-t border-border-subtle bg-surface-hover/50">
+                  <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider mt-3 mb-2">Permissions</p>
                   <ul className="space-y-1.5">
                     {role.permissions.map(p => (
-                      <li key={p} className="flex items-center gap-2 text-sm text-slate-600">
+                      <li key={p} className="flex items-center gap-2 text-sm text-text-secondary">
                         <CheckCircle className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
                         {p}
                       </li>
@@ -664,9 +667,9 @@ export default function SettingsPage() {
               )}
             </div>
           ))}
-          <p className="text-xs text-slate-400 mt-3">
+          <p className="text-xs text-text-muted mt-3">
             Need a custom role for your organization?{' '}
-            <a href="/contact" className="text-emerald-600 hover:text-emerald-800 font-medium">Contact us</a> — custom roles are available on Enterprise plans.
+            <a href="/contact" className="text-accent-400 hover:text-accent-300 font-medium">Contact us</a> — custom roles are available on Enterprise plans.
           </p>
         </div>
       )}
@@ -684,13 +687,13 @@ export default function SettingsPage() {
                 { label: 'Session timeout',                     value: '8 hours inactivity',     status: 'cfg', detail: 'Idle sessions are terminated. Configurable per role.' },
                 { label: 'Password policy',                     value: 'Managed by IdP',         status: 'ok',  detail: 'Min 12 chars, complexity enforced at identity provider.' },
               ].map((item) => (
-                <div key={item.label} className="flex items-start justify-between py-3 border-b border-slate-100 last:border-0 gap-4">
+                <div key={item.label} className="flex items-start justify-between py-3 border-b border-border-subtle last:border-0 gap-4">
                   <div>
-                    <p className="text-sm font-semibold text-slate-800">{item.label}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">{item.detail}</p>
+                    <p className="text-sm font-semibold text-text-secondary">{item.label}</p>
+                    <p className="text-xs text-text-muted mt-0.5">{item.detail}</p>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <p className={`text-xs font-semibold ${item.status === 'on' || item.status === 'ok' ? 'text-green-700' : 'text-emerald-700'}`}>{item.value}</p>
+                    <p className={`text-xs font-semibold ${item.status === 'on' || item.status === 'ok' ? 'text-emerald-400' : 'text-emerald-400'}`}>{item.value}</p>
                   </div>
                 </div>
               ))}
@@ -703,7 +706,7 @@ export default function SettingsPage() {
             <div className="space-y-3">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-semibold text-slate-800">IP allowlist</p>
+                  <p className="text-sm font-semibold text-text-secondary">IP allowlist</p>
                   <Button
                     variant="secondary" size="sm" icon={<Plus className="w-3.5 h-3.5" />}
                     onClick={() => setIpFormOpen(o => !o)}
@@ -719,23 +722,23 @@ export default function SettingsPage() {
                       onChange={e => { setIpInput(e.target.value); setIpError('') }}
                       onKeyDown={e => { if (e.key === 'Enter') addIpRule() }}
                       placeholder="e.g. 203.0.113.0/24"
-                      className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm font-mono text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="flex-1 border border-border-strong rounded-lg px-3 py-2 text-sm font-mono text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent-500"
                     />
                     <Button variant="primary" size="sm" onClick={addIpRule}>Save</Button>
                   </div>
                 )}
-                {ipError && <p className="text-xs text-red-600 mb-2">{ipError}</p>}
+                {ipError && <p className="text-xs text-red-400 mb-2">{ipError}</p>}
 
                 {ipRules.length === 0 ? (
-                  <p className="text-xs text-slate-500 italic py-2">No IP rules configured. Add CIDR ranges to restrict access to specific networks.</p>
+                  <p className="text-xs text-text-muted italic py-2">No IP rules configured. Add CIDR ranges to restrict access to specific networks.</p>
                 ) : (
                   <ul className="space-y-1.5">
                     {ipRules.map(rule => (
-                      <li key={rule} className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
-                        <code className="text-xs text-slate-700 font-mono">{rule}</code>
+                      <li key={rule} className="flex items-center justify-between bg-surface-hover border border-border rounded-lg px-3 py-2">
+                        <code className="text-xs text-text-secondary font-mono">{rule}</code>
                         <button
                           onClick={() => removeIpRule(rule)}
-                          className="text-slate-400 hover:text-red-600 p-0.5 transition-colors"
+                          className="text-text-muted hover:text-red-400 p-0.5 transition-colors"
                           title="Remove rule"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -752,10 +755,10 @@ export default function SettingsPage() {
             <CardHeader title="API Access" icon={<Key className="w-4 h-4" />} />
             <CardDivider />
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-lg gap-3">
+              <div className="flex items-center justify-between p-3 bg-surface-hover border border-border rounded-lg gap-3">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-slate-800">API Key — Production</p>
-                  <p className="text-xs font-mono text-slate-400 mt-0.5 truncate">
+                  <p className="text-sm font-medium text-text-secondary">API Key — Production</p>
+                  <p className="text-xs font-mono text-text-muted mt-0.5 truncate">
                     {apiKeyVisible ? apiKey : `${apiKey.slice(0, 10)}${'•'.repeat(26)}${apiKey.slice(-4)}`}
                   </p>
                 </div>
@@ -776,8 +779,8 @@ export default function SettingsPage() {
                   />
                 </div>
               </div>
-              <p className="text-xs text-slate-500 flex items-center gap-1.5">
-                <AlertTriangle className="w-3 h-3 text-amber-500" />
+              <p className="text-xs text-text-muted flex items-center gap-1.5">
+                <AlertTriangle className="w-3 h-3 text-amber-400" />
                 API keys grant full read/write access. Never share or commit to version control.
               </p>
             </div>
@@ -793,19 +796,19 @@ export default function SettingsPage() {
             <CardDivider />
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Organization name</label>
+                <label className="block text-xs font-semibold text-text-secondary mb-1.5">Organization name</label>
                 <input
                   value={tenantName}
                   onChange={e => setTenantName(e.target.value)}
-                  className="w-full border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="w-full border border-border-strong rounded-lg px-3.5 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Timezone</label>
+                <label className="block text-xs font-semibold text-text-secondary mb-1.5">Timezone</label>
                 <select
                   value={timezone}
                   onChange={e => setTimezone(e.target.value)}
-                  className="w-full border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full border border-border-strong rounded-lg px-3.5 py-2.5 text-sm text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-500"
                 >
                   <option value="America/Los_Angeles">Pacific Time (PT)</option>
                   <option value="America/Chicago">Central Time (CT)</option>
@@ -813,17 +816,43 @@ export default function SettingsPage() {
                   <option value="UTC">UTC</option>
                 </select>
               </div>
-              <div className="flex gap-3 pt-2">
+              <div className="flex items-center gap-3 pt-2">
                 <Button
                   variant="primary"
                   size="md"
-                  onClick={() => {
-                    if (currentUser) saveUser({ ...currentUser, company: tenantName.trim() || currentUser.company })
+                  disabled={savingOrgName || !tenantName.trim()}
+                  onClick={async () => {
+                    setSavingOrgName(true)
+                    setOrgNameError('')
+                    setOrgNameSaved(false)
+                    try {
+                      const res = await fetch('/api/settings/update-org-name', {
+                        method:  'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body:    JSON.stringify({ name: tenantName.trim() }),
+                      })
+                      if (!res.ok) {
+                        const body = await res.json().catch(() => ({}))
+                        setOrgNameError(body.error || 'Failed to save organization name.')
+                        return
+                      }
+                      // Also update the local display cache so this admin's
+                      // own session reflects the new name immediately.
+                      if (currentUser) saveUser({ ...currentUser, company: tenantName.trim() })
+                      setOrgNameSaved(true)
+                      setTimeout(() => setOrgNameSaved(false), 3000)
+                    } catch {
+                      setOrgNameError('Failed to save organization name. Please try again.')
+                    } finally {
+                      setSavingOrgName(false)
+                    }
                   }}
                 >
-                  Save changes
+                  {savingOrgName ? 'Saving…' : 'Save changes'}
                 </Button>
-                <Button variant="secondary" size="md" onClick={() => setTenantName(currentUser?.company || '')}>Discard</Button>
+                <Button variant="secondary" size="md" onClick={() => { setTenantName(currentUser?.company || ''); setOrgNameError('') }}>Discard</Button>
+                {orgNameSaved && <span className="text-xs font-medium text-emerald-400">Saved — your team will see this the next time they load the app.</span>}
+                {orgNameError && <span className="text-xs font-medium text-red-400">{orgNameError}</span>}
               </div>
             </div>
           </Card>
@@ -835,16 +864,16 @@ export default function SettingsPage() {
               {[
                 { label: 'Plan', value: `${plan} Plan`, highlight: true },
               ].map((row) => (
-                <div key={row.label} className="flex justify-between items-center text-sm py-1.5 border-b border-slate-100 last:border-0">
-                  <span className="text-slate-500">{row.label}</span>
-                  <span className={`font-semibold ${'highlight' in row && row.highlight ? 'text-emerald-700' : 'text-slate-800'}`}>{row.value}</span>
+                <div key={row.label} className="flex justify-between items-center text-sm py-1.5 border-b border-border-subtle last:border-0">
+                  <span className="text-text-muted">{row.label}</span>
+                  <span className={`font-semibold ${'highlight' in row && row.highlight ? 'text-emerald-400' : 'text-text-secondary'}`}>{row.value}</span>
                 </div>
               ))}
             </div>
             <div className="mt-4 flex items-center gap-3">
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-text-muted">
                 You're on the highest tier. Questions about billing?{' '}
-                <a href="/contact" className="text-emerald-600 hover:text-emerald-800 font-medium">Contact us</a>
+                <a href="/contact" className="text-accent-400 hover:text-accent-300 font-medium">Contact us</a>
               </p>
             </div>
           </Card>
@@ -861,14 +890,14 @@ export default function SettingsPage() {
               <CardHeader title="Data Management" icon={<Database className="w-4 h-4" />} />
               <CardDivider />
               <div className="space-y-4">
-                <p className="text-sm text-slate-600 leading-relaxed">
+                <p className="text-sm text-text-secondary leading-relaxed">
                   Reset all uploaded data and connected source contributions from your workspace.
                   This removes every file you have uploaded and all computed metrics derived from them.
                   Your account and settings are not affected.
                 </p>
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex gap-3">
-                  <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-red-700">
+                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 flex gap-3">
+                  <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-400">
                     This action is permanent. All uploaded data, anomaly results, and spend metrics will be erased.
                     You will need to re-upload your files to restore them.
                   </p>
@@ -887,13 +916,13 @@ export default function SettingsPage() {
           {/* ── Confirm ── */}
           {resetStep === 'confirm' && (
             <Card>
-              <CardHeader title="Confirm data reset" icon={<AlertCircle className="w-4 h-4 text-red-600" />} />
+              <CardHeader title="Confirm data reset" icon={<AlertCircle className="w-4 h-4 text-red-400" />} />
               <CardDivider />
               <div className="space-y-5">
-                <p className="text-sm text-slate-700 leading-relaxed">
+                <p className="text-sm text-text-secondary leading-relaxed">
                   Are you sure you want to permanently delete all uploaded data?
                   This cannot be undone. A verification code will be sent to{' '}
-                  <span className="font-semibold text-slate-900">{currentUser?.email}</span>{' '}
+                  <span className="font-semibold text-text-primary">{currentUser?.email}</span>{' '}
                   to confirm.
                 </p>
                 <div className="flex gap-3">
@@ -905,7 +934,7 @@ export default function SettingsPage() {
                   </button>
                   <button
                     onClick={() => setResetStep('idle')}
-                    className="text-sm font-medium text-slate-600 hover:text-slate-900 px-4 py-2.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"
+                    className="text-sm font-medium text-text-secondary hover:text-text-primary px-4 py-2.5 rounded-lg border border-border hover:bg-surface-hover transition-colors"
                   >
                     Cancel
                   </button>
@@ -917,10 +946,10 @@ export default function SettingsPage() {
           {/* ── Sending ── */}
           {resetStep === 'sending' && (
             <Card>
-              <CardHeader title="Sending verification code…" icon={<Loader2 className="w-4 h-4 animate-spin text-slate-500" />} />
+              <CardHeader title="Sending verification code…" icon={<Loader2 className="w-4 h-4 animate-spin text-text-muted" />} />
               <CardDivider />
-              <p className="text-sm text-slate-500 py-2">
-                Sending a 6-digit code to <span className="font-medium text-slate-700">{currentUser?.email}</span>
+              <p className="text-sm text-text-muted py-2">
+                Sending a 6-digit code to <span className="font-medium text-text-secondary">{currentUser?.email}</span>
               </p>
             </Card>
           )}
@@ -931,8 +960,8 @@ export default function SettingsPage() {
               <CardHeader title="Enter verification code" icon={<Shield className="w-4 h-4" />} />
               <CardDivider />
               <div className="space-y-5">
-                <p className="text-sm text-slate-600">
-                  Enter the 6-digit code sent to <span className="font-semibold text-slate-800">{currentUser?.email}</span>.
+                <p className="text-sm text-text-secondary">
+                  Enter the 6-digit code sent to <span className="font-semibold text-text-primary">{currentUser?.email}</span>.
                   The code expires in 10 minutes.
                 </p>
 
@@ -949,20 +978,20 @@ export default function SettingsPage() {
                       onChange={e => handleCodeDigit(i, e.target.value)}
                       onKeyDown={e => handleCodeKeyDown(i, e)}
                       disabled={resetStep === 'verifying'}
-                      className="w-11 h-14 text-center text-xl font-bold border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 disabled:opacity-50 text-slate-900"
+                      className="w-11 h-14 text-center text-xl font-bold border border-border-strong rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 disabled:opacity-50 text-text-primary"
                     />
                   ))}
                 </div>
 
                 {resetError && (
-                  <p className="text-sm text-red-600 flex items-center gap-1.5">
+                  <p className="text-sm text-red-400 flex items-center gap-1.5">
                     <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
                     {resetError}
                   </p>
                 )}
 
                 {resetStep === 'verifying' && (
-                  <p className="text-sm text-slate-500 flex items-center gap-2">
+                  <p className="text-sm text-text-muted flex items-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
                     Verifying…
                   </p>
@@ -978,7 +1007,7 @@ export default function SettingsPage() {
                   </button>
                   <button
                     onClick={() => { setResetStep('idle'); setResetCode(''); setResetError('') }}
-                    className="text-sm text-slate-500 hover:text-slate-700 transition-colors"
+                    className="text-sm text-text-muted hover:text-text-secondary transition-colors"
                   >
                     Cancel
                   </button>
@@ -987,7 +1016,7 @@ export default function SettingsPage() {
                 <button
                   onClick={sendResetCode}
                   disabled={resetStep === 'verifying'}
-                  className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+                  className="text-xs text-text-muted hover:text-text-secondary transition-colors"
                 >
                   Didn't receive a code? Resend
                 </button>
@@ -998,16 +1027,16 @@ export default function SettingsPage() {
           {/* ── Done ── */}
           {resetStep === 'done' && (
             <Card>
-              <CardHeader title="Data reset complete" icon={<CheckCircle className="w-4 h-4 text-green-600" />} />
+              <CardHeader title="Data reset complete" icon={<CheckCircle className="w-4 h-4 text-emerald-400" />} />
               <CardDivider />
               <div className="space-y-4">
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-text-secondary">
                   All uploaded data has been permanently removed from your workspace.
                   Connect a new data source or upload a file to get started again.
                 </p>
                 <button
                   onClick={() => { setResetStep('idle'); setResetCode(''); setResetError('') }}
-                  className="text-sm font-medium text-emerald-700 hover:text-emerald-900 transition-colors"
+                  className="text-sm font-medium text-emerald-400 hover:text-emerald-300 transition-colors"
                 >
                   ← Back to data settings
                 </button>
@@ -1018,10 +1047,10 @@ export default function SettingsPage() {
           {/* ── Error ── */}
           {resetStep === 'error' && (
             <Card>
-              <CardHeader title="Could not send code" icon={<AlertCircle className="w-4 h-4 text-red-600" />} />
+              <CardHeader title="Could not send code" icon={<AlertCircle className="w-4 h-4 text-red-400" />} />
               <CardDivider />
               <div className="space-y-4">
-                {resetError && <p className="text-sm text-red-600">{resetError}</p>}
+                {resetError && <p className="text-sm text-red-400">{resetError}</p>}
                 <div className="flex gap-3">
                   <button
                     onClick={sendResetCode}
@@ -1031,7 +1060,7 @@ export default function SettingsPage() {
                   </button>
                   <button
                     onClick={() => { setResetStep('idle'); setResetError('') }}
-                    className="text-sm text-slate-500 hover:text-slate-700 transition-colors"
+                    className="text-sm text-text-muted hover:text-text-secondary transition-colors"
                   >
                     Cancel
                   </button>

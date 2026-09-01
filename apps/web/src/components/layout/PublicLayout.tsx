@@ -64,31 +64,31 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
       <Head>
         <title>{title ? `${title} — Ventura` : 'Ventura — Financial Operations Intelligence'}</title>
       </Head>
-      <div className="min-h-screen flex flex-col bg-white">
+      <div className="min-h-screen flex flex-col bg-surface">
 
         {/* Top nav */}
-        <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200">
+        <header className="sticky top-0 z-50 bg-surface/95 backdrop-blur border-b border-border">
           <div className="h-16 px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 flex items-center justify-between">
             <Link href="/" className="no-underline" onClick={() => setDrawerOpen(false)}>
-              <VenturaLogo variant="dark" height={32} />
+              <VenturaLogo variant="light" height={28} />
             </Link>
 
             {/* Desktop nav */}
             <div className="hidden sm:flex items-center gap-3">
-              <Link href="/demo" className="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
+              <Link href="/demo" className="text-sm font-medium text-text-muted hover:text-text-primary transition-colors">
                 Demo
               </Link>
               {!loggedIn && (
                 <>
                   <Link
                     href="/employee-login"
-                    className="text-sm font-semibold text-emerald-700 hover:text-emerald-800 border border-emerald-600 hover:border-emerald-700 hover:bg-emerald-50 px-4 py-2 rounded-lg transition-colors"
+                    className="text-sm font-semibold text-emerald-400 hover:text-emerald-300 border border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-500/10 px-4 py-2 rounded-lg transition-colors"
                   >
                     Employee portal
                   </Link>
                   <Link
                     href="/login"
-                    className="text-sm font-semibold text-slate-700 hover:text-slate-900 border border-slate-300 hover:border-slate-400 px-4 py-2 rounded-lg transition-colors"
+                    className="text-sm font-semibold text-text-secondary hover:text-text-primary border border-border-strong hover:border-border px-4 py-2 rounded-lg transition-colors"
                   >
                     Sign in
                   </Link>
@@ -96,11 +96,11 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
               )}
               {/* Logged-in employees: show their portal link only, no sign-in links */}
               {loggedIn ? (
-                <Link href={portalHref} className="bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
+                <Link href={portalHref} className="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
                   {portalLabel}
                 </Link>
               ) : (
-                <Link href="/contact" className="bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
+                <Link href="/contact" className="bg-accent-500 hover:bg-accent-600 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
                   Get started
                 </Link>
               )}
@@ -108,7 +108,7 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
 
             {/* Mobile hamburger */}
             <button
-              className="sm:hidden p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+              className="sm:hidden p-2 text-text-secondary hover:text-text-primary hover:bg-surface-overlay transition-colors"
               onClick={() => setDrawerOpen(true)}
               aria-label="Open menu"
             >
@@ -126,13 +126,13 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
         )}
 
         {/* Mobile drawer */}
-        <div className={`fixed top-0 right-0 h-full w-72 bg-white z-[70] flex flex-col shadow-2xl transition-transform duration-200 sm:hidden ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className={`fixed top-0 right-0 h-full w-72 bg-surface-raised z-[70] flex flex-col shadow-2xl transition-transform duration-200 sm:hidden ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
           {/* Drawer header */}
-          <div className="h-16 flex items-center justify-between px-5 border-b border-slate-200">
-            <VenturaLogo variant="dark" height={28} />
+          <div className="h-16 flex items-center justify-between px-5 border-b border-border">
+            <VenturaLogo variant="light" height={24} />
             <button
               onClick={() => setDrawerOpen(false)}
-              className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+              className="p-2 text-text-muted hover:text-text-primary hover:bg-surface-overlay transition-colors"
               aria-label="Close menu"
             >
               <XMarkIcon className="w-5 h-5" />
@@ -144,7 +144,7 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
             <Link
               href="/demo"
               onClick={() => setDrawerOpen(false)}
-              className="block px-4 py-3 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+              className="block px-4 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-overlay hover:text-text-primary transition-colors"
             >
               Demo
             </Link>
@@ -154,14 +154,14 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
                 <Link
                   href="/employee-login"
                   onClick={() => setDrawerOpen(false)}
-                  className="block px-4 py-3 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 border border-emerald-200 rounded-lg transition-colors"
+                  className="block px-4 py-3 text-sm font-semibold text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/30 rounded-lg transition-colors"
                 >
                   Employee portal
                 </Link>
                 <Link
                   href="/login"
                   onClick={() => setDrawerOpen(false)}
-                  className="block px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors"
+                  className="block px-4 py-3 text-sm font-semibold text-text-secondary hover:bg-surface-overlay border border-border rounded-lg transition-colors"
                 >
                   Sign in
                 </Link>
@@ -173,7 +173,7 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
                 <Link
                   href={portalHref}
                   onClick={() => setDrawerOpen(false)}
-                  className="block px-4 py-3 text-sm font-semibold text-white bg-emerald-700 hover:bg-emerald-800 rounded-lg transition-colors text-center"
+                  className="block px-4 py-3 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-colors text-center"
                 >
                   {portalLabel}
                 </Link>
@@ -181,7 +181,7 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
                 <Link
                   href="/contact"
                   onClick={() => setDrawerOpen(false)}
-                  className="block px-4 py-3 text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition-colors text-center"
+                  className="block px-4 py-3 text-sm font-semibold text-white bg-accent-500 hover:bg-accent-600 rounded-lg transition-colors text-center"
                 >
                   Get started
                 </Link>
@@ -193,19 +193,19 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
         <main className="flex-1">{children}</main>
 
         {/* Footer */}
-        <footer className="bg-slate-900 text-slate-400 py-10">
+        <footer className="bg-surface-sunken text-text-muted py-10 border-t border-border">
           <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
             <div className="grid md:grid-cols-4 gap-8 mb-8">
               <div>
                 <div className="mb-3">
-                  <VenturaLogo variant="light" height={22} />
+                  <VenturaLogo variant="light" height={20} />
                 </div>
-                <p className="text-xs text-slate-500 leading-relaxed">
+                <p className="text-xs text-text-muted leading-relaxed">
                   Financial operations intelligence for enterprise finance teams.
                 </p>
               </div>
               <div>
-                <p className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-3">Product</p>
+                <p className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-3">Product</p>
                 <ul className="space-y-2 text-xs">
                   {[
                     { label: 'Anomaly Detection',     href: '/#anomaly'    },
@@ -213,12 +213,12 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
                     { label: 'AI Governance',         href: '/#governance' },
                     { label: 'Integrations',          href: '/demo'        },
                   ].map(({ label, href }) => (
-                    <li key={label}><Link href={href} className="hover:text-slate-200 transition-colors">{label}</Link></li>
+                    <li key={label}><Link href={href} className="hover:text-text-primary transition-colors">{label}</Link></li>
                   ))}
                 </ul>
               </div>
               <div>
-                <p className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-3">Company</p>
+                <p className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-3">Company</p>
                 <ul className="space-y-2 text-xs">
                   {[
                     { label: 'About',            href: '/about'    },
@@ -226,12 +226,12 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
                     { label: 'Privacy Policy',   href: '/privacy'  },
                     { label: 'Terms of Service', href: '/terms'    },
                   ].map(({ label, href }) => (
-                    <li key={label}><Link href={href} className="hover:text-slate-200 transition-colors">{label}</Link></li>
+                    <li key={label}><Link href={href} className="hover:text-text-primary transition-colors">{label}</Link></li>
                   ))}
                 </ul>
               </div>
               <div>
-                <p className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-3">Resources</p>
+                <p className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-3">Resources</p>
                 <ul className="space-y-2 text-xs">
                   {[
                     { label: 'Documentation', href: '/docs'     },
@@ -239,16 +239,16 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
                     { label: 'Status',        href: '/status'   },
                     { label: 'Support',       href: '/contact'  },
                   ].map(({ label, href }) => (
-                    <li key={label}><Link href={href} className="hover:text-slate-200 transition-colors">{label}</Link></li>
+                    <li key={label}><Link href={href} className="hover:text-text-primary transition-colors">{label}</Link></li>
                   ))}
                 </ul>
               </div>
             </div>
-            <div className="border-t border-slate-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="border-t border-border pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
               <p className="text-xs">© 2026 Ventura Financial Intelligence, Inc. All rights reserved.</p>
               <div className="flex items-center gap-1 text-xs">
-                <Link href="/status" className="inline-flex items-center gap-1.5 bg-green-900/40 text-green-400 border border-green-800/50 hover:border-green-700 px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                <Link href="/status" className="inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 hover:border-emerald-500/50 px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   All systems operational
                 </Link>
               </div>

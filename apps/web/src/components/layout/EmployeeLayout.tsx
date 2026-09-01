@@ -28,10 +28,10 @@ interface EmployeeLayoutProps {
 }
 
 const ROLE_LABELS: Record<string, { label: string; color: string }> = {
-  viewer:  { label: 'Viewer',  color: 'bg-slate-100 text-slate-600 border-slate-200' },
-  analyst: { label: 'Analyst', color: 'bg-amber-50 text-amber-700 border-amber-200'  },
-  editor:  { label: 'Editor',  color: 'bg-blue-50 text-blue-700 border-blue-200'     },
-  admin:   { label: 'Admin',   color: 'bg-purple-50 text-purple-700 border-purple-200' },
+  viewer:  { label: 'Viewer',  color: 'bg-slate-400/10 text-slate-400 border-slate-400/25' },
+  analyst: { label: 'Analyst', color: 'bg-amber-500/10 text-amber-400 border-amber-500/30'  },
+  editor:  { label: 'Editor',  color: 'bg-accent-500/10 text-accent-300 border-accent-500/30' },
+  admin:   { label: 'Admin',   color: 'bg-purple-500/10 text-purple-400 border-purple-500/30' },
 }
 
 export default function EmployeeLayout({ children, title }: EmployeeLayoutProps) {
@@ -86,21 +86,21 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
   const SidebarContent = () => (
     <>
       {/* Brand */}
-      <div className="h-14 flex items-center justify-between px-5 border-b border-slate-200 flex-shrink-0">
-        <VenturaLogo variant="dark" height={24} />
-        <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-1 text-slate-400 hover:text-slate-700">
+      <div className="h-14 flex items-center justify-between px-5 border-b border-border flex-shrink-0">
+        <VenturaLogo variant="light" height={22} />
+        <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-1 text-text-muted hover:text-text-secondary">
           <XMarkIcon className="w-5 h-5" />
         </button>
       </div>
 
       {/* Company badge */}
       <div className="px-4 pt-4 pb-2">
-        <div className="flex items-center gap-2.5 px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg">
-          <div className="w-7 h-7 rounded-full bg-emerald-700 flex items-center justify-center flex-shrink-0">
+        <div className="flex items-center gap-2.5 px-3 py-2.5 bg-surface-overlay border border-border rounded-lg">
+          <div className="w-7 h-7 rounded-full bg-emerald-600 flex items-center justify-center flex-shrink-0">
             <BuildingOfficeIcon className="w-4 h-4 text-white" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold text-slate-800 truncate">{companyName || user?.company || 'Your Workspace'}</p>
+            <p className="text-xs font-semibold text-text-primary truncate">{companyName || user?.company || 'Your Workspace'}</p>
             <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${roleInfo.color}`}>
               {roleInfo.label}
             </span>
@@ -110,7 +110,7 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto px-4 pt-2 pb-4 space-y-px">
-        <p className="px-3 mb-1.5 text-[10px] font-semibold tracking-widest text-slate-400 uppercase">Navigation</p>
+        <p className="px-3 mb-1.5 text-[10px] font-semibold tracking-widest text-text-muted uppercase">Navigation</p>
         {navItems.map(item => {
           const active = isActive(item.href)
           const Icon = item.icon
@@ -120,7 +120,7 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
               href={item.href}
               className={clsx(
                 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                active ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
+                active ? 'bg-accent-500 text-white' : 'text-text-secondary hover:text-text-primary hover:bg-surface-overlay',
               )}
             >
               <Icon className="w-4 h-4 flex-shrink-0" />
@@ -130,12 +130,12 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
         })}
 
         {/* Access level notice */}
-        <div className="mt-4 mx-1 px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg">
-          <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide mb-1 flex items-center gap-1">
+        <div className="mt-4 mx-1 px-3 py-2.5 bg-surface-overlay border border-border rounded-lg">
+          <p className="text-[10px] font-semibold text-text-muted uppercase tracking-wide mb-1 flex items-center gap-1">
             <LockClosedIcon className="w-3 h-3" />
             Access level
           </p>
-          <p className="text-[11px] text-slate-500 leading-relaxed">
+          <p className="text-[11px] text-text-muted leading-relaxed">
             {role === 'editor'
               ? 'You can view and make changes across the workspace.'
               : role === 'analyst'
@@ -146,19 +146,19 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
       </nav>
 
       {/* User footer */}
-      <div className="border-t border-slate-200 px-4 py-3">
+      <div className="border-t border-border px-4 py-3">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-full bg-slate-900 flex items-center justify-center flex-shrink-0">
+          <div className="w-7 h-7 rounded-full bg-accent-500 flex items-center justify-center flex-shrink-0">
             <span className="text-white text-[10px] font-bold">{userInitials}</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-slate-800 truncate">{displayName}</p>
-            <p className="text-[10px] text-slate-400">Employee</p>
+            <p className="text-xs font-semibold text-text-primary truncate">{displayName}</p>
+            <p className="text-[10px] text-text-muted">Employee</p>
           </div>
           <button
             onClick={handleSignOut}
             title="Sign out"
-            className="text-slate-400 hover:text-slate-700 transition-colors p-1"
+            className="text-text-muted hover:text-text-secondary transition-colors p-1"
           >
             <ArrowRightOnRectangleIcon className="w-4 h-4" />
           </button>
@@ -172,14 +172,14 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
       <Head>
         <title>{title ? `${title} — Ventura` : 'Ventura — Employee Portal'}</title>
       </Head>
-      <div className="min-h-screen flex bg-slate-50">
+      <div className="min-h-screen flex bg-surface">
 
         {/* Sidebar — desktop always visible, mobile as overlay */}
         {sidebarOpen && (
           <div className="fixed inset-0 bg-black/40 z-20 lg:hidden" onClick={() => setSidebarOpen(false)} />
         )}
         <aside className={clsx(
-          'fixed inset-y-0 left-0 w-60 flex flex-col bg-white border-r border-slate-200 z-30 transition-transform duration-200',
+          'fixed inset-y-0 left-0 w-60 flex flex-col bg-surface-raised border-r border-border z-30 transition-transform duration-200',
           'lg:translate-x-0',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full',
         )}>
@@ -189,18 +189,18 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
         {/* Main content */}
         <div className="flex-1 flex flex-col lg:ml-60 min-h-screen">
           {/* Top bar */}
-          <header className="h-14 bg-white border-b border-slate-200 flex items-center gap-3 px-4 sm:px-6 sticky top-0 z-10 flex-shrink-0">
+          <header className="h-14 bg-surface-raised border-b border-border flex items-center gap-3 px-4 sm:px-6 sticky top-0 z-10 flex-shrink-0">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors -ml-1"
+              className="lg:hidden p-2 text-text-muted hover:text-text-primary hover:bg-surface-overlay transition-colors -ml-1"
               aria-label="Open navigation"
             >
               <Bars3Icon className="w-5 h-5" />
             </button>
             <div>
-              <p className="text-sm font-semibold text-slate-800">{title || 'Employee Portal'}</p>
+              <p className="text-sm font-semibold text-text-primary">{title || 'Employee Portal'}</p>
               {companyName && (
-                <p className="text-[10px] text-slate-400 leading-none mt-0.5">{companyName}</p>
+                <p className="text-[10px] text-text-muted leading-none mt-0.5">{companyName}</p>
               )}
             </div>
             <div className="ml-auto flex items-center gap-2">

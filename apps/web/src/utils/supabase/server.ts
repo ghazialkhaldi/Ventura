@@ -21,28 +21,36 @@ export function createClient(context: PageContext | ApiContext) {
           }))
         },
         setAll(cookiesToSet) {
-          // Supabase often needs to set more than one cookie in a single
-          // response (session refresh, or a session JWT chunked across
-          // multiple cookies to stay under the ~4KB per-cookie limit).
-          // res.setHeader('Set-Cookie', ...) called once per cookie inside a
-          // loop REPLACES the header each time instead of appending — only
-          // the last cookie in the batch would ever reach the browser, and
-          // every earlier one was silently dropped. That corrupts the
-          // session on the very first server-side refresh, which is exactly
-          // what caused "Session not found" right after a successful
-          // sign-in. Node's setHeader accepts an array of values for a
-          // single header name and emits one Set-Cookie line per entry —
-          // build the full array first, then set it once.
+          // Two things matter here, and getting either wrong kills the
+          // session with a "Session not found" on the next request.
+          //
+          // 1. Build the whole array and call setHeader ONCE. Supabase often
+          //    writes several cookies at a time (a refresh, or a session JWT
+          //    chunked across cookies to stay under the ~4KB limit).
+          //    res.setHeader called per cookie in a loop REPLACES the header
+          //    each time rather than appending, so only the last cookie would
+          //    survive and the rest were silently dropped.
+          //
+          // 2. Honour the options Supabase passes instead of hardcoding
+          //    flags. In particular do NOT force HttpOnly: @supabase/ssr's
+          //    browser client reads and writes the auth cookie through
+          //    document.cookie, so it has to stay readable from JavaScript.
+          //    Forcing HttpOnly here blinded the browser client the first
+          //    time any API route refreshed the token, and because refresh
+          //    tokens are single use, the server and browser then diverged
+          //    and the session died. middleware.ts passes options through
+          //    untouched; this needs to match it.
           const cookieStrings = cookiesToSet.map(({ name, value, options }) => {
-            const maxAge = options?.maxAge ?? 60 * 60 * 24 * 365
-            const parts = [
-              `${name}=${value}`,
-              'Path=/',
-              'HttpOnly',
-              'SameSite=Lax',
-              `Max-Age=${maxAge}`,
-              ...(options?.secure ? ['Secure'] : []),
-            ]
+            const parts = [`${name}=${value}`, `Path=${options?.path ?? '/'}`]
+            if (options?.domain)                parts.push(`Domain=${options.domain}`)
+            if (options?.maxAge !== undefined)  parts.push(`Max-Age=${options.maxAge}`)
+            if (options?.expires)               parts.push(`Expires=${new Date(options.expires).toUTCString()}`)
+            // sameSite may arrive as a boolean rather than a string; a bare
+            // `SameSite=true` is not a valid attribute and browsers drop it.
+            const ss = options?.sameSite
+            parts.push(`SameSite=${typeof ss === 'string' ? ss : 'Lax'}`)
+            if (options?.secure)                parts.push('Secure')
+            if (options?.httpOnly)              parts.push('HttpOnly')
             return parts.join('; ')
           })
           if (cookieStrings.length > 0) {

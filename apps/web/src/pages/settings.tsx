@@ -38,31 +38,23 @@ const ROLE_COLORS: Record<string, string> = {
   viewer:  'bg-surface-overlay text-text-muted border-border',
 }
 
+// The three roles you can assign to a team member, matching the options in
+// the Users tab role dropdown.
 const roles = [
   {
-    name: 'Admin', desc: 'Full access: manage users, settings, AI governance, all data',
-    color: 'bg-red-500/10 text-red-400 border-red-500/30',
-    permissions: ['Manage team members and roles', 'Configure workspace settings and billing', 'Full read/write on all data', 'Manage AI governance rules', 'Generate and revoke invite codes'],
+    name: 'Editor', desc: 'View everything and make changes across the workspace',
+    color: 'bg-accent-500/10 text-accent-300 border-accent-500/30',
+    permissions: ['View all dashboards, anomalies and reports', 'Change anomaly status and resolve findings', 'Edit workflows', 'Upload and import data'],
   },
   {
-    name: 'Finance Manager', desc: 'Approve anomalies, manage workflows, view all spend data',
-    color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
-    permissions: ['Approve, dismiss, and resolve anomalies', 'Create and edit workflows', 'View all spend data and reports', 'Export data'],
+    name: 'Analyst', desc: 'View everything and comment on anomalies',
+    color: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+    permissions: ['View all dashboards, anomalies and reports', 'Comment on anomalies', 'Cannot change anomaly status or edit workflows'],
   },
   {
-    name: 'Finance Analyst', desc: 'View and comment on anomalies, read-only workflow access',
-    color: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
-    permissions: ['View and comment on anomalies', 'Read-only workflow access', 'View dashboards and reports'],
-  },
-  {
-    name: 'Read-Only', desc: 'View dashboards and reports. No approval or action capabilities.',
+    name: 'Viewer', desc: 'Read only access to dashboards and reports',
     color: 'bg-surface-overlay text-text-muted border-border',
-    permissions: ['View dashboards', 'View reports', 'View integrations status'],
-  },
-  {
-    name: 'System', desc: 'Ventura AI service account, non-human, cannot log in directly.',
-    color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
-    permissions: ['Automated anomaly detection', 'Workflow execution within governance rules', 'Cannot log in interactively'],
+    permissions: ['View all dashboards, anomalies and reports', 'View integration status', 'Cannot make changes of any kind'],
   },
 ]
 
@@ -97,43 +89,9 @@ export default function SettingsPage() {
   // Roles tab — expandable permission details
   const [expandedRole, setExpandedRole] = useState<string | null>(null)
 
-  // Security tab — IP allowlist (persisted locally) + API key display
-  const [ipRules,    setIpRules]    = useState<string[]>([])
-  const [ipFormOpen, setIpFormOpen] = useState(false)
-  const [ipInput,    setIpInput]    = useState('')
-  const [ipError,    setIpError]    = useState('')
+  // Security tab — API key display
   const [apiKey,        setApiKey]        = useState('optm_live_4kd92mfh37sla09xnvb128fhxY2q')
   const [apiKeyVisible, setApiKeyVisible] = useState(false)
-
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem('sf_ip_rules')
-      if (raw) setIpRules(JSON.parse(raw))
-    } catch {}
-  }, [])
-
-  function persistIpRules(rules: string[]) {
-    setIpRules(rules)
-    try { localStorage.setItem('sf_ip_rules', JSON.stringify(rules)) } catch {}
-  }
-
-  function addIpRule() {
-    const value = ipInput.trim()
-    // Basic CIDR / IP validation
-    if (!/^(\d{1,3}\.){3}\d{1,3}(\/\d{1,2})?$/.test(value)) {
-      setIpError('Enter a valid IPv4 address or CIDR range, e.g. 203.0.113.0/24')
-      return
-    }
-    if (ipRules.includes(value)) { setIpError('This rule already exists.'); return }
-    persistIpRules([...ipRules, value])
-    setIpInput('')
-    setIpFormOpen(false)
-    setIpError('')
-  }
-
-  function removeIpRule(rule: string) {
-    persistIpRules(ipRules.filter(r => r !== rule))
-  }
 
   function generateApiKey() {
     const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
@@ -682,10 +640,9 @@ export default function SettingsPage() {
             <CardDivider />
             <div className="space-y-4">
               {[
-                { label: 'Multi-Factor Authentication (MFA)',   value: 'Required for all users', status: 'on',  detail: 'TOTP + WebAuthn supported. Enforce enrollment per role.' },
-                { label: 'SSO (Okta SAML 2.0)',                 value: 'Configurable',           status: 'on',  detail: 'Connect your Okta org to enable SAML 2.0 single sign-on.' },
-                { label: 'Session timeout',                     value: '8 hours inactivity',     status: 'cfg', detail: 'Idle sessions are terminated. Configurable per role.' },
-                { label: 'Password policy',                     value: 'Managed by IdP',         status: 'ok',  detail: 'Min 12 chars, complexity enforced at identity provider.' },
+                { label: 'Multifactor authentication',  value: 'Required for all users', status: 'on',  detail: 'A verification code is emailed on every sign in, for admins and employees.' },
+                { label: 'Session timeout',             value: '8 hours inactivity',     status: 'cfg', detail: 'Idle sessions are ended automatically.' },
+                { label: 'Password policy',             value: 'Enforced at sign up',    status: 'ok',  detail: 'Minimum 8 characters, with an uppercase letter and a special character.' },
               ].map((item) => (
                 <div key={item.label} className="flex items-start justify-between py-3 border-b border-border-subtle last:border-0 gap-4">
                   <div>
@@ -697,57 +654,6 @@ export default function SettingsPage() {
                   </div>
                 </div>
               ))}
-            </div>
-          </Card>
-
-          <Card>
-            <CardHeader title="Network Security" icon={<Lock className="w-4 h-4" />} />
-            <CardDivider />
-            <div className="space-y-3">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-semibold text-text-secondary">IP allowlist</p>
-                  <Button
-                    variant="secondary" size="sm" icon={<Plus className="w-3.5 h-3.5" />}
-                    onClick={() => setIpFormOpen(o => !o)}
-                  >
-                    Add
-                  </Button>
-                </div>
-
-                {ipFormOpen && (
-                  <div className="flex gap-2 mb-3">
-                    <input
-                      value={ipInput}
-                      onChange={e => { setIpInput(e.target.value); setIpError('') }}
-                      onKeyDown={e => { if (e.key === 'Enter') addIpRule() }}
-                      placeholder="e.g. 203.0.113.0/24"
-                      className="flex-1 border border-border-strong rounded-lg px-3 py-2 text-sm font-mono text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent-500"
-                    />
-                    <Button variant="primary" size="sm" onClick={addIpRule}>Save</Button>
-                  </div>
-                )}
-                {ipError && <p className="text-xs text-red-400 mb-2">{ipError}</p>}
-
-                {ipRules.length === 0 ? (
-                  <p className="text-xs text-text-muted italic py-2">No IP rules configured. Add CIDR ranges to restrict access to specific networks.</p>
-                ) : (
-                  <ul className="space-y-1.5">
-                    {ipRules.map(rule => (
-                      <li key={rule} className="flex items-center justify-between bg-surface-hover border border-border rounded-lg px-3 py-2">
-                        <code className="text-xs text-text-secondary font-mono">{rule}</code>
-                        <button
-                          onClick={() => removeIpRule(rule)}
-                          className="text-text-muted hover:text-red-400 p-0.5 transition-colors"
-                          title="Remove rule"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
             </div>
           </Card>
 
@@ -800,7 +706,7 @@ export default function SettingsPage() {
                 <input
                   value={tenantName}
                   onChange={e => setTenantName(e.target.value)}
-                  className="w-full border border-border-strong rounded-lg px-3.5 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
+                  className="w-full bg-surface border border-border-strong rounded-lg px-3.5 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
                 />
               </div>
               <div>
@@ -808,7 +714,7 @@ export default function SettingsPage() {
                 <select
                   value={timezone}
                   onChange={e => setTimezone(e.target.value)}
-                  className="w-full border border-border-strong rounded-lg px-3.5 py-2.5 text-sm text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-500"
+                  className="w-full bg-surface border border-border-strong rounded-lg px-3.5 py-2.5 text-sm text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent-500"
                 >
                   <option value="America/Los_Angeles">Pacific Time (PT)</option>
                   <option value="America/Chicago">Central Time (CT)</option>

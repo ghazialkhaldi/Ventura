@@ -8,8 +8,8 @@ import BrandIcon, { type BrandKey } from '../components/ui/BrandIcon'
 import ConnectModal, { INTEGRATION_CONFIGS } from '../components/ui/ConnectModal'
 import { removeSourceDataset } from '../lib/dataStore'
 import {
-  Plug, RefreshCw, Settings, Plus, Database, Shield,
-  Link, Clock, ChevronRight, Search, Loader2, Trash2,
+  Plug, RefreshCw, Settings, Plus, Database,
+  Clock, ChevronRight, Search, Loader2, Trash2,
 } from 'lucide-react'
 
 const BRAND_MAP: Record<string, BrandKey> = {
@@ -22,7 +22,6 @@ const BRAND_MAP: Record<string, BrandKey> = {
   'slack':       'slack',
   'csv':         'csv',
   'document':    'documents',
-  'okta':        'okta',
   'stripe':      'stripe',
   'sap':         'sap',
   'expensify':   'expensify',
@@ -45,7 +44,6 @@ function getIntegrationId(intg: { id: string; name: string }): string {
   if (name.includes('salesforce')) return 'salesforce'
   if (name.includes('netsuite'))   return 'netsuite'
   if (name.includes('xero'))       return 'xero'
-  if (name.includes('okta'))       return 'okta'
   if (name.includes('slack'))      return 'slack'
   if (name.includes('stripe'))     return 'stripe'
   if (name.includes('sap'))        return 'sap'
@@ -70,7 +68,6 @@ const INTEGRATION_CATALOG: IntegrationDef[] = [
   { id: 'adp',        name: 'ADP',              type: 'Payroll',            description: 'Payroll run data, employee headcount, and W-2 summaries from ADP Workforce Now.',                               authMethod: 'Token-Based Auth'  },
   { id: 'salesforce', name: 'Salesforce',       type: 'CRM',                description: 'Revenue pipeline, closed deals, and AR aging from Salesforce CRM.',                                             authMethod: 'OAuth 2.0'        },
   { id: 'netsuite',   name: 'NetSuite ERP',     type: 'ERP',                description: 'Full GL, AP/AR, and multi-entity consolidation from Oracle NetSuite.',                                           authMethod: 'Token-Based Auth'  },
-  { id: 'okta',       name: 'Okta',             type: 'Identity Provider',  description: 'SSO and user lifecycle management. Automates provisioning and deprovisioning.',                                 authMethod: 'SAML 2.0'         },
   { id: 'csv',        name: 'File Upload',      type: 'File / CSV',        description: 'Upload CSV, XLSX, QBO, OFX, PDF, or ZIP files. Column auto-detection handles most export formats.',              authMethod: 'File Upload'       },
   { id: 'stripe',     name: 'Stripe',           type: 'Payments',           description: 'Revenue transactions, refunds, and dispute history from Stripe.',                                                authMethod: 'API Key'           },
   { id: 'xero',       name: 'Xero',             type: 'GL / Accounting',    description: 'Xero Accounting GL, bank reconciliations, and bills via the Xero API.',                                         authMethod: 'OAuth 2.0'        },
@@ -86,7 +83,6 @@ const ADD_OPTIONS = [
   { id: 'salesforce', name: 'Salesforce',     brand: 'salesforce' as BrandKey, desc: 'CRM / Revenue'      },
   { id: 'netsuite',   name: 'NetSuite ERP',   brand: 'netsuite'   as BrandKey, desc: 'Multi-entity GL'    },
   { id: 'xero',       name: 'Xero',           brand: 'xero'       as BrandKey, desc: 'Accounting'         },
-  { id: 'okta',       name: 'Okta',           brand: 'okta'       as BrandKey, desc: 'SSO / SCIM'         },
   { id: 'stripe',     name: 'Stripe',         brand: 'stripe'     as BrandKey, desc: 'Payments'           },
   { id: 'expensify',  name: 'Expensify',      brand: 'expensify'  as BrandKey, desc: 'Expense management' },
   { id: 'gusto',      name: 'Gusto',          brand: 'gusto'      as BrandKey, desc: 'HR & payroll'       },
@@ -231,7 +227,7 @@ export default function IntegrationsPage() {
         {[
           { label: 'Connected sources', value: `${connectedCount} / ${INTEGRATION_CATALOG.length}`, icon: Plug,     color: 'text-emerald-400',  bg: 'bg-emerald-500/10',  border: 'border-emerald-500/30'  },
           { label: 'Available sources',  value: INTEGRATION_CATALOG.length,                          icon: Database, color: 'text-emerald-400',   bg: 'bg-emerald-500/10',   border: 'border-emerald-500/30'   },
-          { label: 'File upload',        value: 'Supported',                                          icon: Shield,   color: 'text-text-secondary',  bg: 'bg-surface-raised',  border: 'border-border'  },
+          { label: 'File upload',        value: 'Supported',                                          icon: Database, color: 'text-text-secondary',  bg: 'bg-surface-raised',  border: 'border-border'  },
         ].map((s) => {
           const Icon = s.icon
           return (
@@ -345,67 +341,6 @@ export default function IntegrationsPage() {
         })}
       </div>
 
-      {/* SSO / Identity section */}
-      <Card>
-        <CardHeader
-          title="Identity & Access Management"
-          subtitle="SSO and SCIM provisioning"
-          icon={<Shield className="w-4 h-4" />}
-          action={<Badge variant="green">Active</Badge>}
-        />
-        <CardDivider />
-        <div className="grid md:grid-cols-3 gap-6">
-          {[
-            {
-              title:       'SAML 2.0 SSO',
-              status:      'Connected',
-              provider:    'Okta',
-              brand:       'okta' as BrandKey,
-              description: 'Single sign-on via Okta SAML 2.0. Session management and MFA enforced at the identity provider.',
-              icon:        Shield,
-            },
-            {
-              title:       'SCIM 2.0 Provisioning',
-              status:      'Active',
-              provider:    'Okta',
-              brand:       'okta' as BrandKey,
-              description: 'Automatic user creation, attribute sync, and deprovisioning on offboard events from Okta.',
-              icon:        RefreshCw,
-            },
-            {
-              title:       'Directory Sync',
-              status:      'Active',
-              provider:    'Okta',
-              brand:       'okta' as BrandKey,
-              description: 'Groups and roles synced from Okta on a configurable schedule. Map directory groups to Ventura roles.',
-              icon:        Link,
-            },
-          ].map((item) => {
-            const Icon = item.icon
-            return (
-              <div key={item.title} className="bg-surface-sunken border border-border rounded-lg p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-2.5">
-                    <BrandIcon brand={item.brand} size={28} />
-                    <div>
-                      <p className="text-sm font-semibold text-text-secondary">{item.title}</p>
-                      <p className="text-xs text-text-muted">via {item.provider}</p>
-                    </div>
-                  </div>
-                  <Badge variant="green">{item.status}</Badge>
-                </div>
-                <p className="text-xs text-text-muted leading-relaxed mb-3">{item.description}</p>
-                <button
-                  onClick={() => setActiveModal('okta')}
-                  className="text-xs text-accent-400 hover:text-accent-300 font-medium flex items-center gap-1 transition-colors"
-                >
-                  Configure <Settings className="w-3 h-3" />
-                </button>
-              </div>
-            )
-          })}
-        </div>
-      </Card>
     </AppLayout>
   )
 }

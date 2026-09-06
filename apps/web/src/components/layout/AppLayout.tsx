@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import {
-  BellIcon,
   MagnifyingGlassIcon,
-  QuestionMarkCircleIcon,
   ArrowLeftIcon,
   Bars3Icon,
   EyeIcon,
@@ -100,14 +98,6 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
             </div>
 
             <div className="flex items-center gap-1 flex-shrink-0">
-              <button className="relative p-2 text-text-muted hover:text-text-secondary hover:bg-surface-overlay transition-colors">
-                <BellIcon className="w-4 h-4" />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
-              </button>
-              <button className="hidden sm:block p-2 text-text-muted hover:text-text-secondary hover:bg-surface-overlay transition-colors">
-                <QuestionMarkCircleIcon className="w-4 h-4" />
-              </button>
-              <div className="w-px h-5 bg-border mx-1" />
               <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-surface-overlay cursor-pointer transition-colors">
                 <div className="w-6 h-6 bg-sidebar-active border border-border-strong flex items-center justify-center flex-shrink-0">
                   <span className="text-white text-[10px] font-bold">{userInitials}</span>

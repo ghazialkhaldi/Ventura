@@ -96,7 +96,6 @@ export default function ContactPage() {
           {/* Trust points */}
           <div className="space-y-4 w-full max-w-xs">
             {[
-              'Okta SAML 2.0 SSO integration',
               'Role based access control',
               'Append only server side audit trail',
               'Response within one business day',

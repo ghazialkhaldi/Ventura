@@ -10,7 +10,7 @@ export interface IntegrationConfig {
   id: string
   name: string
   brand: BrandKey
-  authType: 'apikey' | 'tba' | 'saml' | 'file' | 'webhook'
+  authType: 'apikey' | 'tba' | 'file' | 'webhook'
   fields: FieldDef[]
   instructions?: {
     steps: string[]
@@ -208,21 +208,6 @@ export const INTEGRATION_CONFIGS: Record<string, IntegrationConfig> = {
       { key: 'consumer_secret', label: 'Consumer Secret', type: 'password', placeholder: '••••••••••••', required: true },
       { key: 'token_id',        label: 'Token ID',        type: 'password', placeholder: '••••••••••••', required: true },
       { key: 'token_secret',    label: 'Token Secret',    type: 'password', placeholder: '••••••••••••', required: true },
-    ],
-  },
-
-  // ── Okta ──────────────────────────────────────────────────────────────────────
-  'okta': {
-    id: 'okta', name: 'Okta SSO / SCIM', brand: 'okta', authType: 'saml',
-    instructions: {
-      steps: [
-        'Log in to your Okta Admin console (e.g. yourorg.okta.com/admin).',
-        'Your Okta domain is shown in the top-right corner of the admin panel (e.g. yourorg.okta.com).',
-        'Enter it below. Ventura will generate SAML metadata for you to paste back into Okta.',
-      ],
-    },
-    fields: [
-      { key: 'okta_domain', label: 'Okta Domain', type: 'url', placeholder: 'https://yourorg.okta.com', required: true },
     ],
   },
 
@@ -463,7 +448,6 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
   }
 
   const authLabel = config.authType === 'tba' ? 'Token-Based Auth'
-    : config.authType === 'saml'    ? 'SAML 2.0'
     : config.authType === 'webhook' ? 'Webhook'
     : config.authType === 'file'    ? 'File Upload'
     : 'API Key'

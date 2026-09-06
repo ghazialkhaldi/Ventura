@@ -30,7 +30,6 @@ const STREAM_BRANDS: { id: string; name: string; brand: BrandKey }[] = [
   { id: 'salesforce', name: 'Salesforce',  brand: 'salesforce' },
   { id: 'netsuite',   name: 'NetSuite',    brand: 'netsuite'   },
   { id: 'xero',       name: 'Xero',        brand: 'xero'       },
-  { id: 'okta',       name: 'Okta',        brand: 'okta'       },
   { id: 'stripe',     name: 'Stripe',      brand: 'stripe'     },
   { id: 'sap',        name: 'SAP',         brand: 'sap'        },
   { id: 'expensify',  name: 'Expensify',   brand: 'expensify'  },
@@ -56,9 +55,9 @@ const capabilities = [
     id: 'workflow',
     eyebrow: 'Approval controls',
     title: 'Workflow tracking',
-    body: 'Model any finance approval process, from vendor onboarding through invoice approval and expense reimbursement. Bottlenecks and missed SLA targets surface as they happen, not at month end.',
+    body: 'Model any finance approval process, from vendor onboarding through invoice approval and expense reimbursement. Bottlenecks and overdue approvals surface as they happen, not at month end.',
     bullets: [
-      'SLA targets with overdue detection per workflow',
+      'Deadline targets with overdue detection per workflow',
       'Bottleneck identification by anomaly type',
       'Owner assignment at each stage',
       'Status tracking from open to resolved',
@@ -95,7 +94,7 @@ export default function HomePage() {
                 Find spend anomalies before they close
               </h1>
               <p className="text-lg text-text-secondary leading-relaxed mb-8 max-w-lg">
-                Your ledger closes monthly. Risk does not wait.
+                Duplicates, overruns and policy breaches, caught on every sync.
               </p>
 
               <div className="flex flex-wrap items-center gap-4">
@@ -167,31 +166,25 @@ export default function HomePage() {
 
       {/* ── Integration logo stream ── */}
       <section className="bg-surface border-b border-border py-6">
-        <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
-          <p className="text-base font-semibold text-text-secondary mb-5">Connects to your existing financial stack</p>
-          <div className="flex flex-wrap gap-3">
-            {STREAM_BRANDS.map(b => (
+        <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 mb-5 flex items-center justify-between flex-wrap gap-2">
+          <p className="text-base font-semibold text-text-secondary">Connects to your existing financial stack</p>
+          <p className="text-xs text-text-muted">Also available: REST API, webhook, SFTP and custom ETL.</p>
+        </div>
+
+        <div className="relative overflow-hidden select-none">
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-24 z-10 bg-gradient-to-r from-surface to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-24 z-10 bg-gradient-to-l from-surface to-transparent" />
+          <div className="animate-marquee flex gap-4 w-max px-4">
+            {[...STREAM_BRANDS, ...STREAM_BRANDS].map((b, i) => (
               <div
-                key={b.id}
-                className="flex items-center gap-2.5 bg-surface-raised border border-border px-4 py-2.5"
+                key={`${b.id}-${i}`}
+                className="flex items-center gap-3 bg-surface-raised border border-border px-5 py-3 flex-shrink-0"
               >
-                <BrandIcon brand={b.brand} size={22} />
-                <span className="text-sm font-medium text-text-secondary whitespace-nowrap">{b.name}</span>
+                <BrandIcon brand={b.brand} size={26} />
+                <span className="text-sm font-semibold text-text-secondary whitespace-nowrap">{b.name}</span>
               </div>
             ))}
           </div>
-          <p className="text-xs text-text-muted mt-4">Also available: REST API, webhook, SFTP and custom ETL.</p>
-        </div>
-      </section>
-
-      {/* ── Overview ── */}
-      <section className="bg-surface-raised border-b border-border py-14">
-        <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
-          <p className="text-xl text-text-secondary leading-relaxed max-w-3xl">
-            Ventura reads your accounting systems, bank feeds, payroll and card data, then checks every
-            transaction against a set of rules your team controls. Findings arrive with the evidence
-            attached, so a reviewer can act on them the same day rather than at quarter end.
-          </p>
         </div>
       </section>
 
@@ -214,7 +207,7 @@ export default function HomePage() {
                     ))}
                   </ul>
                   <div className="mt-7">
-                    <Link href="/demo" className="text-base font-semibold text-accent-400 hover:text-accent-300 transition-colors">
+                    <Link href="/demo" className="inline-flex items-center bg-accent-500 hover:bg-accent-600 text-white font-semibold px-5 py-2.5 text-base transition-colors">
                       See it in action
                     </Link>
                   </div>
@@ -366,7 +359,7 @@ function WorkflowPreviewPanel() {
     <div className="bg-surface-raised border border-border shadow-sm overflow-hidden">
       <div className="px-4 py-3 border-b border-border bg-surface-overlay flex items-center justify-between">
         <p className="text-xs font-semibold text-text-secondary">Invoice Approval Workflow</p>
-        <span className="text-[10px] font-semibold text-red-400 bg-red-500/10 border border-red-500/30 px-2 py-0.5">SLA breach</span>
+        <span className="text-[10px] font-semibold text-red-400 bg-red-500/10 border border-red-500/30 px-2 py-0.5">Overdue</span>
       </div>
       {steps.map((s, i) => (
         <div key={s.step} className={`flex items-center gap-3 px-4 py-2.5 ${i < steps.length - 1 ? 'border-b border-border-subtle' : ''}`}>
@@ -381,7 +374,7 @@ function WorkflowPreviewPanel() {
         </div>
       ))}
       <div className="px-4 py-2.5 bg-amber-500/10 border-t border-amber-500/30">
-        <p className="text-[10px] text-amber-400 font-medium">Bottleneck detected at step 3. SLA target: 48h, approval pending for 6 days</p>
+        <p className="text-[10px] text-amber-400 font-medium">Bottleneck detected at step 3. Target: 48 hours, approval pending for 6 days</p>
       </div>
     </div>
   )

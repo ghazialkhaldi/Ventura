@@ -24,7 +24,6 @@ const SOURCE_CARDS: SourceCard[] = [
   { id: 'stripe',     name: 'Stripe',             brand: 'stripe',     type: 'Payments',           description: 'Revenue, refunds, and dispute history.' },
   { id: 'expensify',  name: 'Expensify',          brand: 'expensify',  type: 'Expense Management', description: 'Approved expense reports and receipts.' },
   { id: 'gusto',      name: 'Gusto',              brand: 'gusto',      type: 'Payroll / HR',       description: 'Payroll journal entries and employee costs.' },
-  { id: 'okta',       name: 'Okta',              brand: 'okta',       type: 'Identity',           description: 'SSO and user lifecycle management.' },
   { id: 'slack',      name: 'Slack',             brand: 'slack',      type: 'Notifications',      description: 'Anomaly alerts in your Slack channel.' },
 ]
 

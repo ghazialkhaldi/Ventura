@@ -342,7 +342,7 @@ export default function EmployeeLoginPage() {
                     <input
                       type="email" value={siEmail} onChange={e => setSiEmail(e.target.value)}
                       placeholder="you@company.com" autoComplete="email"
-                      className="w-full border border-border-strong rounded-lg px-3 py-2.5 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
+                      className="w-full bg-surface border border-border-strong rounded-lg px-3 py-2.5 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
                     />
                   </div>
                   <div>
@@ -351,7 +351,7 @@ export default function EmployeeLoginPage() {
                       <input
                         type={siShowPw ? 'text' : 'password'} value={siPw} onChange={e => setSiPw(e.target.value)}
                         placeholder="••••••••" autoComplete="current-password"
-                        className="w-full border border-border-strong rounded-lg px-3 py-2.5 pr-10 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
+                        className="w-full bg-surface border border-border-strong rounded-lg px-3 py-2.5 pr-10 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
                       />
                       <button type="button" onClick={() => setSiShowPw(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary">
                         {siShowPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}

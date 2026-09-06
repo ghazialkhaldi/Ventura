@@ -16,11 +16,10 @@ const checklist = [
   { id: 'c1',  title: 'Connect accounting system',    done: false, detail: 'Link QuickBooks, NetSuite, Xero, or another GL system' },
   { id: 'c2',  title: 'Connect bank feeds',           done: false, detail: 'Connect bank accounts via Plaid or CSV import' },
   { id: 'c3',  title: 'Connect payroll provider',     done: false, detail: 'Link ADP, Gusto, or upload payroll exports' },
-  { id: 'c4',  title: 'Configure SSO',                done: false, detail: 'Set up Okta, Azure AD, or Google Workspace SAML' },
   { id: 'c5',  title: 'Upload chart of accounts',     done: false, detail: 'Import your GL account structure for categorisation' },
   { id: 'c6',  title: 'Set spending categories',      done: false, detail: 'Map GL codes to spending categories' },
   { id: 'c7',  title: 'Import vendor master',         done: false, detail: 'Upload vendor list CSV for vendor matching' },
-  { id: 'c8',  title: 'Configure approval workflows', done: false, detail: 'Set up approval workflows with SLA targets' },
+  { id: 'c8',  title: 'Configure approval workflows', done: false, detail: 'Set up approval workflows with deadline targets' },
   { id: 'c9',  title: 'Configure AI governance rules',done: false, detail: 'Set confidence thresholds and human-approval triggers' },
   { id: 'c10', title: 'Invite finance team members',  done: false, detail: 'Add team members and assign roles' },
 ]
@@ -69,11 +68,11 @@ export default function OnboardingPage() {
 
       {/* Progress banner */}
       {pctDone < 100 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 mb-6 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-semibold text-amber-900">Setup {pctDone}% complete, {checklist.length - doneCount} steps remaining</p>
-            <p className="text-xs text-amber-700 mt-0.5">Complete all steps to activate full anomaly detection and AI governance features.</p>
+            <p className="text-sm font-semibold text-amber-300">Setup {pctDone}% complete, {checklist.length - doneCount} steps remaining</p>
+            <p className="text-xs text-amber-400/80 mt-0.5">Complete all steps to activate full anomaly detection and AI governance features.</p>
           </div>
         </div>
       )}
@@ -86,7 +85,7 @@ export default function OnboardingPage() {
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
               activeTab === tab.id
-                ? 'border-emerald-600 text-emerald-700'
+                ? 'border-accent-500 text-accent-300'
                 : 'border-transparent text-text-muted hover:text-text-secondary'
             }`}
           >
@@ -103,16 +102,16 @@ export default function OnboardingPage() {
             <div
               key={item.id}
               className={`flex items-start gap-4 p-4 rounded-lg border transition-colors ${
-                item.done ? 'bg-green-50 border-green-200' : 'bg-surface-raised border-border'
+                item.done ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-surface-raised border-border'
               }`}
             >
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${item.done ? 'bg-green-500' : 'bg-surface-raised border-2 border-border-strong'}`}>
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${item.done ? 'bg-emerald-500' : 'bg-surface-raised border-2 border-border-strong'}`}>
                 {item.done && <CheckCircle className="w-4 h-4 text-white" />}
                 {!item.done && <span className="text-xs font-bold text-text-muted">{i + 1}</span>}
               </div>
               <div className="flex-1">
-                <p className={`text-sm font-semibold ${item.done ? 'text-green-800' : 'text-text-secondary'}`}>{item.title}</p>
-                <p className={`text-xs mt-0.5 ${item.done ? 'text-green-700' : 'text-text-muted'}`}>{item.detail}</p>
+                <p className={`text-sm font-semibold ${item.done ? 'text-emerald-300' : 'text-text-secondary'}`}>{item.title}</p>
+                <p className={`text-xs mt-0.5 ${item.done ? 'text-emerald-400' : 'text-text-muted'}`}>{item.detail}</p>
               </div>
               {!item.done && (
                 <Button variant="primary" size="sm" iconRight={<ArrowRight className="w-3.5 h-3.5" />}>
@@ -136,7 +135,7 @@ export default function OnboardingPage() {
               onDragLeave={() => setDragOver(false)}
               onDrop={e => { e.preventDefault(); setDragOver(false) }}
               className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center text-center transition-colors cursor-pointer ${
-                dragOver ? 'border-emerald-400 bg-emerald-50' : 'border-border-strong hover:border-emerald-400 hover:bg-surface-hover'
+                dragOver ? 'border-emerald-400 bg-emerald-500/10' : 'border-border-strong hover:border-emerald-400 hover:bg-surface-hover'
               }`}
             >
               <Upload className="w-8 h-8 text-text-muted mb-3" />
@@ -196,7 +195,7 @@ export default function OnboardingPage() {
                 <tr key={row.source} className="hover:bg-surface-hover">
                   <td className="px-4 py-3 text-xs font-mono text-text-secondary">{row.source}</td>
                   <td className="px-4 py-3">
-                    <span className="text-xs font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">{row.target}</span>
+                    <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">{row.target}</span>
                   </td>
                   <td className="px-4 py-3 text-xs text-text-muted font-mono">{row.sample}</td>
                   <td className="px-4 py-3">
@@ -242,7 +241,7 @@ export default function OnboardingPage() {
                   <td className="px-4 py-3 text-xs text-text-muted">{row.date}</td>
                   <td className="px-4 py-3 text-sm font-semibold text-text-secondary">{row.records.toLocaleString()}</td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs font-semibold ${row.errors > 0 ? 'text-red-600' : 'text-text-muted'}`}>{row.errors}</span>
+                    <span className={`text-xs font-semibold ${row.errors > 0 ? 'text-red-400' : 'text-text-muted'}`}>{row.errors}</span>
                   </td>
                   <td className="px-4 py-3">
                     {row.status === 'Success' ? <Badge variant="green">Success</Badge> : <Badge variant="red">Failed</Badge>}

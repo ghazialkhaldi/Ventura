@@ -191,7 +191,7 @@ export default function WorkflowsPage() {
         subtitle="Approval processes auto-generated from detected anomalies"
         actions={
           <Button variant="secondary" size="sm" icon={<ArrowRight className="w-3.5 h-3.5" />}>
-            Configure SLAs
+            Configure deadlines
           </Button>
         }
         className="mb-6"
@@ -255,7 +255,7 @@ export default function WorkflowsPage() {
                     <div className="hidden md:flex flex-col gap-1 w-32 flex-shrink-0">
                       <div className="flex items-center justify-between text-[10px] text-text-muted">
                         <span>~{avgDays}d avg</span>
-                        <span>SLA {slaDays}d</span>
+                        <span>Target {slaDays}d</span>
                       </div>
                       <div className="h-1.5 bg-surface-overlay rounded-full overflow-hidden">
                         <div className={`h-full rounded-full ${slaColor}`} style={{ width: `${pctBar}%` }} />

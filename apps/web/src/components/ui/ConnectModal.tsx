@@ -37,7 +37,7 @@ export const INTEGRATION_CONFIGS: Record<string, IntegrationConfig> = {
         'Go to developer.intuit.com and sign in (or create a free developer account).',
         'Click "Create an App" → select "QuickBooks Online and Payments".',
         'Under Keys & OAuth → Production, copy your Client ID and Client Secret.',
-        'To find your Company/Realm ID: log in to QuickBooks Online — it appears in the URL as ?realmId=XXXXXXXXX.',
+        'To find your Company/Realm ID: log in to QuickBooks Online. It appears in the URL as ?realmId=XXXXXXXXX.',
       ],
       link: { label: 'Open Intuit Developer Portal', url: 'https://developer.intuit.com/app/developer/homepage' },
     },
@@ -75,9 +75,9 @@ export const INTEGRATION_CONFIGS: Record<string, IntegrationConfig> = {
         'Go to developer.xero.com → My Apps → New App.',
         'Select "Web App", fill in the details, and save.',
         'Copy your Client ID from the Configuration tab.',
-        'Click "Generate a secret" to get your Client Secret — copy it immediately as it won\'t be shown again.',
+        'Click "Generate a secret" to get your Client Secret. Copy it immediately, as it won\'t be shown again.',
       ],
-      note: 'Client Secret is shown only once — copy it immediately after generating.',
+      note: 'Client Secret is shown only once. Copy it immediately after generating.',
       link: { label: 'Open Xero Developer Portal', url: 'https://developer.xero.com/myapps' },
     },
     fields: [
@@ -195,9 +195,9 @@ export const INTEGRATION_CONFIGS: Record<string, IntegrationConfig> = {
     instructions: {
       steps: [
         'In NetSuite, go to Setup → Integrations → Manage Integrations → New. Enable Token-Based Authentication and save.',
-        'Immediately copy the Consumer Key and Consumer Secret shown on the confirmation screen — they won\'t appear again.',
+        'Immediately copy the Consumer Key and Consumer Secret shown on the confirmation screen; they won\'t appear again.',
         'Go to Setup → Users/Roles → Access Tokens → New. Select your integration and assign a role, then save.',
-        'Immediately copy the Token ID and Token Secret shown — they won\'t appear again.',
+        'Immediately copy the Token ID and Token Secret shown; they won\'t appear again.',
         'Find your Account ID in Setup → Company → Company Information.',
       ],
       note: 'Consumer Key/Secret and Token ID/Secret are each shown only once at creation. Copy them before closing.',
@@ -218,7 +218,7 @@ export const INTEGRATION_CONFIGS: Record<string, IntegrationConfig> = {
       steps: [
         'Log in to your Okta Admin console (e.g. yourorg.okta.com/admin).',
         'Your Okta domain is shown in the top-right corner of the admin panel (e.g. yourorg.okta.com).',
-        'Enter it below — Ventura will generate SAML metadata for you to paste back into Okta.',
+        'Enter it below. Ventura will generate SAML metadata for you to paste back into Okta.',
       ],
     },
     fields: [
@@ -310,7 +310,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
     const parsed = await parseFile(file)
     if ('error' in parsed) throw new Error(parsed.error)
 
-    setStatusMsg(`Parsed ${parsed.rowCount.toLocaleString()} rows — detecting anomalies…`)
+    setStatusMsg(`Parsed ${parsed.rowCount.toLocaleString()} rows, detecting anomalies…`)
     await new Promise(r => setTimeout(r, 150))
 
     const anomalies = runAnomalyDetection(parsed.transactions)
@@ -365,7 +365,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
         ts: new Date().toISOString(),
         actor: 'User',
         event: 'File Uploaded',
-        detail: `${file.name} — ${parsed.rowCount.toLocaleString()} rows, ${txs.length.toLocaleString()} transactions, ${fmtBytes(file.size)}`,
+        detail: `${file.name}: ${parsed.rowCount.toLocaleString()} rows, ${txs.length.toLocaleString()} transactions, ${fmtBytes(file.size)}`,
         severity: 'info',
         resource: file.name,
       },
@@ -654,7 +654,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
                     {result.txCount.toLocaleString()} transactions · {result.anomalyCount} anomal{result.anomalyCount !== 1 ? 'ies' : 'y'} detected
                   </p>
                 ) : (
-                  <p className="text-xs text-text-muted mt-1">Credentials saved — initial sync will begin shortly</p>
+                  <p className="text-xs text-text-muted mt-1">Credentials saved. Initial sync will begin shortly</p>
                 )}
               </div>
               <button

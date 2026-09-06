@@ -40,7 +40,7 @@ const ROLE_COLORS: Record<string, string> = {
 
 const roles = [
   {
-    name: 'Admin', desc: 'Full access — manage users, settings, AI governance, all data',
+    name: 'Admin', desc: 'Full access: manage users, settings, AI governance, all data',
     color: 'bg-red-500/10 text-red-400 border-red-500/30',
     permissions: ['Manage team members and roles', 'Configure workspace settings and billing', 'Full read/write on all data', 'Manage AI governance rules', 'Generate and revoke invite codes'],
   },
@@ -60,7 +60,7 @@ const roles = [
     permissions: ['View dashboards', 'View reports', 'View integrations status'],
   },
   {
-    name: 'System', desc: 'Ventura AI service account — non-human, cannot log in directly.',
+    name: 'System', desc: 'Ventura AI service account, non-human, cannot log in directly.',
     color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
     permissions: ['Automated anomaly detection', 'Workflow execution within governance rules', 'Cannot log in interactively'],
   },
@@ -478,7 +478,7 @@ export default function SettingsPage() {
                           </span>
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-text-primary">{currentUser.name || '—'}</p>
+                          <p className="text-sm font-semibold text-text-primary">{currentUser.name || 'N/A'}</p>
                           <p className="text-xs text-text-muted">{currentUser.email}</p>
                         </div>
                       </div>
@@ -521,7 +521,7 @@ export default function SettingsPage() {
                           </span>
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-text-primary">{member.name || '—'}</p>
+                          <p className="text-sm font-semibold text-text-primary">{member.name || 'N/A'}</p>
                           <p className="text-xs text-text-muted">{member.email}</p>
                         </div>
                       </div>
@@ -546,7 +546,7 @@ export default function SettingsPage() {
                     </td>
                     <td className="px-4 py-3.5">
                       <span className="text-xs text-text-muted">
-                        {member.joined_at ? new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(member.joined_at)) : '—'}
+                        {member.joined_at ? new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(member.joined_at)) : 'N/A'}
                       </span>
                     </td>
                     <td className="px-4 py-3.5">
@@ -669,7 +669,7 @@ export default function SettingsPage() {
           ))}
           <p className="text-xs text-text-muted mt-3">
             Need a custom role for your organization?{' '}
-            <a href="/contact" className="text-accent-400 hover:text-accent-300 font-medium">Contact us</a> — custom roles are available on Enterprise plans.
+            <a href="/contact" className="text-accent-400 hover:text-accent-300 font-medium">Contact us</a>. Custom roles are available on Enterprise plans.
           </p>
         </div>
       )}
@@ -757,7 +757,7 @@ export default function SettingsPage() {
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 bg-surface-hover border border-border rounded-lg gap-3">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-text-secondary">API Key — Production</p>
+                  <p className="text-sm font-medium text-text-secondary">API Key: Production</p>
                   <p className="text-xs font-mono text-text-muted mt-0.5 truncate">
                     {apiKeyVisible ? apiKey : `${apiKey.slice(0, 10)}${'•'.repeat(26)}${apiKey.slice(-4)}`}
                   </p>
@@ -851,7 +851,7 @@ export default function SettingsPage() {
                   {savingOrgName ? 'Saving…' : 'Save changes'}
                 </Button>
                 <Button variant="secondary" size="md" onClick={() => { setTenantName(currentUser?.company || ''); setOrgNameError('') }}>Discard</Button>
-                {orgNameSaved && <span className="text-xs font-medium text-emerald-400">Saved — your team will see this the next time they load the app.</span>}
+                {orgNameSaved && <span className="text-xs font-medium text-emerald-400">Saved. Your team will see this the next time they load the app.</span>}
                 {orgNameError && <span className="text-xs font-medium text-red-400">{orgNameError}</span>}
               </div>
             </div>

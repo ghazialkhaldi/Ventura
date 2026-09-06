@@ -140,7 +140,7 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
               ? 'You can view and make changes across the workspace.'
               : role === 'analyst'
               ? 'You can view everything and comment on anomalies.'
-              : 'Read-only — you can view all tabs but not make changes.'}
+              : 'Read-only: you can view all tabs but not make changes.'}
           </p>
         </div>
       </nav>
@@ -170,7 +170,7 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
   return (
     <>
       <Head>
-        <title>{title ? `${title} — Ventura` : 'Ventura — Employee Portal'}</title>
+        <title>{title ? `${title} · Ventura` : 'Ventura · Employee Portal'}</title>
       </Head>
       <div className="min-h-screen flex bg-surface">
 

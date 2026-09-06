@@ -173,7 +173,7 @@ export default function EmployeeDashboard() {
             </div>
             <div>
               <p className="text-xs text-text-muted font-medium uppercase tracking-wide">Workspace</p>
-              <p className="text-base font-bold text-text-primary">{info?.company || user?.company || '—'}</p>
+              <p className="text-base font-bold text-text-primary">{info?.company || user?.company || 'N/A'}</p>
             </div>
           </div>
           <div className="space-y-2 text-sm">
@@ -186,7 +186,7 @@ export default function EmployeeDashboard() {
             <div className="flex items-center justify-between py-1.5 border-b border-border-subtle">
               <span className="text-text-muted text-xs">Member since</span>
               <span className="text-xs text-text-secondary font-medium">
-                {info?.joinedAt ? new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(info.joinedAt)) : '—'}
+                {info?.joinedAt ? new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(info.joinedAt)) : 'N/A'}
               </span>
             </div>
             <div className="flex items-center justify-between py-1.5">

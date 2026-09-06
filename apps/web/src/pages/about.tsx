@@ -3,9 +3,9 @@ import Link from 'next/link'
 
 const values = [
   { title: 'Accuracy above all',   desc: 'Financial data leaves no room for error. Every anomaly we surface is explainable, auditable, and traceable to source transactions.' },
-  { title: 'Human in the loop',    desc: 'AI accelerates finance teams — it does not replace their judgment. Every consequential action requires human approval by design.' },
-  { title: 'Security by default',  desc: 'Enterprise-grade encryption, role-based access, and immutable audit trails are built into the platform, not bolted on.' },
-  { title: 'Radical transparency', desc: 'Our AI shows its reasoning. Confidence scores, detection logic, and model decisions are visible to every stakeholder.' },
+  { title: 'Human in the loop',    desc: 'Automation accelerates finance teams; it does not replace their judgment. Every consequential action requires human approval by design.' },
+  { title: 'Security by default',  desc: 'Encryption, role based access, and an append only audit trail are built into the platform, not bolted on.' },
+  { title: 'Radical transparency', desc: 'Ventura shows its reasoning. Confidence scores, detection logic, and every decision are visible to every stakeholder.' },
 ]
 
 export default function AboutPage() {
@@ -19,8 +19,8 @@ export default function AboutPage() {
             Financial operations intelligence for the enterprise
           </h1>
           <p className="text-base text-text-muted mt-4 leading-relaxed">
-            Ventura helps finance teams detect anomalies, streamline workflows, and govern AI-driven
-            decisions — with full auditability at every step.
+            Ventura helps finance teams detect anomalies, streamline workflows, and govern automated
+            decisions, with full auditability at every step.
           </p>
         </div>
       </section>
@@ -30,10 +30,10 @@ export default function AboutPage() {
         <div className="max-w-3xl mx-auto px-6">
           <h2 className="text-xl font-bold text-text-primary mb-4">Our mission</h2>
           <p className="text-sm text-text-secondary leading-relaxed">
-            Enterprise finance teams process millions of transactions across dozens of systems — and errors,
+            Enterprise finance teams process millions of transactions across dozens of systems, and errors,
             duplicates, and policy violations slip through every day. Ventura was built on a simple conviction:
             finance teams deserve the same intelligent tooling that transformed engineering and sales. We combine
-            AI-powered anomaly detection with strict human-in-the-loop governance, so teams move faster without
+            rule based anomaly detection with strict human in the loop governance, so teams move faster without
             ever losing control.
           </p>
         </div>

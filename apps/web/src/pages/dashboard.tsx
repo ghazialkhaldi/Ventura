@@ -39,13 +39,13 @@ function fmtFull(n: number): string {
 }
 
 function fmtDate(iso: string): string {
-  if (!iso) return '—'
+  if (!iso) return 'N/A'
   try { return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }
   catch { return iso }
 }
 
 function timeAgo(iso: string): string {
-  if (!iso) return '—'
+  if (!iso) return 'N/A'
   const sec = Math.floor((Date.now() - new Date(iso).getTime()) / 1000)
   if (sec < 60)    return 'just now'
   if (sec < 3600)  return `${Math.floor(sec / 60)}m ago`
@@ -100,7 +100,7 @@ const ROLE_COLORS: Record<string, string> = {
 
 function fmtJoined(iso: string): string {
   try { return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }
-  catch { return '—' }
+  catch { return 'N/A' }
 }
 
 export default function DashboardPage() {
@@ -236,7 +236,7 @@ export default function DashboardPage() {
             {[
               { n: 1, text: 'Upload a transaction export or connect your accounting system', href: '/integrations', cta: 'Connect data' },
               { n: 2, text: 'Ventura normalizes and scans transactions for anomalies automatically' },
-              { n: 3, text: 'Review findings — approve, escalate, or dismiss each alert' },
+              { n: 3, text: 'Review findings: approve, escalate, or dismiss each alert' },
               { n: 4, text: 'Monitor spend trends, vendor risk, and savings opportunities' },
             ].map(s => (
               <div key={s.n} className="flex items-center gap-3 p-3.5 bg-surface-raised border border-border">
@@ -301,7 +301,7 @@ export default function DashboardPage() {
           </span>
         )}
         {(dataset.creditCount ?? 0) > 0 && (
-          <span title="Credit/refund rows identified via a Debit/Credit column split — excluded from spend totals and anomaly detection so refunds don't get counted as vendor spend.">
+          <span title="Credit/refund rows identified via a Debit/Credit column split; excluded from spend totals and anomaly detection so refunds don't get counted as vendor spend.">
             {dataset.creditCount} credit{dataset.creditCount !== 1 ? 's' : ''} excluded ({fmtC(dataset.totalCredits ?? 0)})
           </span>
         )}
@@ -338,7 +338,7 @@ export default function DashboardPage() {
             <div className="flex-1 p-5 min-w-0">
               <div className="flex items-center gap-2 mb-2">
                 <span className={`text-[10px] font-bold tracking-widest uppercase ${SEV_LABEL[topSeverity]}`}>
-                  {criticalCount > 0 ? 'Critical — Immediate Action Required' : highCount > 0 ? 'High Priority' : 'Needs Review'}
+                  {criticalCount > 0 ? 'Critical: Immediate Action Required' : highCount > 0 ? 'High Priority' : 'Needs Review'}
                 </span>
                 <span className="text-[10px] text-text-muted">·</span>
                 <span className="text-[10px] text-text-muted">

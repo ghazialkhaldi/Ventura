@@ -165,7 +165,7 @@ export default function AuditLogsPage() {
                   {new Date(ev.created_at).toLocaleString()}
                 </td>
                 <td className="px-4 py-3">
-                  <p className="text-xs font-semibold text-text-secondary">{ev.actor_email ?? '—'}</p>
+                  <p className="text-xs font-semibold text-text-secondary">{ev.actor_email ?? 'N/A'}</p>
                 </td>
                 <td className="px-4 py-3">
                   <Badge variant="auditSeverity" value={ev.severity}>{ev.event}</Badge>
@@ -197,7 +197,7 @@ export default function AuditLogsPage() {
           </div>
           <p className="text-xs text-text-muted mb-3 max-w-2xl">
             Generated in this browser while parsing and analyzing your uploaded files. Stored locally on this
-            device only — it is not part of the server-side security audit trail above, is not shared across
+            device only: it is not part of the server-side security audit trail above, is not shared across
             devices or team members, and is cleared if you clear browser data.
           </p>
           <div className="bg-surface-raised border border-border rounded-lg overflow-hidden divide-y divide-border-subtle">

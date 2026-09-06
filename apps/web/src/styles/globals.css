@@ -48,14 +48,6 @@ td, th {
 /* Transitions */
 button, a { transition: background-color 0.12s, color 0.12s, border-color 0.12s, opacity 0.12s; }
 
-/* Marquee / logo stream */
-@keyframes marquee-left {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
-}
-.animate-marquee { animation: marquee-left 40s linear infinite; }
-.animate-marquee:hover { animation-play-state: paused; }
-
 /* Metric value emphasis */
 .metric-value {
   @apply text-2xl font-bold leading-none tracking-tight text-text-primary;

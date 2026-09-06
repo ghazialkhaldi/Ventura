@@ -56,7 +56,7 @@ export default function UploadDataPage() {
 
       <PageHeader
         title="Connect a Data Source"
-        subtitle="Link your accounting, ERP, payroll, or banking systems — Ventura syncs and normalizes automatically"
+        subtitle="Link your accounting, ERP, payroll, or banking systems. Ventura syncs and normalizes automatically"
         className="mb-8"
       />
 

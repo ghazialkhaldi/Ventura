@@ -39,16 +39,16 @@ export default function ContactPage() {
           'Business Name': form.businessName,
           'Company Size':  form.companySize,
           message:         form.message,
-          _subject:        `Ventura Enquiry — ${form.businessName}`,
+          _subject:        `Ventura Enquiry: ${form.businessName}`,
         }),
       })
       if (res.ok) {
         setSubmitted(true)
       } else {
-        setSubmitError('Something went wrong — please try again or email us directly.')
+        setSubmitError('Something went wrong. Please try again or email us directly.')
       }
     } catch {
-      setSubmitError('Something went wrong — please try again or email us directly.')
+      setSubmitError('Something went wrong. Please try again or email us directly.')
     } finally {
       setSending(false)
     }
@@ -57,7 +57,7 @@ export default function ContactPage() {
   return (
     <>
       <Head>
-        <title>Contact Us — Ventura</title>
+        <title>Contact Us · Ventura</title>
       </Head>
 
       {/* Nav header */}
@@ -97,8 +97,8 @@ export default function ContactPage() {
           <div className="space-y-4 w-full max-w-xs">
             {[
               'Okta SAML 2.0 SSO integration',
-              'Role-based access control',
-              'Append-only server-side audit trail',
+              'Role based access control',
+              'Append only server side audit trail',
               'Response within one business day',
             ].map(point => (
               <div key={point} className="flex items-center gap-3">

@@ -230,7 +230,7 @@ export default function LoginPage() {
 
   return (
     <>
-      <Head><title>Sign in — Ventura</title></Head>
+      <Head><title>Sign in · Ventura</title></Head>
       <div className="min-h-screen flex relative">
         <span className="absolute top-3 right-4 text-[10px] text-text-muted z-50 select-none">v1.4</span>
 
@@ -243,12 +243,11 @@ export default function LoginPage() {
           {step === 'creds' ? (
             <div>
               <h2 className="text-2xl font-bold text-white leading-snug mb-4">
-                Financial Operations Intelligence<br />
-                for Enterprise Finance Teams
+                Financial operations intelligence for enterprise finance teams
               </h2>
               <p className="text-sm text-text-muted leading-relaxed mb-8">
                 Connect your accounting systems, detect anomalies automatically,
-                and enforce approval workflows — all with a complete AI audit trail.
+                and enforce approval workflows, all with a complete audit trail.
               </p>
               <ul className="space-y-3">
                 {[
@@ -281,7 +280,7 @@ export default function LoginPage() {
               <p className="text-sm text-text-muted leading-relaxed mb-8">
                 {mfaIsEmail
                   ? `We sent a 6-digit code to ${email}. It expires in 10 minutes.`
-                  : 'Ventura requires a second verification step each time you sign in — keeping your financial data secure even if your password is compromised.'
+                  : 'Ventura requires a second verification step each time you sign in, keeping your financial data secure even if your password is compromised.'
                 }
               </p>
               <ul className="space-y-3">

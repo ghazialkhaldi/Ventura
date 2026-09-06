@@ -27,7 +27,7 @@ const TYPE_META: Record<AnomalyType, {
 }> = {
   duplicate: {
     name:        'Duplicate Payment Review',
-    description: 'Review potential duplicate payments — confirm, void, or approve as intentional.',
+    description: 'Review potential duplicate payments: confirm, void, or approve as intentional.',
     slaDays:     2,
     steps: [
       { name: 'Finance Analyst review',  owner: 'Finance Analyst' },
@@ -178,7 +178,7 @@ export default function WorkflowsPage() {
       <AppLayout title="Workflows">
         <DataEmptyState
           title="No workflow data yet"
-          description="Upload your financial data on the Dashboard. Ventura will automatically generate review workflows for every anomaly detected — duplicates, large transactions, unusual patterns, and more."
+          description="Upload your financial data on the Dashboard. Ventura will automatically generate review workflows for every anomaly detected: duplicates, large transactions, unusual patterns, and more."
         />
       </AppLayout>
     )

@@ -27,7 +27,7 @@ function fmtFull(n: number): string {
 function suggestedAction(type: string, severity: string): string {
   if (type === 'duplicate')       return 'Void the duplicate payment if confirmed'
   if (type === 'missing_vendor')  return 'Identify the counterparty and update records'
-  if (severity === 'CRITICAL')    return 'Escalate to CFO — requires immediate review'
+  if (severity === 'CRITICAL')    return 'Escalate to CFO: requires immediate review'
   if (severity === 'HIGH')        return 'Request documentation from payment approver'
   if (type === 'round_number')    return 'Verify invoice exists and amount is accurate'
   if (type === 'high_frequency')  return 'Confirm split billing or check for submission error'

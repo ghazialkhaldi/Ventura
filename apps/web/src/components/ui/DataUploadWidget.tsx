@@ -122,7 +122,7 @@ export default function DataUploadWidget({ onReady }: Props) {
         ts: new Date().toISOString(),
         actor: 'Ventura',
         event: 'File Parsed',
-        detail: `${entry.file.name} — ${result.rowCount.toLocaleString()} rows, ${result.transactions.length.toLocaleString()} transactions extracted`,
+        detail: `${entry.file.name}: ${result.rowCount.toLocaleString()} rows, ${result.transactions.length.toLocaleString()} transactions extracted`,
         severity: 'info',
         resource: entry.file.name,
       })
@@ -151,7 +151,7 @@ export default function DataUploadWidget({ onReady }: Props) {
       ts: new Date().toISOString(),
       actor: 'Ventura AI',
       event: 'Anomaly Detection Complete',
-      detail: `Analyzed ${spendTransactions.length.toLocaleString()} transactions — ${anomalies.length} anomalies detected (${anomalies.filter(a => a.severity === 'CRITICAL').length} critical, ${anomalies.filter(a => a.severity === 'HIGH').length} high)`,
+      detail: `Analyzed ${spendTransactions.length.toLocaleString()} transactions: ${anomalies.length} anomalies detected (${anomalies.filter(a => a.severity === 'CRITICAL').length} critical, ${anomalies.filter(a => a.severity === 'HIGH').length} high)`,
       severity: anomalies.some(a => a.severity === 'CRITICAL') ? 'critical' : anomalies.length > 0 ? 'warning' : 'info',
       resource: 'Anomaly Engine',
     })
@@ -240,7 +240,7 @@ export default function DataUploadWidget({ onReady }: Props) {
       ts: new Date().toISOString(),
       actor: 'User',
       event: 'Data Uploaded',
-      detail: `${allFilesResult.length} file(s) uploaded — ${allTransactions.length.toLocaleString()} total transactions, ${fmtBytes(entries.reduce((s, e) => s + e.file.size, 0))} total`,
+      detail: `${allFilesResult.length} file(s) uploaded: ${allTransactions.length.toLocaleString()} total transactions, ${fmtBytes(entries.reduce((s, e) => s + e.file.size, 0))} total`,
       severity: 'info',
       resource: allFilesResult.map(e => e.file.name).join(', '),
     })
@@ -304,7 +304,7 @@ export default function DataUploadWidget({ onReady }: Props) {
         <h2 className="text-2xl font-bold text-text-primary mb-2">Upload your financial data</h2>
         <p className="text-sm text-text-muted max-w-lg mx-auto leading-relaxed">
           Import GL exports, bank statements, payroll files, vendor data, or any transaction report.
-          Ventura will parse your data, detect anomalies, and build your analytics — no manual setup required.
+          Ventura will parse your data, detect anomalies, and build your analytics. No manual setup required.
         </p>
       </div>
 
@@ -368,7 +368,7 @@ export default function DataUploadWidget({ onReady }: Props) {
                   <p className="text-sm font-medium text-text-primary truncate">{e.file.name}</p>
                   <p className="text-xs text-text-muted">
                     {fmtBytes(e.file.size)}
-                    {e.error && <span className="text-red-400 ml-2">— {e.error}</span>}
+                    {e.error && <span className="text-red-400 ml-2">: {e.error}</span>}
                   </p>
                 </div>
                 <button

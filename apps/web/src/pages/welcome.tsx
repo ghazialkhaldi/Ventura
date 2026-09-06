@@ -272,7 +272,7 @@ export default function WelcomePage() {
             <p className="text-xs font-semibold text-text-secondary mb-1.5">What you&apos;ll see after connecting</p>
             <p className="text-[11px] text-text-muted leading-relaxed">
               Once your data syncs, your dashboard will show live spend metrics, anomaly findings,
-              workflow status, and savings opportunities — refreshed on every sync cycle.
+              workflow status, and savings opportunities, refreshed on every sync cycle.
             </p>
           </div>
 

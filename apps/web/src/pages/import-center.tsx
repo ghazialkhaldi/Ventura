@@ -129,7 +129,7 @@ export default function ImportCenterPage() {
 
     try {
       // Stage 1: receive
-      setStageStatus('receive', 'done', `${file.name} — ${fmtBytes(file.size)}`)
+      setStageStatus('receive', 'done', `${file.name}: ${fmtBytes(file.size)}`)
 
       // Stage 2: extract
       setStageStatus('extract', 'running', 'Parsing file…')
@@ -427,7 +427,7 @@ export default function ImportCenterPage() {
                     {invoices[0].field_mappings.map((fm: FieldMapping) => (
                       <tr key={fm.canonical} className="border-b border-border-subtle last:border-0">
                         <td className="py-2 pr-4 font-mono text-text-secondary">{fm.canonical}</td>
-                        <td className="py-2 pr-4 font-mono text-emerald-400">{fm.raw_column || <span className="text-text-muted">—</span>}</td>
+                        <td className="py-2 pr-4 font-mono text-emerald-400">{fm.raw_column || <span className="text-text-muted">N/A</span>}</td>
                         <td className="py-2 pr-4 text-text-muted max-w-[180px] truncate" title={fm.sample_value}>
                           {fm.sample_value || <span className="text-text-muted">empty</span>}
                         </td>
@@ -554,9 +554,9 @@ export default function ImportCenterPage() {
                           onClick={() => setExpandedRow(isExpanded ? null : inv.id)}
                         >
                           <td className="py-2.5 pr-3 font-mono text-text-secondary">{inv.invoice_id.slice(0, 14)}…</td>
-                          <td className="py-2.5 pr-3 font-medium text-text-secondary max-w-[140px] truncate">{inv.vendor_name || '—'}</td>
+                          <td className="py-2.5 pr-3 font-medium text-text-secondary max-w-[140px] truncate">{inv.vendor_name || 'N/A'}</td>
                           <td className="py-2.5 pr-3 font-semibold text-text-secondary">{fmtCurrency(inv.invoice_total)}</td>
-                          <td className="py-2.5 pr-3 text-text-muted">{inv.invoice_date || '—'}</td>
+                          <td className="py-2.5 pr-3 text-text-muted">{inv.invoice_date || 'N/A'}</td>
                           <td className="py-2.5 pr-3">
                             <div className="flex items-center gap-2">
                               <div className="w-16 h-1.5 bg-surface-overlay rounded-full overflow-hidden">
@@ -626,11 +626,11 @@ export default function ImportCenterPage() {
                                       ['vendor_name', inv.vendor_name],
                                       ['invoice_total', fmtCurrency(inv.invoice_total)],
                                       ['invoice_date', inv.invoice_date],
-                                      ['due_date', inv.due_date || '—'],
+                                      ['due_date', inv.due_date || 'N/A'],
                                       ['payment_terms', inv.payment_terms],
                                       ['currency', inv.currency],
-                                      ['department', inv.department || '—'],
-                                      ['cost_center', inv.cost_center || '—'],
+                                      ['department', inv.department || 'N/A'],
+                                      ['cost_center', inv.cost_center || 'N/A'],
                                       ['source_system', inv.source_system],
                                       ['fiscal_year', String(inv.fiscal_year)],
                                       ['data_tier', tierLabel(inv.data_tier)],

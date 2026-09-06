@@ -5,7 +5,7 @@ import VenturaLogo from '../components/VenturaLogo'
 export default function NotFoundPage() {
   return (
     <>
-      <Head><title>Page not found — Ventura</title></Head>
+      <Head><title>Page not found · Ventura</title></Head>
       <div className="min-h-screen bg-surface flex flex-col items-center justify-center px-4 text-center">
         <Link href="/" className="mb-10 no-underline">
           <VenturaLogo variant="light" height={28} />

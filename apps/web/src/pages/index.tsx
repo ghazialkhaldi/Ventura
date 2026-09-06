@@ -1,22 +1,10 @@
-﻿import React from 'react'
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import PublicLayout from '../components/layout/PublicLayout'
 import BrandIcon, { type BrandKey } from '../components/ui/BrandIcon'
 import {
-  AreaChart, Area, BarChart, Bar, ComposedChart, XAxis, YAxis,
+  Area, Bar, ComposedChart, XAxis, YAxis,
   CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts'
-import {
-  ExclamationTriangleIcon,
-  ShieldCheckIcon,
-  LockClosedIcon,
-  UsersIcon,
-  ChartBarIcon,
-  ArrowRightIcon,
-  ArrowsRightLeftIcon,
-  ScaleIcon,
-  CheckCircleIcon,
-} from '@heroicons/react/24/outline'
 
 // ── Illustrative demo chart data ─────────────────────────────────────────────
 const DEMO_DATA = [
@@ -55,47 +43,38 @@ const capabilities = [
   {
     id: 'anomaly',
     eyebrow: 'Spend intelligence',
-    title: 'Continuous anomaly detection across every financial source',
-    body: 'Ventura runs rule-based checks against your accounting systems, bank feeds, payroll, and card data — flagging duplicates, budget overruns, policy violations, and statistical outliers before they close in the ledger.',
+    title: 'Anomaly detection',
+    body: 'Ventura checks your accounting systems, bank feeds, payroll and card data on every sync. It flags duplicates, budget overruns, policy breaches and statistical outliers before they close in the ledger.',
     bullets: [
-      'Duplicate and near-duplicate payment detection',
-      'Vendor spend baseline and spike analysis',
-      'Round-number and high-frequency payment flags',
-      'Transaction evidence references on every finding',
+      'Duplicate and near duplicate payment detection',
+      'Vendor spend baselines and spike analysis',
+      'Round number and high frequency payment flags',
+      'Transaction evidence on every finding',
     ],
-    icon: ExclamationTriangleIcon,
-    iconBg: 'bg-orange-500/10',
-    iconColor: 'text-orange-400',
   },
   {
     id: 'workflow',
     eyebrow: 'Approval controls',
-    title: 'Map and enforce every approval workflow with SLA tracking',
-    body: 'Model every finance approval process — vendor onboarding, invoice sign-off, contract amendments, expense reimbursements. Surface bottlenecks and SLA breaches in real time so nothing stays stuck in someone\'s inbox.',
+    title: 'Workflow tracking',
+    body: 'Model any finance approval process, from vendor onboarding through invoice approval and expense reimbursement. Bottlenecks and missed SLA targets surface as they happen, not at month end.',
     bullets: [
-      'Per-workflow SLA targets with overdue detection',
-      'Bottleneck identification per anomaly type',
-      'Step-by-step owner assignment for each workflow stage',
-      'Status tracking across Open, Under Review, and Resolved',
+      'SLA targets with overdue detection per workflow',
+      'Bottleneck identification by anomaly type',
+      'Owner assignment at each stage',
+      'Status tracking from open to resolved',
     ],
-    icon: ArrowsRightLeftIcon,
-    iconBg: 'bg-surface-overlay',
-    iconColor: 'text-text-secondary',
   },
   {
     id: 'governance',
     eyebrow: 'Explainable by design',
-    title: 'Every finding is explainable, auditable, and human-controlled',
-    body: 'Nothing in Ventura is a black box, and nothing acts on its own. Every finding shows the exact rule and evidence that triggered it. Status only ever changes through an explicit, logged action by a person on your team — never automatically.',
+    title: 'Full transparency',
+    body: 'Nothing here is a black box and nothing acts on its own. Every finding shows the rule and the evidence that triggered it. Status changes only through a logged action by a person on your team.',
     bullets: [
-      'Every finding cites the transactions and math behind it',
-      'Confidence-threshold prioritization, configurable per workspace',
-      'No autonomous actions — every status change is a manual, logged decision',
-      'Append-only server-side audit trail for security-relevant events',
+      'Every finding cites the transactions behind it',
+      'Confidence thresholds you configure per workspace',
+      'No autonomous actions of any kind',
+      'Append only audit trail for security events',
     ],
-    icon: ScaleIcon,
-    iconBg: 'bg-surface-overlay',
-    iconColor: 'text-text-secondary',
   },
 ]
 
@@ -112,35 +91,19 @@ export default function HomePage() {
 
             {/* Left: copy */}
             <div className="pt-2">
-              <h1 className="text-[3rem] font-bold leading-[1.08] tracking-tight mb-5 bg-gradient-to-br from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-                Detect spend anomalies.<br />
-                Enforce approval controls.<br />
-                Protect your operations.
+              <h1 className="text-[3rem] font-bold leading-[1.08] tracking-tight text-text-primary mb-5">
+                Find spend anomalies before they close
               </h1>
-              <p className="text-lg text-text-secondary leading-relaxed mb-7 max-w-xl">
-                Ventura connects to your ERP, bank feeds, payroll, and card data to surface financial risk
-                and workflow bottlenecks — with explainable AI decisions and a complete audit trail built
-                for enterprise compliance requirements.
+              <p className="text-lg text-text-secondary leading-relaxed mb-8 max-w-lg">
+                Your ledger closes monthly. Risk does not wait.
               </p>
 
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-2 mb-8">
-                {['AI Anomaly Detection', 'Approval Workflows', 'Immutable Audit Log', 'Explainable AI'].map((cert, i) => (
-                  <React.Fragment key={cert}>
-                    {i > 0 && <span className="text-text-muted select-none" aria-hidden="true">·</span>}
-                    <span className="inline-flex items-center gap-1.5 text-sm text-text-secondary bg-surface-raised border border-border px-3 py-1.5 font-medium">
-                      <CheckCircleIcon className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                      {cert}
-                    </span>
-                  </React.Fragment>
-                ))}
-              </div>
-
               <div className="flex flex-wrap items-center gap-4">
-                <Link href="/contact" className="inline-flex items-center gap-2 bg-accent-500 hover:bg-accent-600 text-white font-semibold px-6 py-3 text-base transition-colors">
-                  Get started
+                <Link href="/demo" className="inline-flex items-center gap-2 bg-accent-500 hover:bg-accent-600 text-white font-semibold px-6 py-3 text-base transition-colors">
+                  View a demo
                 </Link>
-                <Link href="/demo" className="inline-flex items-center gap-1.5 text-base font-medium text-text-secondary hover:text-text-primary transition-colors">
-                  View a demo <ArrowRightIcon className="w-4 h-4" />
+                <Link href="/contact" className="inline-flex items-center gap-2 border border-border-strong hover:border-text-muted text-text-secondary hover:text-text-primary font-semibold px-6 py-3 text-base transition-colors">
+                  Talk to us
                 </Link>
               </div>
             </div>
@@ -166,12 +129,14 @@ export default function HomePage() {
                           <stop offset="95%" stopColor="#4f88cb" stopOpacity={0.01} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#22304a" vertical={false} />
                       <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                       <YAxis yAxisId="spend" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={fmtK} width={44} />
                       <YAxis yAxisId="risk" orientation="right" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={fmtK} width={44} />
                       <Tooltip
-                        contentStyle={{ fontSize: 11, border: '1px solid #e2e8f0' }}
+                        contentStyle={{ fontSize: 11, background: '#111a2c', border: '1px solid #22304a' }}
+                        labelStyle={{ color: '#e8edf5' }}
+                        itemStyle={{ color: '#a9b8cf' }}
                         formatter={(v: number, name: string) => [
                           `$${v}K`,
                           name === 'spend' ? 'Monthly Spend' : name === 'anomalyExposure' ? 'Risk Exposure' : 'Savings Found',
@@ -180,7 +145,7 @@ export default function HomePage() {
                       <Legend
                         iconSize={8}
                         formatter={(v) => (
-                          <span style={{ fontSize: 10, color: '#64748b' }}>
+                          <span style={{ fontSize: 10, color: '#7186a3' }}>
                             {v === 'spend' ? 'Monthly Spend' : v === 'anomalyExposure' ? 'Risk Exposure' : 'Savings Found'}
                           </span>
                         )}
@@ -202,57 +167,55 @@ export default function HomePage() {
 
       {/* ── Integration logo stream ── */}
       <section className="bg-surface border-b border-border py-6">
-        <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 mb-5 flex items-center justify-between flex-wrap gap-2">
-          <div>
-            <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1">Native integrations</p>
-            <p className="text-base font-semibold text-text-secondary">Connects to your existing financial stack</p>
-          </div>
-          <p className="text-xs text-text-muted">Also available: REST API · Webhook · SFTP · Custom ETL</p>
-        </div>
-
-        <div className="relative overflow-hidden select-none">
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-24 z-10 bg-gradient-to-r from-surface to-transparent" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-24 z-10 bg-gradient-to-l from-surface to-transparent" />
-          <div className="animate-marquee flex gap-4 w-max px-4">
-            {[...STREAM_BRANDS, ...STREAM_BRANDS].map((b, i) => (
+        <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
+          <p className="text-base font-semibold text-text-secondary mb-5">Connects to your existing financial stack</p>
+          <div className="flex flex-wrap gap-3">
+            {STREAM_BRANDS.map(b => (
               <div
-                key={`${b.id}-${i}`}
-                className="flex items-center gap-3 bg-surface-raised border border-border px-5 py-3 shadow-sm flex-shrink-0"
+                key={b.id}
+                className="flex items-center gap-2.5 bg-surface-raised border border-border px-4 py-2.5"
               >
-                <BrandIcon brand={b.brand} size={30} />
-                <span className="text-sm font-semibold text-text-secondary whitespace-nowrap">{b.name}</span>
+                <BrandIcon brand={b.brand} size={22} />
+                <span className="text-sm font-medium text-text-secondary whitespace-nowrap">{b.name}</span>
               </div>
             ))}
           </div>
+          <p className="text-xs text-text-muted mt-4">Also available: REST API, webhook, SFTP and custom ETL.</p>
+        </div>
+      </section>
+
+      {/* ── Overview ── */}
+      <section className="bg-surface-raised border-b border-border py-14">
+        <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
+          <p className="text-xl text-text-secondary leading-relaxed max-w-3xl">
+            Ventura reads your accounting systems, bank feeds, payroll and card data, then checks every
+            transaction against a set of rules your team controls. Findings arrive with the evidence
+            attached, so a reviewer can act on them the same day rather than at quarter end.
+          </p>
         </div>
       </section>
 
       {/* ── Capabilities ── */}
       {capabilities.map((cap, i) => {
-        const Icon = cap.icon
         const isEven = i % 2 === 0
         return (
           <section key={cap.id} id={cap.id} className={`py-14 border-b border-border ${isEven ? 'bg-surface-raised' : 'bg-surface'}`}>
             <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
               <div className="grid lg:grid-cols-2 gap-14 items-center">
                 <div className={!isEven ? 'lg:order-2' : ''}>
-                  <div className={`w-11 h-11 ${cap.iconBg} border border-border flex items-center justify-center mb-5`}>
-                    <Icon className={`w-6 h-6 ${cap.iconColor}`} />
-                  </div>
                   <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-3">{cap.eyebrow}</p>
                   <h2 className="text-[2rem] font-bold text-text-primary mb-4 leading-snug">{cap.title}</h2>
                   <p className="text-base text-text-secondary leading-relaxed mb-6">{cap.body}</p>
-                  <ul className="space-y-3">
+                  <ul className="border-t border-border">
                     {cap.bullets.map(b => (
-                      <li key={b} className="flex items-start gap-3 text-base text-text-secondary">
-                        <CheckCircleIcon className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <li key={b} className="text-base text-text-secondary py-2.5 border-b border-border">
                         {b}
                       </li>
                     ))}
                   </ul>
                   <div className="mt-7">
-                    <Link href="/demo" className="inline-flex items-center gap-1.5 text-base font-semibold text-text-secondary hover:text-text-primary transition-colors">
-                      See it in action <ArrowRightIcon className="w-5 h-5" />
+                    <Link href="/demo" className="text-base font-semibold text-accent-400 hover:text-accent-300 transition-colors">
+                      See it in action
                     </Link>
                   </div>
                 </div>
@@ -274,59 +237,50 @@ export default function HomePage() {
             <div>
               <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-4">Transparency & Audit Trail</p>
               <h2 className="text-[2rem] font-bold text-text-primary mb-4 leading-snug">
-                Every AI decision is explainable, logged, and traceable to source transactions
+                Every finding is explainable, logged, and traceable to source transactions
               </h2>
               <p className="text-base text-text-secondary leading-relaxed mb-8">
-                Ventura doesn't just flag anomalies — it shows its reasoning. Every finding includes a
-                confidence score, a plain-language explanation, and direct references to the underlying
-                transactions, so your team can investigate, approve, or dismiss with full context.
+                Ventura does not just flag anomalies, it shows its reasoning. Every finding carries a
+                confidence score, a plain explanation and direct references to the transactions behind it,
+                so your team can investigate, approve or dismiss with full context.
               </p>
-              <div className="space-y-5">
+              <div className="border-t border-border">
                 {[
-                  { icon: ChartBarIcon,    title: 'Complete audit trail',             body: 'Every detection, manual review, status change, and approval is logged with a timestamp and actor — giving you a full history of every decision.' },
-                  { icon: ShieldCheckIcon, title: 'Confidence scores on every finding', body: 'Each anomaly includes a model confidence score (0–100%) and the reasoning behind it, so reviewers know exactly how certain the system is.' },
-                  { icon: LockClosedIcon,  title: 'Transaction evidence references',  body: 'Every anomaly links directly to the specific transaction IDs involved — no guessing which rows triggered the alert.' },
-                  { icon: UsersIcon,       title: 'Data masking and testing modes',   body: 'Run analysis on masked or synthetic data to protect sensitive information during demos, onboarding, or internal testing.' },
-                ].map(item => {
-                  const IIcon = item.icon
-                  return (
-                    <div key={item.title} className="flex gap-4 items-start">
-                      <div className="w-10 h-10 bg-surface-overlay border border-border flex items-center justify-center flex-shrink-0">
-                        <IIcon className="w-5 h-5 text-text-secondary" />
-                      </div>
-                      <div>
-                        <p className="text-base font-semibold text-text-secondary">{item.title}</p>
-                        <p className="text-sm text-text-muted mt-1 leading-relaxed">{item.body}</p>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-
-            <div className="bg-[#0f1923] border border-border p-6">
-              <p className="text-text-muted mb-4 text-[10px] font-mono uppercase tracking-wider">// AI decision log — structure</p>
-              <div className="space-y-1.5 font-mono text-[12px] leading-relaxed">
-                {[
-                  { k: 'event',      v: '"anomaly.detected"',          c: 'text-green-400' },
-                  { k: 'anomaly_id', v: '"ANO-xxx"',                   c: 'text-amber-300' },
-                  { k: 'confidence', v: '0.97',                        c: 'text-purple-300' },
-                  { k: 'risk_tier',  v: '"High"',                      c: 'text-orange-400' },
-                  { k: 'action',     v: '"human_approval_required"',   c: 'text-amber-300' },
-                  { k: 'actor',      v: '"finance@yourcompany.com"',   c: 'text-green-300' },
-                  { k: 'immutable',  v: 'true',                        c: 'text-emerald-400' },
-                  { k: 'log_id',     v: '"evt_xxxxxxxxxx"',            c: 'text-text-muted' },
-                ].map(row => (
-                  <div key={row.k} className="flex gap-3">
-                    <span className="text-text-muted select-none">{row.k}:</span>
-                    <span className={row.c}>{row.v}</span>
+                  { title: 'Complete audit trail',    body: 'Every detection, review, status change and approval is logged with a timestamp and an actor.' },
+                  { title: 'Confidence on every finding', body: 'Each anomaly carries a score from 0 to 100 and the reasoning behind it, so reviewers know how certain the system is.' },
+                  { title: 'Transaction evidence',    body: 'Every anomaly links to the exact transaction IDs involved. No guessing which rows triggered the alert.' },
+                  { title: 'Data masking',            body: 'Run analysis on masked data to protect sensitive information during demos, onboarding or internal testing.' },
+                ].map(item => (
+                  <div key={item.title} className="py-4 border-b border-border">
+                    <p className="text-base font-semibold text-text-primary">{item.title}</p>
+                    <p className="text-sm text-text-muted mt-1 leading-relaxed">{item.body}</p>
                   </div>
                 ))}
               </div>
-              <div className="mt-4 pt-4 border-t border-border flex items-center gap-2">
-                <span className="w-1.5 h-1.5 bg-emerald-400 animate-pulse" />
-                <span className="text-[10px] text-text-muted font-mono">tamper-evident · append-only · exportable</span>
+            </div>
+
+            <div className="bg-surface border border-border">
+              <div className="px-5 py-3 border-b border-border">
+                <p className="text-xs font-semibold text-text-secondary">Audit log record</p>
               </div>
+              <table className="w-full text-sm">
+                <tbody>
+                  {[
+                    { k: 'Event',      v: 'anomaly.detected' },
+                    { k: 'Anomaly',    v: 'ANO-1042' },
+                    { k: 'Confidence', v: '97' },
+                    { k: 'Risk tier',  v: 'High' },
+                    { k: 'Action',     v: 'Human approval required' },
+                    { k: 'Actor',      v: 'finance@yourcompany.com' },
+                    { k: 'Recorded',   v: 'Server side, append only' },
+                  ].map(row => (
+                    <tr key={row.k} className="border-b border-border-subtle last:border-0">
+                      <td className="px-5 py-2.5 text-text-muted w-36">{row.k}</td>
+                      <td className="px-5 py-2.5 text-text-secondary font-medium">{row.v}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -339,11 +293,11 @@ export default function HomePage() {
             <div>
               <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-4">Get started</p>
               <h2 className="text-[2rem] font-bold text-white mb-4 leading-snug">
-                Purpose-built for enterprise finance operations
+                Built for enterprise finance operations
               </h2>
               <p className="text-base text-text-muted leading-relaxed max-w-lg">
-                Connect your accounting system and Ventura will scan your transactions automatically.
-                Most finance teams identify their first findings within hours of their first sync.
+                Connect your accounting system and Ventura scans your transactions automatically.
+                Most teams see their first findings within hours of the first sync.
               </p>
             </div>
             <div className="flex flex-col gap-3 md:flex-shrink-0">
@@ -352,7 +306,7 @@ export default function HomePage() {
                 Talk to us
               </Link>
               <Link href="/contact" className="inline-flex items-center justify-center gap-2 bg-[#1a2640] text-slate-200 font-medium px-7 py-3 text-base border border-border hover:bg-[#1e3a6e] transition-colors">
-                Sign up for access <ArrowRightIcon className="w-4 h-4" />
+                Sign up for access
               </Link>
             </div>
           </div>
@@ -367,9 +321,9 @@ export default function HomePage() {
 
 function AnomalyPreviewPanel() {
   const rows = [
-    { title: 'Duplicate invoice — same vendor, same amount', type: 'Duplicate',      sev: 'HIGH',     sevCls: 'border-orange-500/30 bg-orange-500/10 text-orange-400' },
-    { title: 'Statistical outlier — payment 4× vendor baseline', type: 'Outlier',   sev: 'CRITICAL', sevCls: 'border-red-500/30 bg-red-500/10 text-red-400' },
-    { title: 'Round-number transaction above $10,000',         type: 'Round Number', sev: 'MEDIUM',   sevCls: 'border-amber-500/30 bg-amber-500/10 text-amber-400' },
+    { title: 'Duplicate invoice: same vendor, same amount', type: 'Duplicate',      sev: 'HIGH',     sevCls: 'border-orange-500/30 bg-orange-500/10 text-orange-400' },
+    { title: 'Statistical outlier: payment 4× vendor baseline', type: 'Outlier',   sev: 'CRITICAL', sevCls: 'border-red-500/30 bg-red-500/10 text-red-400' },
+    { title: 'Round number transaction above $10,000',         type: 'Round Number', sev: 'MEDIUM',   sevCls: 'border-amber-500/30 bg-amber-500/10 text-amber-400' },
   ]
   return (
     <div className="bg-surface-raised border border-border shadow-sm overflow-hidden">
@@ -387,7 +341,7 @@ function AnomalyPreviewPanel() {
         </div>
       ))}
       <div className="px-4 py-2.5 bg-surface-overlay border-t border-border">
-        <p className="text-[10px] text-text-muted">AI evidence chain and suggested actions available per finding</p>
+        <p className="text-[10px] text-text-muted">Evidence chain and suggested actions available per finding</p>
       </div>
     </div>
   )
@@ -398,8 +352,8 @@ function WorkflowPreviewPanel() {
     { step: 'Invoice received',         status: 'done',  actor: 'System',     time: '0h'  },
     { step: '3-way match verification', status: 'done',  actor: 'System',     time: '2h'  },
     { step: 'Manager approval',         status: 'stuck', actor: 'Pending',    time: '6d'  },
-    { step: 'AP final sign-off',        status: 'wait',  actor: 'AP Team',    time: '—'   },
-    { step: 'Payment release',          status: 'wait',  actor: 'Finance',    time: '—'   },
+    { step: 'AP final approval',        status: 'wait',  actor: 'AP Team',    time: 'Pending' },
+    { step: 'Payment release',          status: 'wait',  actor: 'Finance',    time: 'Pending' },
   ]
   const statusStyle: Record<string, string> = {
     done:  'bg-emerald-500/10 border-emerald-500/30 text-emerald-400',
@@ -427,7 +381,7 @@ function WorkflowPreviewPanel() {
         </div>
       ))}
       <div className="px-4 py-2.5 bg-amber-500/10 border-t border-amber-500/30">
-        <p className="text-[10px] text-amber-400 font-medium">Bottleneck detected at step 3 — SLA target: 48h, approval pending for 6 days</p>
+        <p className="text-[10px] text-amber-400 font-medium">Bottleneck detected at step 3. SLA target: 48h, approval pending for 6 days</p>
       </div>
     </div>
   )
@@ -435,20 +389,20 @@ function WorkflowPreviewPanel() {
 
 function GovernancePreviewPanel() {
   const events = [
-    { ts: 'Today', type: 'AUTO_APPROVED',  tier: 'Low',      conf: 96, action: 'Duplicate invoice flagged and logged'       },
-    { ts: 'Today', type: 'HUMAN_REQUIRED', tier: 'Critical', conf: 94, action: 'Statistical outlier — investigation opened' },
-    { ts: 'Today', type: 'AUTO_APPROVED',  tier: 'Low',      conf: 90, action: 'License consolidation opportunity noted'    },
-    { ts: 'Today', type: 'HUMAN_APPROVED', tier: 'High',     conf: 85, action: 'Budget overrun escalated and reviewed'      },
+    { ts: 'Today', type: 'LOGGED',    tier: 'Low',      conf: 96, action: 'Duplicate invoice flagged and logged'      },
+    { ts: 'Today', type: 'OPEN',      tier: 'Critical', conf: 94, action: 'Statistical outlier: investigation opened' },
+    { ts: 'Today', type: 'LOGGED',    tier: 'Low',      conf: 90, action: 'License consolidation opportunity noted'   },
+    { ts: 'Today', type: 'REVIEWED',  tier: 'High',     conf: 85, action: 'Budget overrun escalated and reviewed'     },
   ]
   const typeCls: Record<string, string> = {
-    AUTO_APPROVED:  'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
-    HUMAN_REQUIRED: 'bg-red-500/10 text-red-400 border-red-500/30',
-    HUMAN_APPROVED: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+    LOGGED:   'bg-slate-400/10 text-slate-400 border-slate-400/25',
+    OPEN:     'bg-red-500/10 text-red-400 border-red-500/30',
+    REVIEWED: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
   }
   return (
     <div className="bg-surface-raised border border-border shadow-sm overflow-hidden">
       <div className="px-4 py-3 border-b border-border bg-surface-overlay flex items-center justify-between">
-        <p className="text-xs font-semibold text-text-secondary">AI Governance Log</p>
+        <p className="text-xs font-semibold text-text-secondary">Governance Log</p>
         <span className="text-[10px] text-text-muted border border-border px-2 py-0.5">Example</span>
       </div>
       {events.map((e, i) => (
@@ -465,7 +419,7 @@ function GovernancePreviewPanel() {
         </div>
       ))}
       <div className="px-4 py-2.5 bg-surface-overlay border-t border-border">
-        <p className="text-[10px] text-text-muted">Every AI action is logged · human approval gates enforced by policy</p>
+        <p className="text-[10px] text-text-muted">Every detection and review is logged with an actor and a timestamp</p>
       </div>
     </div>
   )

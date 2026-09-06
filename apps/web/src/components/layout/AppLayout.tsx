@@ -59,7 +59,7 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
   return (
     <>
       <Head>
-        <title>{title ? `${title} — Ventura` : 'Ventura — Financial Operations Intelligence'}</title>
+        <title>{title ? `${title} · Ventura` : 'Ventura · Financial Operations Intelligence'}</title>
       </Head>
       <div className="min-h-screen flex bg-surface">
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
@@ -125,14 +125,14 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
             wsRole === 'editor' ? (
               <div className="flex items-center gap-2 bg-emerald-500/10 border-b border-emerald-500/30 text-emerald-300 px-4 sm:px-6 py-2 text-xs font-medium">
                 <PencilSquareIcon className="w-3.5 h-3.5 flex-shrink-0" />
-                Editor access — you can view and make changes in this workspace.
+                Editor access: you can view and make changes in this workspace.
               </div>
             ) : (
               <div className="flex items-center gap-2 bg-amber-500/10 border-b border-amber-500/30 text-amber-300 px-4 sm:px-6 py-2 text-xs font-medium">
                 <EyeIcon className="w-3.5 h-3.5 flex-shrink-0" />
                 {wsRole === 'analyst'
-                  ? 'Analyst access — you can view everything and comment on anomalies. Ask your admin for edit permission.'
-                  : 'Read-only access — you can browse all tabs but not make changes. Ask your admin for edit permission.'}
+                  ? 'Analyst access: you can view everything and comment on anomalies. Ask your admin for edit permission.'
+                  : 'Read-only access: you can browse all tabs but not make changes. Ask your admin for edit permission.'}
               </div>
             )
           )}

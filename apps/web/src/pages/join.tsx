@@ -78,7 +78,7 @@ export default function JoinPage() {
   return (
     <>
       <Head>
-        <title>Join Workspace — Ventura</title>
+        <title>Join Workspace · Ventura</title>
       </Head>
 
       <div className="min-h-screen bg-surface flex flex-col items-center justify-center px-4">
@@ -134,7 +134,7 @@ export default function JoinPage() {
                         </div>
                         <div>
                           <p className="text-xs font-semibold text-emerald-300">{company}</p>
-                          <p className="text-[11px] text-emerald-400">Valid invite — click Join to continue</p>
+                          <p className="text-[11px] text-emerald-400">Valid invite. Click Join to continue</p>
                         </div>
                       </div>
                     )}

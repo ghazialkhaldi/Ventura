@@ -30,20 +30,20 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <title>Ventura — Financial Intelligence Platform</title>
+        <title>Ventura · Financial Intelligence Platform</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="description" content="AI-powered financial operations intelligence for enterprise finance teams. Detect anomalies, streamline workflows, and govern AI decisions with full auditability." />
+        <meta name="description" content="Financial operations intelligence for enterprise finance teams. Detect anomalies, streamline workflows, and govern automated decisions with full auditability." />
         <meta name="theme-color" content="#0b1220" />
         {/* Open Graph */}
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="Ventura" />
-        <meta property="og:title" content="Ventura — Financial Intelligence Platform" />
-        <meta property="og:description" content="AI-powered financial operations intelligence for enterprise finance teams." />
+        <meta property="og:title" content="Ventura · Financial Intelligence Platform" />
+        <meta property="og:description" content="Financial operations intelligence for enterprise finance teams." />
         <meta property="og:image" content="/ventura-logo.png" />
         {/* Twitter */}
         <meta name="twitter:card" content="summary" />
-        <meta name="twitter:title" content="Ventura — Financial Intelligence Platform" />
-        <meta name="twitter:description" content="AI-powered financial operations intelligence for enterprise finance teams." />
+        <meta name="twitter:title" content="Ventura · Financial Intelligence Platform" />
+        <meta name="twitter:description" content="Financial operations intelligence for enterprise finance teams." />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" type="image/png" href="/favicon.png" />
         <link rel="apple-touch-icon" href="/favicon.png" />

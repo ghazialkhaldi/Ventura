@@ -229,12 +229,12 @@ export default function AIGovernancePage() {
                 // written by explicit user actions — nothing in the codebase
                 // changes an anomaly's status autonomously).
                 { rule: `Anomalies at or above ${confidenceThreshold}% confidence are flagged high-confidence for priority review`, status: 'Enforced', icon: CheckCircle, color: 'text-emerald-400' },
-                { rule: 'No automated action is ever taken on an anomaly — every status change is a manual, logged user action', status: 'Enforced', icon: CheckCircle, color: 'text-emerald-400' },
+                { rule: 'No automated action is ever taken on an anomaly. Every status change is a manual, logged user action', status: 'Enforced', icon: CheckCircle, color: 'text-emerald-400' },
                 // These describe a routing/notification/provenance system
                 // that does not exist yet — previously shown as "Enforced"
                 // with a green checkmark, which was inaccurate.
                 { rule: 'Critical-tier anomalies automatically routed to CISO + CFO for review', status: 'Not implemented', icon: Clock, color: 'text-amber-400' },
-                { rule: 'Per-finding AI provenance log (model, prompt, confidence)', status: 'Not implemented — findings are produced by a deterministic rule engine, not a model', icon: Clock, color: 'text-amber-400' },
+                { rule: 'Per-finding AI provenance log (model, prompt, confidence)', status: 'Not implemented: findings are produced by a deterministic rule engine, not a model', icon: Clock, color: 'text-amber-400' },
                 { rule: 'Model explanations required before human approval UI', status: 'Draft', icon: Clock, color: 'text-amber-400' },
               ].map((r, i) => {
                 const Icon = r.icon
@@ -257,7 +257,7 @@ export default function AIGovernancePage() {
           <div className="flex items-start gap-2.5 bg-amber-500/10 border border-amber-500/30 rounded-lg px-4 py-3 mb-4">
             <Info className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
             <p className="text-xs text-amber-400">
-              <span className="font-semibold">Policy reference, not a live routing log.</span> Anomaly detection in Ventura today runs on a deterministic rule engine (statistical outliers, duplicate matching, threshold checks) — it does not call the language models listed below. This table documents the intended routing policy for a future model-backed detection layer; it does not reflect requests actually being made.
+              <span className="font-semibold">Policy reference, not a live routing log.</span> Anomaly detection in Ventura today runs on a deterministic rule engine (statistical outliers, duplicate matching, threshold checks). It does not call the language models listed below. This table documents the intended routing policy for a future model-backed detection layer; it does not reflect requests actually being made.
             </p>
           </div>
         <div className="bg-surface-raised border border-border rounded-lg overflow-hidden">
@@ -282,7 +282,7 @@ export default function AIGovernancePage() {
                   <td className="px-4 py-4">
                     {row.autoApprove
                       ? <Badge variant="green"><CheckCircle className="w-3 h-3 inline mr-1" />Yes</Badge>
-                      : <Badge variant="red"><XCircle className="w-3 h-3 inline mr-1" />No — human required</Badge>}
+                      : <Badge variant="red"><XCircle className="w-3 h-3 inline mr-1" />No, human required</Badge>}
                   </td>
                   <td className="px-4 py-4 text-xs text-text-muted max-w-xs">{row.examples}</td>
                   <td className="px-4 py-4">

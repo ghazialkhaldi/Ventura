@@ -6,7 +6,7 @@ const systems = [
   { name: 'API',                   desc: 'REST API and integrations endpoints' },
   { name: 'Authentication',        desc: 'Sign-in, MFA, and session management' },
   { name: 'AI Detection Engine',   desc: 'Anomaly detection and confidence scoring' },
-  { name: 'Data Ingestion',        desc: 'File uploads and connected-source syncs' },
+  { name: 'Data Ingestion',        desc: 'File uploads and connected source syncs' },
   { name: 'Email Delivery',        desc: 'Verification codes and notifications' },
 ]
 

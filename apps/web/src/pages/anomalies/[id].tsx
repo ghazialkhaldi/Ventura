@@ -18,7 +18,7 @@ function fmtFull(n: number): string {
 }
 
 function fmtDate(iso: string): string {
-  if (!iso) return '—'
+  if (!iso) return 'N/A'
   try { return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }
   catch { return iso }
 }
@@ -27,12 +27,12 @@ type ActionRisk = 'None' | 'Low' | 'Medium' | 'High'
 
 function suggestedActions(a: DetectedAnomaly) {
   const base: { label: string; type: string; risk: ActionRisk }[] = [
-    { label: 'Mark as reviewed — no action needed',           type: 'resolve',   risk: 'None' },
+    { label: 'Mark as reviewed, no action needed',           type: 'resolve',   risk: 'None' },
     { label: 'Request supporting documentation from approver', type: 'request',   risk: 'Low' },
     { label: 'Escalate to CFO / Finance Director',            type: 'escalate',  risk: 'Medium' },
   ]
   if (a.severity === 'CRITICAL' || a.severity === 'HIGH') {
-    base.push({ label: 'Escalate to CISO — potential fraud', type: 'escalate', risk: 'High' })
+    base.push({ label: 'Escalate to CISO: potential fraud', type: 'escalate', risk: 'High' })
   }
   if (a.type === 'duplicate') {
     base.unshift({ label: 'Void the duplicate payment if confirmed', type: 'payment', risk: 'High' })
@@ -112,7 +112,7 @@ export default function AnomalyDetailPage() {
   const actions = suggestedActions(anomaly)
 
   return (
-    <AppLayout title={`${anomaly.id} — ${anomaly.title}`}>
+    <AppLayout title={`${anomaly.id}: ${anomaly.title}`}>
       {/* ── Breadcrumb ── */}
       <div className="flex items-center gap-1.5 text-xs text-text-muted mb-4">
         <Link href="/anomalies" className="hover:text-accent-400 transition-colors flex items-center gap-0.5">
@@ -126,7 +126,7 @@ export default function AnomalyDetailPage() {
       {anomaly.severity === 'CRITICAL' && (
         <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/30 rounded-lg p-3.5 mb-4">
           <ShieldAlert className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
-          <p className="text-sm font-semibold text-red-400">Critical — Immediate action required</p>
+          <p className="text-sm font-semibold text-red-400">Critical: Immediate action required</p>
         </div>
       )}
 
@@ -223,7 +223,7 @@ export default function AnomalyDetailPage() {
                         <td className="px-4 py-2.5 font-mono text-text-muted">{tx.id}</td>
                         <td className="px-4 py-2.5 text-text-muted">{tx.date}</td>
                         <td className="px-4 py-2.5 font-medium text-text-secondary truncate max-w-[140px]">{tx.vendor}</td>
-                        <td className="px-4 py-2.5 text-text-muted hidden md:table-cell">{tx.category || '—'}</td>
+                        <td className="px-4 py-2.5 text-text-muted hidden md:table-cell">{tx.category || 'N/A'}</td>
                         <td className="px-4 py-2.5 text-right font-semibold text-text-secondary">{fmtFull(tx.amount)}</td>
                       </tr>
                     ))}

@@ -40,12 +40,12 @@ const RISK_BY_TYPE = [
 ]
 
 const ANOMALIES = [
-  { id: 'ANO-001', sev: 'CRITICAL', type: 'outlier',      title: 'Statistical outlier — vendor payment 4× baseline',      vendor: 'Meridian Consulting', category: 'Professional Services', amount: 42800, confidence: 97 },
-  { id: 'ANO-002', sev: 'HIGH',     type: 'duplicate',    title: 'Duplicate invoice — same vendor, same amount',           vendor: 'Apex Software Ltd',   category: 'Software',             amount: 7200,  confidence: 94 },
-  { id: 'ANO-003', sev: 'HIGH',     type: 'budget',       title: 'Budget overrun — Engineering Q2 +37%',                  vendor: 'Various',             category: 'Engineering',          amount: 18500, confidence: 91 },
-  { id: 'ANO-004', sev: 'MEDIUM',   type: 'round number', title: 'Round-number transaction above $10,000',                vendor: 'Globex Corp',         category: 'Operations',           amount: 25000, confidence: 78 },
+  { id: 'ANO-001', sev: 'CRITICAL', type: 'outlier',      title: 'Statistical outlier: vendor payment 4× baseline',      vendor: 'Meridian Consulting', category: 'Professional Services', amount: 42800, confidence: 97 },
+  { id: 'ANO-002', sev: 'HIGH',     type: 'duplicate',    title: 'Duplicate invoice: same vendor, same amount',           vendor: 'Apex Software Ltd',   category: 'Software',             amount: 7200,  confidence: 94 },
+  { id: 'ANO-003', sev: 'HIGH',     type: 'budget',       title: 'Budget overrun: Engineering Q2 +37%',                  vendor: 'Various',             category: 'Engineering',          amount: 18500, confidence: 91 },
+  { id: 'ANO-004', sev: 'MEDIUM',   type: 'round number', title: 'Round number transaction above $10,000',                vendor: 'Globex Corp',         category: 'Operations',           amount: 25000, confidence: 78 },
   { id: 'ANO-005', sev: 'MEDIUM',   type: 'high freq.',   title: 'Unusually high transaction frequency from vendor',      vendor: 'ProCloud Services',   category: 'Cloud & Hosting',      amount: 12200, confidence: 83 },
-  { id: 'ANO-006', sev: 'LOW',      type: 'contract',     title: 'Vendor contract nearing expiry — no renewal on file',   vendor: 'Initech Systems',     category: 'Software',             amount: 0,     confidence: 90 },
+  { id: 'ANO-006', sev: 'LOW',      type: 'contract',     title: 'Vendor contract nearing expiry, no renewal on file',   vendor: 'Initech Systems',     category: 'Software',             amount: 0,     confidence: 90 },
 ]
 
 const DUPLICATES = [
@@ -74,10 +74,10 @@ const VENDORS = [
 ]
 
 const AUDIT_LOG = [
-  { event: 'Anomaly ANO-001 flagged — CRITICAL statistical outlier', actor: 'Ventura AI', ts: 'just now', sev: 'critical' },
+  { event: 'Anomaly ANO-001 flagged: CRITICAL statistical outlier', actor: 'Ventura AI', ts: 'just now', sev: 'critical' },
   { event: 'Duplicate invoice ANO-002 queued for review',            actor: 'Ventura AI', ts: '5m ago',   sev: 'warning'  },
   { event: 'Budget overrun ANO-003 escalated to Finance team',       actor: 'Ventura AI', ts: '1h ago',   sev: 'warning'  },
-  { event: 'Data sync completed — 1,284 transactions processed',     actor: 'System',     ts: '2h ago',   sev: 'info'     },
+  { event: 'Data sync completed: 1,284 transactions processed',     actor: 'System',     ts: '2h ago',   sev: 'info'     },
 ]
 
 // ── Sidebar nav ──────────────────────────────────────────────────────────────
@@ -118,7 +118,7 @@ const NAV_SECTIONS = [
 function fmtC(n: number): string {
   if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(1) + 'M'
   if (n >= 1_000)     return '$' + (n / 1_000).toFixed(0) + 'K'
-  return n === 0 ? '—' : '$' + n.toFixed(0)
+  return n === 0 ? 'None' : '$' + n.toFixed(0)
 }
 
 const SEV_LEFT: Record<string, string> = {
@@ -169,7 +169,7 @@ export default function DemoPage() {
             <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-2">Product demo</p>
             <h1 className="text-[1.9rem] font-bold text-text-primary leading-tight">Your finance ops platform, live</h1>
             <p className="text-sm text-text-muted mt-1.5 max-w-xl">
-              A full preview of Ventura with illustrative data — the exact interface your finance team would use.
+              A full preview of Ventura with illustrative data: the exact interface your finance team would use.
               Connect your accounting stack to see real findings within hours.
             </p>
           </div>
@@ -183,7 +183,7 @@ export default function DemoPage() {
       <div className="bg-amber-500/10 border-b border-amber-500/30 px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 py-2.5 flex items-center gap-3">
         <span className="w-1.5 h-1.5 bg-amber-500 rounded-full flex-shrink-0" />
         <p className="text-xs text-amber-400">
-          <span className="font-semibold">Demo mode</span> — all figures are illustrative examples only.{' '}
+          <span className="font-semibold">Demo mode:</span> all figures are illustrative examples only.{' '}
           <Link href="/contact" className="underline underline-offset-2 font-medium hover:text-amber-300 transition-colors">
             Talk to our team
           </Link>{' '}
@@ -303,7 +303,7 @@ export default function DemoPage() {
                   <div className="flex items-stretch divide-x divide-border">
                     <div className="flex-1 p-4 min-w-0">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-[10px] font-bold tracking-widest uppercase text-red-400">Critical — Immediate Action Required</span>
+                        <span className="text-[10px] font-bold tracking-widest uppercase text-red-400">Critical: Immediate Action Required</span>
                         <span className="text-[10px] text-text-muted">·</span>
                         <span className="text-[10px] text-text-muted">{ANOMALIES.length} open alerts · 5 high-confidence</span>
                       </div>

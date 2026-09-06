@@ -17,7 +17,7 @@ function fmtFull(n: number) {
 }
 
 function fmtShort(iso: string) {
-  if (!iso) return '—'
+  if (!iso) return 'N/A'
   try { return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }
   catch { return iso }
 }

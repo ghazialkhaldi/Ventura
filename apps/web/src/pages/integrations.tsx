@@ -284,7 +284,7 @@ export default function IntegrationsPage() {
                   <div className="space-y-1.5 mb-4">
                     {[
                       { label: 'Auth method', value: intg.authMethod },
-                      { label: 'Records',     value: isConnected ? 'Synced' : '—' },
+                      { label: 'Records',     value: isConnected ? 'Synced' : 'N/A' },
                     ].map((row) => (
                       <div key={row.label} className="flex justify-between text-xs">
                         <span className="text-text-muted">{row.label}</span>

@@ -62,7 +62,7 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
   return (
     <>
       <Head>
-        <title>{title ? `${title} — Ventura` : 'Ventura — Financial Operations Intelligence'}</title>
+        <title>{title ? `${title} · Ventura` : 'Ventura · Financial Operations Intelligence'}</title>
       </Head>
       <div className="min-h-screen flex flex-col bg-surface">
 

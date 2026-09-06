@@ -236,7 +236,7 @@ export default function EmployeeLoginPage() {
     // Step 2: sign in with the newly created (pre-confirmed) account
     const { data, error: signInErr } = await supabase.auth.signInWithPassword({ email: suEmail, password: suPw })
     if (signInErr || !data.user) {
-      setError(signInErr?.message || 'Account created — please sign in.')
+      setError(signInErr?.message || 'Account created. Please sign in.')
       setLoading(false)
       return
     }
@@ -295,7 +295,7 @@ export default function EmployeeLoginPage() {
 
   return (
     <>
-      <Head><title>Employee Portal — Ventura</title></Head>
+      <Head><title>Employee Portal · Ventura</title></Head>
 
       <div className="min-h-screen bg-surface flex flex-col items-center justify-center px-4 py-10">
         <Link href="/" className="mb-8 no-underline">
@@ -447,9 +447,9 @@ export default function EmployeeLoginPage() {
                       <Mail className="w-6 h-6 text-accent-400" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-text-primary">Email sent — wait up to 2 minutes</p>
+                      <p className="text-sm font-bold text-text-primary">Email sent. Wait up to 2 minutes</p>
                       <p className="text-xs text-text-muted mt-1 leading-relaxed">
-                        A 6-digit code was sent to<br />
+                        A 6 digit code was sent to{' '}
                         <span className="font-semibold text-text-secondary">{step === 'mfa' ? siEmail : suEmail}</span>
                       </p>
                     </div>

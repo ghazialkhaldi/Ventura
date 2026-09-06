@@ -19,11 +19,11 @@ const sections = [
   },
   {
     title: '5. Acceptable Use',
-    body: 'You agree not to misuse the Service, including attempting to access data belonging to other organizations, reverse-engineering the platform, disrupting service availability, or using the Service in violation of applicable law.',
+    body: 'You agree not to misuse the Service, including attempting to access data belonging to other organizations, reverse engineering the platform, disrupting service availability, or using the Service in violation of applicable law.',
   },
   {
     title: '6. AI-Generated Insights',
-    body: 'The Service uses artificial intelligence to surface anomalies and recommendations. These outputs are decision-support tools, not financial advice. Your organization remains responsible for all financial decisions and approvals made using the Service.',
+    body: 'The Service uses artificial intelligence to surface anomalies and recommendations. These outputs are decision support tools, not financial advice. Your organization remains responsible for all financial decisions and approvals made using the Service.',
   },
   {
     title: '7. Availability and Support',

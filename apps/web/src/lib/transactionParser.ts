@@ -144,20 +144,105 @@ export function rowsToTransactions(
   return txs
 }
 
+// ─── Header row detection ─────────────────────────────────────────────────────
+
+/**
+ * Real exports rarely put the header on the first line. Accounting systems and
+ * hand-built workbooks routinely lead with a company name, a report title, a
+ * date-generated stamp, then the actual header. Taking row 0 blindly makes the
+ * header something like ["Northwest Co"], so no vendor or amount column is
+ * found and every row is discarded.
+ *
+ * Score each candidate row by how much it looks like a header, and prefer one
+ * that yields both a vendor and an amount.
+ */
+function scoreHeaderRow(cells: unknown[]): number {
+  const headers = cells.map(c => String(c ?? '').trim()).filter(Boolean)
+  if (headers.length < 2) return -1
+
+  const m = detectColumns(headers)
+  let score = 0
+  if (m.vendor)                            score += 3
+  if (m.amount || m.debit || m.credit)     score += 3
+  if (m.date)                              score += 2
+  if (m.description)                       score += 1
+  if (m.category)                          score += 1
+  if (m.account)                           score += 1
+
+  // Header cells are labels, not figures. A row of numbers is data, not a header.
+  const labelish = headers.filter(h => isNaN(parseFloat(h.replace(/[$,]/g, '')))).length
+  score += Math.min(labelish, 4) * 0.25
+
+  return score
+}
+
+/** Index of the most header-like row within the first `maxScan` rows. */
+function pickHeaderRow(rows: unknown[][], maxScan = 15): number {
+  let bestIdx = 0
+  let bestScore = -1
+  const limit = Math.min(rows.length, maxScan)
+  for (let i = 0; i < limit; i++) {
+    const s = scoreHeaderRow(rows[i] ?? [])
+    if (s > bestScore) { bestScore = s; bestIdx = i }
+  }
+  // Only override the default when the winner actually carries both a vendor
+  // and an amount (3 + 3); otherwise fall back to the conventional first row.
+  return bestScore >= 6 ? bestIdx : 0
+}
+
+/**
+ * Build row objects from a matrix given the header row index. Repeated header
+ * names are suffixed so later columns don't silently overwrite earlier ones.
+ */
+function buildRows(matrix: unknown[][], headerIdx: number): { rows: RawRow[]; headers: string[] } {
+  const seen = new Map<string, number>()
+  const rawHeaders = (matrix[headerIdx] ?? []).map(h => {
+    const base = String(h ?? '').trim()
+    if (!base) return ''
+    const n = seen.get(base) ?? 0
+    seen.set(base, n + 1)
+    return n === 0 ? base : `${base} (${n + 1})`
+  })
+
+  const headers = rawHeaders.filter(Boolean)
+  const rows: RawRow[] = []
+
+  for (let r = headerIdx + 1; r < matrix.length; r++) {
+    const cells = matrix[r] ?? []
+    const row: RawRow = {}
+    rawHeaders.forEach((h, ci) => {
+      if (!h) return
+      const cell = cells[ci]
+      row[h] = cell instanceof Date
+        ? cell.toISOString().split('T')[0]
+        : String(cell ?? '').trim()
+    })
+    if (Object.values(row).some(v => v !== '')) rows.push(row)
+  }
+
+  return { rows, headers }
+}
+
+/** True when a header set gives us enough to build transactions. */
+function isUsable(headers: string[]): boolean {
+  const m = detectColumns(headers)
+  return !!m.vendor && !!(m.amount || m.debit || m.credit)
+}
+
 // ─── CSV parser (PapaParse wrapper) ──────────────────────────────────────────
 
 export async function parseCSV(file: File): Promise<{ rows: RawRow[]; headers: string[] }> {
   const Papa = (await import('papaparse')).default
+  // Parsed as a matrix rather than with header:true, so the header row can be
+  // located rather than assumed to be the first line.
   return new Promise((resolve, reject) => {
-    Papa.parse<RawRow>(file, {
-      header: true,
+    Papa.parse<string[]>(file, {
+      header: false,
       skipEmptyLines: true,
-      transformHeader: (h: string) => h.trim(),
       complete: (result) => {
-        resolve({
-          rows:    result.data as RawRow[],
-          headers: result.meta.fields ?? [],
-        })
+        const matrix = (result.data as unknown[][]).filter(r => Array.isArray(r))
+        if (matrix.length === 0) return resolve({ rows: [], headers: [] })
+        resolve(buildRows(matrix, pickHeaderRow(matrix)))
       },
       error: (err: Error) => reject(err),
     })
@@ -171,43 +256,32 @@ export async function parseExcel(file: File): Promise<{ rows: RawRow[]; headers:
   const buffer = await file.arrayBuffer()
   const wb = XLSX.read(buffer, { type: 'array', cellDates: true })
 
-  // Use the first sheet
-  const sheetName = wb.SheetNames[0]
-  const ws = wb.Sheets[sheetName]
+  // Walk every sheet, not just the first. Workbooks frequently lead with a
+  // cover, summary or notes tab and keep the ledger on a later one. Return the
+  // first sheet that yields a usable vendor + amount mapping; otherwise keep
+  // the richest sheet seen so the caller can still surface its columns.
+  let fallback: { rows: RawRow[]; headers: string[] } = { rows: [], headers: [] }
 
-  const jsonRows = (XLSX.utils.sheet_to_json(ws, {
-    header: 1,
-    defval: '',
-    blankrows: false,
-  }) as unknown) as unknown[][]
+  for (const sheetName of wb.SheetNames) {
+    const ws = wb.Sheets[sheetName]
+    if (!ws) continue
 
-  if (jsonRows.length < 2) return { rows: [], headers: [] }
+    const matrix = (XLSX.utils.sheet_to_json(ws, {
+      header: 1,
+      defval: '',
+      blankrows: false,
+    }) as unknown) as unknown[][]
 
-  // First row = headers
-  const rawHeaders = (jsonRows[0] as string[]).map(h => String(h ?? '').trim())
-  const headers = rawHeaders.filter(Boolean)
+    if (matrix.length < 2) continue
 
-  const rows: RawRow[] = []
-  for (let r = 1; r < jsonRows.length; r++) {
-    const cells = jsonRows[r] as unknown[]
-    const row: RawRow = {}
-    rawHeaders.forEach((h, ci) => {
-      if (h) {
-        const cell = cells[ci]
-        if (cell instanceof Date) {
-          row[h] = cell.toISOString().split('T')[0]
-        } else {
-          row[h] = String(cell ?? '').trim()
-        }
-      }
-    })
-    // Skip completely empty rows
-    if (Object.values(row).some(v => v !== '')) {
-      rows.push(row)
-    }
+    const { rows, headers } = buildRows(matrix, pickHeaderRow(matrix))
+    if (headers.length === 0 || rows.length === 0) continue
+
+    if (isUsable(headers)) return { rows, headers }
+    if (rows.length > fallback.rows.length) fallback = { rows, headers }
   }
 
-  return { rows, headers }
+  return fallback
 }
 
 // ─── PDF parser (pdfjs-dist) ──────────────────────────────────────────────────

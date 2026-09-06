@@ -209,7 +209,7 @@ export default function DashboardPage() {
             <div className="w-14 h-14 bg-surface-overlay border border-border flex items-center justify-center mx-auto mb-4">
               <InboxIcon className="w-7 h-7 text-text-muted" />
             </div>
-            <h1 className="text-xl font-bold text-text-primary mb-2">No data on this device yet</h1>
+            <h1 className="text-xl font-normal text-text-primary mb-2">No data on this device yet</h1>
             <p className="text-sm text-text-muted max-w-sm mx-auto">
               Financial data is uploaded per-device by your workspace admin and hasn&apos;t been loaded in this
               browser. Ask your admin to upload from your device, or check back after they&apos;ve connected data
@@ -226,7 +226,7 @@ export default function DashboardPage() {
             <div className="w-14 h-14 bg-surface-overlay border border-border flex items-center justify-center mx-auto mb-4">
               <ChartBarIcon className="w-7 h-7 text-text-muted" />
             </div>
-            <h1 className="text-xl font-bold text-text-primary mb-2">Set up your finance workspace</h1>
+            <h1 className="text-xl font-normal text-text-primary mb-2">Set up your finance workspace</h1>
             <p className="text-sm text-text-muted max-w-sm mx-auto">
               Connect your accounting data to detect anomalies, surface savings, and take action on financial risk.
             </p>
@@ -240,12 +240,12 @@ export default function DashboardPage() {
               { n: 4, text: 'Monitor spend trends, vendor risk, and savings opportunities' },
             ].map(s => (
               <div key={s.n} className="flex items-center gap-3 p-3.5 bg-surface-raised border border-border">
-                <div className="w-6 h-6 bg-surface-overlay text-text-muted text-xs font-bold flex items-center justify-center flex-shrink-0">
+                <div className="w-6 h-6 bg-surface-overlay text-text-muted text-xs font-medium flex items-center justify-center flex-shrink-0">
                   {s.n}
                 </div>
                 <p className="text-sm text-text-secondary flex-1">{s.text}</p>
                 {s.href && (
-                  <Link href={s.href} className="text-xs bg-accent-500 text-white px-3 py-1.5 font-semibold whitespace-nowrap hover:bg-accent-600 transition-colors">
+                  <Link href={s.href} className="text-xs bg-accent-500 text-white px-3 py-1.5 font-medium whitespace-nowrap hover:bg-accent-600 transition-colors">
                     {s.cta}
                   </Link>
                 )}
@@ -285,7 +285,7 @@ export default function DashboardPage() {
       <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 mb-5 text-[11px] text-text-muted border-b border-border-subtle pb-3.5">
         <div className="flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
-          <span className="font-semibold text-text-secondary">
+          <span className="font-medium text-text-secondary">
             {testMode === 'live' ? 'Live data' : testMode === 'masked' ? 'Masked data' : 'Synthetic data'}
           </span>
         </div>
@@ -321,7 +321,7 @@ export default function DashboardPage() {
           </>
         )}
         {(dataset.pendingReviewCount ?? 0) > 0 && (
-          <Link href="/import-center" className="flex items-center gap-1 text-amber-400 font-semibold hover:text-amber-300 transition-colors">
+          <Link href="/import-center" className="flex items-center gap-1 text-amber-400 font-medium hover:text-amber-300 transition-colors">
             <InboxIcon className="w-3 h-3" /> {dataset.pendingReviewCount} pending review
           </Link>
         )}
@@ -346,7 +346,7 @@ export default function DashboardPage() {
                   {highConf.length > 0 ? ` · ${highConf.length} high-confidence` : ''}
                 </span>
               </div>
-              <p className="text-text-primary font-semibold text-base leading-snug">{topAnomaly.title}</p>
+              <p className="text-text-primary font-medium text-base leading-snug">{topAnomaly.title}</p>
               <p className="text-text-muted text-xs mt-1">
                 {topAnomaly.vendor}{topAnomaly.category ? ` · ${topAnomaly.category}` : ''}
               </p>
@@ -356,7 +356,7 @@ export default function DashboardPage() {
             {/* Amount */}
             <div className="px-5 py-5 flex flex-col items-center justify-center gap-1.5 flex-shrink-0">
               <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest">At Risk</p>
-              <p className={`text-2xl font-bold ${SEV_AMT[topSeverity]}`}>
+              <p className={`text-2xl font-normal ${SEV_AMT[topSeverity]}`}>
                 {fmtC(topAnomaly.amount)}
               </p>
               <div className="flex items-center gap-1.5">
@@ -371,7 +371,7 @@ export default function DashboardPage() {
             <div className="px-5 py-5 flex flex-col items-center justify-center gap-3 flex-shrink-0">
               <Link
                 href={`/anomalies/${topAnomaly.id}`}
-                className="flex items-center gap-2 bg-accent-500 hover:bg-accent-600 text-white text-sm font-semibold px-4 py-2.5 transition-colors whitespace-nowrap"
+                className="flex items-center gap-2 bg-accent-500 hover:bg-accent-600 text-white text-sm font-medium px-4 py-2.5 transition-colors whitespace-nowrap"
               >
                 Investigate <ArrowRightIcon className="w-3.5 h-3.5" />
               </Link>
@@ -402,7 +402,7 @@ export default function DashboardPage() {
       {/* ── Page header ── */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h1 className="text-lg font-bold text-text-primary">{company}</h1>
+          <h1 className="text-lg font-normal text-text-primary">{company}</h1>
           <p className="text-xs text-text-muted mt-0.5">{dateLabel} · {dataset.files.length} file{dataset.files.length !== 1 ? 's' : ''} · {dataset.totalTransactions.toLocaleString()} transactions</p>
         </div>
         <Link
@@ -417,25 +417,25 @@ export default function DashboardPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         <div className="bg-surface-raised border border-border px-5 py-4">
           <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-2">Total Spend</p>
-          <p className="text-3xl font-bold leading-none text-text-primary">{fmtC(dataset.totalSpend)}</p>
+          <p className="text-3xl font-normal leading-none text-text-primary">{fmtC(dataset.totalSpend)}</p>
           <p className="text-xs text-text-muted mt-1.5">{dateLabel}</p>
         </div>
 
         <div className="bg-surface-raised border border-border px-5 py-4">
           <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-2">Risk Exposure</p>
-          <p className={`text-3xl font-bold leading-none ${totalExposure > 0 ? 'text-red-400' : 'text-text-muted'}`}>{fmtC(totalExposure)}</p>
+          <p className={`text-3xl font-normal leading-none ${totalExposure > 0 ? 'text-red-400' : 'text-text-muted'}`}>{fmtC(totalExposure)}</p>
           <p className="text-xs text-text-muted mt-1.5">{openAnomalies.length} open anomal{openAnomalies.length !== 1 ? 'ies' : 'y'}</p>
         </div>
 
         <div className="bg-surface-raised border border-border px-5 py-4">
           <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-2">Savings Identified</p>
-          <p className={`text-3xl font-bold leading-none ${duplicateSavings > 0 ? 'text-text-primary' : 'text-text-muted'}`}>{fmtC(duplicateSavings)}</p>
+          <p className={`text-3xl font-normal leading-none ${duplicateSavings > 0 ? 'text-text-primary' : 'text-text-muted'}`}>{fmtC(duplicateSavings)}</p>
           <p className="text-xs text-text-muted mt-1.5">{duplicates.length} duplicate payment{duplicates.length !== 1 ? 's' : ''}</p>
         </div>
 
         <div className="bg-surface-raised border border-border px-5 py-4">
           <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-2">Transactions</p>
-          <p className="text-3xl font-bold leading-none text-text-primary">{dataset.totalTransactions.toLocaleString()}</p>
+          <p className="text-3xl font-normal leading-none text-text-primary">{dataset.totalTransactions.toLocaleString()}</p>
           <p className="text-xs text-text-muted mt-1.5">{dataset.uniqueVendors.toLocaleString()} unique vendors</p>
         </div>
       </div>
@@ -459,7 +459,7 @@ export default function DashboardPage() {
           <div className="bg-surface-raised border border-border overflow-hidden mb-6">
             <div className="px-5 py-3.5 border-b border-border-subtle flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold text-text-primary">Risk & Savings Overview</p>
+                <p className="text-sm font-medium text-text-primary">Risk & Savings Overview</p>
                 <p className="text-xs text-text-muted">Anomaly exposure vs recoverable savings by type</p>
               </div>
               <div className="flex items-center gap-5 text-xs text-text-muted">
@@ -505,10 +505,10 @@ export default function DashboardPage() {
             <div className="bg-surface-raised border border-border overflow-hidden">
               <div className="px-5 py-3.5 flex items-center justify-between border-b border-border-subtle">
                 <div>
-                  <p className="text-sm font-semibold text-text-primary">Spend Trend</p>
+                  <p className="text-sm font-medium text-text-primary">Spend Trend</p>
                   <p className="text-xs text-text-muted">{dataset.monthlyBreakdown.length} months</p>
                 </div>
-                <span className="text-xs font-bold text-text-secondary">{fmtC(dataset.totalSpend)} total</span>
+                <span className="text-xs font-medium text-text-secondary">{fmtC(dataset.totalSpend)} total</span>
               </div>
               <div className="px-2 py-3 h-40">
                 <ResponsiveContainer width="100%" height="100%">
@@ -537,7 +537,7 @@ export default function DashboardPage() {
           <div>
             <div className="flex items-center justify-between mb-3">
               <div>
-                <p className="text-sm font-semibold text-text-primary">Open Anomalies</p>
+                <p className="text-sm font-medium text-text-primary">Open Anomalies</p>
                 <p className="text-xs text-text-muted mt-0.5">
                   {openAnomalies.length} require review
                   {highConf.length > 0 ? ` · ${highConf.length} high-confidence` : ''}
@@ -551,7 +551,7 @@ export default function DashboardPage() {
             {openAnomalies.length === 0 ? (
               <div className="bg-surface-raised border border-border p-8 text-center">
                 <CheckCircleIcon className="w-8 h-8 text-text-muted mx-auto mb-2" />
-                <p className="text-sm font-semibold text-text-secondary">No open anomalies</p>
+                <p className="text-sm font-medium text-text-secondary">No open anomalies</p>
                 <p className="text-xs text-text-muted mt-1">All findings reviewed or none detected in current data.</p>
               </div>
             ) : (
@@ -571,7 +571,7 @@ export default function DashboardPage() {
                       <p className="text-xs text-text-muted truncate">{a.vendor}{a.category ? ` · ${a.category}` : ''}</p>
                     </div>
                     <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                      <p className={`text-sm font-bold ${SEV_AMT[a.severity]}`}>{fmtC(a.amount)}</p>
+                      <p className={`text-sm font-medium ${SEV_AMT[a.severity]}`}>{fmtC(a.amount)}</p>
                       <div className="flex items-center gap-1.5">
                         <div className="w-10 h-1 bg-surface-overlay overflow-hidden">
                           <div className="h-full bg-slate-400" style={{ width: `${a.confidence}%` }} />
@@ -601,11 +601,11 @@ export default function DashboardPage() {
           <div className="bg-surface-raised border border-border overflow-hidden">
             <div className="px-5 py-3.5 border-b border-border-subtle flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold text-text-primary">Savings Opportunities</p>
+                <p className="text-sm font-medium text-text-primary">Savings Opportunities</p>
                 <p className="text-xs text-text-muted">Duplicate & recoverable spend</p>
               </div>
               {duplicateSavings > 0 && (
-                <p className="text-base font-bold text-text-primary">{fmtC(duplicateSavings)}</p>
+                <p className="text-base font-medium text-text-primary">{fmtC(duplicateSavings)}</p>
               )}
             </div>
             <div className="p-5">
@@ -614,10 +614,10 @@ export default function DashboardPage() {
                   {duplicates.slice(0, 4).map(a => (
                     <Link key={a.id} href={`/anomalies/${a.id}`} className="flex items-center justify-between group">
                       <div className="min-w-0">
-                        <p className="text-xs font-semibold text-text-secondary group-hover:text-text-muted transition-colors truncate">{a.vendor}</p>
+                        <p className="text-xs font-medium text-text-secondary group-hover:text-text-muted transition-colors truncate">{a.vendor}</p>
                         <p className="text-[10px] text-text-muted">{a.confidence}% confidence</p>
                       </div>
-                      <span className="text-sm font-bold text-text-primary flex-shrink-0 ml-4">{fmtC(a.amount)}</span>
+                      <span className="text-sm font-medium text-text-primary flex-shrink-0 ml-4">{fmtC(a.amount)}</span>
                     </Link>
                   ))}
                   {duplicates.length > 4 && (
@@ -625,7 +625,7 @@ export default function DashboardPage() {
                   )}
                   <div className="pt-3 border-t border-border-subtle flex items-center justify-between">
                     <span className="text-[11px] font-bold text-text-muted uppercase tracking-wide">Total recoverable</span>
-                    <span className="text-sm font-bold text-text-primary">{fmtC(duplicateSavings)}</span>
+                    <span className="text-sm font-medium text-text-primary">{fmtC(duplicateSavings)}</span>
                   </div>
                 </div>
               ) : (
@@ -641,7 +641,7 @@ export default function DashboardPage() {
           {categories.length > 0 && (
             <div className="bg-surface-raised border border-border overflow-hidden">
               <div className="px-5 py-3.5 border-b border-border-subtle">
-                <p className="text-sm font-semibold text-text-primary">Spend by Category</p>
+                <p className="text-sm font-medium text-text-primary">Spend by Category</p>
                 <p className="text-xs text-text-muted">Top {categories.length} categories</p>
               </div>
               <div className="p-5 space-y-2.5">
@@ -655,7 +655,7 @@ export default function DashboardPage() {
                           <span className="text-xs text-text-secondary font-medium truncate max-w-[120px]">{cat.category || 'Uncategorized'}</span>
                           {hasAlert && <ExclamationTriangleIcon className="w-2.5 h-2.5 text-amber-400 flex-shrink-0" />}
                         </div>
-                        <span className="text-xs font-semibold text-text-secondary ml-2">{fmtC(cat.total)}</span>
+                        <span className="text-xs font-medium text-text-secondary ml-2">{fmtC(cat.total)}</span>
                       </div>
                       <div className="h-1.5 bg-surface-overlay overflow-hidden">
                         <div className={`h-full ${hasAlert ? 'bg-amber-400' : 'bg-slate-400'}`} style={{ width: `${pct}%` }} />
@@ -672,7 +672,7 @@ export default function DashboardPage() {
             <div className="bg-surface-raised border border-border overflow-hidden">
               <div className="px-5 py-3.5 border-b border-border-subtle flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-text-primary">Vendor Concentration</p>
+                  <p className="text-sm font-medium text-text-primary">Vendor Concentration</p>
                   <p className="text-xs text-text-muted">Top vendors by spend</p>
                 </div>
                 {topVendorShare > 40 && (
@@ -695,7 +695,7 @@ export default function DashboardPage() {
                         </div>
                         <div className="flex items-center gap-2 ml-2">
                           <span className="text-[10px] text-text-muted">{share}%</span>
-                          <span className="text-xs font-semibold text-text-secondary">{fmtC(v.total)}</span>
+                          <span className="text-xs font-medium text-text-secondary">{fmtC(v.total)}</span>
                         </div>
                       </div>
                       <div className="h-1.5 bg-surface-overlay overflow-hidden">
@@ -714,7 +714,7 @@ export default function DashboardPage() {
       {recentAudit.length > 0 && (
         <div className="bg-surface-raised border border-border overflow-hidden mb-6">
           <div className="px-5 py-3.5 flex items-center justify-between border-b border-border-subtle">
-            <p className="text-sm font-semibold text-text-primary">Processing Log</p>
+            <p className="text-sm font-medium text-text-primary">Processing Log</p>
             <Link href="/audit-logs" className="text-xs text-text-secondary hover:text-text-primary flex items-center gap-0.5 transition-colors">
               Full audit log <ChevronRightIcon className="w-3 h-3" />
             </Link>
@@ -736,7 +736,7 @@ export default function DashboardPage() {
       <div className="bg-surface-raised border border-border overflow-hidden">
         <div className="px-5 py-3.5 border-b border-border-subtle flex items-center justify-between">
           <div>
-            <p className="text-sm font-semibold text-text-primary">Team Access</p>
+            <p className="text-sm font-medium text-text-primary">Team Access</p>
             <p className="text-xs text-text-muted">
               {members.length === 0 ? 'No members yet' : `${members.length} member${members.length !== 1 ? 's' : ''}`}
             </p>
@@ -753,7 +753,7 @@ export default function DashboardPage() {
           {/* Invite code card */}
           <div className="border border-border rounded-lg p-4 bg-surface-hover">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-semibold text-text-secondary">Invite link</p>
+              <p className="text-xs font-medium text-text-secondary">Invite link</p>
               <button
                 onClick={generateInvite}
                 disabled={generating}

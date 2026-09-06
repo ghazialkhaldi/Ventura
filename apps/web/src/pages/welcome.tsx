@@ -90,7 +90,7 @@ export default function WelcomePage() {
         <div className="flex items-start justify-between gap-6">
           <div>
             <p className="text-[11px] font-semibold text-text-muted uppercase tracking-widest mb-2">Setup &amp; Onboarding</p>
-            <h1 className="text-2xl font-bold text-text-primary mb-1.5">
+            <h1 className="text-2xl font-normal text-text-primary mb-1.5">
               Welcome to Ventura{companyDisplay !== 'Your Organization' ? `, ${companyDisplay}` : ''}
             </h1>
             <p className="text-sm text-text-muted max-w-xl leading-relaxed">
@@ -113,7 +113,7 @@ export default function WelcomePage() {
             {SETUP_STEPS.map((step, i) => (
               <React.Fragment key={step.id}>
                 <div className="flex flex-col items-center flex-1 relative z-10">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center border-2 text-xs font-bold transition-colors ${
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center border-2 text-xs font-medium transition-colors ${
                     step.done
                       ? 'bg-green-500 border-green-500 text-white'
                       : step.current
@@ -144,10 +144,10 @@ export default function WelcomePage() {
         <div>
           <div className="flex items-center gap-3 mb-5">
             <div className="w-7 h-7 rounded-full bg-emerald-600 flex items-center justify-center flex-shrink-0">
-              <span className="text-white text-xs font-bold">2</span>
+              <span className="text-white text-xs font-medium">2</span>
             </div>
             <div>
-              <p className="text-sm font-semibold text-text-primary">Connect a data source</p>
+              <p className="text-sm font-medium text-text-primary">Connect a data source</p>
               <p className="text-xs text-text-muted">Select your primary financial system to begin ingestion</p>
             </div>
           </div>
@@ -166,7 +166,7 @@ export default function WelcomePage() {
                     <div className="flex items-center gap-2.5">
                       <BrandIcon brand={src.brand} size={36} />
                       <div>
-                        <p className="text-xs font-semibold text-text-secondary leading-snug">{src.name}</p>
+                        <p className="text-xs font-medium text-text-secondary leading-snug">{src.name}</p>
                         <p className="text-[10px] text-text-muted mt-0.5">{src.category}</p>
                       </div>
                     </div>
@@ -182,7 +182,7 @@ export default function WelcomePage() {
                     <button
                       onClick={() => !isConnected && setActiveModal(src.id)}
                       disabled={isConnected}
-                      className={`flex-1 text-xs font-semibold py-2 rounded-md transition-colors flex items-center justify-center gap-1.5 ${
+                      className={`flex-1 text-xs font-medium py-2 rounded-md transition-colors flex items-center justify-center gap-1.5 ${
                         isConnected
                           ? 'bg-green-50 text-green-700 border border-green-200 cursor-default'
                           : 'bg-[#0c1526] hover:bg-[#1a2640] text-white'
@@ -215,7 +215,7 @@ export default function WelcomePage() {
               <div className="flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm font-semibold text-green-800">
+                  <p className="text-sm font-medium text-green-800">
                     {connected.length === 1
                       ? `${SOURCES.find(s => s.id === connected[0])?.name} connected successfully`
                       : `${connected.length} sources connected`}
@@ -225,7 +225,7 @@ export default function WelcomePage() {
                     the first batch completes. You will receive an alert when results are ready.
                   </p>
                   <div className="mt-3 flex items-center gap-3">
-                    <Link href="/onboarding" className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-800 hover:text-green-900">
+                    <Link href="/onboarding" className="inline-flex items-center gap-1.5 text-xs font-medium text-green-800 hover:text-green-900">
                       Continue to field mapping <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                     <span className="text-green-400">·</span>
@@ -241,7 +241,7 @@ export default function WelcomePage() {
           {/* Remaining steps */}
           <div className="bg-surface-raised border border-border rounded-lg overflow-hidden">
             <div className="px-4 py-3 bg-surface-raised border-b border-border">
-              <p className="text-xs font-semibold text-text-secondary">Remaining setup steps</p>
+              <p className="text-xs font-medium text-text-secondary">Remaining setup steps</p>
             </div>
             {[
               { icon: Upload,    step: 3, title: 'Import or sync transactions',   desc: 'Bulk CSV import or live feed from connected sources' },
@@ -256,7 +256,7 @@ export default function WelcomePage() {
                     <span className="text-[10px] font-bold text-text-muted">{item.step}</span>
                   </div>
                   <div className="flex-1">
-                    <p className="text-xs font-semibold text-text-secondary">{item.title}</p>
+                    <p className="text-xs font-medium text-text-secondary">{item.title}</p>
                     <p className="text-[11px] text-text-muted mt-0.5">{item.desc}</p>
                   </div>
                   <Icon className="w-4 h-4 text-text-muted flex-shrink-0 mt-0.5" />
@@ -269,7 +269,7 @@ export default function WelcomePage() {
         {/* Right: preview of what's coming */}
         <div className="flex flex-col gap-4">
           <div className="bg-surface-raised border border-border rounded-lg p-4">
-            <p className="text-xs font-semibold text-text-secondary mb-1.5">What you&apos;ll see after connecting</p>
+            <p className="text-xs font-medium text-text-secondary mb-1.5">What you&apos;ll see after connecting</p>
             <p className="text-[11px] text-text-muted leading-relaxed">
               Once your data syncs, your dashboard will show live spend metrics, anomaly findings,
               workflow status, and savings opportunities, refreshed on every sync cycle.
@@ -321,14 +321,14 @@ export default function WelcomePage() {
 
           {/* Navigate to existing workspace */}
           <div className="bg-[#0c1526] rounded-lg p-4">
-            <p className="text-xs font-semibold text-white mb-1.5">Returning user?</p>
+            <p className="text-xs font-medium text-white mb-1.5">Returning user?</p>
             <p className="text-[11px] text-text-muted mb-3 leading-relaxed">
               If your data is already connected, navigate directly to your workspace to view
               current findings and workflows.
             </p>
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-1.5 bg-surface-raised text-text-primary text-xs font-semibold px-4 py-2 rounded-md hover:bg-surface-hover transition-colors"
+              className="inline-flex items-center gap-1.5 bg-surface-raised text-text-primary text-xs font-medium px-4 py-2 rounded-md hover:bg-surface-hover transition-colors"
             >
               Open workspace <ArrowRight className="w-3.5 h-3.5" />
             </Link>

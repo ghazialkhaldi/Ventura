@@ -308,14 +308,14 @@ export default function EmployeeLoginPage() {
             {/* Tabs — hidden during verify step */}
             {step === 'form' && (
               <div className="px-6 pt-6 pb-0">
-                <h1 className="text-lg font-bold text-text-primary">Employee Portal</h1>
+                <h1 className="text-lg font-normal text-text-primary">Employee Portal</h1>
                 <p className="text-xs text-text-muted mt-0.5">Access your company's financial workspace</p>
                 <div className="flex gap-0 mt-5 border-b border-border">
                   {(['signin', 'signup'] as Tab[]).map(t => (
                     <button
                       key={t}
                       onClick={() => switchTab(t)}
-                      className={`flex-1 py-2.5 text-sm font-semibold transition-colors border-b-2 -mb-px ${
+                      className={`flex-1 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
                         tab === t ? 'text-text-primary border-accent-500' : 'text-text-muted border-transparent hover:text-text-secondary'
                       }`}
                     >
@@ -338,7 +338,7 @@ export default function EmployeeLoginPage() {
               {tab === 'signin' && step === 'form' && (
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-semibold text-text-secondary mb-1.5">Email</label>
+                    <label className="block text-xs font-medium text-text-secondary mb-1.5">Email</label>
                     <input
                       type="email" value={siEmail} onChange={e => setSiEmail(e.target.value)}
                       placeholder="you@company.com" autoComplete="email"
@@ -346,7 +346,7 @@ export default function EmployeeLoginPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-text-secondary mb-1.5">Password</label>
+                    <label className="block text-xs font-medium text-text-secondary mb-1.5">Password</label>
                     <div className="relative">
                       <input
                         type={siShowPw ? 'text' : 'password'} value={siPw} onChange={e => setSiPw(e.target.value)}
@@ -362,7 +362,7 @@ export default function EmployeeLoginPage() {
                     </div>
                   </div>
                   <button type="submit" disabled={loading}
-                    className="w-full bg-accent-500 hover:bg-accent-600 active:bg-accent-700 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition-colors text-sm flex items-center justify-center gap-2 shadow-sm"
+                    className="w-full bg-accent-500 hover:bg-accent-600 active:bg-accent-700 disabled:opacity-50 text-white font-medium py-2.5 rounded-lg transition-colors text-sm flex items-center justify-center gap-2 shadow-sm"
                   >
                     {loading ? 'Signing in…' : <>Sign In <ArrowRight className="w-4 h-4" /></>}
                   </button>
@@ -374,14 +374,14 @@ export default function EmployeeLoginPage() {
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold text-text-secondary mb-1.5">First name</label>
+                      <label className="block text-xs font-medium text-text-secondary mb-1.5">First name</label>
                       <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)}
                         placeholder="Jane" autoComplete="given-name"
                         className="w-full border border-border-strong rounded-lg px-3 py-2.5 text-sm placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-text-secondary mb-1.5">Last name</label>
+                      <label className="block text-xs font-medium text-text-secondary mb-1.5">Last name</label>
                       <input type="text" value={lastName} onChange={e => setLastName(e.target.value)}
                         placeholder="Smith" autoComplete="family-name"
                         className="w-full border border-border-strong rounded-lg px-3 py-2.5 text-sm placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
@@ -390,7 +390,7 @@ export default function EmployeeLoginPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-text-secondary mb-1.5">Work email</label>
+                    <label className="block text-xs font-medium text-text-secondary mb-1.5">Work email</label>
                     <input type="email" value={suEmail} onChange={e => setSuEmail(e.target.value)}
                       placeholder="you@company.com" autoComplete="email"
                       className="w-full border border-border-strong rounded-lg px-3 py-2.5 text-sm placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
@@ -398,7 +398,7 @@ export default function EmployeeLoginPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-text-secondary mb-1.5">Password</label>
+                    <label className="block text-xs font-medium text-text-secondary mb-1.5">Password</label>
                     <div className="relative">
                       <input type={suShowPw ? 'text' : 'password'} value={suPw} onChange={e => setSuPw(e.target.value)}
                         placeholder="Create a strong password" autoComplete="new-password"
@@ -418,7 +418,7 @@ export default function EmployeeLoginPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-text-secondary mb-1.5">Re-enter password</label>
+                    <label className="block text-xs font-medium text-text-secondary mb-1.5">Re-enter password</label>
                     <div className="relative">
                       <input type={suShowPw2 ? 'text' : 'password'} value={suPw2} onChange={e => setSuPw2(e.target.value)}
                         placeholder="Confirm password" autoComplete="new-password"
@@ -432,7 +432,7 @@ export default function EmployeeLoginPage() {
                   </div>
 
                   <button type="submit" disabled={loading}
-                    className="w-full bg-accent-500 hover:bg-accent-600 active:bg-accent-700 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition-colors text-sm shadow-sm"
+                    className="w-full bg-accent-500 hover:bg-accent-600 active:bg-accent-700 disabled:opacity-50 text-white font-medium py-2.5 rounded-lg transition-colors text-sm shadow-sm"
                   >
                     {loading ? 'Sending code…' : 'Create Account'}
                   </button>
@@ -447,10 +447,10 @@ export default function EmployeeLoginPage() {
                       <Mail className="w-6 h-6 text-accent-400" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-text-primary">Email sent. Wait up to 2 minutes</p>
+                      <p className="text-sm font-medium text-text-primary">Email sent. Wait up to 2 minutes</p>
                       <p className="text-xs text-text-muted mt-1 leading-relaxed">
                         A 6 digit code was sent to{' '}
-                        <span className="font-semibold text-text-secondary">{step === 'mfa' ? siEmail : suEmail}</span>
+                        <span className="font-medium text-text-secondary">{step === 'mfa' ? siEmail : suEmail}</span>
                       </p>
                     </div>
                   </div>
@@ -469,7 +469,7 @@ export default function EmployeeLoginPage() {
                         onChange={e => handleDigit(i, e.target.value)}
                         onKeyDown={e => handleKey(i, e)}
                         disabled={loading}
-                        className="w-11 h-14 text-center text-xl font-bold border border-border-strong rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500 disabled:opacity-50 text-text-primary"
+                        className="w-11 h-14 text-center text-xl font-normal border border-border-strong rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500 disabled:opacity-50 text-text-primary"
                       />
                     ))}
                   </div>
@@ -477,7 +477,7 @@ export default function EmployeeLoginPage() {
                   <button
                     onClick={() => step === 'mfa' ? verifyMfa(digits.join('')) : verifyCode(digits.join(''))}
                     disabled={loading || digits.join('').length !== 6}
-                    className="w-full bg-accent-500 hover:bg-accent-600 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition-colors text-sm shadow-sm"
+                    className="w-full bg-accent-500 hover:bg-accent-600 disabled:opacity-50 text-white font-medium py-2.5 rounded-lg transition-colors text-sm shadow-sm"
                   >
                     {loading ? 'Verifying…' : step === 'mfa' ? 'Verify & Sign In' : 'Verify & Create Account'}
                   </button>

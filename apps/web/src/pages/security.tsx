@@ -33,7 +33,7 @@ export default function SecurityPage() {
     <PublicLayout title="Security">
       <section className="bg-surface-raised border-b border-border py-20">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <p className="text-xs font-semibold text-accent-400 uppercase tracking-widest mb-3">Security</p>
+          <p className="text-xs font-medium text-accent-400 uppercase tracking-widest mb-3">Security</p>
           <h1 className="text-3xl sm:text-4xl font-normal text-text-primary leading-tight">
             Your financial data, protected at every layer
           </h1>
@@ -64,7 +64,7 @@ export default function SecurityPage() {
             We take security reports seriously. If you believe you've found a vulnerability in Ventura,
             please reach out and our team will respond promptly.
           </p>
-          <Link href="/contact" className="inline-block bg-accent-500 hover:bg-accent-600 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
+          <Link href="/contact" className="inline-block bg-accent-500 hover:bg-accent-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
             Contact security team
           </Link>
         </div>

@@ -98,10 +98,10 @@ export default function HomePage() {
               </p>
 
               <div className="flex flex-wrap items-center gap-4">
-                <Link href="/demo" className="inline-flex items-center gap-2 bg-accent-500 hover:bg-accent-600 text-white font-semibold px-6 py-3 text-base transition-colors">
+                <Link href="/demo" className="inline-flex items-center gap-2 bg-accent-500 hover:bg-accent-600 text-white font-medium px-6 py-3 text-base transition-colors">
                   View a demo
                 </Link>
-                <Link href="/contact" className="inline-flex items-center gap-2 border border-border-strong hover:border-text-muted text-text-secondary hover:text-text-primary font-semibold px-6 py-3 text-base transition-colors">
+                <Link href="/contact" className="inline-flex items-center gap-2 border border-border-strong hover:border-text-muted text-text-secondary hover:text-text-primary font-medium px-6 py-3 text-base transition-colors">
                   Talk to us
                 </Link>
               </div>
@@ -112,7 +112,7 @@ export default function HomePage() {
               <div className="bg-surface-raised border border-border overflow-hidden">
                 <div className="px-4 py-3 bg-surface-raised border-b border-border flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-semibold text-text-secondary">Spend & Anomaly Overview</p>
+                    <p className="text-xs font-medium text-text-secondary">Spend & Anomaly Overview</p>
                     <p className="text-[10px] text-text-muted mt-0.5">Monthly spend · risk exposure · savings identified</p>
                   </div>
                   <span className="text-[10px] text-text-muted border border-border px-2 py-0.5 font-medium">
@@ -196,7 +196,7 @@ export default function HomePage() {
             <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
               <div className="grid lg:grid-cols-2 gap-14 items-center">
                 <div className={!isEven ? 'lg:order-2' : ''}>
-                  <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-3">{cap.eyebrow}</p>
+                  <p className="text-xs font-medium text-text-muted uppercase tracking-widest mb-3">{cap.eyebrow}</p>
                   <h2 className="text-[2rem] font-normal text-text-primary mb-5 leading-snug tracking-[-0.01em]">{cap.title}</h2>
                   <p className="text-base text-text-secondary leading-relaxed mb-6">{cap.body}</p>
                   <ul className="border-t border-border">
@@ -207,7 +207,7 @@ export default function HomePage() {
                     ))}
                   </ul>
                   <div className="mt-7">
-                    <Link href="/demo" className="inline-flex items-center bg-accent-500 hover:bg-accent-600 text-white font-semibold px-5 py-2.5 text-base transition-colors">
+                    <Link href="/demo" className="inline-flex items-center bg-accent-500 hover:bg-accent-600 text-white font-medium px-5 py-2.5 text-base transition-colors">
                       See it in action
                     </Link>
                   </div>
@@ -228,7 +228,7 @@ export default function HomePage() {
         <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
           <div className="grid md:grid-cols-2 gap-14 items-start">
             <div>
-              <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-4">Transparency & Audit Trail</p>
+              <p className="text-xs font-medium text-text-muted uppercase tracking-widest mb-4">Transparency & Audit Trail</p>
               <h2 className="text-[2rem] font-normal text-text-primary mb-5 leading-snug tracking-[-0.01em]">
                 Every finding is explainable, logged, and traceable to source transactions
               </h2>
@@ -254,7 +254,7 @@ export default function HomePage() {
 
             <div className="bg-surface border border-border">
               <div className="px-5 py-3 border-b border-border">
-                <p className="text-xs font-semibold text-text-secondary">Audit log record</p>
+                <p className="text-xs font-medium text-text-secondary">Audit log record</p>
               </div>
               <table className="w-full text-sm">
                 <tbody>
@@ -284,7 +284,7 @@ export default function HomePage() {
         <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
           <div className="grid md:grid-cols-[1fr_auto] gap-10 items-center">
             <div>
-              <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-4">Get started</p>
+              <p className="text-xs font-medium text-text-muted uppercase tracking-widest mb-4">Get started</p>
               <h2 className="text-[2rem] font-normal text-white mb-5 leading-snug tracking-[-0.01em]">
                 Built for enterprise finance operations
               </h2>
@@ -295,7 +295,7 @@ export default function HomePage() {
             </div>
             <div className="flex flex-col gap-3 md:flex-shrink-0">
               {/* Intentional inverted fill: light button reads as the strong CTA against this dark banner */}
-              <Link href="/contact" className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-100 text-slate-900 font-semibold px-7 py-3 text-base transition-colors">
+              <Link href="/contact" className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-100 text-slate-900 font-medium px-7 py-3 text-base transition-colors">
                 Talk to us
               </Link>
               <Link href="/contact" className="inline-flex items-center justify-center gap-2 bg-[#1a2640] text-slate-200 font-medium px-7 py-3 text-base border border-border hover:bg-[#1e3a6e] transition-colors">
@@ -321,7 +321,7 @@ function AnomalyPreviewPanel() {
   return (
     <div className="bg-surface-raised border border-border overflow-hidden">
       <div className="px-4 py-3 border-b border-border flex items-center justify-between bg-surface-overlay">
-        <p className="text-xs font-semibold text-text-secondary">Anomaly Detection Results</p>
+        <p className="text-xs font-medium text-text-secondary">Anomaly Detection Results</p>
         <span className="text-[10px] text-text-muted border border-border px-2 py-0.5">Example</span>
       </div>
       {rows.map((row, i) => (
@@ -358,7 +358,7 @@ function WorkflowPreviewPanel() {
   return (
     <div className="bg-surface-raised border border-border overflow-hidden">
       <div className="px-4 py-3 border-b border-border bg-surface-overlay flex items-center justify-between">
-        <p className="text-xs font-semibold text-text-secondary">Invoice Approval Workflow</p>
+        <p className="text-xs font-medium text-text-secondary">Invoice Approval Workflow</p>
         <span className="text-[10px] font-semibold text-red-400 bg-red-500/10 border border-red-500/30 px-2 py-0.5">Overdue</span>
       </div>
       {steps.map((s, i) => (
@@ -395,7 +395,7 @@ function GovernancePreviewPanel() {
   return (
     <div className="bg-surface-raised border border-border overflow-hidden">
       <div className="px-4 py-3 border-b border-border bg-surface-overlay flex items-center justify-between">
-        <p className="text-xs font-semibold text-text-secondary">Governance Log</p>
+        <p className="text-xs font-medium text-text-secondary">Governance Log</p>
         <span className="text-[10px] text-text-muted border border-border px-2 py-0.5">Example</span>
       </div>
       {events.map((e, i) => (

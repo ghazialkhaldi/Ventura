@@ -99,7 +99,7 @@ export default function AnomalyDetailPage() {
       <AppLayout title="Anomaly not found">
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <AlertTriangle className="w-10 h-10 text-text-muted mb-4" />
-          <p className="text-text-secondary font-semibold">Anomaly not found</p>
+          <p className="text-text-secondary font-medium">Anomaly not found</p>
           <p className="text-xs text-text-muted mt-1">It may have been cleared when data was re-uploaded.</p>
           <Link href="/anomalies" className="text-accent-400 text-sm mt-4 hover:text-accent-300 flex items-center gap-1">
             <ChevronLeft className="w-3.5 h-3.5" /> Back to Anomalies
@@ -126,7 +126,7 @@ export default function AnomalyDetailPage() {
       {anomaly.severity === 'CRITICAL' && (
         <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/30 rounded-lg p-3.5 mb-4">
           <ShieldAlert className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
-          <p className="text-sm font-semibold text-red-400">Critical: Immediate action required</p>
+          <p className="text-sm font-medium text-red-400">Critical: Immediate action required</p>
         </div>
       )}
 
@@ -136,7 +136,7 @@ export default function AnomalyDetailPage() {
             <Badge variant="severity" value={anomaly.severity} dot>{anomaly.severity}</Badge>
             <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">{anomaly.type.replace(/_/g, ' ')}</span>
           </div>
-          <h1 className="text-lg font-bold text-text-primary leading-snug">{anomaly.title}</h1>
+          <h1 className="text-lg font-normal text-text-primary leading-snug">{anomaly.title}</h1>
           <p className="text-xs text-text-muted mt-0.5">{anomaly.vendor}{anomaly.category ? ` · ${anomaly.category}` : ''}</p>
         </div>
         <Badge variant="status" value={anomaly.status} className="flex-shrink-0 mt-1">{anomaly.status}</Badge>
@@ -146,12 +146,12 @@ export default function AnomalyDetailPage() {
       <div className={`grid grid-cols-2 md:grid-cols-4 gap-2.5 mb-6 border-l-4 ${SEV_LEFT[anomaly.severity] ?? 'border-l-border-strong'} pl-4`}>
         <div>
           <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Amount</p>
-          <p className="text-2xl font-bold text-text-primary leading-none">{fmtFull(anomaly.amount)}</p>
+          <p className="text-2xl font-normal text-text-primary leading-none">{fmtFull(anomaly.amount)}</p>
         </div>
         <div>
           <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Confidence</p>
           <div className="flex items-center gap-2">
-            <p className="text-2xl font-bold text-text-primary leading-none">{anomaly.confidence}%</p>
+            <p className="text-2xl font-normal text-text-primary leading-none">{anomaly.confidence}%</p>
           </div>
           <div className="mt-1 h-1 w-20 bg-surface-overlay rounded-full overflow-hidden">
             <div className="h-full bg-accent-500 rounded-full" style={{ width: `${anomaly.confidence}%` }} />
@@ -159,11 +159,11 @@ export default function AnomalyDetailPage() {
         </div>
         <div>
           <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Severity</p>
-          <p className="text-2xl font-bold text-text-primary leading-none capitalize">{anomaly.severity.toLowerCase()}</p>
+          <p className="text-2xl font-normal text-text-primary leading-none capitalize">{anomaly.severity.toLowerCase()}</p>
         </div>
         <div>
           <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Detected</p>
-          <p className="text-sm font-semibold text-text-secondary mt-1">{fmtDate(anomaly.detectedAt)}</p>
+          <p className="text-sm font-medium text-text-secondary mt-1">{fmtDate(anomaly.detectedAt)}</p>
         </div>
       </div>
 
@@ -179,7 +179,7 @@ export default function AnomalyDetailPage() {
               <div className="flex items-center gap-2">
                 <Activity className="w-4 h-4 text-accent-400" />
                 <div>
-                  <p className="text-sm font-semibold text-text-primary">Root Cause Analysis</p>
+                  <p className="text-sm font-medium text-text-primary">Root Cause Analysis</p>
                   <p className="text-xs text-text-muted">Powered by Ventura Intelligence</p>
                 </div>
               </div>
@@ -189,7 +189,7 @@ export default function AnomalyDetailPage() {
             </div>
             <div className="p-5">
               <div className="bg-surface-sunken border border-border rounded-lg p-4 mb-4">
-                <p className="text-xs font-bold text-text-muted uppercase tracking-widest mb-2">Detection Reasoning</p>
+                <p className="text-xs font-medium text-text-muted uppercase tracking-widest mb-2">Detection Reasoning</p>
                 <p className="text-sm text-text-secondary leading-relaxed">{anomaly.reasoning}</p>
               </div>
               <p className="text-sm text-text-secondary leading-relaxed">{anomaly.description}</p>
@@ -202,7 +202,7 @@ export default function AnomalyDetailPage() {
               <div className="px-5 py-3.5 border-b border-border-subtle flex items-center gap-2">
                 <FileText className="w-4 h-4 text-text-muted" />
                 <div>
-                  <p className="text-sm font-semibold text-text-primary">Source Transactions</p>
+                  <p className="text-sm font-medium text-text-primary">Source Transactions</p>
                   <p className="text-xs text-text-muted">{sourceTx.length} transaction{sourceTx.length !== 1 ? 's' : ''} referenced</p>
                 </div>
               </div>
@@ -210,11 +210,11 @@ export default function AnomalyDetailPage() {
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="bg-surface-overlay border-b border-border-subtle">
-                      <th className="text-left px-4 py-2.5 font-bold text-text-muted uppercase tracking-wider">ID</th>
-                      <th className="text-left px-4 py-2.5 font-bold text-text-muted uppercase tracking-wider">Date</th>
-                      <th className="text-left px-4 py-2.5 font-bold text-text-muted uppercase tracking-wider">Vendor</th>
-                      <th className="text-left px-4 py-2.5 font-bold text-text-muted uppercase tracking-wider hidden md:table-cell">Category</th>
-                      <th className="text-right px-4 py-2.5 font-bold text-text-muted uppercase tracking-wider">Amount</th>
+                      <th className="text-left px-4 py-2.5 font-medium text-text-muted uppercase tracking-wider">ID</th>
+                      <th className="text-left px-4 py-2.5 font-medium text-text-muted uppercase tracking-wider">Date</th>
+                      <th className="text-left px-4 py-2.5 font-medium text-text-muted uppercase tracking-wider">Vendor</th>
+                      <th className="text-left px-4 py-2.5 font-medium text-text-muted uppercase tracking-wider hidden md:table-cell">Category</th>
+                      <th className="text-right px-4 py-2.5 font-medium text-text-muted uppercase tracking-wider">Amount</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border-subtle">
@@ -224,7 +224,7 @@ export default function AnomalyDetailPage() {
                         <td className="px-4 py-2.5 text-text-muted">{tx.date}</td>
                         <td className="px-4 py-2.5 font-medium text-text-secondary truncate max-w-[140px]">{tx.vendor}</td>
                         <td className="px-4 py-2.5 text-text-muted hidden md:table-cell">{tx.category || 'N/A'}</td>
-                        <td className="px-4 py-2.5 text-right font-semibold text-text-secondary">{fmtFull(tx.amount)}</td>
+                        <td className="px-4 py-2.5 text-right font-medium text-text-secondary">{fmtFull(tx.amount)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -238,14 +238,14 @@ export default function AnomalyDetailPage() {
             <div className="px-5 py-3.5 border-b border-border-subtle flex items-center gap-2">
               <CheckCircle className="w-4 h-4 text-text-muted" />
               <div>
-                <p className="text-sm font-semibold text-text-primary">Suggested Actions</p>
+                <p className="text-sm font-medium text-text-primary">Suggested Actions</p>
                 <p className="text-xs text-text-muted">AI-recommended responses based on anomaly type</p>
               </div>
             </div>
             <div className="p-4 space-y-2.5">
               {actions.map((action, i) => (
                 <div key={i} className="flex items-center gap-3 p-3 border border-border rounded-lg hover:bg-surface-hover transition-colors">
-                  <div className="w-6 h-6 rounded-full bg-surface-overlay text-text-muted text-xs font-bold flex items-center justify-center flex-shrink-0">
+                  <div className="w-6 h-6 rounded-full bg-surface-overlay text-text-muted text-xs font-medium flex items-center justify-center flex-shrink-0">
                     {i + 1}
                   </div>
                   <p className="text-sm font-medium text-text-secondary flex-1">{action.label}</p>
@@ -264,14 +264,14 @@ export default function AnomalyDetailPage() {
           {/* Approval controls — prominent */}
           <div className="bg-[#0c1526] border border-[#1e2d47] rounded-xl overflow-hidden">
             <div className="px-5 py-3.5 border-b border-[#1e2d47]">
-              <p className="text-xs font-bold text-[#8ea4c0] uppercase tracking-widest">Review Decision</p>
-              <p className="text-sm font-semibold text-white mt-0.5">{anomaly.id}</p>
+              <p className="text-xs font-medium text-[#8ea4c0] uppercase tracking-widest">Review Decision</p>
+              <p className="text-sm font-medium text-white mt-0.5">{anomaly.id}</p>
             </div>
             <div className="p-5 space-y-2.5">
               <button
                 onClick={() => updateStatus('Resolved')}
                 disabled={updating || anomaly.status === 'Resolved'}
-                className="w-full flex items-center gap-2 justify-center bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-sm font-bold px-4 py-2.5 rounded-lg transition-colors"
+                className="w-full flex items-center gap-2 justify-center bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors"
               >
                 <CheckCircle className="w-4 h-4" />
                 {anomaly.status === 'Resolved' ? 'Approved' : 'Approve finding'}
@@ -279,7 +279,7 @@ export default function AnomalyDetailPage() {
               <button
                 onClick={() => updateStatus('Under Review')}
                 disabled={updating || anomaly.status === 'Under Review'}
-                className="w-full flex items-center gap-2 justify-center bg-[#1e2d47] hover:bg-[#253654] disabled:opacity-50 text-white text-sm font-semibold px-4 py-2.5 rounded-lg border border-[#2d4268] transition-colors"
+                className="w-full flex items-center gap-2 justify-center bg-[#1e2d47] hover:bg-[#253654] disabled:opacity-50 text-white text-sm font-medium px-4 py-2.5 rounded-lg border border-[#2d4268] transition-colors"
               >
                 <AlertTriangle className="w-4 h-4 text-amber-400" />
                 Escalate to CFO / CISO
@@ -304,7 +304,7 @@ export default function AnomalyDetailPage() {
           {/* Quick facts */}
           <div className="bg-surface-raised border border-border rounded-lg overflow-hidden">
             <div className="px-5 py-3.5 border-b border-border-subtle">
-              <p className="text-sm font-semibold text-text-primary">Finding Details</p>
+              <p className="text-sm font-medium text-text-primary">Finding Details</p>
             </div>
             <div className="px-5 py-4 space-y-3">
               {[
@@ -318,7 +318,7 @@ export default function AnomalyDetailPage() {
               ].map(row => (
                 <div key={row.label} className="flex justify-between items-center">
                   <span className="text-xs text-text-muted">{row.label}</span>
-                  <span className={`text-xs font-semibold text-text-secondary ${row.mono ? 'font-mono' : ''} ${row.cap ? 'capitalize' : ''}`}>
+                  <span className={`text-xs font-medium text-text-secondary ${row.mono ? 'font-mono' : ''} ${row.cap ? 'capitalize' : ''}`}>
                     {row.value}
                   </span>
                 </div>
@@ -330,7 +330,7 @@ export default function AnomalyDetailPage() {
           {related.length > 0 && (
             <div className="bg-surface-raised border border-border rounded-lg overflow-hidden">
               <div className="px-5 py-3.5 border-b border-border-subtle">
-                <p className="text-sm font-semibold text-text-primary">Same Vendor</p>
+                <p className="text-sm font-medium text-text-primary">Same Vendor</p>
                 <p className="text-xs text-text-muted">{related.length} related anomal{related.length !== 1 ? 'ies' : 'y'}</p>
               </div>
               <div className="divide-y divide-border-subtle">

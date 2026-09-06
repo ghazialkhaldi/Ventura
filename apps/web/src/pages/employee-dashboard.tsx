@@ -173,13 +173,13 @@ export default function EmployeeDashboard() {
             </div>
             <div>
               <p className="text-xs text-text-muted font-medium uppercase tracking-wide">Workspace</p>
-              <p className="text-base font-bold text-text-primary">{info?.company || user?.company || 'N/A'}</p>
+              <p className="text-base font-medium text-text-primary">{info?.company || user?.company || 'N/A'}</p>
             </div>
           </div>
           <div className="space-y-2 text-sm">
             <div className="flex items-center justify-between py-1.5 border-b border-border-subtle">
               <span className="text-text-muted text-xs">Your role</span>
-              <span className={`text-xs font-semibold px-2.5 py-1 border rounded-full ${roleMeta.color}`}>
+              <span className={`text-xs font-medium px-2.5 py-1 border rounded-full ${roleMeta.color}`}>
                 {roleMeta.label}
               </span>
             </div>
@@ -203,7 +203,7 @@ export default function EmployeeDashboard() {
         <div className="bg-surface-raised border border-border rounded-xl p-5">
           <div className="flex items-center gap-2 mb-1">
             <ShieldCheckIcon className="w-4 h-4 text-text-muted" />
-            <p className="text-xs font-semibold text-text-muted uppercase tracking-wide">Your Permissions</p>
+            <p className="text-xs font-medium text-text-muted uppercase tracking-wide">Your Permissions</p>
           </div>
           <p className="text-xs text-text-muted mb-4">{roleMeta.desc}</p>
           <ul className="space-y-2">
@@ -245,7 +245,7 @@ export default function EmployeeDashboard() {
               <item.icon className="w-5 h-5 text-text-muted flex-shrink-0" />
               <div>
                 <p className="text-[11px] text-text-muted">{item.label}</p>
-                <p className={`text-sm font-semibold ${item.color}`}>{item.value}</p>
+                <p className={`text-sm font-medium ${item.color}`}>{item.value}</p>
               </div>
             </div>
           ))}
@@ -256,7 +256,7 @@ export default function EmployeeDashboard() {
       <div className="mt-5 bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 flex items-start gap-3">
         <ChartBarIcon className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
         <div>
-          <p className="text-sm font-semibold text-blue-300">Workspace data</p>
+          <p className="text-sm font-medium text-blue-300">Workspace data</p>
           <p className="text-xs text-blue-400 mt-0.5 leading-relaxed">
             Live anomaly and spend data will appear here once your admin connects and syncs their data source.
             Your role determines which actions you can take on that data.
@@ -268,7 +268,7 @@ export default function EmployeeDashboard() {
       <div className="mt-5 bg-surface-raised border border-border rounded-xl">
         <div className="flex items-center gap-2 px-5 py-4 border-b border-border-subtle">
           <ClockIcon className="w-4 h-4 text-text-muted" />
-          <p className="text-sm font-semibold text-text-secondary">Your recent activity</p>
+          <p className="text-sm font-medium text-text-secondary">Your recent activity</p>
         </div>
         {activity.length === 0 ? (
           <p className="text-sm text-text-muted px-5 py-6 italic">No activity recorded yet.</p>

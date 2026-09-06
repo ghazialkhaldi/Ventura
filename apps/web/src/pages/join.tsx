@@ -96,13 +96,13 @@ export default function JoinPage() {
                     <Check className="w-7 h-7 text-emerald-400" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-text-primary">You've joined {company}</p>
+                    <p className="text-sm font-medium text-text-primary">You've joined {company}</p>
                     <p className="text-xs text-text-muted mt-1">Taking you to the dashboard…</p>
                   </div>
                 </div>
               ) : (
                 <>
-                  <h1 className="text-lg font-bold text-text-primary">Join a Workspace</h1>
+                  <h1 className="text-lg font-normal text-text-primary">Join a Workspace</h1>
                   <p className="text-xs text-text-muted mt-0.5 mb-6">
                     Enter the invite code or paste the invite link your admin shared with you.
                   </p>
@@ -116,7 +116,7 @@ export default function JoinPage() {
 
                   <div className="space-y-3">
                     <div>
-                      <label className="block text-xs font-semibold text-text-secondary mb-1.5">Invite code</label>
+                      <label className="block text-xs font-medium text-text-secondary mb-1.5">Invite code</label>
                       <input
                         type="text"
                         value={code}
@@ -133,7 +133,7 @@ export default function JoinPage() {
                           <Building2 className="w-4 h-4 text-emerald-400" />
                         </div>
                         <div>
-                          <p className="text-xs font-semibold text-emerald-300">{company}</p>
+                          <p className="text-xs font-medium text-emerald-300">{company}</p>
                           <p className="text-[11px] text-emerald-400">Valid invite. Click Join to continue</p>
                         </div>
                       </div>
@@ -143,7 +143,7 @@ export default function JoinPage() {
                       <button
                         onClick={() => validateCode()}
                         disabled={validating || !code.trim()}
-                        className="w-full bg-surface-overlay hover:bg-surface-hover disabled:opacity-50 text-text-secondary font-semibold py-2.5 rounded-lg transition-colors text-sm flex items-center justify-center gap-2"
+                        className="w-full bg-surface-overlay hover:bg-surface-hover disabled:opacity-50 text-text-secondary font-medium py-2.5 rounded-lg transition-colors text-sm flex items-center justify-center gap-2"
                       >
                         {validating ? <><Loader2 className="w-4 h-4 animate-spin" /> Validating…</> : 'Validate Code'}
                       </button>
@@ -151,7 +151,7 @@ export default function JoinPage() {
                       <button
                         onClick={handleJoin}
                         disabled={joining}
-                        className="w-full bg-accent-500 hover:bg-accent-600 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition-colors text-sm flex items-center justify-center gap-2"
+                        className="w-full bg-accent-500 hover:bg-accent-600 disabled:opacity-50 text-white font-medium py-2.5 rounded-lg transition-colors text-sm flex items-center justify-center gap-2"
                       >
                         {joining
                           ? <><Loader2 className="w-4 h-4 animate-spin" /> Joining…</>

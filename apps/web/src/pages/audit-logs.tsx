@@ -89,7 +89,7 @@ export default function AuditLogsPage() {
           { label: 'Informational',  value: stats.info,     color: 'text-emerald-400',  bg: 'bg-emerald-500/10',  border: 'border-emerald-500/30'   },
         ].map((s) => (
           <div key={s.label} className={`${s.bg} border ${s.border} rounded-lg px-4 py-3`}>
-            <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
+            <p className={`text-xl font-normal ${s.color}`}>{s.value}</p>
             <p className="text-xs text-text-muted">{s.label}</p>
           </div>
         ))}
@@ -101,7 +101,7 @@ export default function AuditLogsPage() {
       <div className="flex items-start gap-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-lg px-4 py-3 mb-4">
         <Info className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
         <p className="text-xs text-emerald-400">
-          <span className="font-semibold">Append-only.</span> Written server-side when security-relevant actions occur (MFA verification, team role changes, member removal, workspace joins, integration connections). No update or delete path exists in the application for these rows.
+          <span className="font-medium">Append-only.</span> Written server-side when security-relevant actions occur (MFA verification, team role changes, member removal, workspace joins, integration connections). No update or delete path exists in the application for these rows.
         </p>
       </div>
 
@@ -137,12 +137,12 @@ export default function AuditLogsPage() {
         <table className="w-full data-table">
           <thead>
             <tr className="bg-surface-overlay border-b border-border">
-              <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider w-6"></th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">Timestamp</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">Actor</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">Event</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">Resource</th>
-              <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">Detail</th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider w-6"></th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Timestamp</th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Actor</th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Event</th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Resource</th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Detail</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border-subtle">
@@ -165,7 +165,7 @@ export default function AuditLogsPage() {
                   {new Date(ev.created_at).toLocaleString()}
                 </td>
                 <td className="px-4 py-3">
-                  <p className="text-xs font-semibold text-text-secondary">{ev.actor_email ?? 'N/A'}</p>
+                  <p className="text-xs font-medium text-text-secondary">{ev.actor_email ?? 'N/A'}</p>
                 </td>
                 <td className="px-4 py-3">
                   <Badge variant="auditSeverity" value={ev.severity}>{ev.event}</Badge>
@@ -193,7 +193,7 @@ export default function AuditLogsPage() {
         <div>
           <div className="flex items-center gap-2 mb-3">
             <Laptop className="w-4 h-4 text-text-muted" />
-            <p className="text-sm font-semibold text-text-primary">Local processing log</p>
+            <p className="text-sm font-medium text-text-primary">Local processing log</p>
           </div>
           <p className="text-xs text-text-muted mb-3 max-w-2xl">
             Generated in this browser while parsing and analyzing your uploaded files. Stored locally on this

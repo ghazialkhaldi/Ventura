@@ -106,7 +106,7 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
             <BuildingOfficeIcon className="w-4 h-4 text-white" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold text-text-primary truncate">{companyName || user?.company || 'Your Workspace'}</p>
+            <p className="text-xs font-medium text-text-primary truncate">{companyName || user?.company || 'Your Workspace'}</p>
             <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${roleInfo.color}`}>
               {roleInfo.label}
             </span>
@@ -158,7 +158,7 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
             <span className="text-white text-[10px] font-bold">{userInitials}</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-text-primary truncate">{displayName}</p>
+            <p className="text-xs font-medium text-text-primary truncate">{displayName}</p>
             <p className="text-[10px] text-text-muted">Employee</p>
           </div>
           <button
@@ -204,7 +204,7 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
               <Bars3Icon className="w-5 h-5" />
             </button>
             <div>
-              <p className="text-sm font-semibold text-text-primary">{title || 'Employee Portal'}</p>
+              <p className="text-sm font-medium text-text-primary">{title || 'Employee Portal'}</p>
               {companyName && (
                 <p className="text-[10px] text-text-muted leading-none mt-0.5">{companyName}</p>
               )}

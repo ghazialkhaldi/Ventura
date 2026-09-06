@@ -71,7 +71,7 @@ export default function OnboardingPage() {
         <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 mb-6 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-semibold text-amber-300">Setup {pctDone}% complete, {checklist.length - doneCount} steps remaining</p>
+            <p className="text-sm font-medium text-amber-300">Setup {pctDone}% complete, {checklist.length - doneCount} steps remaining</p>
             <p className="text-xs text-amber-400/80 mt-0.5">Complete all steps to activate full anomaly detection and AI governance features.</p>
           </div>
         </div>
@@ -107,10 +107,10 @@ export default function OnboardingPage() {
             >
               <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${item.done ? 'bg-emerald-500' : 'bg-surface-raised border-2 border-border-strong'}`}>
                 {item.done && <CheckCircle className="w-4 h-4 text-white" />}
-                {!item.done && <span className="text-xs font-bold text-text-muted">{i + 1}</span>}
+                {!item.done && <span className="text-xs font-medium text-text-muted">{i + 1}</span>}
               </div>
               <div className="flex-1">
-                <p className={`text-sm font-semibold ${item.done ? 'text-emerald-300' : 'text-text-secondary'}`}>{item.title}</p>
+                <p className={`text-sm font-medium ${item.done ? 'text-emerald-300' : 'text-text-secondary'}`}>{item.title}</p>
                 <p className={`text-xs mt-0.5 ${item.done ? 'text-emerald-400' : 'text-text-muted'}`}>{item.detail}</p>
               </div>
               {!item.done && (
@@ -139,12 +139,12 @@ export default function OnboardingPage() {
               }`}
             >
               <Upload className="w-8 h-8 text-text-muted mb-3" />
-              <p className="text-sm font-semibold text-text-secondary mb-1">Drag & drop your CSV here</p>
+              <p className="text-sm font-medium text-text-secondary mb-1">Drag & drop your CSV here</p>
               <p className="text-xs text-text-muted mb-4">Supports: GL exports, bank statements, vendor lists, AP ledger</p>
               <Button variant="secondary" size="sm">Browse files</Button>
             </div>
             <div className="mt-4">
-              <p className="text-xs text-text-muted font-semibold mb-2">Accepted formats</p>
+              <p className="text-xs text-text-muted font-medium mb-2">Accepted formats</p>
               <div className="flex flex-wrap gap-2">
                 {['QuickBooks export', 'NetSuite GL', 'Bank CSV', 'Custom (with mapping)'].map(f => (
                   <span key={f} className="text-xs bg-surface-overlay text-text-muted px-2 py-1 rounded border border-border">{f}</span>
@@ -166,7 +166,7 @@ export default function OnboardingPage() {
             <CardDivider />
             <div className="border-2 border-dashed border-border-strong hover:border-emerald-400 hover:bg-surface-hover rounded-xl p-10 flex flex-col items-center justify-center text-center transition-colors cursor-pointer">
               <FileText className="w-8 h-8 text-text-muted mb-3" />
-              <p className="text-sm font-semibold text-text-secondary mb-1">Upload documents</p>
+              <p className="text-sm font-medium text-text-secondary mb-1">Upload documents</p>
               <p className="text-xs text-text-muted mb-4">PDF invoices, receipts, and contracts are OCR-extracted and matched to transactions.</p>
               <Button variant="secondary" size="sm">Browse files</Button>
             </div>
@@ -186,7 +186,7 @@ export default function OnboardingPage() {
             <thead>
               <tr className="bg-surface-raised border-b border-border">
                 {['Source field', 'Target field', 'Sample value', 'Status', ''].map(h => (
-                  <th key={h} className="text-left px-4 py-2.5 text-xs font-semibold text-text-muted uppercase tracking-wider">{h}</th>
+                  <th key={h} className="text-left px-4 py-2.5 text-xs font-medium text-text-muted uppercase tracking-wider">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -217,7 +217,7 @@ export default function OnboardingPage() {
       {activeTab === 'sync' && (
         <div className="bg-surface-raised border border-border rounded-lg p-10 flex flex-col items-center justify-center text-center">
           <RefreshCw className="w-8 h-8 text-text-muted mb-3" />
-          <p className="text-sm font-semibold text-text-muted mb-1">No connected sources</p>
+          <p className="text-sm font-medium text-text-muted mb-1">No connected sources</p>
           <p className="text-xs text-text-muted">Connect an accounting system, bank feed, or payroll provider to see sync status here.</p>
         </div>
       )}
@@ -229,7 +229,7 @@ export default function OnboardingPage() {
             <thead>
               <tr className="bg-surface-raised border-b border-border">
                 {['ID', 'Source', 'Date / Time', 'Records', 'Errors', 'Status'].map(h => (
-                  <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">{h}</th>
+                  <th key={h} className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -239,9 +239,9 @@ export default function OnboardingPage() {
                   <td className="px-4 py-3 text-xs font-mono text-text-muted">{row.id}</td>
                   <td className="px-4 py-3 text-sm text-text-secondary">{row.source}</td>
                   <td className="px-4 py-3 text-xs text-text-muted">{row.date}</td>
-                  <td className="px-4 py-3 text-sm font-semibold text-text-secondary">{row.records.toLocaleString()}</td>
+                  <td className="px-4 py-3 text-sm font-medium text-text-secondary">{row.records.toLocaleString()}</td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs font-semibold ${row.errors > 0 ? 'text-red-400' : 'text-text-muted'}`}>{row.errors}</span>
+                    <span className={`text-xs font-medium ${row.errors > 0 ? 'text-red-400' : 'text-text-muted'}`}>{row.errors}</span>
                   </td>
                   <td className="px-4 py-3">
                     {row.status === 'Success' ? <Badge variant="green">Success</Badge> : <Badge variant="red">Failed</Badge>}

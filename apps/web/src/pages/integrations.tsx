@@ -191,7 +191,7 @@ export default function IntegrationsPage() {
       {showAddPanel && (
         <div className="mb-6 bg-surface-raised border border-border rounded-lg shadow-sm overflow-hidden">
           <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-            <p className="text-sm font-semibold text-text-primary">Add a new integration</p>
+            <p className="text-sm font-medium text-text-primary">Add a new integration</p>
             <button onClick={() => setShowAddPanel(false)} className="text-text-muted hover:text-text-secondary text-xs">Close</button>
           </div>
           <div className="px-5 py-4">
@@ -213,7 +213,7 @@ export default function IntegrationsPage() {
                   className="flex flex-col items-center gap-2 p-3 rounded-lg border border-border hover:border-accent-400 hover:shadow-sm transition-all text-center group"
                 >
                   <BrandIcon brand={opt.brand} size={36} />
-                  <p className="text-xs font-semibold text-text-secondary group-hover:text-accent-400 transition-colors leading-snug">{opt.name}</p>
+                  <p className="text-xs font-medium text-text-secondary group-hover:text-accent-400 transition-colors leading-snug">{opt.name}</p>
                   <p className="text-[10px] text-text-muted">{opt.desc}</p>
                 </button>
               ))}
@@ -234,7 +234,7 @@ export default function IntegrationsPage() {
             <div key={s.label} className={`${s.bg} border ${s.border} rounded-lg px-4 py-3 flex items-center gap-3`}>
               <Icon className={`w-5 h-5 ${s.color} flex-shrink-0`} />
               <div>
-                <p className={`text-base font-bold ${s.color}`}>{s.value}</p>
+                <p className={`text-base font-medium ${s.color}`}>{s.value}</p>
                 <p className="text-xs text-text-muted">{s.label}</p>
               </div>
             </div>
@@ -258,7 +258,7 @@ export default function IntegrationsPage() {
                     <Loader2 className="w-5 h-5 text-emerald-400 animate-spin" />
                   </div>
                   <div className="text-center">
-                    <p className="text-sm font-semibold text-text-primary">Refreshing…</p>
+                    <p className="text-sm font-medium text-text-primary">Refreshing…</p>
                     <p className="text-xs text-text-muted mt-0.5">Syncing latest records from {intg.name}</p>
                   </div>
                 </div>
@@ -268,7 +268,7 @@ export default function IntegrationsPage() {
                     <div className="flex items-center gap-3">
                       <BrandIcon brand={brand} size={40} />
                       <div>
-                        <p className="text-sm font-semibold text-text-primary">{intg.name}</p>
+                        <p className="text-sm font-medium text-text-primary">{intg.name}</p>
                         <p className="text-xs text-text-muted">{intg.type}</p>
                       </div>
                     </div>

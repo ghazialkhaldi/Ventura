@@ -250,7 +250,7 @@ export default function LoginPage() {
 
           {step === 'creds' ? (
             <div>
-              <h2 className="text-2xl font-bold text-white leading-snug mb-4">
+              <h2 className="text-2xl font-normal text-white leading-snug mb-4">
                 Financial operations intelligence for enterprise finance teams
               </h2>
               <p className="text-sm text-text-muted leading-relaxed mb-8">
@@ -279,7 +279,7 @@ export default function LoginPage() {
                   : <ShieldCheck className="w-6 h-6 text-emerald-400" />
                 }
               </div>
-              <h2 className="text-2xl font-bold text-white leading-snug mb-4">
+              <h2 className="text-2xl font-normal text-white leading-snug mb-4">
                 {mfaIsEmail
                   ? 'Check your email for a verification code'
                   : 'Your workspace is protected with multi-factor authentication'
@@ -325,7 +325,7 @@ export default function LoginPage() {
               {step === 'creds' && (
                 <>
                   <div className="mb-8">
-                    <h1 className="text-2xl font-bold text-text-primary">Sign in to your workspace</h1>
+                    <h1 className="text-2xl font-normal text-text-primary">Sign in to your workspace</h1>
                     <p className="text-sm text-text-muted mt-1">Enter your details to continue.</p>
                   </div>
 
@@ -338,7 +338,7 @@ export default function LoginPage() {
 
                   <form onSubmit={handleCredentials} className="space-y-4">
                     <div>
-                      <label className="block text-xs font-semibold text-text-secondary mb-1.5">Work email</label>
+                      <label className="block text-xs font-medium text-text-secondary mb-1.5">Work email</label>
                       <input
                         type="email" required value={email} onChange={e => setEmail(e.target.value)}
                         placeholder="you@company.com" autoComplete="email" className={inputCls}
@@ -347,7 +347,7 @@ export default function LoginPage() {
 
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
-                        <label className="text-xs font-semibold text-text-secondary">Password</label>
+                        <label className="text-xs font-medium text-text-secondary">Password</label>
                         <Link href="/forgot-password" className="text-xs text-text-muted hover:text-text-secondary transition-colors">
                           Forgot password?
                         </Link>
@@ -368,7 +368,7 @@ export default function LoginPage() {
 
                     <button
                       type="submit" disabled={loading}
-                      className="w-full bg-accent-500 hover:bg-accent-600 text-white font-semibold py-2.5 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full bg-accent-500 hover:bg-accent-600 text-white font-medium py-2.5 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {loading ? (
                         <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
@@ -398,7 +398,7 @@ export default function LoginPage() {
                         : <ShieldCheck className="w-5 h-5 text-text-secondary" />
                       }
                     </div>
-                    <h1 className="text-2xl font-bold text-text-primary">
+                    <h1 className="text-2xl font-normal text-text-primary">
                       {mfaIsEmail ? 'Check your email' : 'Two-factor authentication'}
                     </h1>
                     <p className="text-sm text-text-muted mt-1.5 leading-relaxed">
@@ -421,7 +421,7 @@ export default function LoginPage() {
 
                   <form onSubmit={handleMFASubmit} className="space-y-4">
                     <div>
-                      <label className="block text-xs font-semibold text-text-secondary mb-1.5">
+                      <label className="block text-xs font-medium text-text-secondary mb-1.5">
                         Verification code
                       </label>
                       <input
@@ -445,7 +445,7 @@ export default function LoginPage() {
 
                     <button
                       type="submit" disabled={loading || mfaCode.length < 6}
-                      className="w-full bg-accent-500 hover:bg-accent-600 text-white font-semibold py-2.5 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full bg-accent-500 hover:bg-accent-600 text-white font-medium py-2.5 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {loading ? (
                         <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">

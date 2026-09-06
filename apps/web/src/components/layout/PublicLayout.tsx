@@ -82,13 +82,13 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
                 <>
                   <Link
                     href="/employee-login"
-                    className="text-sm font-semibold text-emerald-400 hover:text-emerald-300 border border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-500/10 px-4 py-2 rounded-lg transition-colors"
+                    className="text-sm font-medium text-emerald-400 hover:text-emerald-300 border border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-500/10 px-4 py-2 rounded-lg transition-colors"
                   >
                     Employee portal
                   </Link>
                   <Link
                     href="/login"
-                    className="text-sm font-semibold text-text-secondary hover:text-text-primary border border-border-strong hover:border-border px-4 py-2 rounded-lg transition-colors"
+                    className="text-sm font-medium text-text-secondary hover:text-text-primary border border-border-strong hover:border-border px-4 py-2 rounded-lg transition-colors"
                   >
                     Sign in
                   </Link>
@@ -96,11 +96,11 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
               )}
               {/* Logged-in employees: show their portal link only, no sign-in links */}
               {loggedIn ? (
-                <Link href={portalHref} className="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
+                <Link href={portalHref} className="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
                   {portalLabel}
                 </Link>
               ) : (
-                <Link href="/contact" className="bg-accent-500 hover:bg-accent-600 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
+                <Link href="/contact" className="bg-accent-500 hover:bg-accent-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
                   Get started
                 </Link>
               )}
@@ -154,14 +154,14 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
                 <Link
                   href="/employee-login"
                   onClick={() => setDrawerOpen(false)}
-                  className="block px-4 py-3 text-sm font-semibold text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/30 rounded-lg transition-colors"
+                  className="block px-4 py-3 text-sm font-medium text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/30 rounded-lg transition-colors"
                 >
                   Employee portal
                 </Link>
                 <Link
                   href="/login"
                   onClick={() => setDrawerOpen(false)}
-                  className="block px-4 py-3 text-sm font-semibold text-text-secondary hover:bg-surface-overlay border border-border rounded-lg transition-colors"
+                  className="block px-4 py-3 text-sm font-medium text-text-secondary hover:bg-surface-overlay border border-border rounded-lg transition-colors"
                 >
                   Sign in
                 </Link>
@@ -173,7 +173,7 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
                 <Link
                   href={portalHref}
                   onClick={() => setDrawerOpen(false)}
-                  className="block px-4 py-3 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-colors text-center"
+                  className="block px-4 py-3 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-colors text-center"
                 >
                   {portalLabel}
                 </Link>
@@ -181,7 +181,7 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
                 <Link
                   href="/contact"
                   onClick={() => setDrawerOpen(false)}
-                  className="block px-4 py-3 text-sm font-semibold text-white bg-accent-500 hover:bg-accent-600 rounded-lg transition-colors text-center"
+                  className="block px-4 py-3 text-sm font-medium text-white bg-accent-500 hover:bg-accent-600 rounded-lg transition-colors text-center"
                 >
                   Get started
                 </Link>
@@ -205,7 +205,7 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
                 </p>
               </div>
               <div>
-                <p className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-3">Product</p>
+                <p className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-3">Product</p>
                 <ul className="space-y-2 text-xs">
                   {[
                     { label: 'Anomaly Detection',     href: '/#anomaly'    },
@@ -218,7 +218,7 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
                 </ul>
               </div>
               <div>
-                <p className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-3">Company</p>
+                <p className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-3">Company</p>
                 <ul className="space-y-2 text-xs">
                   {[
                     { label: 'About',            href: '/about'    },
@@ -231,7 +231,7 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
                 </ul>
               </div>
               <div>
-                <p className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-3">Resources</p>
+                <p className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-3">Resources</p>
                 <ul className="space-y-2 text-xs">
                   {[
                     { label: 'Documentation', href: '/docs'     },

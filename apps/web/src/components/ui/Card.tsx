@@ -34,7 +34,7 @@ export function CardHeader({ title, subtitle, action, icon, className }: CardHea
           </div>
         )}
         <div>
-          <h3 className="text-sm font-semibold text-text-primary">{title}</h3>
+          <h3 className="text-sm font-medium text-text-primary">{title}</h3>
           {subtitle && <p className="text-xs text-text-muted mt-0.5">{subtitle}</p>}
         </div>
       </div>

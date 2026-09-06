@@ -39,7 +39,7 @@ export default function DocsPage() {
     <PublicLayout title="Documentation">
       <section className="bg-surface-raised border-b border-border py-20">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <p className="text-xs font-semibold text-accent-400 uppercase tracking-widest mb-3">Documentation</p>
+          <p className="text-xs font-medium text-accent-400 uppercase tracking-widest mb-3">Documentation</p>
           <h1 className="text-3xl font-normal text-text-primary">Learn Ventura</h1>
           <p className="text-base text-text-muted mt-3">
             Everything you need to set up your workspace, connect data, and put AI-powered

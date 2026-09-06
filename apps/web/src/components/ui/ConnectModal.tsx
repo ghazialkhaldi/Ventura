@@ -461,7 +461,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
         <div className="flex items-center gap-3 px-5 py-4 border-b border-border flex-shrink-0">
           <BrandIcon brand={config.brand} size={32} contained />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-text-primary">
+            <p className="text-sm font-medium text-text-primary">
               {isFileType ? 'Upload File' : `Connect ${config.name}`}
             </p>
             <p className="text-[11px] text-text-muted">{authLabel}</p>
@@ -498,7 +498,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
 
                   {config.instructions.note && (
                     <div className="text-[11px] bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2 mb-3 leading-relaxed">
-                      <span className="font-semibold text-amber-400">Note: </span>
+                      <span className="font-medium text-amber-400">Note: </span>
                       <span className="text-amber-300">{config.instructions.note}</span>
                     </div>
                   )}
@@ -562,7 +562,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
                 ) : (
                   config.fields.map(f => (
                     <div key={f.key}>
-                      <label className="block text-xs font-semibold text-text-secondary mb-1.5">
+                      <label className="block text-xs font-medium text-text-secondary mb-1.5">
                         {f.label}{f.required && <span className="text-red-400 ml-0.5">*</span>}
                       </label>
                       {f.type === 'select' ? (
@@ -592,7 +592,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
                 <div className="pt-1 flex items-center gap-3">
                   <button
                     type="submit"
-                    className="flex-1 bg-accent-500 hover:bg-accent-600 text-white font-semibold py-2.5 rounded-lg transition-colors text-sm"
+                    className="flex-1 bg-accent-500 hover:bg-accent-600 text-white font-medium py-2.5 rounded-lg transition-colors text-sm"
                   >
                     {isFileType ? 'Process file' : 'Save & Connect'}
                   </button>
@@ -615,7 +615,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
                 <Loader2 className="w-6 h-6 text-emerald-400 animate-spin" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-text-primary">
+                <p className="text-sm font-medium text-text-primary">
                   {isFileType ? 'Processing your file…' : 'Saving connection…'}
                 </p>
                 <p className="text-xs text-text-muted mt-1">{statusMsg}</p>
@@ -630,7 +630,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
                 <Check className="w-7 h-7 text-emerald-400" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-text-primary">
+                <p className="text-sm font-medium text-text-primary">
                   {isFileType ? 'File processed' : `${config.name} connected`}
                 </p>
                 {result ? (
@@ -643,7 +643,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
               </div>
               <button
                 onClick={() => { onClose(); window.location.href = '/dashboard' }}
-                className="mt-2 bg-accent-500 hover:bg-accent-600 text-white font-semibold py-2.5 px-6 rounded-lg transition-colors text-sm"
+                className="mt-2 bg-accent-500 hover:bg-accent-600 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm"
               >
                 {isFileType ? 'View dashboard' : 'Done'}
               </button>
@@ -657,7 +657,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
                 <Clock className="w-7 h-7 text-text-muted" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-text-primary">{config.name} coming soon</p>
+                <p className="text-sm font-medium text-text-primary">{config.name} coming soon</p>
                 <p className="text-xs text-text-muted mt-2 max-w-xs leading-relaxed">
                   Contact{' '}
                   <a href="mailto:support@venturafinance.net" className="text-accent-400 hover:underline">
@@ -666,7 +666,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
                   to enable {config.name} access on your account.
                 </p>
               </div>
-              <button onClick={onClose} className="mt-1 bg-accent-500 hover:bg-accent-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors text-sm">
+              <button onClick={onClose} className="mt-1 bg-accent-500 hover:bg-accent-600 text-white font-medium py-2 px-6 rounded-lg transition-colors text-sm">
                 Close
               </button>
             </div>
@@ -679,7 +679,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
                 <AlertCircle className="w-7 h-7 text-red-400" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-text-primary">Connection failed</p>
+                <p className="text-sm font-medium text-text-primary">Connection failed</p>
                 <p className="text-xs text-red-400 mt-1 max-w-xs">{error}</p>
               </div>
               <button

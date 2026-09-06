@@ -335,7 +335,7 @@ export default function SettingsPage() {
           <div className="relative bg-surface-raised rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-border">
               <div>
-                <p className="text-sm font-semibold text-text-primary">Invite team member</p>
+                <p className="text-sm font-medium text-text-primary">Invite team member</p>
                 <p className="text-xs text-text-muted mt-0.5">Share this link with employees to join your workspace</p>
               </div>
               <button onClick={() => setInviteOpen(false)} className="text-text-muted hover:text-text-secondary p-1 rounded transition-colors">
@@ -359,26 +359,26 @@ export default function SettingsPage() {
               {inviteState === 'ready' && inviteCode && (
                 <>
                   <div>
-                    <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Invite code</p>
+                    <p className="text-xs font-medium text-text-muted uppercase tracking-wider mb-2">Invite code</p>
                     <div className="flex items-center gap-2 bg-surface-hover border border-border rounded-lg px-3 py-2.5">
                       <code className="text-xs text-text-secondary font-mono flex-1 truncate">{inviteCode}</code>
                       <button
                         onClick={() => copyInvite('code')}
-                        className="flex-shrink-0 text-xs font-semibold text-text-muted hover:text-text-secondary flex items-center gap-1 transition-colors"
+                        className="flex-shrink-0 text-xs font-medium text-text-muted hover:text-text-secondary flex items-center gap-1 transition-colors"
                       >
                         {inviteCopied === 'code' ? <><CheckCircle className="w-3.5 h-3.5 text-emerald-500" /> Copied</> : 'Copy'}
                       </button>
                     </div>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2">Invite link</p>
+                    <p className="text-xs font-medium text-text-muted uppercase tracking-wider mb-2">Invite link</p>
                     <div className="flex items-center gap-2 bg-surface-hover border border-border rounded-lg px-3 py-2.5">
                       <span className="text-xs text-text-muted flex-1 truncate font-mono">
                         {typeof window !== 'undefined' ? window.location.origin : ''}/join?code={inviteCode}
                       </span>
                       <button
                         onClick={() => copyInvite('link')}
-                        className="flex-shrink-0 text-xs font-semibold text-text-muted hover:text-text-secondary flex items-center gap-1 transition-colors"
+                        className="flex-shrink-0 text-xs font-medium text-text-muted hover:text-text-secondary flex items-center gap-1 transition-colors"
                       >
                         {inviteCopied === 'link' ? <><CheckCircle className="w-3.5 h-3.5 text-emerald-500" /> Copied</> : 'Copy'}
                       </button>
@@ -420,7 +420,7 @@ export default function SettingsPage() {
               <thead>
                 <tr className="bg-surface-overlay border-b border-border">
                   {['User', 'Role', 'Joined', 'Logs', ''].map(h => (
-                    <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">{h}</th>
+                    <th key={h} className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -436,7 +436,7 @@ export default function SettingsPage() {
                           </span>
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-text-primary">{currentUser.name || 'N/A'}</p>
+                          <p className="text-sm font-medium text-text-primary">{currentUser.name || 'N/A'}</p>
                           <p className="text-xs text-text-muted">{currentUser.email}</p>
                         </div>
                       </div>
@@ -479,7 +479,7 @@ export default function SettingsPage() {
                           </span>
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-text-primary">{member.name || 'N/A'}</p>
+                          <p className="text-sm font-medium text-text-primary">{member.name || 'N/A'}</p>
                           <p className="text-xs text-text-muted">{member.email}</p>
                         </div>
                       </div>
@@ -490,7 +490,7 @@ export default function SettingsPage() {
                           value={member.role}
                           onChange={e => updateMemberRole(member, e.target.value)}
                           disabled={updatingRole === member.user_id}
-                          className={`text-xs font-semibold px-2.5 py-1 pr-6 border rounded-full appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent-500 ${ROLE_COLORS[member.role] ?? ROLE_COLORS.viewer}`}
+                          className={`text-xs font-medium px-2.5 py-1 pr-6 border rounded-full appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent-500 ${ROLE_COLORS[member.role] ?? ROLE_COLORS.viewer}`}
                         >
                           <option value="viewer">Viewer</option>
                           <option value="analyst">Analyst</option>
@@ -542,7 +542,7 @@ export default function SettingsPage() {
                 {/* Panel header */}
                 <div className="flex items-center justify-between px-5 py-4 border-b border-border">
                   <div>
-                    <p className="text-sm font-bold text-text-primary">{logsEmployee.name || logsEmployee.email}</p>
+                    <p className="text-sm font-medium text-text-primary">{logsEmployee.name || logsEmployee.email}</p>
                     <p className="text-xs text-text-muted mt-0.5">Activity log · {logsEmployee.email}</p>
                   </div>
                   <button onClick={() => setLogsEmployee(null)} className="p-1.5 text-text-muted hover:text-text-secondary hover:bg-surface-overlay rounded transition-colors">
@@ -599,7 +599,7 @@ export default function SettingsPage() {
           {roles.map((role) => (
             <div key={role.name} className="bg-surface-raised border border-border rounded-lg overflow-hidden">
               <div className="p-4 flex items-center gap-4">
-                <span className={`text-xs font-semibold px-3 py-1.5 rounded-full border w-36 text-center flex-shrink-0 ${role.color}`}>
+                <span className={`text-xs font-medium px-3 py-1.5 rounded-full border w-36 text-center flex-shrink-0 ${role.color}`}>
                   {role.name}
                 </span>
                 <p className="text-sm text-text-secondary flex-1">{role.desc}</p>
@@ -646,11 +646,11 @@ export default function SettingsPage() {
               ].map((item) => (
                 <div key={item.label} className="flex items-start justify-between py-3 border-b border-border-subtle last:border-0 gap-4">
                   <div>
-                    <p className="text-sm font-semibold text-text-secondary">{item.label}</p>
+                    <p className="text-sm font-medium text-text-secondary">{item.label}</p>
                     <p className="text-xs text-text-muted mt-0.5">{item.detail}</p>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <p className={`text-xs font-semibold ${item.status === 'on' || item.status === 'ok' ? 'text-emerald-400' : 'text-emerald-400'}`}>{item.value}</p>
+                    <p className={`text-xs font-medium ${item.status === 'on' || item.status === 'ok' ? 'text-emerald-400' : 'text-emerald-400'}`}>{item.value}</p>
                   </div>
                 </div>
               ))}
@@ -702,7 +702,7 @@ export default function SettingsPage() {
             <CardDivider />
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-text-secondary mb-1.5">Organization name</label>
+                <label className="block text-xs font-medium text-text-secondary mb-1.5">Organization name</label>
                 <input
                   value={tenantName}
                   onChange={e => setTenantName(e.target.value)}
@@ -710,7 +710,7 @@ export default function SettingsPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-text-secondary mb-1.5">Timezone</label>
+                <label className="block text-xs font-medium text-text-secondary mb-1.5">Timezone</label>
                 <select
                   value={timezone}
                   onChange={e => setTimezone(e.target.value)}
@@ -772,7 +772,7 @@ export default function SettingsPage() {
               ].map((row) => (
                 <div key={row.label} className="flex justify-between items-center text-sm py-1.5 border-b border-border-subtle last:border-0">
                   <span className="text-text-muted">{row.label}</span>
-                  <span className={`font-semibold ${'highlight' in row && row.highlight ? 'text-emerald-400' : 'text-text-secondary'}`}>{row.value}</span>
+                  <span className={`font-medium ${'highlight' in row && row.highlight ? 'text-emerald-400' : 'text-text-secondary'}`}>{row.value}</span>
                 </div>
               ))}
             </div>
@@ -810,7 +810,7 @@ export default function SettingsPage() {
                 </div>
                 <button
                   onClick={() => setResetStep('confirm')}
-                  className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors"
+                  className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
                   Reset all data
@@ -828,13 +828,13 @@ export default function SettingsPage() {
                 <p className="text-sm text-text-secondary leading-relaxed">
                   Are you sure you want to permanently delete all uploaded data?
                   This cannot be undone. A verification code will be sent to{' '}
-                  <span className="font-semibold text-text-primary">{currentUser?.email}</span>{' '}
+                  <span className="font-medium text-text-primary">{currentUser?.email}</span>{' '}
                   to confirm.
                 </p>
                 <div className="flex gap-3">
                   <button
                     onClick={sendResetCode}
-                    className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors"
+                    className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
                   >
                     Yes, send verification code
                   </button>
@@ -867,7 +867,7 @@ export default function SettingsPage() {
               <CardDivider />
               <div className="space-y-5">
                 <p className="text-sm text-text-secondary">
-                  Enter the 6-digit code sent to <span className="font-semibold text-text-primary">{currentUser?.email}</span>.
+                  Enter the 6-digit code sent to <span className="font-medium text-text-primary">{currentUser?.email}</span>.
                   The code expires in 10 minutes.
                 </p>
 
@@ -884,7 +884,7 @@ export default function SettingsPage() {
                       onChange={e => handleCodeDigit(i, e.target.value)}
                       onKeyDown={e => handleCodeKeyDown(i, e)}
                       disabled={resetStep === 'verifying'}
-                      className="w-11 h-14 text-center text-xl font-bold border border-border-strong rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 disabled:opacity-50 text-text-primary"
+                      className="w-11 h-14 text-center text-xl font-normal border border-border-strong rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 disabled:opacity-50 text-text-primary"
                     />
                   ))}
                 </div>
@@ -907,7 +907,7 @@ export default function SettingsPage() {
                   <button
                     onClick={verifyAndReset}
                     disabled={resetCode.length !== 6 || resetStep === 'verifying'}
-                    className="bg-red-600 hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors"
+                    className="bg-red-600 hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
                   >
                     Confirm reset
                   </button>
@@ -960,7 +960,7 @@ export default function SettingsPage() {
                 <div className="flex gap-3">
                   <button
                     onClick={sendResetCode}
-                    className="text-sm font-semibold text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition-colors"
+                    className="text-sm font-medium text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition-colors"
                   >
                     Try again
                   </button>

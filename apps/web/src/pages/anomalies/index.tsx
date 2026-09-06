@@ -109,7 +109,7 @@ export default function AnomaliesPage() {
       {/* ── Page header ── */}
       <div className="flex items-start justify-between mb-5">
         <div>
-          <h1 className="text-lg font-bold text-text-primary">Anomaly Investigation</h1>
+          <h1 className="text-lg font-normal text-text-primary">Anomaly Investigation</h1>
           <p className="text-xs text-text-muted mt-0.5">AI-detected spend anomalies, policy violations, and risk signals</p>
         </div>
         <button
@@ -155,7 +155,7 @@ export default function AnomaliesPage() {
             >
               <Icon className={`w-4 h-4 ${s.color} flex-shrink-0`} />
               <div>
-                <p className={`text-base font-bold ${s.color} leading-none`}>{s.count !== null ? s.count : s.value}</p>
+                <p className={`text-base font-medium ${s.color} leading-none`}>{s.count !== null ? s.count : s.value}</p>
                 <p className="text-[11px] text-text-muted mt-0.5">{s.label}</p>
               </div>
             </button>
@@ -207,7 +207,7 @@ export default function AnomaliesPage() {
       {filtered.length === 0 ? (
         <div className="bg-surface-raised border border-border rounded-lg p-12 text-center">
           <CheckCircle className="w-10 h-10 text-text-muted mx-auto mb-3" />
-          <p className="text-sm font-semibold text-text-secondary">
+          <p className="text-sm font-medium text-text-secondary">
             {anomalies.length === 0 ? 'No anomalies detected' : 'No anomalies match the current filters'}
           </p>
           <p className="text-xs text-text-muted mt-1 max-w-xs mx-auto">
@@ -216,7 +216,7 @@ export default function AnomaliesPage() {
               : 'Try adjusting the severity, status, or search filters above.'}
           </p>
           {!isReady && (
-            <Link href="/integrations" className="inline-flex items-center gap-1.5 mt-4 text-xs bg-[#0c1526] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#1a2640] transition-colors">
+            <Link href="/integrations" className="inline-flex items-center gap-1.5 mt-4 text-xs bg-[#0c1526] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#1a2640] transition-colors">
               Connect data source
             </Link>
           )}
@@ -241,7 +241,7 @@ export default function AnomaliesPage() {
                     </div>
 
                     <Link href={`/anomalies/${a.id}`} className="group">
-                      <p className="text-sm font-semibold text-text-primary group-hover:text-accent-400 transition-colors">{a.title}</p>
+                      <p className="text-sm font-medium text-text-primary group-hover:text-accent-400 transition-colors">{a.title}</p>
                     </Link>
                     <p className="text-xs text-text-muted mt-0.5">{a.vendor}{a.category ? ` · ${a.category}` : ''}</p>
                     <p className="text-xs text-text-muted mt-2 leading-relaxed line-clamp-2">{a.description}</p>
@@ -255,7 +255,7 @@ export default function AnomaliesPage() {
 
                   {/* Right column */}
                   <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                    <p className={`text-xl font-bold ${SEV_AMT[a.severity] ?? 'text-text-secondary'}`}>{fmtFull(a.amount)}</p>
+                    <p className={`text-xl font-normal ${SEV_AMT[a.severity] ?? 'text-text-secondary'}`}>{fmtFull(a.amount)}</p>
                     <div className="flex items-center gap-1.5">
                       <div className="w-16 h-1.5 bg-surface-overlay rounded-full overflow-hidden">
                         <div className="h-full rounded-full bg-accent-500" style={{ width: `${a.confidence}%` }} />
@@ -265,7 +265,7 @@ export default function AnomaliesPage() {
                     <Badge variant="status" value={a.status}>{a.status}</Badge>
                     <Link
                       href={`/anomalies/${a.id}`}
-                      className="inline-flex items-center gap-1 text-xs font-semibold text-accent-400 hover:text-accent-300 transition-colors mt-1"
+                      className="inline-flex items-center gap-1 text-xs font-medium text-accent-400 hover:text-accent-300 transition-colors mt-1"
                     >
                       Investigate <ChevronRight className="w-3 h-3" />
                     </Link>

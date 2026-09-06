@@ -83,7 +83,7 @@ export default function PrivacyPage() {
   return (
     <PublicLayout title="Privacy Policy">
       <div className="max-w-2xl mx-auto px-6 py-16">
-        <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-4">Legal</p>
+        <p className="text-xs font-medium text-text-muted uppercase tracking-widest mb-4">Legal</p>
         <h1 className="text-3xl font-normal text-text-primary mb-3">Privacy Policy</h1>
         <p className="text-sm text-text-muted mb-10">Last updated: September 2026</p>
 

@@ -138,7 +138,7 @@ export default function AIGovernancePage() {
           { label: 'Avg confidence',      value: `${avgConf}%`,      color: 'text-emerald-400'  },
         ].map((s) => (
           <div key={s.label} className="bg-surface-raised border border-border rounded-lg px-4 py-3">
-            <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
+            <p className={`text-xl font-normal ${s.color}`}>{s.value}</p>
             <p className="text-xs text-text-muted mt-0.5">{s.label}</p>
           </div>
         ))}
@@ -183,7 +183,7 @@ export default function AIGovernancePage() {
                         <div className="flex-1 h-2 bg-surface-overlay rounded-full overflow-hidden">
                           <div className={`h-full rounded-full ${row.color}`} style={{ width: `${pct}%` }} />
                         </div>
-                        <span className="text-xs font-semibold text-text-secondary w-8 text-right">{row.count}</span>
+                        <span className="text-xs font-medium text-text-secondary w-8 text-right">{row.count}</span>
                         <span className="text-xs text-text-muted w-8 text-right">{pct}%</span>
                       </div>
                     )
@@ -210,7 +210,7 @@ export default function AIGovernancePage() {
                         <div className="flex-1 h-2 bg-surface-overlay rounded-full overflow-hidden">
                           <div className={`h-full rounded-full ${row.color}`} style={{ width: `${pct}%` }} />
                         </div>
-                        <span className="text-xs font-semibold text-text-secondary w-6 text-right">{row.count}</span>
+                        <span className="text-xs font-medium text-text-secondary w-6 text-right">{row.count}</span>
                       </div>
                     )
                   })}
@@ -257,7 +257,7 @@ export default function AIGovernancePage() {
           <div className="flex items-start gap-2.5 bg-amber-500/10 border border-amber-500/30 rounded-lg px-4 py-3 mb-4">
             <Info className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
             <p className="text-xs text-amber-400">
-              <span className="font-semibold">Policy reference, not a live routing log.</span> Anomaly detection in Ventura today runs on a deterministic rule engine (statistical outliers, duplicate matching, threshold checks). It does not call the language models listed below. This table documents the intended routing policy for a future model-backed detection layer; it does not reflect requests actually being made.
+              <span className="font-medium">Policy reference, not a live routing log.</span> Anomaly detection in Ventura today runs on a deterministic rule engine (statistical outliers, duplicate matching, threshold checks). It does not call the language models listed below. This table documents the intended routing policy for a future model-backed detection layer; it does not reflect requests actually being made.
             </p>
           </div>
         <div className="bg-surface-raised border border-border rounded-lg overflow-hidden">
@@ -265,7 +265,7 @@ export default function AIGovernancePage() {
             <thead>
               <tr className="bg-surface-overlay border-b border-border">
                 {['Risk Tier', 'Model', 'Confidence threshold', 'Auto-approve?', 'Example tasks', ''].map(h => (
-                  <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">{h}</th>
+                  <th key={h} className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -273,12 +273,12 @@ export default function AIGovernancePage() {
               {modelRoutes.map((row) => (
                 <tr key={row.tier} className="hover:bg-surface-hover">
                   <td className="px-4 py-4">
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${tierColor[row.tier]}`}>{row.tier}</span>
+                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${tierColor[row.tier]}`}>{row.tier}</span>
                   </td>
                   <td className="px-4 py-4">
                     <span className="text-xs font-mono bg-surface-overlay text-text-secondary px-2 py-1 rounded">{row.model}</span>
                   </td>
-                  <td className="px-4 py-4 text-sm font-semibold text-text-secondary">{row.threshold}</td>
+                  <td className="px-4 py-4 text-sm font-medium text-text-secondary">{row.threshold}</td>
                   <td className="px-4 py-4">
                     {row.autoApprove
                       ? <Badge variant="green"><CheckCircle className="w-3 h-3 inline mr-1" />Yes</Badge>
@@ -303,7 +303,7 @@ export default function AIGovernancePage() {
             <thead>
               <tr className="bg-surface-overlay border-b border-border">
                 {['Timestamp', 'Anomaly', 'Type', 'Severity', 'Confidence', 'Amount', ''].map(h => (
-                  <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">{h}</th>
+                  <th key={h} className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -360,7 +360,7 @@ export default function AIGovernancePage() {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-sm font-medium text-text-secondary">Auto-approval threshold</label>
-                  <span className="text-lg font-bold text-accent-400">{confidenceThreshold}%</span>
+                  <span className="text-lg font-normal text-accent-400">{confidenceThreshold}%</span>
                 </div>
                 <input
                   type="range"

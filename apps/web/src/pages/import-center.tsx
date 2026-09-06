@@ -249,7 +249,7 @@ export default function ImportCenterPage() {
           <div className="flex items-center gap-2">
             <span className="text-xs text-text-muted">{batches.length} batch{batches.length !== 1 ? 'es' : ''} imported</span>
             {reviewQueue.length > 0 && (
-              <span className="inline-flex items-center gap-1 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold px-2 py-0.5 rounded-full">
+              <span className="inline-flex items-center gap-1 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-medium px-2 py-0.5 rounded-full">
                 <AlertCircle className="w-3 h-3" />
                 {reviewQueue.length} pending review
               </span>
@@ -307,7 +307,7 @@ export default function ImportCenterPage() {
                   }`}
                 >
                   <BrandIcon brand={opt.brand} size={32} />
-                  <p className="text-xs font-semibold text-text-secondary leading-snug">{opt.label}</p>
+                  <p className="text-xs font-medium text-text-secondary leading-snug">{opt.label}</p>
                   <p className="text-[10px] text-text-muted leading-tight">{opt.note}</p>
                 </button>
               ))}
@@ -337,14 +337,14 @@ export default function ImportCenterPage() {
                   onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f) }}
                 />
                 <Upload className="w-8 h-8 text-text-muted mx-auto mb-3" />
-                <p className="text-sm font-semibold text-text-secondary mb-1">Drop your file here or click to browse</p>
+                <p className="text-sm font-medium text-text-secondary mb-1">Drop your file here or click to browse</p>
                 <p className="text-xs text-text-muted">Supports {accepted.replace(/\./g, '').toUpperCase().split(',').join(' · ')}</p>
               </div>
             ) : (
               <div className="flex items-center gap-4 p-4 bg-surface-sunken rounded-lg border border-border">
                 <FileText className="w-8 h-8 text-accent-400 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-text-secondary">{file.name}</p>
+                  <p className="text-sm font-medium text-text-secondary">{file.name}</p>
                   <p className="text-xs text-text-muted">{fmtBytes(file.size)} · {SOURCE_OPTS.find(s => s.id === source)?.label}</p>
                 </div>
                 <button onClick={() => { setFile(null); setInvoices([]); setStage('idle') }} className="text-text-muted hover:text-red-400 transition-colors">
@@ -357,7 +357,7 @@ export default function ImportCenterPage() {
               <div className="flex items-start gap-3 mt-4 bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3">
                 <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-xs font-semibold text-red-400">Parsing failed</p>
+                  <p className="text-xs font-medium text-red-400">Parsing failed</p>
                   <p className="text-xs text-red-400 mt-0.5">{errMsg}</p>
                 </div>
               </div>
@@ -368,7 +368,7 @@ export default function ImportCenterPage() {
                 <button
                   onClick={handleImport}
                   disabled={stage === 'parsing'}
-                  className="flex items-center gap-2 bg-[#0c1526] hover:bg-[#1a2640] disabled:opacity-50 text-white font-semibold px-6 py-2.5 rounded-lg text-sm transition-colors"
+                  className="flex items-center gap-2 bg-[#0c1526] hover:bg-[#1a2640] disabled:opacity-50 text-white font-medium px-6 py-2.5 rounded-lg text-sm transition-colors"
                 >
                   {stage === 'parsing'
                     ? <><RefreshCw className="w-4 h-4 animate-spin" /> Processing…</>
@@ -386,7 +386,7 @@ export default function ImportCenterPage() {
                 subtitle="How your raw columns map to the canonical invoice schema"
                 action={
                   summary && (
-                    <span className={`text-sm font-bold ${confidenceColor(summary.avgConf)}`}>
+                    <span className={`text-sm font-medium ${confidenceColor(summary.avgConf)}`}>
                       {summary.avgConf}% avg confidence
                     </span>
                   )
@@ -398,8 +398,8 @@ export default function ImportCenterPage() {
               {summary && (
                 <div className="mb-5 p-4 bg-surface-sunken rounded-lg border border-border">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs font-semibold text-text-secondary">Normalization Confidence</p>
-                    <span className={`text-sm font-bold ${confidenceColor(summary.avgConf)}`}>{summary.avgConf}%</span>
+                    <p className="text-xs font-medium text-text-secondary">Normalization Confidence</p>
+                    <span className={`text-sm font-medium ${confidenceColor(summary.avgConf)}`}>{summary.avgConf}%</span>
                   </div>
                   <div className="h-2 bg-surface-overlay rounded-full overflow-hidden">
                     <div className={`h-full rounded-full ${confidenceBg(summary.avgConf)}`} style={{ width: `${summary.avgConf}%` }} />
@@ -482,10 +482,10 @@ export default function ImportCenterPage() {
                     <span className="text-[10px] font-bold text-text-muted">{idx + 1}</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-text-secondary">{s.label}</p>
+                    <p className="text-sm font-medium text-text-secondary">{s.label}</p>
                     <p className="text-xs text-text-muted mt-0.5">{s.detail || (s.status === 'pending' ? 'Waiting…' : '')}</p>
                   </div>
-                  <span className="text-xs font-semibold capitalize text-text-muted">{s.status}</span>
+                  <span className="text-xs font-medium capitalize text-text-muted">{s.status}</span>
                 </div>
               )
             })}
@@ -496,7 +496,7 @@ export default function ImportCenterPage() {
               <div className="flex items-center gap-3">
                 <CheckCircle className="w-5 h-5 text-emerald-400" />
                 <div>
-                  <p className="text-sm font-semibold text-emerald-400">Import complete</p>
+                  <p className="text-sm font-medium text-emerald-400">Import complete</p>
                   <p className="text-xs text-emerald-400 mt-0.5">
                     {summary.total.toLocaleString()} invoices normalized · {summary.avgConf}% avg confidence
                     {summary.reviewed > 0 ? ` · ${summary.reviewed} pending review` : ''}
@@ -504,7 +504,7 @@ export default function ImportCenterPage() {
                 </div>
                 <button
                   onClick={() => setTab('review')}
-                  className="ml-auto text-xs text-emerald-400 font-semibold flex items-center gap-1"
+                  className="ml-auto text-xs text-emerald-400 font-medium flex items-center gap-1"
                 >
                   Review queue <ChevronRight className="w-3 h-3" />
                 </button>
@@ -529,7 +529,7 @@ export default function ImportCenterPage() {
           {reviewQueue.length === 0 ? (
             <div className="py-16 flex flex-col items-center text-center">
               <CheckCircle className="w-10 h-10 text-emerald-400 mb-3" />
-              <p className="text-text-secondary font-semibold">Review queue is empty</p>
+              <p className="text-text-secondary font-medium">Review queue is empty</p>
               <p className="text-xs text-text-muted mt-1">All imported invoices passed confidence thresholds.</p>
             </div>
           ) : (
@@ -555,14 +555,14 @@ export default function ImportCenterPage() {
                         >
                           <td className="py-2.5 pr-3 font-mono text-text-secondary">{inv.invoice_id.slice(0, 14)}…</td>
                           <td className="py-2.5 pr-3 font-medium text-text-secondary max-w-[140px] truncate">{inv.vendor_name || 'N/A'}</td>
-                          <td className="py-2.5 pr-3 font-semibold text-text-secondary">{fmtCurrency(inv.invoice_total)}</td>
+                          <td className="py-2.5 pr-3 font-medium text-text-secondary">{fmtCurrency(inv.invoice_total)}</td>
                           <td className="py-2.5 pr-3 text-text-muted">{inv.invoice_date || 'N/A'}</td>
                           <td className="py-2.5 pr-3">
                             <div className="flex items-center gap-2">
                               <div className="w-16 h-1.5 bg-surface-overlay rounded-full overflow-hidden">
                                 <div className={`h-full rounded-full ${confidenceBg(inv.normalization_confidence)}`} style={{ width: `${inv.normalization_confidence}%` }} />
                               </div>
-                              <span className={`font-semibold ${confidenceColor(inv.normalization_confidence)}`}>{inv.normalization_confidence}%</span>
+                              <span className={`font-medium ${confidenceColor(inv.normalization_confidence)}`}>{inv.normalization_confidence}%</span>
                             </div>
                           </td>
                           <td className="py-2.5 pr-3">
@@ -601,7 +601,7 @@ export default function ImportCenterPage() {
                             <td colSpan={8} className="pb-3 px-1">
                               <div className="bg-surface-sunken border border-border rounded-lg p-4 space-y-4">
                                 <div className="flex items-center justify-between">
-                                  <p className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Record Detail</p>
+                                  <p className="text-xs font-medium text-text-secondary uppercase tracking-wide">Record Detail</p>
                                   <button
                                     onClick={() => setShowRaw(showRaw === inv.id ? null : inv.id)}
                                     className="text-xs text-accent-400 flex items-center gap-1"
@@ -681,7 +681,7 @@ export default function ImportCenterPage() {
           {batches.length === 0 ? (
             <div className="py-16 flex flex-col items-center text-center">
               <History className="w-10 h-10 text-text-muted mb-3" />
-              <p className="text-text-secondary font-semibold">No imports yet</p>
+              <p className="text-text-secondary font-medium">No imports yet</p>
               <p className="text-xs text-text-muted mt-1">Go to the Import tab to ingest your first file.</p>
             </div>
           ) : (
@@ -700,24 +700,24 @@ export default function ImportCenterPage() {
                       <td className="py-2.5 pr-4 font-mono text-text-muted text-[10px]">{b.id}</td>
                       <td className="py-2.5 pr-4 text-text-secondary font-medium max-w-[140px] truncate">{b.file_name}</td>
                       <td className="py-2.5 pr-4 capitalize text-text-muted">{b.source}</td>
-                      <td className="py-2.5 pr-4 font-semibold text-text-secondary">{b.total_records.toLocaleString()}</td>
+                      <td className="py-2.5 pr-4 font-medium text-text-secondary">{b.total_records.toLocaleString()}</td>
                       <td className="py-2.5 pr-4 text-text-secondary">{b.normalized.toLocaleString()}</td>
                       <td className="py-2.5 pr-4">
                         <div className="flex items-center gap-2">
                           <div className="w-12 h-1.5 bg-surface-overlay rounded-full overflow-hidden">
                             <div className={`h-full rounded-full ${confidenceBg(b.avg_confidence)}`} style={{ width: `${b.avg_confidence}%` }} />
                           </div>
-                          <span className={`font-semibold ${confidenceColor(b.avg_confidence)}`}>{b.avg_confidence}%</span>
+                          <span className={`font-medium ${confidenceColor(b.avg_confidence)}`}>{b.avg_confidence}%</span>
                         </div>
                       </td>
                       <td className="py-2.5 pr-4">
                         {b.review_required > 0
-                          ? <span className="text-amber-400 font-semibold">{b.review_required}</span>
+                          ? <span className="text-amber-400 font-medium">{b.review_required}</span>
                           : <span className="text-text-muted">0</span>}
                       </td>
                       <td className="py-2.5 pr-4">
                         {b.duplicates > 0
-                          ? <span className="text-red-400 font-semibold">{b.duplicates}</span>
+                          ? <span className="text-red-400 font-medium">{b.duplicates}</span>
                           : <span className="text-text-muted">0</span>}
                       </td>
                       <td className="py-2.5 pr-4">

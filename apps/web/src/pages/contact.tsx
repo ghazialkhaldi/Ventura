@@ -68,7 +68,7 @@ export default function ContactPage() {
           </Link>
           <div className="flex items-center gap-4">
             <Link href="/login" className="text-base font-medium text-text-secondary hover:text-text-primary transition-colors">Sign in</Link>
-            <Link href="/contact" className="bg-accent-500 hover:bg-accent-600 text-white text-base font-semibold px-5 py-2.5 transition-colors">Get started</Link>
+            <Link href="/contact" className="bg-accent-500 hover:bg-accent-600 text-white text-base font-medium px-5 py-2.5 transition-colors">Get started</Link>
           </div>
         </div>
       </header>
@@ -119,7 +119,7 @@ export default function ContactPage() {
           <div className="max-w-md w-full mx-auto lg:mx-0">
 
             <div className="mb-8">
-              <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-3">Get in touch</p>
+              <p className="text-xs font-medium text-text-muted uppercase tracking-widest mb-3">Get in touch</p>
               <h1 className="text-[1.9rem] font-normal text-text-primary leading-tight mb-3">
                 Talk to our team
               </h1>
@@ -137,7 +137,7 @@ export default function ContactPage() {
                 </p>
                 <button
                   onClick={() => { setSubmitted(false); setForm({ name: '', email: '', businessName: '', companySize: '', message: '' }) }}
-                  className="mt-5 text-sm text-text-secondary font-semibold hover:text-text-primary transition-colors"
+                  className="mt-5 text-sm text-text-secondary font-medium hover:text-text-primary transition-colors"
                 >
                   Send another message
                 </button>

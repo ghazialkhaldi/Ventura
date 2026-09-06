@@ -82,7 +82,7 @@ export default function UploadDataPage() {
 
               {/* Name + type */}
               <div>
-                <p className="text-sm font-semibold text-text-primary group-hover:text-accent-400 transition-colors leading-snug">
+                <p className="text-sm font-medium text-text-primary group-hover:text-accent-400 transition-colors leading-snug">
                   {src.name}
                 </p>
                 <p className="text-[11px] text-text-muted mt-0.5">{src.type}</p>
@@ -93,7 +93,7 @@ export default function UploadDataPage() {
 
               {/* CTA */}
               <div className="mt-auto">
-                <span className={`text-xs font-semibold ${isConnected ? 'text-emerald-400' : 'text-accent-400 group-hover:text-accent-300'}`}>
+                <span className={`text-xs font-medium ${isConnected ? 'text-emerald-400' : 'text-accent-400 group-hover:text-accent-300'}`}>
                   {isConnected ? 'Reconfigure →' : 'Connect →'}
                 </span>
               </div>

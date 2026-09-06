@@ -58,7 +58,7 @@ button, a { transition: background-color 0.12s, color 0.12s, border-color 0.12s,
 
 /* Metric value emphasis */
 .metric-value {
-  @apply text-2xl font-bold leading-none tracking-tight text-text-primary;
+  @apply text-2xl font-normal leading-none tracking-tight text-text-primary;
   font-variant-numeric: tabular-nums;
 }
 

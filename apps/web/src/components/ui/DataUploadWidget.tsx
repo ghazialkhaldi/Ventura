@@ -282,7 +282,7 @@ export default function DataUploadWidget({ onReady }: Props) {
         <div className="w-16 h-16 rounded-full bg-emerald-500/10 border-2 border-emerald-500/30 flex items-center justify-center mb-5">
           <CheckCircle className="w-8 h-8 text-emerald-400" />
         </div>
-        <p className="text-lg font-semibold text-text-primary mb-1">Data processed</p>
+        <p className="text-lg font-normal text-text-primary mb-1">Data processed</p>
         <p className="text-sm text-text-muted mb-4">
           {summary.txCount.toLocaleString()} transactions analyzed ·{' '}
           {summary.anomalyCount} anomali{summary.anomalyCount !== 1 ? 'es' : 'y'} detected
@@ -301,7 +301,7 @@ export default function DataUploadWidget({ onReady }: Props) {
         <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent-500 mb-4">
           <Upload className="w-6 h-6 text-white" />
         </div>
-        <h2 className="text-2xl font-bold text-text-primary mb-2">Upload your financial data</h2>
+        <h2 className="text-2xl font-normal text-text-primary mb-2">Upload your financial data</h2>
         <p className="text-sm text-text-muted max-w-lg mx-auto leading-relaxed">
           Import GL exports, bank statements, payroll files, vendor data, or any transaction report.
           Ventura will parse your data, detect anomalies, and build your analytics. No manual setup required.
@@ -332,7 +332,7 @@ export default function DataUploadWidget({ onReady }: Props) {
             onChange={e => { addFiles(e.target.files); if (inputRef.current) inputRef.current.value = '' }}
           />
           <Upload className="w-9 h-9 text-text-muted mx-auto mb-3" />
-          <p className="text-sm font-semibold text-text-secondary mb-1">
+          <p className="text-sm font-medium text-text-secondary mb-1">
             Drop files here or <span className="text-emerald-400 underline underline-offset-2">browse to upload</span>
           </p>
           <p className="text-xs text-text-muted mb-4">CSV · TSV · XLSX · XLS · PDF</p>
@@ -347,7 +347,7 @@ export default function DataUploadWidget({ onReady }: Props) {
       {entries.length > 0 && !isProcessing && (
         <div className="bg-surface-raised border border-border rounded-xl overflow-hidden mb-4">
           <div className="px-4 py-2.5 bg-surface-overlay border-b border-border flex items-center justify-between">
-            <p className="text-xs font-semibold text-text-secondary">
+            <p className="text-xs font-medium text-text-secondary">
               {entries.length} file{entries.length !== 1 ? 's' : ''} selected ·{' '}
               {fmtBytes(entries.reduce((s, e) => s + e.file.size, 0))} total
             </p>
@@ -440,7 +440,7 @@ export default function DataUploadWidget({ onReady }: Props) {
             <button
               onClick={handleProcess}
               disabled={entries.length === 0 || entries.every(e => e.status === 'error')}
-              className="flex-1 bg-accent-500 hover:bg-accent-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2"
+              className="flex-1 bg-accent-500 hover:bg-accent-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium py-3 rounded-xl transition-colors text-sm flex items-center justify-center gap-2"
             >
               <Upload className="w-4 h-4" />
               {entries.length === 0
@@ -450,7 +450,7 @@ export default function DataUploadWidget({ onReady }: Props) {
             <div className="text-text-muted text-sm font-medium select-none">or</div>
             <Link
               href="/integrations"
-              className="flex items-center gap-2 border border-border-strong hover:border-border text-text-secondary font-semibold py-3 px-5 rounded-xl transition-colors text-sm bg-surface-raised"
+              className="flex items-center gap-2 border border-border-strong hover:border-border text-text-secondary font-medium py-3 px-5 rounded-xl transition-colors text-sm bg-surface-raised"
             >
               <Plug className="w-4 h-4" />
               Connect integration

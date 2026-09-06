@@ -48,7 +48,7 @@ export default function TermsPage() {
     <PublicLayout title="Terms of Service">
       <section className="py-14 bg-surface-raised">
         <div className="max-w-3xl mx-auto px-6">
-          <p className="text-xs font-semibold text-accent-400 uppercase tracking-widest mb-3">Legal</p>
+          <p className="text-xs font-medium text-accent-400 uppercase tracking-widest mb-3">Legal</p>
           <h1 className="text-3xl font-normal text-text-primary">Terms of Service</h1>
           <p className="text-sm text-text-muted mt-2">Last updated: July 2026</p>
 

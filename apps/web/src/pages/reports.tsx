@@ -633,7 +633,7 @@ export default function ReportsPage() {
     <AppLayout title="Reports">
       <div className="max-w-3xl">
         <div className="mb-8">
-          <h1 className="text-lg font-bold text-text-primary">Reports</h1>
+          <h1 className="text-lg font-normal text-text-primary">Reports</h1>
           <p className="text-xs text-text-muted mt-0.5">Download a professional PDF report directly to your computer</p>
         </div>
 
@@ -645,7 +645,7 @@ export default function ReportsPage() {
                 <FileText className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="text-sm font-bold text-text-primary">Financial Intelligence Report</p>
+                <p className="text-sm font-medium text-text-primary">Financial Intelligence Report</p>
                 <p className="text-xs text-text-muted mt-0.5">{company} · {dateRange}</p>
                 <p className="text-xs text-text-muted mt-0.5">Generated {today()}</p>
               </div>
@@ -655,7 +655,7 @@ export default function ReportsPage() {
 
           {/* Contents */}
           <div className="px-6 py-5 border-b border-border">
-            <p className="text-xs font-semibold text-text-secondary mb-4">Report contents</p>
+            <p className="text-xs font-medium text-text-secondary mb-4">Report contents</p>
             <div className="grid sm:grid-cols-2 gap-3">
               {[
                 { icon: Building2,     label: 'Title page',        desc: `${company} · ${today()} · risk summary callout` },
@@ -670,7 +670,7 @@ export default function ReportsPage() {
                   <div key={item.label} className="flex items-center gap-3 p-3 bg-surface-sunken border border-border">
                     <Icon className="w-4 h-4 text-text-muted flex-shrink-0" />
                     <div>
-                      <p className="text-xs font-semibold text-text-secondary">{item.label}</p>
+                      <p className="text-xs font-medium text-text-secondary">{item.label}</p>
                       <p className="text-[10px] text-text-muted mt-0.5">{item.desc}</p>
                     </div>
                     <CheckCircle className="w-3.5 h-3.5 text-emerald-400 ml-auto flex-shrink-0" />
@@ -682,7 +682,7 @@ export default function ReportsPage() {
 
           {/* Options */}
           <div className="px-6 py-5 border-b border-border">
-            <p className="text-xs font-semibold text-text-secondary mb-3">Options</p>
+            <p className="text-xs font-medium text-text-secondary mb-3">Options</p>
             <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
@@ -708,7 +708,7 @@ export default function ReportsPage() {
             <button
               onClick={handleGenerate}
               disabled={generating}
-              className="inline-flex items-center gap-2 bg-accent-500 hover:bg-accent-600 text-white font-semibold px-5 py-2.5 text-sm transition-colors disabled:opacity-50 flex-shrink-0"
+              className="inline-flex items-center gap-2 bg-accent-500 hover:bg-accent-600 text-white font-medium px-5 py-2.5 text-sm transition-colors disabled:opacity-50 flex-shrink-0"
             >
               {generating ? (
                 <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
@@ -731,7 +731,7 @@ export default function ReportsPage() {
           ].map(s => (
             <div key={s.label} className="bg-surface-raised border border-border px-4 py-3">
               <p className="text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-1">{s.label}</p>
-              <p className={`text-base font-bold ${s.color} tabular-nums`}>{s.value}</p>
+              <p className={`text-base font-medium ${s.color} tabular-nums`}>{s.value}</p>
             </div>
           ))}
         </div>

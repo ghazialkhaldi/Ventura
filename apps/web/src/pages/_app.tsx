@@ -11,20 +11,37 @@ const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600', '700'], 
 
 export default function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
-    const supabase = createClient()
-    // Restore user profile from Supabase session if localStorage was wiped
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session?.user) return
-      if (localStorage.getItem('sf_user')) return
-      const email   = session.user.email ?? ''
-      const name    = email.split('@')[0].replace(/[._-]/g, ' ')
-        .split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
-      const domain  = email.split('@')[1] ?? ''
-      const company = domain
-        ? domain.split('.')[0].charAt(0).toUpperCase() + domain.split('.')[0].slice(1)
-        : 'Your Organization'
-      saveUser({ email, name, company, role: 'Admin' })
-    })
+    // Restore the profile if localStorage was wiped but a session still exists.
+    //
+    // This asks the SERVER rather than the browser client on purpose. The
+    // browser reads the session from document.cookie, so if the auth cookie
+    // isn't visible to JavaScript the client thinks nobody is signed in while
+    // the middleware still admits them to protected pages, stranding them on a
+    // shell with placeholder initials and no data. Asking the server sidesteps
+    // cookie visibility entirely.
+    if (localStorage.getItem('sf_user')) return
+
+    fetch('/api/auth/me')
+      .then(r => (r.ok ? r.json() : null))
+      .then((me: { email: string; fullName: string | null; company: string | null; isEmployee: boolean } | null) => {
+        if (!me?.email) return
+        const email  = me.email
+        const name   = me.fullName || email.split('@')[0].replace(/[._-]/g, ' ')
+          .split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+        const domain = email.split('@')[1] ?? ''
+        const derived = domain
+          ? domain.split('.')[0].charAt(0).toUpperCase() + domain.split('.')[0].slice(1)
+          : 'Your Organization'
+        // Prefer the organisation name set in Settings over the one derived
+        // from the email domain, so restoring never silently reverts it.
+        saveUser({
+          email,
+          name,
+          company: me.company || derived,
+          role: me.isEmployee ? 'employee' : 'Admin',
+        })
+      })
+      .catch(() => {})
   }, [])
 
   return (

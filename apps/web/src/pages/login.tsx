@@ -212,7 +212,15 @@ export default function LoginPage() {
     const userEmail = user?.email ?? email
     const { derivedName, derivedCompany } = deriveUser(userEmail)
 
-    saveUser({ email: userEmail, name: derivedName, company: derivedCompany, role: 'Admin' })
+    // An organisation name set in Settings is stored on the account as
+    // _company_name. Prefer it over the name derived from the email domain,
+    // otherwise every sign-in silently reverts the workspace name.
+    const savedCompany = (user?.user_metadata as Record<string, unknown> | undefined)?._company_name
+    const company = typeof savedCompany === 'string' && savedCompany.trim()
+      ? savedCompany
+      : derivedCompany
+
+    saveUser({ email: userEmail, name: derivedName, company, role: 'Admin' })
     if (typeof window !== 'undefined') localStorage.setItem('sf_token', `session_${Date.now()}`)
     setLoading(false)
     router.push('/welcome')

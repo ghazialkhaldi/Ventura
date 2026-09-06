@@ -57,8 +57,12 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
   }, [sidebarOpen])
 
   async function handleSignOut() {
+    // Server side first: the browser client cannot clear an HttpOnly cookie,
+    // so a client-only signOut can leave the session alive on the server and
+    // strand the user in the app with no profile and no way out.
+    await fetch('/api/auth/signout', { method: 'POST' }).catch(() => {})
     const supabase = createClient()
-    await supabase.auth.signOut()
+    await supabase.auth.signOut().catch(() => {})
     clearUser()
     // Full page navigation rather than router.push, so the request to '/'
     // carries the cleared session cookie past the middleware.

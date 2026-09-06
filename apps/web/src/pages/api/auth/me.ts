@@ -15,7 +15,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const supabase = createClient({ req, res })
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user?.email) return res.status(401).json({ error: 'Not authenticated' })
+  if (!user?.email) {
+    // No readable session, yet Supabase cookies are present: they are stale or
+    // corrupt, most likely chunks left over from an earlier bad write. Left
+    // alone they keep decoding to nothing on every request, so expire them and
+    // let the visitor sign in cleanly instead of getting stuck.
+    const stale = Object.keys(req.cookies).filter(n => n.startsWith('sb-'))
+    if (stale.length > 0) {
+      res.setHeader('Set-Cookie', stale.map(n => `${n}=; Path=/; Max-Age=0; SameSite=Lax`))
+    }
+    return res.status(401).json({ error: 'Not authenticated' })
+  }
 
   const meta = (user.user_metadata || {}) as Record<string, unknown>
   const companyName = typeof meta._company_name === 'string' && meta._company_name.trim()

@@ -60,7 +60,9 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
     const supabase = createClient()
     await supabase.auth.signOut()
     clearUser()
-    router.push('/employee-login')
+    // Full page navigation rather than router.push, so the request to '/'
+    // carries the cleared session cookie past the middleware.
+    window.location.href = '/'
   }
 
   const userInitials = user ? initials(user.name || user.email) : '?'

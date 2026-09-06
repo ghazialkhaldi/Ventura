@@ -67,7 +67,10 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     const supabase = createClient()
     await supabase.auth.signOut()
     clearUser()
-    router.push(isEmployee ? '/employee-login' : '/login')
+    // Full page navigation rather than router.push: the middleware bounces
+    // authenticated users off '/' to the dashboard, so this request has to
+    // carry the cleared session cookie, not a cached client-side route.
+    window.location.href = '/'
   }
 
   const userInitials = user ? initials(user.name || user.email) : '?'

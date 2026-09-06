@@ -16,11 +16,11 @@ export default function StatusPage() {
       <section className="py-14 bg-surface-raised min-h-[60vh]">
         <div className="max-w-2xl mx-auto px-6">
           <p className="text-xs font-semibold text-accent-400 uppercase tracking-widest mb-3">Status</p>
-          <h1 className="text-3xl font-bold text-text-primary">System status</h1>
+          <h1 className="text-3xl font-normal text-text-primary">System status</h1>
 
           {/* Overall banner */}
           <div className="mt-8 flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg px-5 py-4">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 flex-shrink-0" />
             <p className="text-sm font-semibold text-emerald-400">All systems operational</p>
           </div>
 

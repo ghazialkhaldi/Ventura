@@ -248,7 +248,7 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
               <p className="text-xs">© 2026 Ventura Financial Intelligence, Inc. All rights reserved.</p>
               <div className="flex items-center gap-1 text-xs">
                 <Link href="/status" className="inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 hover:border-emerald-500/50 px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                   All systems operational
                 </Link>
               </div>

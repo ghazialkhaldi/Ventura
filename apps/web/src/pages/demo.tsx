@@ -167,7 +167,7 @@ export default function DemoPage() {
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
             <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-2">Product demo</p>
-            <h1 className="text-[1.9rem] font-bold text-text-primary leading-tight">Your finance ops platform, live</h1>
+            <h1 className="text-[1.9rem] font-normal text-text-primary leading-tight">Your finance ops platform, live</h1>
             <p className="text-sm text-text-muted mt-1.5 max-w-xl">
               A full preview of Ventura with illustrative data: the exact interface your finance team would use.
               Connect your accounting stack to see real findings within hours.
@@ -315,7 +315,7 @@ export default function DemoPage() {
                     </div>
                     <div className="px-4 py-4 flex flex-col items-center justify-center gap-1 flex-shrink-0">
                       <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest">At Risk</p>
-                      <p className="text-xl font-bold text-red-400">{fmtC(ANOMALIES[0].amount)}</p>
+                      <p className="text-xl font-normal text-red-400">{fmtC(ANOMALIES[0].amount)}</p>
                       <div className="flex items-center gap-1.5">
                         <div className="w-14 h-1 bg-surface-overlay overflow-hidden">
                           <div className="h-full bg-text-muted" style={{ width: `${ANOMALIES[0].confidence}%` }} />
@@ -347,7 +347,7 @@ export default function DemoPage() {
                 {/* Page sub-header */}
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h2 className="text-base font-bold text-text-primary">Acme Corporation</h2>
+                    <h2 className="text-base font-medium text-text-primary">Acme Corporation</h2>
                     <p className="text-xs text-text-muted mt-0.5">Jul 2025 – Jun 2026 · 3 files · 1,284 transactions</p>
                   </div>
                 </div>
@@ -362,7 +362,7 @@ export default function DemoPage() {
                   ].map(k => (
                     <div key={k.label} className="bg-surface-raised border border-border px-4 py-3 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
                       <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1.5">{k.label}</p>
-                      <p className={`text-2xl font-bold leading-none ${k.color}`}>{k.value}</p>
+                      <p className={`text-2xl font-normal leading-none ${k.color}`}>{k.value}</p>
                       <p className="text-xs text-text-muted mt-1">{k.sub}</p>
                     </div>
                   ))}
@@ -411,7 +411,7 @@ export default function DemoPage() {
                           <p className="text-sm font-semibold text-text-primary">Spend Trend</p>
                           <p className="text-xs text-text-muted">12 months</p>
                         </div>
-                        <span className="text-xs font-bold text-text-secondary">{fmtC(totalSpend)} total</span>
+                        <span className="text-xs font-medium text-text-secondary">{fmtC(totalSpend)} total</span>
                       </div>
                       <div className="px-2 py-3 h-36">
                         <ResponsiveContainer width="100%" height="100%">
@@ -455,7 +455,7 @@ export default function DemoPage() {
                               <p className="text-[11px] text-text-muted truncate">{a.vendor} · {a.category}</p>
                             </div>
                             <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                              <p className={`text-xs font-bold ${SEV_AMT[a.sev]}`}>{fmtC(a.amount)}</p>
+                              <p className={`text-xs font-medium ${SEV_AMT[a.sev]}`}>{fmtC(a.amount)}</p>
                               <div className="flex items-center gap-1">
                                 <div className="w-8 h-1 bg-surface-overlay overflow-hidden">
                                   <div className="h-full bg-text-muted" style={{ width: `${a.confidence}%` }} />
@@ -479,7 +479,7 @@ export default function DemoPage() {
                           <p className="text-sm font-semibold text-text-primary">Savings Opportunities</p>
                           <p className="text-xs text-text-muted">Duplicate & recoverable</p>
                         </div>
-                        <p className="text-sm font-bold text-text-primary">{fmtC(totalSavings)}</p>
+                        <p className="text-sm font-medium text-text-primary">{fmtC(totalSavings)}</p>
                       </div>
                       <div className="p-4 space-y-2.5">
                         {DUPLICATES.map(d => (
@@ -488,12 +488,12 @@ export default function DemoPage() {
                               <p className="text-xs font-semibold text-text-secondary truncate">{d.vendor}</p>
                               <p className="text-[10px] text-text-muted">{d.confidence}% confidence</p>
                             </div>
-                            <span className="text-xs font-bold text-text-primary flex-shrink-0 ml-3">{fmtC(d.amount)}</span>
+                            <span className="text-xs font-medium text-text-primary flex-shrink-0 ml-3">{fmtC(d.amount)}</span>
                           </div>
                         ))}
                         <div className="pt-2.5 border-t border-border-subtle flex items-center justify-between">
                           <span className="text-[11px] font-bold text-text-muted uppercase tracking-wide">Total recoverable</span>
-                          <span className="text-xs font-bold text-text-primary">{fmtC(totalSavings)}</span>
+                          <span className="text-xs font-medium text-text-primary">{fmtC(totalSavings)}</span>
                         </div>
                       </div>
                     </div>
@@ -595,7 +595,7 @@ export default function DemoPage() {
         <div className="grid md:grid-cols-[1fr_auto] gap-10 items-center">
           <div>
             <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-4">Ready to go live?</p>
-            <h2 className="text-2xl font-bold text-white mb-3">Connect your financial stack and see real findings</h2>
+            <h2 className="text-2xl font-normal text-white mb-3">Connect your financial stack and see real findings</h2>
             <p className="text-sm text-text-muted leading-relaxed max-w-lg">
               Most finance teams identify their first findings within hours of their first sync.
               Talk to our team and we&apos;ll get you set up with your real data.

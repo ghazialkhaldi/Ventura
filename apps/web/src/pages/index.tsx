@@ -84,13 +84,13 @@ export default function HomePage() {
     <PublicLayout title="Financial Operations Intelligence">
 
       {/* ── Hero ── */}
-      <section className="bg-gradient-to-b from-surface-raised to-surface border-b border-border pt-10 pb-12">
+      <section className="bg-surface-raised border-b border-border pt-16 pb-20">
         <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
           <div className="grid lg:grid-cols-[1fr_1fr] gap-12 items-start">
 
             {/* Left: copy */}
             <div className="pt-2">
-              <h1 className="text-[3rem] font-bold leading-[1.08] tracking-tight text-text-primary mb-5">
+              <h1 className="text-[3.25rem] font-normal leading-[1.12] tracking-[-0.02em] text-text-primary mb-6">
                 Find spend anomalies before they close
               </h1>
               <p className="text-lg text-text-secondary leading-relaxed mb-8 max-w-lg">
@@ -109,7 +109,7 @@ export default function HomePage() {
 
             {/* Right: demo chart */}
             <div className="lg:pt-2">
-              <div className="bg-surface-raised border border-border shadow-[0_4px_24px_-4px_rgba(0,0,0,0.10)] overflow-hidden">
+              <div className="bg-surface-raised border border-border overflow-hidden">
                 <div className="px-4 py-3 bg-surface-raised border-b border-border flex items-center justify-between">
                   <div>
                     <p className="text-xs font-semibold text-text-secondary">Spend & Anomaly Overview</p>
@@ -167,7 +167,7 @@ export default function HomePage() {
       {/* ── Integration logo stream ── */}
       <section className="bg-surface border-b border-border py-6">
         <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 mb-5 flex items-center justify-between flex-wrap gap-2">
-          <p className="text-base font-semibold text-text-secondary">Connects to your existing financial stack</p>
+          <p className="text-base text-text-secondary">Connects to your existing financial stack</p>
           <p className="text-xs text-text-muted">Also available: REST API, webhook, SFTP and custom ETL.</p>
         </div>
 
@@ -181,7 +181,7 @@ export default function HomePage() {
                 className="flex items-center gap-3 bg-surface-raised border border-border px-5 py-3 flex-shrink-0"
               >
                 <BrandIcon brand={b.brand} size={26} />
-                <span className="text-sm font-semibold text-text-secondary whitespace-nowrap">{b.name}</span>
+                <span className="text-sm font-medium text-text-secondary whitespace-nowrap">{b.name}</span>
               </div>
             ))}
           </div>
@@ -192,12 +192,12 @@ export default function HomePage() {
       {capabilities.map((cap, i) => {
         const isEven = i % 2 === 0
         return (
-          <section key={cap.id} id={cap.id} className={`py-14 border-b border-border ${isEven ? 'bg-surface-raised' : 'bg-surface'}`}>
+          <section key={cap.id} id={cap.id} className={`py-20 border-b border-border ${isEven ? 'bg-surface-raised' : 'bg-surface'}`}>
             <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
               <div className="grid lg:grid-cols-2 gap-14 items-center">
                 <div className={!isEven ? 'lg:order-2' : ''}>
                   <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-3">{cap.eyebrow}</p>
-                  <h2 className="text-[2rem] font-bold text-text-primary mb-4 leading-snug">{cap.title}</h2>
+                  <h2 className="text-[2rem] font-normal text-text-primary mb-5 leading-snug tracking-[-0.01em]">{cap.title}</h2>
                   <p className="text-base text-text-secondary leading-relaxed mb-6">{cap.body}</p>
                   <ul className="border-t border-border">
                     {cap.bullets.map(b => (
@@ -224,12 +224,12 @@ export default function HomePage() {
       })}
 
       {/* ── Transparency & Audit Trail ── */}
-      <section id="security" className="py-14 bg-surface-raised border-b border-border">
+      <section id="security" className="py-20 bg-surface-raised border-b border-border">
         <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
           <div className="grid md:grid-cols-2 gap-14 items-start">
             <div>
               <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-4">Transparency & Audit Trail</p>
-              <h2 className="text-[2rem] font-bold text-text-primary mb-4 leading-snug">
+              <h2 className="text-[2rem] font-normal text-text-primary mb-5 leading-snug tracking-[-0.01em]">
                 Every finding is explainable, logged, and traceable to source transactions
               </h2>
               <p className="text-base text-text-secondary leading-relaxed mb-8">
@@ -245,7 +245,7 @@ export default function HomePage() {
                   { title: 'Data masking',            body: 'Run analysis on masked data to protect sensitive information during demos, onboarding or internal testing.' },
                 ].map(item => (
                   <div key={item.title} className="py-4 border-b border-border">
-                    <p className="text-base font-semibold text-text-primary">{item.title}</p>
+                    <p className="text-base font-medium text-text-primary">{item.title}</p>
                     <p className="text-sm text-text-muted mt-1 leading-relaxed">{item.body}</p>
                   </div>
                 ))}
@@ -280,12 +280,12 @@ export default function HomePage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="py-14 bg-[#0c1526]">
+      <section className="py-20 bg-[#0c1526]">
         <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
           <div className="grid md:grid-cols-[1fr_auto] gap-10 items-center">
             <div>
               <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-4">Get started</p>
-              <h2 className="text-[2rem] font-bold text-white mb-4 leading-snug">
+              <h2 className="text-[2rem] font-normal text-white mb-5 leading-snug tracking-[-0.01em]">
                 Built for enterprise finance operations
               </h2>
               <p className="text-base text-text-muted leading-relaxed max-w-lg">
@@ -319,7 +319,7 @@ function AnomalyPreviewPanel() {
     { title: 'Round number transaction above $10,000',         type: 'Round Number', sev: 'MEDIUM',   sevCls: 'border-amber-500/30 bg-amber-500/10 text-amber-400' },
   ]
   return (
-    <div className="bg-surface-raised border border-border shadow-sm overflow-hidden">
+    <div className="bg-surface-raised border border-border overflow-hidden">
       <div className="px-4 py-3 border-b border-border flex items-center justify-between bg-surface-overlay">
         <p className="text-xs font-semibold text-text-secondary">Anomaly Detection Results</p>
         <span className="text-[10px] text-text-muted border border-border px-2 py-0.5">Example</span>
@@ -356,7 +356,7 @@ function WorkflowPreviewPanel() {
   const statusLabel: Record<string, string> = { done: 'Done', stuck: 'Overdue', wait: 'Waiting' }
 
   return (
-    <div className="bg-surface-raised border border-border shadow-sm overflow-hidden">
+    <div className="bg-surface-raised border border-border overflow-hidden">
       <div className="px-4 py-3 border-b border-border bg-surface-overlay flex items-center justify-between">
         <p className="text-xs font-semibold text-text-secondary">Invoice Approval Workflow</p>
         <span className="text-[10px] font-semibold text-red-400 bg-red-500/10 border border-red-500/30 px-2 py-0.5">Overdue</span>
@@ -393,7 +393,7 @@ function GovernancePreviewPanel() {
     REVIEWED: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
   }
   return (
-    <div className="bg-surface-raised border border-border shadow-sm overflow-hidden">
+    <div className="bg-surface-raised border border-border overflow-hidden">
       <div className="px-4 py-3 border-b border-border bg-surface-overlay flex items-center justify-between">
         <p className="text-xs font-semibold text-text-secondary">Governance Log</p>
         <span className="text-[10px] text-text-muted border border-border px-2 py-0.5">Example</span>

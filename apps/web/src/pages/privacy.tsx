@@ -84,7 +84,7 @@ export default function PrivacyPage() {
     <PublicLayout title="Privacy Policy">
       <div className="max-w-2xl mx-auto px-6 py-16">
         <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-4">Legal</p>
-        <h1 className="text-3xl font-bold text-text-primary mb-3">Privacy Policy</h1>
+        <h1 className="text-3xl font-normal text-text-primary mb-3">Privacy Policy</h1>
         <p className="text-sm text-text-muted mb-10">Last updated: September 2026</p>
 
         <p className="text-sm text-text-secondary leading-relaxed mb-10">
@@ -96,7 +96,7 @@ export default function PrivacyPage() {
         <div className="space-y-9">
           {SECTIONS.map(section => (
             <section key={section.title}>
-              <h2 className="text-base font-bold text-text-primary mb-3">{section.title}</h2>
+              <h2 className="text-base font-medium text-text-primary mb-3">{section.title}</h2>
               <div className="space-y-3">
                 {section.body.map((p, i) => (
                   <p key={i} className="text-sm text-text-secondary leading-relaxed">{p}</p>

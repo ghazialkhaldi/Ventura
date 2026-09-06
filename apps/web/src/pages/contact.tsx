@@ -120,7 +120,7 @@ export default function ContactPage() {
 
             <div className="mb-8">
               <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-3">Get in touch</p>
-              <h1 className="text-[1.9rem] font-bold text-text-primary leading-tight mb-3">
+              <h1 className="text-[1.9rem] font-normal text-text-primary leading-tight mb-3">
                 Talk to our team
               </h1>
               <p className="text-sm text-text-muted leading-relaxed">
@@ -131,7 +131,7 @@ export default function ContactPage() {
             {submitted ? (
               <div className="bg-surface-raised border border-border p-10 text-center">
                 <CheckCircleIcon className="w-10 h-10 text-emerald-400 mx-auto mb-4" />
-                <h2 className="text-lg font-bold text-text-primary mb-2">Message sent</h2>
+                <h2 className="text-lg font-normal text-text-primary mb-2">Message sent</h2>
                 <p className="text-sm text-text-muted max-w-xs mx-auto">
                   Thanks for reaching out. We'll be in touch within one business day.
                 </p>
@@ -149,7 +149,7 @@ export default function ContactPage() {
                   {/* Row 1 */}
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-text-muted uppercase tracking-widest mb-1.5">
+                      <label className="block text-xs font-medium text-text-muted uppercase tracking-widest mb-1.5">
                         Full Name <span className="text-red-400">*</span>
                       </label>
                       <input
@@ -159,7 +159,7 @@ export default function ContactPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-text-muted uppercase tracking-widest mb-1.5">
+                      <label className="block text-xs font-medium text-text-muted uppercase tracking-widest mb-1.5">
                         Work Email <span className="text-red-400">*</span>
                       </label>
                       <input
@@ -173,7 +173,7 @@ export default function ContactPage() {
                   {/* Row 2 */}
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-text-muted uppercase tracking-widest mb-1.5">
+                      <label className="block text-xs font-medium text-text-muted uppercase tracking-widest mb-1.5">
                         Business Name <span className="text-red-400">*</span>
                       </label>
                       <input
@@ -183,7 +183,7 @@ export default function ContactPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-text-muted uppercase tracking-widest mb-1.5">
+                      <label className="block text-xs font-medium text-text-muted uppercase tracking-widest mb-1.5">
                         Company Size <span className="text-red-400">*</span>
                       </label>
                       <select
@@ -199,7 +199,7 @@ export default function ContactPage() {
 
                   {/* Message */}
                   <div>
-                    <label className="block text-xs font-bold text-text-muted uppercase tracking-widest mb-1.5">
+                    <label className="block text-xs font-medium text-text-muted uppercase tracking-widest mb-1.5">
                       Message <span className="text-red-400">*</span>
                     </label>
                     <textarea
@@ -220,7 +220,7 @@ export default function ContactPage() {
                   <button
                     type="submit"
                     disabled={sending}
-                    className="inline-flex items-center gap-2 bg-accent-500 hover:bg-accent-600 disabled:opacity-60 text-white text-sm font-bold px-5 py-2.5 transition-colors flex-shrink-0"
+                    className="inline-flex items-center gap-2 bg-accent-500 hover:bg-accent-600 disabled:opacity-60 text-white text-sm font-medium px-5 py-2.5 transition-colors flex-shrink-0"
                   >
                     {sending ? (
                       <>

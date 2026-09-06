@@ -31,10 +31,10 @@ const practices = [
 export default function SecurityPage() {
   return (
     <PublicLayout title="Security">
-      <section className="bg-gradient-to-b from-surface-raised to-surface border-b border-border py-16">
+      <section className="bg-surface-raised border-b border-border py-20">
         <div className="max-w-3xl mx-auto px-6 text-center">
           <p className="text-xs font-semibold text-accent-400 uppercase tracking-widest mb-3">Security</p>
-          <h1 className="text-3xl sm:text-4xl font-bold text-text-primary leading-tight">
+          <h1 className="text-3xl sm:text-4xl font-normal text-text-primary leading-tight">
             Your financial data, protected at every layer
           </h1>
           <p className="text-base text-text-muted mt-4 leading-relaxed">
@@ -44,12 +44,12 @@ export default function SecurityPage() {
         </div>
       </section>
 
-      <section className="py-14 bg-surface-raised border-b border-border">
+      <section className="py-20 bg-surface-raised border-b border-border">
         <div className="max-w-4xl mx-auto px-6">
           <div className="grid sm:grid-cols-2 gap-5">
             {practices.map(p => (
               <div key={p.title} className="border border-border rounded-lg p-5 hover:border-border-strong transition-colors">
-                <h3 className="text-sm font-bold text-text-primary mb-1.5">{p.title}</h3>
+                <h3 className="text-sm font-medium text-text-primary mb-1.5">{p.title}</h3>
                 <p className="text-sm text-text-muted leading-relaxed">{p.desc}</p>
               </div>
             ))}
@@ -57,9 +57,9 @@ export default function SecurityPage() {
         </div>
       </section>
 
-      <section className="py-14 bg-surface">
+      <section className="py-20 bg-surface">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <h2 className="text-xl font-bold text-text-primary mb-3">Reporting a vulnerability</h2>
+          <h2 className="text-xl font-normal text-text-primary mb-3">Reporting a vulnerability</h2>
           <p className="text-sm text-text-muted mb-6 leading-relaxed">
             We take security reports seriously. If you believe you've found a vulnerability in Ventura,
             please reach out and our team will respond promptly.

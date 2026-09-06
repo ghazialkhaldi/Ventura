@@ -49,13 +49,13 @@ export default function TermsPage() {
       <section className="py-14 bg-surface-raised">
         <div className="max-w-3xl mx-auto px-6">
           <p className="text-xs font-semibold text-accent-400 uppercase tracking-widest mb-3">Legal</p>
-          <h1 className="text-3xl font-bold text-text-primary">Terms of Service</h1>
+          <h1 className="text-3xl font-normal text-text-primary">Terms of Service</h1>
           <p className="text-sm text-text-muted mt-2">Last updated: July 2026</p>
 
           <div className="mt-10 space-y-8">
             {sections.map(s => (
               <div key={s.title}>
-                <h2 className="text-base font-bold text-text-primary mb-2">{s.title}</h2>
+                <h2 className="text-base font-medium text-text-primary mb-2">{s.title}</h2>
                 <p className="text-sm text-text-secondary leading-relaxed">{s.body}</p>
               </div>
             ))}

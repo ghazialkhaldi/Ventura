@@ -37,10 +37,10 @@ const guides = [
 export default function DocsPage() {
   return (
     <PublicLayout title="Documentation">
-      <section className="bg-gradient-to-b from-surface-raised to-surface border-b border-border py-14">
+      <section className="bg-surface-raised border-b border-border py-20">
         <div className="max-w-3xl mx-auto px-6 text-center">
           <p className="text-xs font-semibold text-accent-400 uppercase tracking-widest mb-3">Documentation</p>
-          <h1 className="text-3xl font-bold text-text-primary">Learn Ventura</h1>
+          <h1 className="text-3xl font-normal text-text-primary">Learn Ventura</h1>
           <p className="text-base text-text-muted mt-3">
             Everything you need to set up your workspace, connect data, and put AI-powered
             financial intelligence to work.
@@ -48,12 +48,12 @@ export default function DocsPage() {
         </div>
       </section>
 
-      <section className="py-14 bg-surface-raised">
+      <section className="py-20 bg-surface-raised">
         <div className="max-w-5xl mx-auto px-6">
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {guides.map(g => (
               <div key={g.title} id={g.title === 'API reference' ? 'api' : undefined} className="border border-border rounded-lg p-5 hover:border-border-strong hover:shadow-sm transition-all">
-                <h3 className="text-sm font-bold text-text-primary mb-1.5">{g.title}</h3>
+                <h3 className="text-sm font-medium text-text-primary mb-1.5">{g.title}</h3>
                 <p className="text-xs text-text-muted leading-relaxed mb-3">{g.desc}</p>
                 <ol className="space-y-1.5">
                   {g.steps.map((s, i) => (

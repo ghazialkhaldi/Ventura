@@ -13,18 +13,53 @@ const ACCOUNT_SYN     = ['account','account name','account number','gl account',
 
 // ─── Column detection ─────────────────────────────────────────────────────────
 
+/** Split a header into lowercase word tokens: "Net Amount (USD)" -> [net, amount, usd] */
+function tokenize(header: string): string[] {
+  return header.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean)
+}
+
+/**
+ * Match a column by synonym, from strictest to loosest.
+ *
+ * Naive substring matching is actively dangerous with short synonyms and was
+ * the cause of vendors showing up as numbers: "to" (a vendor synonym) matches
+ * "Total", so vendor bound to a numeric column. "cr" matches "Description",
+ * "dr" matches "Address". Short synonyms are therefore only ever honoured as
+ * whole words, and loose substring matching is reserved for synonyms long
+ * enough to be unambiguous.
+ */
 function matchCol(headers: string[], synonyms: string[]): string | null {
-  const low = headers.map(h => h.toLowerCase().trim())
-  // exact match first
+  const norm = headers.map(h => h.toLowerCase().trim())
+  const toks = headers.map(tokenize)
+
+  // 1. Exact header match.
   for (const syn of synonyms) {
-    const i = low.indexOf(syn)
+    const i = norm.indexOf(syn)
     if (i >= 0) return headers[i]
   }
-  // substring match
+
+  // 2. Whole-word match. A single-word synonym must equal one of the header's
+  //    tokens; a multi-word synonym must appear as a consecutive run of them.
   for (const syn of synonyms) {
-    const i = low.findIndex(h => h.includes(syn))
+    const synToks = tokenize(syn)
+    if (synToks.length === 0) continue
+    const i = toks.findIndex(t => {
+      if (synToks.length === 1) return t.includes(synToks[0])
+      for (let s = 0; s + synToks.length <= t.length; s++) {
+        if (synToks.every((st, k) => t[s + k] === st)) return true
+      }
+      return false
+    })
     if (i >= 0) return headers[i]
   }
+
+  // 3. Loose substring, only for synonyms long enough to be safe.
+  for (const syn of synonyms) {
+    if (syn.length < 5) continue
+    const i = norm.findIndex(h => h.includes(syn))
+    if (i >= 0) return headers[i]
+  }
+
   return null
 }
 
@@ -229,6 +264,113 @@ function isUsable(headers: string[]): boolean {
   return !!m.vendor && !!(m.amount || m.debit || m.credit)
 }
 
+// ─── Mapping validation ───────────────────────────────────────────────────────
+
+function sample(rows: RawRow[], col: string, n = 40): string[] {
+  return rows.slice(0, n).map(r => (r[col] ?? '').trim()).filter(Boolean)
+}
+
+function looksNumeric(v: string): boolean {
+  const s = v.replace(/[$£€¥₹,\s()]/g, '')
+  return s !== '' && !isNaN(Number(s))
+}
+
+/** Share of sampled values in a column that parse as numbers. */
+function numericRatio(rows: RawRow[], col: string): number {
+  const vals = sample(rows, col)
+  if (vals.length === 0) return 0
+  return vals.filter(looksNumeric).length / vals.length
+}
+
+/**
+ * Whether a value actually looks like a date.
+ *
+ * Deliberately does not use parseDate: that returns the raw input when it
+ * cannot parse, so "Stripe" comes back as "Stripe" rather than empty. Nor does
+ * it trust `new Date` alone, which reads "100234" as the year 100234 and would
+ * make an invoice-number column look like dates.
+ */
+function looksLikeDate(v: string): boolean {
+  const s = v.trim()
+  if (!s) return false
+  if (/^-?\d+(\.\d+)?$/.test(s)) return false            // bare number, not a date
+  if (/^\d{4}[\/\-.]\d{1,2}[\/\-.]\d{1,2}/.test(s)) return true   // 2026-01-04
+  if (/^\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4}$/.test(s)) return true // 04/01/2026
+  // Textual forms such as "4 Jan 2026" or "Jan 4, 2026".
+  if (/[a-z]{3}/i.test(s) && /\d/.test(s) && !isNaN(new Date(s).getTime())) return true
+  return false
+}
+
+/** Share of sampled values in a column that look like dates. */
+function dateRatio(rows: RawRow[], col: string): number {
+  const vals = sample(rows, col)
+  if (vals.length === 0) return 0
+  return vals.filter(looksLikeDate).length / vals.length
+}
+
+/** Looks like an identifier or a year rather than money. */
+function looksLikeIdOrYear(header: string, rows: RawRow[], col: string): boolean {
+  if (/\b(id|no|num|number|code|ref|reference|qty|quantity|count|year|fy)\b/.test(header.toLowerCase())) return true
+  const vals = sample(rows, col).filter(looksNumeric).map(v => Math.abs(parseAmount(v)))
+  if (vals.length === 0) return false
+  const allWholeSmall = vals.every(v => Number.isInteger(v) && v > 1900 && v < 2200)
+  return allWholeSmall
+}
+
+/**
+ * Header names alone are not trustworthy. Confirm the chosen columns against
+ * the data and repair them if they disagree, which is what turns a
+ * mis-detected header into vendors rendered as numbers and a total of a
+ * couple of dollars.
+ */
+function validateMapping(rows: RawRow[], headers: string[], mapping: ColumnMapping): ColumnMapping {
+  const m = { ...mapping }
+
+  // If the header names gave us no date column, recover it from the data so
+  // it is not later mistaken for the vendor.
+  if (!m.date) {
+    const dateCol = headers.find(h => h !== m.vendor && dateRatio(rows, h) > 0.7)
+    if (dateCol) m.date = dateCol
+  }
+
+  // A vendor column should hold names: not figures, and not dates.
+  if (m.vendor && numericRatio(rows, m.vendor) > 0.5)  m.vendor = null
+  if (m.vendor && dateRatio(rows, m.vendor) > 0.7)     m.vendor = null
+  if (!m.vendor) {
+    const textCols = headers
+      .filter(h => numericRatio(rows, h) < 0.3 && sample(rows, h).length > 0)
+      .filter(h => dateRatio(rows, h) <= 0.7)
+      .filter(h => h !== m.date && h !== m.category && h !== m.account)
+    // Prefer the column with the most distinct values: vendors vary, labels repeat.
+    const best = textCols
+      .map(h => ({ h, distinct: new Set(sample(rows, h).map(v => v.toLowerCase())).size }))
+      .sort((a, b) => b.distinct - a.distinct)[0]
+    m.vendor = best?.h ?? null
+  }
+
+  // An amount column should hold figures, and not be an id, count or year.
+  const amountBad = m.amount && (numericRatio(rows, m.amount) < 0.5 || looksLikeIdOrYear(m.amount, rows, m.amount))
+  if (amountBad) m.amount = null
+
+  if (!m.amount && !m.debit && !m.credit) {
+    const numeric = headers
+      .filter(h => h !== m.vendor && h !== m.date)
+      .filter(h => numericRatio(rows, h) >= 0.6)
+      .filter(h => !looksLikeIdOrYear(h, rows, h))
+    // Money columns tend to carry the larger magnitudes.
+    const best = numeric
+      .map(h => {
+        const vals = sample(rows, h).filter(looksNumeric).map(v => Math.abs(parseAmount(v)))
+        const mean = vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : 0
+        return { h, mean }
+      })
+      .sort((a, b) => b.mean - a.mean)[0]
+    if (best) m.amount = best.h
+  }
+
+  return m
+}
+
 // ─── CSV parser (PapaParse wrapper) ──────────────────────────────────────────
 
 export async function parseCSV(file: File): Promise<{ rows: RawRow[]; headers: string[] }> {
@@ -386,23 +528,11 @@ export async function parseFile(
     return { error: `No data rows found in ${file.name}` }
   }
 
-  const mapping = detectColumns(headers)
-
-  // Need at least a vendor and either amount or debit/credit
-  const hasVendor = !!(mapping.vendor)
-  const hasAmount = !!(mapping.amount || mapping.debit || mapping.credit)
-
-  if (!hasVendor || !hasAmount) {
-    // Try using the first numeric column as amount and first text column as vendor
-    const numericCols = headers.filter(h => {
-      const vals = rows.slice(0, 20).map(r => r[h]).filter(Boolean)
-      return vals.some(v => !isNaN(parseFloat(v.replace(/[$,]/g, ''))))
-    })
-    const textCols = headers.filter(h => !numericCols.includes(h))
-
-    if (!mapping.amount && numericCols.length > 0) mapping.amount = numericCols[0]
-    if (!mapping.vendor && textCols.length > 0)    mapping.vendor = textCols[0]
-  }
+  // Detect from the header names, then confirm each choice against the actual
+  // column contents. Names alone mislead: a header called "Total" can end up
+  // bound to vendor, which renders vendors as numbers and collapses the spend
+  // total. Validation repairs those picks from the data.
+  const mapping = validateMapping(rows, headers, detectColumns(headers))
 
   const transactions = rowsToTransactions(rows, mapping)
 

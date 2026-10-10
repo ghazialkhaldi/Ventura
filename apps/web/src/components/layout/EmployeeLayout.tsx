@@ -79,8 +79,8 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
     <>
       {/* Brand */}
       <div className="h-14 flex items-center justify-between px-5 flex-shrink-0">
-        <VenturaLogo variant="dark" height={15} />
-        <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-1 text-text-muted hover:text-text-secondary">
+        <VenturaLogo variant="light" height={15} />
+        <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-1.5 rounded-md text-white/70 hover:text-white hover:bg-white/10" aria-label="Close navigation">
           <XMarkIcon className="w-5 h-5" />
         </button>
       </div>
@@ -88,11 +88,11 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
       {/* Company badge */}
       <div className="px-4 pt-4 pb-2">
         <div className="flex items-center gap-2.5 px-2 py-2 rounded-lg">
-          <div className="w-7 h-7 rounded-md bg-ink flex items-center justify-center flex-shrink-0">
-            <BuildingOfficeIcon className="w-4 h-4 text-white" />
+          <div className="w-7 h-7 rounded-md bg-white flex items-center justify-center flex-shrink-0">
+            <BuildingOfficeIcon className="w-4 h-4 text-sky-night" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium text-text-primary truncate">{companyName || user?.company || 'Your Workspace'}</p>
+            <p className="text-xs font-medium text-white truncate">{companyName || user?.company || 'Your Workspace'}</p>
             <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${roleInfo.color}`}>
               {roleInfo.label}
             </span>
@@ -102,7 +102,7 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto px-4 pt-2 pb-4 space-y-px">
-        <p className="px-2 mb-1 text-[12px] font-medium text-sidebar-muted">Navigation</p>
+        <p className="px-2 mb-1 text-[12px] font-medium text-white/55">Navigation</p>
         {navItems.map(item => {
           const active = isActive(item.href)
           const Icon = item.icon
@@ -112,22 +112,22 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
               href={item.href}
               className={clsx(
                 'flex items-center gap-2.5 h-8 px-2 rounded-md text-[13.5px] font-medium',
-                active ? 'bg-surface-raised text-text-primary shadow-card ring-1 ring-border' : 'text-sidebar-text hover:text-text-primary hover:bg-sidebar-hover',
+                active ? 'bg-white text-sky-night shadow-card' : 'text-white/80 hover:text-white hover:bg-white/10',
               )}
             >
-              <Icon className="w-4 h-4 flex-shrink-0" />
+              <Icon className={clsx('w-4 h-4 flex-shrink-0', active ? 'text-accent-600' : 'text-white/60')} />
               {item.label}
             </Link>
           )
         })}
 
         {/* Access level notice */}
-        <div className="mt-4 mx-1 px-3 py-2.5 bg-surface-overlay border border-border rounded-lg">
-          <p className="text-[12px] font-medium text-text-muted mb-1 flex items-center gap-1">
+        <div className="mt-4 mx-1 px-3 py-2.5 bg-white/10 rounded-lg">
+          <p className="text-[12px] font-medium text-white/80 mb-1 flex items-center gap-1">
             <LockClosedIcon className="w-3 h-3" />
             Access level
           </p>
-          <p className="text-[11px] text-text-muted leading-relaxed">
+          <p className="text-[12px] text-white/70 leading-relaxed">
             {role === 'editor'
               ? 'You can view and make changes across the workspace.'
               : role === 'analyst'
@@ -138,19 +138,20 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
       </nav>
 
       {/* User footer */}
-      <div className="border-t border-border px-4 py-3">
+      <div className="border-t border-white/10 px-4 py-3">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-full bg-accent-100 flex items-center justify-center flex-shrink-0">
-            <span className="text-accent-800 text-[11px] font-semibold">{userInitials}</span>
+          <div className="w-7 h-7 rounded-full bg-white/15 flex items-center justify-center flex-shrink-0">
+            <span className="text-white text-[11px] font-semibold">{userInitials}</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-text-primary truncate">{displayName}</p>
-            <p className="text-[10px] text-text-muted">Employee</p>
+            <p className="text-xs font-medium text-white truncate">{displayName}</p>
+            <p className="text-[12px] text-white/60">Employee</p>
           </div>
           <button
             onClick={handleSignOut}
             title="Sign out"
-            className="text-text-muted hover:text-text-secondary transition-colors p-1"
+            className="rounded-md text-white/60 hover:text-white hover:bg-white/10 p-1.5"
+            aria-label="Sign out"
           >
             <ArrowRightOnRectangleIcon className="w-4 h-4" />
           </button>
@@ -170,8 +171,8 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
         {sidebarOpen && (
           <div className="fixed inset-0 bg-ink/30 z-20 lg:hidden" onClick={() => setSidebarOpen(false)} />
         )}
-        <aside className={clsx(
-          'fixed inset-y-0 left-0 w-60 flex flex-col bg-sidebar-bg border-r border-sidebar-border z-30 transition-transform duration-300 ease-out-expo',
+        <aside style={{ backgroundImage: 'linear-gradient(to bottom, #12133a 0%, #1c1d52 42%, #2e2a6c 78%, #3f3484 100%)' }} className={clsx(
+          'fixed inset-y-0 left-0 w-60 flex flex-col text-white z-30 transition-transform duration-300 ease-out-expo',
           'lg:translate-x-0',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full',
         )}>

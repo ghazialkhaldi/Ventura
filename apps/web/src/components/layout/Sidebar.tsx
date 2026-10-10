@@ -18,6 +18,7 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const user = useCurrentUser()
   const [anomalyCount,  setAnomalyCount]  = useState(0)
   const [workflowCount, setWorkflowCount] = useState(0)
+  const [close, setClose] = useState<{ decided: number; total: number }>({ decided: 0, total: 0 })
 
   // Close on route change (handles mobile nav taps)
   useEffect(() => {
@@ -36,6 +37,10 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         const types = new Set(ds.anomalies.filter(a => a.status !== 'Resolved').map(a => a.type)).size
         setAnomalyCount(open)
         setWorkflowCount(types)
+        setClose({
+          decided: ds.anomalies.filter(a => a.status === 'Resolved' || a.status === 'Dismissed').length,
+          total:   ds.anomalies.length,
+        })
       } catch {}
     }
     refresh()
@@ -118,46 +123,42 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         />
       )}
 
-      <aside className={clsx(
-        'fixed inset-y-0 left-0 w-60 flex flex-col bg-sidebar-bg border-r border-sidebar-border z-30 transition-transform duration-300 ease-out-expo',
-        'lg:translate-x-0',
-        isOpen ? 'translate-x-0' : '-translate-x-full',
-      )}>
-
-        {/* Brand */}
+      {/* The rail is the dawn sky: the one place the brand's world enters the app. */}
+      <aside
+        className={clsx(
+          'fixed inset-y-0 left-0 w-60 flex flex-col text-white z-30 transition-transform duration-300 ease-out-expo',
+          'lg:translate-x-0',
+          isOpen ? 'translate-x-0' : '-translate-x-full',
+        )}
+        style={{ backgroundImage: 'linear-gradient(to bottom, #12133a 0%, #1c1d52 42%, #2e2a6c 78%, #3f3484 100%)' }}
+      >
         <div className="h-14 flex items-center px-5 flex-shrink-0">
           <div className="flex-1">
-            <VenturaLogo variant="dark" height={15} />
+            <VenturaLogo variant="light" height={15} />
           </div>
           <button
             onClick={onClose}
-            className="lg:hidden -mr-1 rounded-md text-sidebar-muted hover:text-sidebar-text hover:bg-sidebar-hover p-1.5"
+            className="lg:hidden -mr-1 rounded-md text-white/70 hover:text-white hover:bg-white/10 p-1.5"
             aria-label="Close navigation"
           >
             <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Workspace label */}
         <div className="px-3 pb-1">
           <div className="flex items-center gap-2.5 px-2 py-2 rounded-lg">
-            <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md bg-ink text-[11px] font-semibold text-white">
+            <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md bg-white text-[11px] font-semibold text-sky-night">
               {companyName.charAt(0).toUpperCase()}
             </span>
-            <div className="flex-1 min-w-0">
-              <p className="text-[13.5px] font-medium text-text-primary truncate">{companyName}</p>
-            </div>
-            <BuildingOfficeIcon className="w-4 h-4 text-sidebar-muted flex-shrink-0" aria-hidden />
+            <p className="flex-1 min-w-0 text-[13.5px] font-medium text-white truncate">{companyName}</p>
+            <BuildingOfficeIcon className="w-4 h-4 text-white/50 flex-shrink-0" aria-hidden />
           </div>
         </div>
 
-        {/* Navigation */}
         <nav className="flex-1 overflow-y-auto sidebar-scroll px-3 pt-3 pb-4 space-y-5">
           {navSections.map((section) => (
             <div key={section.label}>
-              <p className="px-2 mb-1 text-[12px] font-medium text-sidebar-muted">
-                {section.label}
-              </p>
+              <p className="px-2 mb-1 text-[12px] font-medium text-white/55">{section.label}</p>
               <ul className="space-y-px">
                 {section.items.map((item) => {
                   const active = isActive(item.href)
@@ -166,17 +167,17 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                     <li key={item.label}>
                       <Link
                         href={item.href}
+                        aria-current={active ? 'page' : undefined}
                         className={clsx(
                           'flex items-center gap-2.5 h-8 px-2 rounded-md text-[13.5px] font-medium',
-                          active
-                            ? 'bg-surface-raised text-text-primary shadow-card ring-1 ring-border'
-                            : 'text-sidebar-text hover:text-text-primary hover:bg-sidebar-hover',
+                          active ? 'bg-white text-sky-night shadow-card' : 'text-white/80 hover:text-white hover:bg-white/10',
                         )}
                       >
-                        <Icon className={clsx('w-4 h-4 flex-shrink-0', active ? 'text-accent-600' : 'text-sidebar-muted')} />
+                        <Icon className={clsx('w-4 h-4 flex-shrink-0', active ? 'text-accent-600' : 'text-white/60')} />
                         <span className="flex-1 truncate">{item.label}</span>
                         {!!item.badge && (
-                          <span className="min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-medium text-text-secondary bg-sidebar-active tabular-nums inline-flex items-center justify-center">
+                          <span className={clsx('min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-medium tabular-nums inline-flex items-center justify-center',
+                            active ? 'bg-accent-50 text-accent-700' : 'bg-white/15 text-white')}>
                             {item.badge}
                           </span>
                         )}
@@ -189,21 +190,22 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           ))}
         </nav>
 
-        {/* User */}
-        <div className="border-t border-sidebar-border px-3 py-3">
+        <CloseHorizon decided={close.decided} total={close.total} />
+
+        <div className="border-t border-white/10 px-3 py-3">
           <div className="flex items-center gap-2.5 px-2 py-1.5">
-            <div className="w-7 h-7 rounded-full bg-accent-100 flex items-center justify-center flex-shrink-0">
-              <span className="text-accent-800 text-[11px] font-semibold">{userInitials}</span>
+            <div className="w-7 h-7 rounded-full bg-white/15 flex items-center justify-center flex-shrink-0">
+              <span className="text-white text-[11px] font-semibold">{userInitials}</span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-medium text-text-primary truncate">{displayName}</p>
-              <p className="text-[12px] text-sidebar-muted capitalize">{user?.role ?? 'Admin'}</p>
+              <p className="text-[13px] font-medium text-white truncate">{displayName}</p>
+              <p className="text-[12px] text-white/60 capitalize">{user?.role ?? 'Admin'}</p>
             </div>
             <button
               onClick={handleSignOut}
               title="Sign out"
               aria-label="Sign out"
-              className="rounded-md text-sidebar-muted hover:text-text-primary hover:bg-sidebar-hover p-1.5"
+              className="rounded-md text-white/60 hover:text-white hover:bg-white/10 p-1.5"
             >
               <ArrowRightOnRectangleIcon className="w-4 h-4" />
             </button>
@@ -213,3 +215,24 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     </>
   )
 }
+
+/**
+ * The app's signature: the period's close as a sunrise. The sun sits below the
+ * horizon while findings are open and climbs as they are resolved or dismissed;
+ * at the last decision it is fully up.
+ */
+function CloseHorizon({ decided, total }: { decided: number; total: number }) {
+  if (!total) return null
+  const p = decided / total
+  return (
+    <Link href="/anomalies" className="group relative mx-3 mb-3 block h-[72px] overflow-hidden rounded-lg ring-1 ring-white/10" aria-label={`Close progress: ${decided} of ${total} findings decided`}>
+      <span aria-hidden className="absolute inset-0" style={{ backgroundImage: 'linear-gradient(to bottom, #2e2a6c 0%, #6b4c9a 55%, #c4718f 78%, #f39a7c 100%)' }} />
+      <span aria-hidden className="absolute left-1/2 h-16 w-16 -translate-x-1/2 rounded-full transition-[top] duration-700 ease-out-expo"
+        style={{ top: `${78 - p * 58}%`, background: 'radial-gradient(closest-side, rgb(255 244 220), rgb(255 214 170 / 0.75) 40%, transparent)' }} />
+      <span aria-hidden className="absolute inset-x-0 bottom-0 h-[22%]" style={{ background: 'linear-gradient(to bottom, #b0708f, #4b3f8f)' }} />
+      <span className="absolute left-2.5 top-2 text-[11.5px] font-medium text-white">Close</span>
+      <span className="absolute right-2.5 top-2 text-[11.5px] text-white/85 tabular-nums">{decided} of {total} decided</span>
+    </Link>
+  )
+}
+

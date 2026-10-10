@@ -249,13 +249,13 @@ export default function WorkflowsPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             {[
               { label: 'Workflow types',     value: stats.total,        icon: GitMerge,      color: 'text-text-secondary', bg: 'bg-surface-raised', border: 'border-border' },
-              { label: 'Critical/Bottleneck', value: stats.bottleneck,   icon: AlertTriangle, color: 'text-critical-fg',   bg: 'bg-critical-bg',    border: 'border-critical-line' },
-              { label: 'Items in review',    value: stats.totalInProg,  icon: Clock,         color: 'text-positive-fg',  bg: 'bg-positive-bg',   border: 'border-positive-line' },
-              { label: 'Overdue items',      value: stats.totalOverdue, icon: AlertCircle,   color: 'text-medium-fg', bg: 'bg-medium-bg',  border: 'border-medium-line' },
+              { label: 'Critical/Bottleneck', value: stats.bottleneck,   icon: AlertTriangle, color: 'text-critical-fg',   bg: 'bg-surface-raised', border: 'border-border' },
+              { label: 'Items in review',    value: stats.totalInProg,  icon: Clock,         color: 'text-positive-fg',  bg: 'bg-surface-raised', border: 'border-border' },
+              { label: 'Overdue items',      value: stats.totalOverdue, icon: AlertCircle,   color: 'text-medium-fg', bg: 'bg-surface-raised', border: 'border-border' },
             ].map((s) => {
               const Icon = s.icon
               return (
-                <div key={s.label} className={`${s.bg} border ${s.border} rounded-lg px-4 py-3 flex items-center gap-3`}>
+                <div key={s.label} className={`${s.bg} border ${s.border} rounded-xl shadow-card px-4 py-3 flex items-center gap-3`}>
                   <Icon className={`w-5 h-5 ${s.color} flex-shrink-0`} />
                   <div>
                     <p className={`text-xl font-medium tracking-[-0.02em] ${s.color}`}>{s.value}</p>

@@ -243,7 +243,13 @@ export default function LoginPage() {
         <span className="absolute top-3 right-4 text-[10px] text-text-muted z-50 select-none">v1.4</span>
 
         {/* ── Left panel ── */}
-        <div className="hidden lg:flex lg:w-[440px] xl:w-[500px] bg-ink text-ink-text flex-col justify-between p-10 xl:p-12 flex-shrink-0">
+        <div className="hidden lg:flex lg:w-[440px] xl:w-[500px] relative overflow-hidden text-white flex-col justify-between p-10 xl:p-12 flex-shrink-0"
+          style={{ backgroundImage: 'linear-gradient(to bottom, #1a1b4d 0%, #4b3f8f 40%, #c4718f 70%, #f39a7c 84%, #ffd3a1 100%)' }}>
+          {/* the dawn, as on the site: a sun on the horizon and still water */}
+          <span aria-hidden className="pointer-events-none absolute left-[62%] top-[86%] h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full"
+            style={{ background: 'radial-gradient(closest-side, rgb(255 246 222 / 0.95), rgb(255 214 176 / 0.45) 35%, transparent)' }} />
+          <span aria-hidden className="pointer-events-none absolute inset-x-0 top-[86%] bottom-0"
+            style={{ background: 'linear-gradient(to bottom, #e7a38c, #7e5c8e 55%, #3a2f68)' }} />
           <Link href="/" className="no-underline">
             <VenturaLogo variant="light" height={17} />
           </Link>
@@ -253,18 +259,18 @@ export default function LoginPage() {
               <h2 className="font-display font-medium text-[2rem] leading-[1.1] tracking-[-0.025em] text-white mb-5">
                 Find the spend that needs a second look before close.
               </h2>
-              <p className="text-[15.5px] text-ink-muted leading-relaxed mb-9">
+              <p className="text-[15.5px] text-white/85 leading-relaxed mb-9">
                 Every finding traced to the rows behind it, and nothing changes
                 until someone on your team decides.
               </p>
-              <ul className="border-t border-ink-line">
+              <ul className="border-t border-white/20">
                 {[
                   'Ten checks, from duplicates to period cut-off',
                   'Confidence and reasoning on every finding',
                   'Every status change logged with who and when',
                   'Role-based access with email verification',
                 ].map(item => (
-                  <li key={item} className="py-3 border-b border-ink-line text-[14.5px] text-ink-text">
+                  <li key={item} className="py-3 border-b border-white/20 text-[14.5px] text-white">
                     {item}
                   </li>
                 ))}
@@ -272,10 +278,10 @@ export default function LoginPage() {
             </div>
           ) : (
             <div>
-              <div className="w-11 h-11 rounded-xl bg-ink-raised border border-ink-line flex items-center justify-center mb-6">
+              <div className="w-11 h-11 rounded-xl bg-white/15 flex items-center justify-center mb-6">
                 {mfaIsEmail
-                  ? <Mail className="w-5 h-5 text-accent-300" />
-                  : <ShieldCheck className="w-5 h-5 text-accent-300" />
+                  ? <Mail className="w-5 h-5 text-white" />
+                  : <ShieldCheck className="w-5 h-5 text-white" />
                 }
               </div>
               <h2 className="font-display font-medium text-[1.75rem] leading-[1.12] tracking-[-0.025em] text-white mb-4">
@@ -284,20 +290,20 @@ export default function LoginPage() {
                   : 'Your workspace is protected with multi-factor authentication'
                 }
               </h2>
-              <p className="text-[15px] text-ink-muted leading-relaxed mb-8">
+              <p className="text-[15px] text-white/85 leading-relaxed mb-8">
                 {mfaIsEmail
                   ? `We sent a 6-digit code to ${email}. It expires in 10 minutes.`
                   : 'Ventura requires a second verification step each time you sign in, keeping your financial data secure even if your password is compromised.'
                 }
               </p>
-              <ul className="border-t border-ink-line">
+              <ul className="border-t border-white/20">
                 {[
                   'MFA enforced for all workspace members',
                   mfaIsEmail ? 'Email verification code sent securely' : 'TOTP authenticator app support',
                   'Each session verified independently',
                   'Role based access control',
                 ].map(item => (
-                  <li key={item} className="py-3 border-b border-ink-line text-[14.5px] text-ink-text">
+                  <li key={item} className="py-3 border-b border-white/20 text-[14.5px] text-white">
                     {item}
                   </li>
                 ))}
@@ -305,7 +311,7 @@ export default function LoginPage() {
             </div>
           )}
 
-          <p className="text-[12.5px] text-ink-muted">© 2026 Ventura Financial Intelligence, Inc.</p>
+          <p className="relative text-[12.5px] text-white/80">© 2026 Ventura Financial Intelligence, Inc.</p>
         </div>
 
         {/* ── Right panel ── */}

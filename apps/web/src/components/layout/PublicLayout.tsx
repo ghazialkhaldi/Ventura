@@ -61,15 +61,23 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
 
   // The header gains its hairline only once content scrolls beneath it
   const [scrolled, setScrolled] = useState(false)
+  // The bar takes on the surface beneath it: on the ultramarine field it is
+  // blue with a white mark, over paper it is white. Regions mark themselves
+  // with data-field.
+  const [overField, setOverField] = useState(true)
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 4)
+    const onScroll = () => {
+      setScrolled(window.scrollY > 4)
+      const el = document.elementFromPoint(window.innerWidth / 2, 66)
+      setOverField(!!el?.closest('[data-field]'))
+    }
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
   const close   = () => setDrawerOpen(false)
-  const onField = !scrolled
+  const onField = overField
 
   return (
     <>
@@ -80,10 +88,10 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
 
         {/* Every marketing page opens on the ultramarine field; the bar sits on
             it until content scrolls beneath, then turns white. */}
-        <header className={`sticky top-0 z-50 border-b transition-colors duration-200 ${scrolled ? 'bg-surface-raised border-border' : 'bg-field border-transparent'}`}>
+        <header className={`sticky top-0 z-50 border-b transition-colors duration-200 ${onField ? 'bg-field border-transparent' : `bg-surface-raised ${scrolled ? 'border-border' : 'border-transparent'}`}`}>
           <div className="max-w-page mx-auto h-16 px-5 sm:px-8 flex items-center gap-8">
             <Link href="/" className="shrink-0 py-2" onClick={close} aria-label="Ventura home">
-              <VenturaLogo variant={scrolled ? 'dark' : 'light'} height={17} />
+              <VenturaLogo variant={onField ? 'light' : 'dark'} height={17} />
             </Link>
 
             <nav className="hidden md:flex items-center gap-1" aria-label="Main">

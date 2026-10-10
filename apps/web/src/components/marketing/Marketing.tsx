@@ -11,7 +11,7 @@ export const H2_CLASS = 'font-display font-medium text-[1.75rem] leading-[1.1] t
 /** Every marketing page opens on the ultramarine field, under the header. */
 export function PageIntro({ title, lead, meta, children }: { title: string; lead?: ReactNode; meta?: ReactNode; children?: ReactNode }) {
   return (
-    <section className="bg-field text-white">
+    <section data-field className="bg-field text-white">
       <div className="max-w-page mx-auto px-5 sm:px-8 pt-12 sm:pt-16 pb-14 sm:pb-20">
         <h1 className={`${H1_CLASS} !text-white max-w-[22ch]`}>{title}</h1>
         {meta && <p className="mt-4 text-[14px] text-field-muted">{meta}</p>}
@@ -81,7 +81,7 @@ export function ClosingCTA({ title, body, primary = { href: '/demo', label: 'Wal
   secondary?: { href: string; label: string } | null
 }) {
   return (
-    <section className="bg-field text-white">
+    <section data-field className="bg-field text-white">
       <div className="max-w-page mx-auto px-5 sm:px-8 py-20 sm:py-28 grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end">
         <div className="max-w-[38rem]">
           <h2 className="font-display font-medium text-[2.25rem] leading-[1.06] tracking-[-0.03em] sm:text-[3.25rem] text-white">{title}</h2>

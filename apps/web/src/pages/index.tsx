@@ -3,7 +3,7 @@ import PublicLayout from '../components/layout/PublicLayout'
 import {
   FindingsFrame, Figure, VendorBaselineChart, ApprovalLimitChart, MappingPanel, AuditTrail,
 } from '../components/marketing/ProductPreview'
-import { LedgerMatrix, SystemsStrip } from '../components/marketing/Hero'
+import { ScrollScanHero, SystemsStrip } from '../components/marketing/Hero'
 import { ClosingCTA } from '../components/marketing/Marketing'
 import { ArrowRightIcon } from '@radix-ui/react-icons'
 
@@ -27,33 +27,30 @@ export default function HomePage() {
   return (
     <PublicLayout>
 
-      {/* ── Hero: the ultramarine field, with the scan as its proof ── */}
-      <section className="bg-field text-white">
-        <div className="max-w-page mx-auto px-5 sm:px-8 pt-12 sm:pt-16 lg:pt-20 grid gap-14 lg:grid-cols-[minmax(0,29rem)_minmax(0,1fr)] lg:gap-16 lg:items-center">
-          <div>
-            <h1 className="font-display font-medium text-[2.5rem] leading-[1.04] tracking-[-0.035em] sm:text-[3.5rem] lg:text-[3.75rem] max-w-[13ch] text-white">
-              Find the spend that needs a second look before close.
-            </h1>
-            <p className="mt-7 max-w-[32rem] text-[17px] sm:text-[18px] leading-[1.6] text-field-muted">
-              Upload a GL, AP or bank export. Ventura reads every row, returns a short ranked list of
-              findings traced to the rows behind them, and nothing changes until your team decides.
-            </p>
-            <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-3">
-              <Link href="/demo" className="group inline-flex items-center gap-2 h-12 px-5 rounded-md bg-white hover:bg-accent-50 text-accent-800 text-[15.5px] font-medium shadow-pop">
-                Walk through the demo
-                <ArrowRightIcon className="w-4 h-4 transition-transform duration-200 ease-out-expo group-hover:translate-x-0.5" />
-              </Link>
-              <Link href="/contact" className="text-[15.5px] font-medium text-white underline decoration-white/40 hover:decoration-white">
-                Talk to us
-              </Link>
-            </div>
-          </div>
-          <div className="min-w-0">
-            <LedgerMatrix />
-          </div>
-        </div>
+      {/* ── Hero: a pinned scroll story. Scrolling scans the register, opens a finding, and decides it. ── */}
+      <ScrollScanHero>
+    <div>
+      <h1 className="font-display font-medium text-[2.5rem] leading-[1.04] tracking-[-0.035em] sm:text-[3.5rem] lg:text-[3.75rem] max-w-[13ch] text-white">
+        Find the spend that needs a second look before close.
+      </h1>
+      <p className="mt-7 max-w-[32rem] text-[17px] sm:text-[18px] leading-[1.6] text-field-muted">
+        Upload a GL, AP or bank export. Ventura reads every row, returns a short ranked list of
+        findings traced to the rows behind them, and nothing changes until your team decides.
+      </p>
+      <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-3">
+        <Link href="/demo" className="group inline-flex items-center gap-2 h-12 px-5 rounded-md bg-white hover:bg-accent-50 text-accent-800 text-[15.5px] font-medium shadow-pop">
+          Walk through the demo
+          <ArrowRightIcon className="w-4 h-4 transition-transform duration-200 ease-out-expo group-hover:translate-x-0.5" />
+        </Link>
+        <Link href="/contact" className="text-[15.5px] font-medium text-white underline decoration-white/40 hover:decoration-white">
+          Talk to us
+        </Link>
+      </div>
+    </div>
+      </ScrollScanHero>
 
-        <div className="max-w-page mx-auto px-5 sm:px-8 pt-16 sm:pt-24 pb-40 sm:pb-48">
+      <section data-field className="bg-field text-white">
+        <div className="max-w-page mx-auto px-5 sm:px-8 pt-16 sm:pt-20 pb-40 sm:pb-48">
           <SystemsStrip />
         </div>
       </section>
@@ -63,7 +60,7 @@ export default function HomePage() {
         <div className="max-w-page mx-auto px-5 sm:px-8 -mt-28 sm:-mt-32">
           <FindingsFrame />
           <p className="mt-5 text-[14px] text-text-muted">
-            Five findings from 1,431 rows. Open one to see its rows, then decide. Example data.
+            Now work the queue yourself: five findings from the same 1,431 rows. Example data.
           </p>
         </div>
       </section>

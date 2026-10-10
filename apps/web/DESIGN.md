@@ -278,7 +278,7 @@ The system refuses the generic AI-startup register (gradients, glow, "AI-powered
 
 **Key Characteristics:**
 - An ultramarine field owns whole regions on marketing pages: the hero and page intros, the logo strip, and the closing band. Everything else is a light, cool canvas.
-- The home hero's signature is the ledger matrix: the example file's 1,431 transactions drawn as a 53 × 27 grid of cells shaded by amount. A scan line passes down it, and the five flagged rows ignite in brightened severity colours, each with a leader line to its finding.
+- The home hero is a pinned scroll story, "scroll to scan". The example file's 1,431 transactions are a 53 × 27 grid shaded by amount. Over about three screens of scroll, the scan line travels the register and five flagged rows ignite with labels; the view zooms into the duplicate payment, which opens into its finding card; the card is resolved and an audit-trail line appears. Progress eases toward the scroll position (scrub with inertia). Phones pin only the stage, and reduced motion shows the finished scan and the resolved finding, unpinned.
 - Brand logos are official marks only (simple-icons), in white on the field; wordmarks stand alone, symbol marks carry their name. No invented lettered badges.
 - UI icons are Radix Icons, the 15px set. They appear only where they do a job (navigation, controls, status), never as bullets or decoration.
 - One ultramarine accent, reserved for actions, links, focus and selection.
@@ -308,7 +308,7 @@ A cool, low-chroma neutral system with a single saturated ultramarine for action
 - **Sidebar Mist** (#f4f6f9, `sidebar-bg`) with **Sidebar Graphite** (#2f3747, `sidebar-text`): the app sidebar is a half-step cooler than the canvas.
 
 ### Field
-- **Ultramarine Field** (#2440d6, `field`): whole regions on marketing pages: the hero and every page intro (the header sits on it until the page scrolls), the systems logo strip, and the full-width closing band. White type on it measures 7.6:1. **Field Mist** (#c7d1ff, `field-muted`) is secondary text on the field (4.9:1). On the field, the primary action inverts: a white button with `accent-800` text.
+- **Ultramarine Field** (#2440d6, `field`): whole regions on marketing pages: the hero and every page intro (the header takes on whichever surface is beneath it; field regions mark themselves with `data-field`), the systems logo strip, and the full-width closing band. White type on it measures 7.6:1. **Field Mist** (#c7d1ff, `field-muted`) is secondary text on the field (4.9:1). On the field, the primary action inverts: a white button with `accent-800` text.
 - **Field Deep** (#1b32b8, `field-deep`): reserved for pressed or recessed states on the field.
 
 ### Ink

@@ -2,24 +2,11 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import clsx from 'clsx'
-import { XMarkIcon } from '@heroicons/react/24/outline'
 import VenturaLogo from '../VenturaLogo'
-import {
-  Squares2X2Icon,
-  ExclamationTriangleIcon,
-  ArrowsRightLeftIcon,
-  BoltIcon,
-  ScaleIcon,
-  DocumentTextIcon,
-  Cog6ToothIcon,
-  ArrowRightOnRectangleIcon,
-  BuildingOfficeIcon,
-  EnvelopeIcon,
-  DocumentArrowDownIcon,
-} from '@heroicons/react/24/outline'
 import { useCurrentUser, clearUser, initials } from '../../hooks/useCurrentUser'
 import { loadDataset } from '../../lib/dataStore'
 import { createClient } from '../../utils/supabase/client'
+import { Cross2Icon as XMarkIcon, DashboardIcon as Squares2X2Icon, ExclamationTriangleIcon, LoopIcon as ArrowsRightLeftIcon, LightningBoltIcon as BoltIcon, MixerHorizontalIcon as ScaleIcon, FileTextIcon as DocumentTextIcon, GearIcon as Cog6ToothIcon, ExitIcon as ArrowRightOnRectangleIcon, HomeIcon as BuildingOfficeIcon, EnvelopeClosedIcon as EnvelopeIcon, DownloadIcon as DocumentArrowDownIcon } from '@radix-ui/react-icons'
 
 interface SidebarProps {
   isOpen?: boolean

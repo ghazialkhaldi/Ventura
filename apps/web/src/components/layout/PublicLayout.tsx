@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import VenturaLogo from '../VenturaLogo'
 import { createClient } from '../../utils/supabase/client'
+import { HamburgerMenuIcon as Bars3Icon, Cross2Icon as XMarkIcon } from '@radix-ui/react-icons'
 
 interface PublicLayoutProps {
   children: React.ReactNode

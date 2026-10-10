@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import PublicLayout from '../components/layout/PublicLayout'
-import { ArrowLeftIcon } from '@heroicons/react/20/solid'
+import { ArrowLeftIcon } from '@radix-ui/react-icons'
 
 export default function ForgotPasswordPage() {
   return (

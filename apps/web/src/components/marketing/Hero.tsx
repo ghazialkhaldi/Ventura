@@ -1,195 +1,259 @@
 import { useEffect, useRef, useState } from 'react'
-import BrandIcon, { type BrandKey } from '../ui/BrandIcon'
+import {
+  siQuickbooks, siXero, siSage, siSap, siZoho, siAdp, siGusto, siStripe, siExpensify, siGooglesheets,
+  type SimpleIcon,
+} from 'simple-icons'
+import { FINDINGS, type Sev } from './ProductPreview'
 
-// ── Ledger scan ──────────────────────────────────────────────────────────────
-// The hero's signature: an example register streams past a scan line, and the
-// rows Ventura would flag light up in their severity colour as they are caught.
-// Example data only; it mirrors the findings in the inbox below the hero.
+// ── The ledger matrix ────────────────────────────────────────────────────────
+// The hero's signature. The example file's 1,431 rows are drawn as a 53 × 27
+// grid, one cell per transaction, shaded by amount. A scan line passes down the
+// register like a document scanner; the five rows Ventura flags ignite in their
+// severity colour and point to their finding. Example data, labelled as such.
 
-type Sev = 'critical' | 'high' | 'medium'
+const COLS = 53
+const ROWS = 27
+const TOTAL = COLS * ROWS            // 1,431
+const GAP_RATIO = 0.36               // gap as a share of the cell size
+const SWEEP_MS = 7200                // one pass of the scan line
+const HOLD_MS = 2600                 // pause on the finished scan before looping
 
-interface Row {
-  date:   string
-  vendor: string
-  amount: string
-  flag?:  { label: string; sev: Sev }
-}
-
-const ROWS: Row[] = [
-  { date: '2026-09-02', vendor: 'Northgate Office Supply', amount: '$412.18' },
-  { date: '2026-09-03', vendor: 'Lumen Telecom',           amount: '$2,240.00' },
-  { date: '2026-09-04', vendor: 'Corva Freight',           amount: '$18,420.00' },
-  { date: '2026-09-04', vendor: 'Pinecrest Payroll',       amount: '$41,980.55' },
-  { date: '2026-09-07', vendor: 'Harbor Cloud',            amount: '$6,120.40' },
-  { date: '2026-09-08', vendor: 'Brightline Staffing',     amount: '$9,850.00' },
-  { date: '2026-09-09', vendor: 'Meridian Legal',          amount: '$4,800.00' },
-  { date: '2026-09-10', vendor: 'Brightline Staffing',     amount: '$9,700.00' },
-  { date: '2026-09-11', vendor: 'Atlas Facilities Co.',    amount: '$3,150.00' },
-  { date: '2026-09-14', vendor: 'Brightline Staffing',     amount: '$9,600.00', flag: { label: 'Split under limit', sev: 'high' } },
-  { date: '2026-09-15', vendor: 'Lumen Telecom',           amount: '$2,240.00' },
-  { date: '2026-09-16', vendor: 'Harbor Cloud',            amount: '$5,980.10' },
-  { date: '2026-09-18', vendor: 'Corva Freight',           amount: '$18,420.00', flag: { label: 'Duplicate payment', sev: 'critical' } },
-  { date: '2026-09-18', vendor: 'Pinecrest Payroll',       amount: '$42,115.20' },
-  { date: '2026-09-21', vendor: 'Northgate Office Supply', amount: '$389.74' },
-  { date: '2026-09-23', vendor: 'Meridian Legal',          amount: '$4,800.00' },
-  { date: '2026-09-24', vendor: 'Atlas Facilities Co.',    amount: '$27,300.00', flag: { label: 'Unusual for vendor', sev: 'medium' } },
-  { date: '2026-09-25', vendor: 'Harbor Cloud',            amount: '$6,044.90' },
-  { date: '2026-09-26', vendor: 'Keystone Advisory LLC',   amount: '$15,000.00', flag: { label: 'New vendor, round amount', sev: 'medium' } },
-  { date: '2026-09-28', vendor: 'Lumen Telecom',           amount: '$2,240.00' },
-  { date: '2026-09-29', vendor: 'Pinecrest Payroll',       amount: '$41,702.80' },
-  { date: '2026-09-30', vendor: 'Northgate Office Supply', amount: '$455.02' },
-  { date: '2026-10-02', vendor: 'Halden Software',         amount: '$42,000.00', flag: { label: 'Outside its period', sev: 'high' } },
-  { date: '2026-10-02', vendor: 'Meridian Legal',          amount: '$1,250.00' },
+// Where the five findings sit in the register (column, row), spread so their
+// labels never collide. Order follows FINDINGS.
+const FLAGS: { col: number; row: number; side: 'left' | 'right' }[] = [
+  { col: 9,  row: 4,  side: 'right' },
+  { col: 41, row: 8,  side: 'left'  },
+  { col: 22, row: 13, side: 'right' },
+  { col: 46, row: 19, side: 'left'  },
+  { col: 14, row: 23, side: 'right' },
 ]
 
-const SEV_ROW: Record<Sev, { bg: string; pill: string; dot: string }> = {
-  critical: { bg: 'bg-critical-bg', pill: 'bg-white text-critical-fg ring-critical-line', dot: 'bg-critical' },
-  high:     { bg: 'bg-high-bg',     pill: 'bg-white text-high-fg ring-high-line',         dot: 'bg-high' },
-  medium:   { bg: 'bg-medium-bg',   pill: 'bg-white text-medium-fg ring-medium-line',     dot: 'bg-medium' },
+// Brighter steps of the severity hues, so a flagged cell reads against the
+// ultramarine field. Only these five cells ever carry them.
+const IGNITE: Record<Sev, string> = { critical: '#ff5a4a', high: '#ff9447', medium: '#ffcc3d' }
+
+// Deterministic "amounts": the same ledger texture on every load and render.
+function magnitude(i: number) {
+  let x = Math.sin(i * 12.9898 + 78.233) * 43758.5453
+  x = x - Math.floor(x)
+  return Math.pow(x, 2.4)            // most payments small, a few large
 }
+const MAG = Array.from({ length: TOTAL }, (_, i) => magnitude(i))
 
-const VISIBLE = 8          // rows in the window
-const BEAM    = 4          // window index the scan line sits on
-const ROW_H   = 44         // px, kept in step with the CSS keyframe
-const TOTAL   = 1431       // rows in the example file
-const START   = 9          // first frame: two findings already caught
+function money(s: string) { return s.replace('.00', '') }
 
-export function LedgerScan() {
-  // Opens a few rows in, so the first frame already shows rows being caught
-  const [tick, setTick] = useState(START)
-  const ref = useRef<HTMLDivElement>(null)
+export function LedgerMatrix() {
+  const wrapRef   = useRef<HTMLDivElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [width, setWidth]     = useState(640)
+  const [progress, setProgress] = useState(1)    // 0..1 of the sweep; 1 = finished state for SSR and reduced motion
 
+  // Track the available width; the grid fills it exactly.
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setTick(ROWS.length - BEAM - 1)          // a settled frame with every row caught
-      return
-    }
-    let visible = true
-    const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting }, { threshold: 0.1 })
-    if (ref.current) io.observe(ref.current)
-    const id = window.setInterval(() => { if (visible && !document.hidden) setTick(t => t + 1) }, 950)
-    return () => { window.clearInterval(id); io.disconnect() }
+    const el = wrapRef.current
+    if (!el) return
+    const ro = new ResizeObserver(([e]) => setWidth(Math.max(240, Math.floor(e.contentRect.width))))
+    ro.observe(el)
+    return () => ro.disconnect()
   }, [])
 
-  const pos      = tick % ROWS.length                         // position in this pass
-  const window_  = Array.from({ length: VISIBLE + 1 }, (_, i) => ROWS[(tick + i) % ROWS.length])
-  const scanned  = Math.min(TOTAL, Math.round(((pos + BEAM + 1) / ROWS.length) * TOTAL))
-  const caught   = ROWS.slice(0, Math.min(ROWS.length, pos + BEAM + 1)).filter(r => r.flag)
-  const latest   = caught[caught.length - 1]
+  // Drive the sweep. Pauses offscreen and in background tabs; reduced motion
+  // shows the finished scan, still.
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setProgress(1); return }
+    let visible = true
+    const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting }, { threshold: 0.05 })
+    if (wrapRef.current) io.observe(wrapRef.current)
+    let raf = 0, last = performance.now(), t = 900   // open a little way into the sweep
+    const loop = (now: number) => {
+      const dt = now - last; last = now
+      if (visible && !document.hidden) {
+        t = (t + dt) % (SWEEP_MS + HOLD_MS)
+        setProgress(Math.min(1, t / SWEEP_MS))
+      }
+      raf = requestAnimationFrame(loop)
+    }
+    raf = requestAnimationFrame(loop)
+    return () => { cancelAnimationFrame(raf); io.disconnect() }
+  }, [])
+
+  const cell   = width / (COLS + (COLS - 1) * GAP_RATIO)
+  const gap    = cell * GAP_RATIO
+  const pitch  = cell + gap
+  const height = ROWS * cell + (ROWS - 1) * gap
+  const beamRow = progress * ROWS                         // fractional row the scan line is on
+  const caught  = FLAGS.map(f => f.row + 0.5 < beamRow)
+  const rowsRead = Math.min(TOTAL, Math.round(Math.min(1, beamRow / ROWS) * TOTAL))
+  const compact  = width < 520
+
+  // Paint the grid.
+  useEffect(() => {
+    const c = canvasRef.current
+    if (!c) return
+    const dpr = window.devicePixelRatio || 1
+    c.width = Math.round(width * dpr); c.height = Math.round(height * dpr)
+    const g = c.getContext('2d')!
+    g.setTransform(dpr, 0, 0, dpr, 0, 0)
+    g.clearRect(0, 0, width, height)
+    const r = Math.min(2, cell * 0.22)
+
+    for (let row = 0; row < ROWS; row++) {
+      const read  = row + 1 <= beamRow
+      const near  = Math.abs(row + 0.5 - beamRow)        // distance from the scan line, in rows
+      for (let col = 0; col < COLS; col++) {
+        const i = row * COLS + col
+        const m = MAG[i]
+        let a = read ? 0.10 + m * 0.66 : 0.05 + m * 0.24
+        if (near < 1.4 && progress < 1) a = Math.min(0.95, a + (1.4 - near) * 0.45)
+        g.fillStyle = `rgba(255,255,255,${a.toFixed(3)})`
+        g.beginPath()
+        g.roundRect(col * pitch, row * pitch, cell, cell, r)
+        g.fill()
+      }
+    }
+
+    // The scan line: a bright rule with a soft wash just behind it.
+    if (progress < 1) {
+      const y = Math.min(height, beamRow * pitch)
+      g.fillStyle = 'rgba(255,255,255,0.10)'
+      g.fillRect(0, Math.max(0, y - pitch * 2), width, pitch * 2)
+      g.fillStyle = 'rgba(255,255,255,0.9)'
+      g.fillRect(0, y - 1, width, 2)
+    }
+
+    // Caught rows: the cell ignites, with a white ring and a leader to its label.
+    FLAGS.forEach((f, k) => {
+      if (!caught[k]) return
+      const x = f.col * pitch, y = f.row * pitch
+      const col = IGNITE[FINDINGS[k].sev]
+      g.fillStyle = col
+      g.beginPath(); g.roundRect(x - gap * 0.5, y - gap * 0.5, cell + gap, cell + gap, r + 1); g.fill()
+      g.strokeStyle = 'rgba(255,255,255,0.95)'; g.lineWidth = 1.5
+      g.beginPath(); g.roundRect(x - gap * 0.5 - 2.5, y - gap * 0.5 - 2.5, cell + gap + 5, cell + gap + 5, r + 3); g.stroke()
+      if (!compact) {
+        const cx = x + cell / 2, cy = y + cell / 2
+        const lx = f.side === 'right' ? cx + pitch * 4 : cx - pitch * 4
+        const ly = cy - pitch * 2.2
+        g.strokeStyle = 'rgba(255,255,255,0.75)'; g.lineWidth = 1
+        g.beginPath(); g.moveTo(cx, cy); g.lineTo(lx, ly); g.stroke()
+      }
+    })
+  }, [width, height, cell, gap, pitch, beamRow, progress, compact]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const latest = [...FLAGS.keys()].filter(k => caught[k]).pop()
 
   return (
-    <div ref={ref} className="rounded-xl bg-surface-raised shadow-pop ring-1 ring-black/5 overflow-hidden text-text-primary">
-      <div className="flex items-center gap-3 px-4 sm:px-5 h-12 border-b border-border">
-        <span className="relative flex h-2.5 w-2.5" aria-hidden>
-          <span className="absolute inline-flex h-full w-full rounded-full bg-accent-400 opacity-60 motion-safe:animate-ping" />
-          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-accent-600" />
-        </span>
-        <p className="text-[13.5px] font-medium">Scanning</p>
-        <p className="hidden sm:block text-[13px] text-text-muted truncate">AP register, Sep 2026.xlsx</p>
-        <span className="ml-auto inline-flex items-center h-6 px-2 rounded-md border border-dashed border-border-strong text-[12px] text-text-muted">
-          Example data
-        </span>
+    <figure className="w-full">
+      <div ref={wrapRef} className="relative w-full" style={{ height }}>
+        <canvas ref={canvasRef} aria-hidden className="absolute inset-0" style={{ width, height }} />
+        {!compact && FLAGS.map((f, k) => {
+          const fnd = FINDINGS[k]
+          const cx = f.col * pitch + cell / 2, cy = f.row * pitch + cell / 2
+          const lx = f.side === 'right' ? cx + pitch * 4 : cx - pitch * 4
+          const ly = cy - pitch * 2.2
+          return (
+            <div
+              key={fnd.id}
+              aria-hidden
+              className="absolute -translate-y-1/2"
+              style={{
+                top: ly,
+                left: f.side === 'right' ? lx : undefined,
+                right: f.side === 'left' ? width - lx : undefined,
+              }}
+            >
+            <div className={`rounded-md bg-white px-2.5 py-1.5 shadow-pop transition-[opacity,transform] duration-300 ease-out-expo ${caught[k] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1'}`}>
+              <p className="flex items-center gap-1.5 text-[12.5px] font-medium text-text-primary whitespace-nowrap leading-tight">
+                <span className="h-2 w-2 rounded-full" style={{ background: IGNITE[fnd.sev] }} />
+                {fnd.title}
+              </p>
+              <p className="mt-0.5 text-[11.5px] text-text-muted whitespace-nowrap tabular-nums leading-tight">
+                {fnd.vendor} · {money(fnd.amount)}
+              </p>
+            </div>
+            </div>
+          )
+        })}
       </div>
-
-      <div className="grid grid-cols-2 border-b border-border text-[12.5px]">
-        <div className="px-4 sm:px-5 py-2.5">
-          <span className="text-text-muted">Rows read </span>
-          <span className="font-medium tabular-nums">{scanned.toLocaleString()}</span>
-          <span className="text-text-muted tabular-nums"> / {TOTAL.toLocaleString()}</span>
-        </div>
-        <div className="px-4 sm:px-5 py-2.5 border-l border-border">
-          <span className="text-text-muted">Findings </span>
-          <span className="font-medium tabular-nums text-accent-700">{caught.length}</span>
-        </div>
-      </div>
-
-      {/* The register window. Decorative; the summary below carries the content. */}
-      <div aria-hidden className="relative overflow-hidden" style={{ height: VISIBLE * ROW_H }}>
-        <div
-          className="absolute inset-x-0 z-0 bg-accent-50 border-y border-accent-300"
-          style={{ top: BEAM * ROW_H, height: ROW_H }}
-        />
-        <div key={tick} className="animate-ledger-step relative z-10" style={{ ['--row-h' as string]: `${ROW_H}px` }}>
-          {window_.map((r, i) => {
-            const hit = r.flag && i <= BEAM
-            return (
-              <div
-                key={`${tick}-${i}`}
-                className={`grid grid-cols-[5.5rem_1fr_auto] items-center gap-3 px-4 sm:px-5 border-b border-border-subtle transition-colors duration-300 ${hit ? SEV_ROW[r.flag!.sev].bg : ''}`}
-                style={{ height: ROW_H }}
-              >
-                <span className="text-[12.5px] text-text-muted tabular-nums">{r.date.slice(5)}</span>
-                <span className="min-w-0 flex items-center gap-2">
-                  <span className="truncate text-[13.5px]">{r.vendor}</span>
-                  {hit && (
-                    <span className={`hidden sm:inline-flex shrink-0 items-center gap-1.5 h-5 px-1.5 rounded text-[11.5px] font-medium ring-1 ring-inset ${SEV_ROW[r.flag!.sev].pill}`}>
-                      <span className={`h-1.5 w-1.5 rounded-full ${SEV_ROW[r.flag!.sev].dot}`} />
-                      {r.flag!.label}
-                    </span>
-                  )}
-                </span>
-                <span className={`text-[13.5px] tabular-nums ${hit ? 'font-medium' : ''}`}>{r.amount}</span>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
-      <div className="px-4 sm:px-5 py-3 border-t border-border bg-surface text-[13px] min-h-[46px] flex items-center" aria-live="off">
-        {latest ? (
-          <p className="truncate">
-            <span className="text-text-muted">Caught: </span>
-            <span className="font-medium">{latest.flag!.label}</span>
-            <span className="text-text-muted"> · {latest.vendor} · </span>
-            <span className="tabular-nums">{latest.amount}</span>
-          </p>
-        ) : (
-          <p className="text-text-muted">Reading every row against its vendor and category&hellip;</p>
+      <figcaption className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-1 text-[13.5px] text-field-muted">
+        <span><span className="font-medium text-white tabular-nums">{rowsRead.toLocaleString()}</span> of 1,431 rows read</span>
+        <span><span className="font-medium text-white tabular-nums">{caught.filter(Boolean).length}</span> findings</span>
+        {compact && latest !== undefined && (
+          <span className="basis-full text-white">{FINDINGS[latest].title} · {FINDINGS[latest].vendor} · {money(FINDINGS[latest].amount)}</span>
         )}
-      </div>
+        <span className="ml-auto text-[12.5px]">Example data, one cell per transaction</span>
+      </figcaption>
       <p className="sr-only">
-        Example: Ventura reads a 1,431-row AP register and flags five rows: a duplicate payment, payments
-        split under an approval limit, a payment outside its period, an amount unusual for its vendor, and
-        a new vendor paid a round amount.
+        Example: an AP register of 1,431 transactions, drawn as a grid. Ventura flags five: a duplicate payment,
+        payments split under an approval limit, a payment outside its period, an amount unusual for its vendor,
+        and a new vendor paid a round amount.
       </p>
-    </div>
+    </figure>
   )
 }
 
 // ── Systems strip ────────────────────────────────────────────────────────────
-// Ventura reads exports (CSV, Excel, PDF) from these systems. It does not sync
-// with them, so the strip says "exports" and nothing more.
+// Official marks only, all in white on the field. Ventura reads exports from
+// these systems; it does not sync with them, so the strip says "exports".
 
-const SYSTEMS: { name: string; brand: BrandKey }[] = [
-  { name: 'QuickBooks',   brand: 'quickbooks' },
-  { name: 'Xero',         brand: 'xero'       },
-  { name: 'NetSuite',     brand: 'netsuite'   },
-  { name: 'SAP',          brand: 'sap'        },
-  { name: 'ADP',          brand: 'adp'        },
-  { name: 'Gusto',        brand: 'gusto'      },
-  { name: 'Stripe',       brand: 'stripe'     },
-  { name: 'Expensify',    brand: 'expensify'  },
-  { name: 'Zoho Books',   brand: 'zoho'       },
-  { name: 'Excel and CSV', brand: 'csv'       },
-  { name: 'PDF statements', brand: 'documents' },
+// 'word' marks are wordmarks and stand alone; 'symbol' marks carry the name.
+const SYSTEMS: { name: string; icon: SimpleIcon; kind: 'word' | 'symbol' }[] = [
+  { name: 'QuickBooks',    icon: siQuickbooks,   kind: 'symbol' },
+  { name: 'Xero',          icon: siXero,         kind: 'symbol' },
+  { name: 'Sage',          icon: siSage,         kind: 'word'   },
+  { name: 'SAP',           icon: siSap,          kind: 'word'   },
+  { name: 'Zoho',          icon: siZoho,         kind: 'word'   },
+  { name: 'ADP',           icon: siAdp,          kind: 'word'   },
+  { name: 'Gusto',         icon: siGusto,        kind: 'word'   },
+  { name: 'Stripe',        icon: siStripe,       kind: 'symbol' },
+  { name: 'Expensify',     icon: siExpensify,    kind: 'symbol' },
+  { name: 'Google Sheets', icon: siGooglesheets, kind: 'symbol' },
 ]
 
-export function SystemsStrip() {
-  const pills = (dup: boolean) =>
-    SYSTEMS.map(s => (
-      <li key={`${s.brand}-${dup}`} aria-hidden={dup} className="shrink-0 inline-flex items-center gap-2.5 h-11 pl-2 pr-4 rounded-full bg-white shadow-card">
-        <BrandIcon brand={s.brand} size={26} contained={false} />
-        <span className="text-[14px] font-medium text-text-primary whitespace-nowrap">{s.name}</span>
-      </li>
-    ))
+/** An official mark, cropped to its own outline so wordmarks read at a legible size. */
+function Mark({ icon, name, kind }: { icon: SimpleIcon; name: string; kind: 'word' | 'symbol' }) {
+  const ref = useRef<SVGPathElement>(null)
+  const [box, setBox] = useState<{ x: number; y: number; w: number; h: number } | null>(null)
+  useEffect(() => {
+    const b = ref.current?.getBBox()
+    if (b && b.width && b.height) setBox({ x: b.x, y: b.y, w: b.width, h: b.height })
+  }, [])
+  const h = kind === 'word' ? 21 : 22
+  const w = box ? Math.round((h * box.w) / box.h) : h
   return (
-    <div>
-      <p className="text-[14px] text-field-muted">Reads exports from the systems you already use</p>
-      <div className="mt-4 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]">
-        <ul className="flex w-max gap-3 animate-marquee motion-reduce:animate-none" aria-label="Systems Ventura reads exports from">
-          {pills(false)}
-          {pills(true)}
-        </ul>
+    <span className="inline-flex shrink-0 items-center gap-2.5 text-white/90">
+      <svg
+        viewBox={box ? `${box.x} ${box.y} ${box.w} ${box.h}` : '0 0 24 24'}
+        width={w}
+        height={h}
+        fill="currentColor"
+        role={kind === 'word' ? 'img' : undefined}
+        aria-label={kind === 'word' ? name : undefined}
+        aria-hidden={kind === 'word' ? undefined : true}
+      >
+        <path ref={ref} d={icon.path} />
+      </svg>
+      {kind === 'symbol' && <span className="text-[15px] font-medium tracking-[-0.01em] whitespace-nowrap">{name}</span>}
+    </span>
+  )
+}
+
+export function SystemsStrip() {
+  const row = (dup: boolean) => (
+    <ul className="flex shrink-0 items-center gap-14 pr-14" aria-hidden={dup}>
+      {SYSTEMS.map(s => <li key={s.name}><Mark icon={s.icon} name={s.name} kind={s.kind} /></li>)}
+    </ul>
+  )
+  return (
+    <div className="grid gap-5 lg:grid-cols-[14rem_1fr] lg:items-center lg:gap-10">
+      <p className="text-[14px] leading-snug text-field-muted">
+        Reads exports from the systems you already use, or any CSV, Excel or PDF file.
+      </p>
+      <div className="overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent)]" aria-label="Systems Ventura reads exports from">
+        <div className="flex w-max animate-marquee motion-reduce:animate-none">
+          {row(false)}
+          {row(true)}
+        </div>
       </div>
     </div>
   )

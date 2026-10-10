@@ -1,6 +1,6 @@
 import PublicLayout from '../components/layout/PublicLayout'
-import { CheckCircleIcon } from '@heroicons/react/20/solid'
 import { PageIntro, InlineLink } from '../components/marketing/Marketing'
+import { CheckCircledIcon as CheckCircleIcon } from '@radix-ui/react-icons'
 
 const systems = [
   { name: 'Web Application',       desc: 'Dashboard, anomaly investigation, workflows' },

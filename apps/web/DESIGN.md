@@ -278,7 +278,9 @@ The system refuses the generic AI-startup register (gradients, glow, "AI-powered
 
 **Key Characteristics:**
 - An ultramarine field owns whole regions on marketing pages: the hero and page intros, the logo strip, and the closing band. Everything else is a light, cool canvas.
-- The home hero's signature is a live ledger scan: example rows stream past a scan line and flagged rows light up in their severity colour as they are caught.
+- The home hero's signature is the ledger matrix: the example file's 1,431 transactions drawn as a 53 × 27 grid of cells shaded by amount. A scan line passes down it, and the five flagged rows ignite in brightened severity colours, each with a leader line to its finding.
+- Brand logos are official marks only (simple-icons), in white on the field; wordmarks stand alone, symbol marks carry their name. No invented lettered badges.
+- UI icons are Radix Icons, the 15px set. They appear only where they do a job (navigation, controls, status), never as bullets or decoration.
 - One ultramarine accent, reserved for actions, links, focus and selection.
 - Archivo throughout; display sizes run semi-expanded on the font's width axis to echo the extended wordmark.
 - Hairline lists and ruled tables in place of grids of identical cards.

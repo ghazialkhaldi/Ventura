@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
-import { CheckCircleIcon, ChevronDownIcon } from '@heroicons/react/20/solid'
 import PublicLayout from '../components/layout/PublicLayout'
 import { H1_CLASS } from '../components/marketing/Marketing'
+import { CheckCircledIcon as CheckCircleIcon, ChevronDownIcon } from '@radix-ui/react-icons'
 
 const COMPANY_SIZES = [
   '1–10 employees',
@@ -73,8 +73,7 @@ export default function ContactPage() {
               'Role-based access control',
               'Append-only, server-side security log',
             ].map(point => (
-              <li key={point} className="flex items-center gap-3 py-4 border-b border-white/20 text-[15.5px] text-white">
-                <CheckCircleIcon className="w-5 h-5 text-field-muted flex-shrink-0" />
+              <li key={point} className="py-4 border-b border-white/20 text-[15.5px] text-white">
                 {point}
               </li>
             ))}

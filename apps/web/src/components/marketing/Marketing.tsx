@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
-import { ArrowRightIcon } from '@heroicons/react/20/solid'
+import { ArrowRightIcon } from '@radix-ui/react-icons'
 
 // Building blocks shared by the public marketing pages, so every page sets
 // type, rhythm and actions the same way the home page does.

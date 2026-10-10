@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, type KeyboardEvent, type ReactNode } from 'react'
-import { ArrowRightIcon, CheckIcon, ArrowUturnLeftIcon } from '@heroicons/react/20/solid'
+import { ArrowRightIcon, CheckIcon, ResetIcon as ArrowUturnLeftIcon } from '@radix-ui/react-icons'
 
 // The product, shown working on labelled example data. Shared by the home page
 // and the demo so both demonstrate the same mechanism: findings traced to rows,

@@ -1,15 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import {
-  MagnifyingGlassIcon,
-  ArrowLeftIcon,
-  Bars3Icon,
-  EyeIcon,
-  PencilSquareIcon,
-} from '@heroicons/react/24/outline'
 import Sidebar from './Sidebar'
 import { useCurrentUser, initials } from '../../hooks/useCurrentUser'
+import { MagnifyingGlassIcon, ArrowLeftIcon, HamburgerMenuIcon as Bars3Icon, EyeOpenIcon as EyeIcon, Pencil2Icon as PencilSquareIcon } from '@radix-ui/react-icons'
 
 interface AppLayoutProps {
   children: React.ReactNode

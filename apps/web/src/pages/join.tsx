@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
-import { AlertCircle, Check, Building2, ArrowRight, Loader2 } from 'lucide-react'
 import VenturaLogo from '../components/VenturaLogo'
+import { CrossCircledIcon as AlertCircle, CheckIcon as Check, HomeIcon as Building2, ArrowRightIcon as ArrowRight, ReloadIcon as Loader2 } from '@radix-ui/react-icons'
 
 export default function JoinPage() {
   const router = useRouter()

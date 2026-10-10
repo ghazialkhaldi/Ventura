@@ -1,12 +1,11 @@
 import Link from 'next/link'
 import PublicLayout from '../components/layout/PublicLayout'
-import { ArrowRightIcon } from '@heroicons/react/20/solid'
-import { ArrowLongRightIcon } from '@heroicons/react/24/outline'
 import {
   FindingsFrame, Figure, VendorBaselineChart, ApprovalLimitChart, MappingPanel, AuditTrail,
 } from '../components/marketing/ProductPreview'
-import { LedgerScan, SystemsStrip } from '../components/marketing/Hero'
+import { LedgerMatrix, SystemsStrip } from '../components/marketing/Hero'
 import { ClosingCTA } from '../components/marketing/Marketing'
+import { ArrowRightIcon } from '@radix-ui/react-icons'
 
 const H2 = 'font-display font-medium text-[1.875rem] leading-[1.1] tracking-[-0.025em] sm:text-title'
 
@@ -30,9 +29,9 @@ export default function HomePage() {
 
       {/* ── Hero: the ultramarine field, with the scan as its proof ── */}
       <section className="bg-field text-white">
-        <div className="max-w-page mx-auto px-5 sm:px-8 pt-12 sm:pt-16 lg:pt-20 grid gap-12 lg:grid-cols-[minmax(0,1fr)_30rem] lg:gap-14 lg:items-center">
+        <div className="max-w-page mx-auto px-5 sm:px-8 pt-12 sm:pt-16 lg:pt-20 grid gap-14 lg:grid-cols-[minmax(0,29rem)_minmax(0,1fr)] lg:gap-16 lg:items-center">
           <div>
-            <h1 className="font-display font-medium text-[2.5rem] leading-[1.04] tracking-[-0.035em] sm:text-[3.5rem] lg:text-[4.25rem] max-w-[13ch] text-white">
+            <h1 className="font-display font-medium text-[2.5rem] leading-[1.04] tracking-[-0.035em] sm:text-[3.5rem] lg:text-[3.75rem] max-w-[13ch] text-white">
               Find the spend that needs a second look before close.
             </h1>
             <p className="mt-7 max-w-[32rem] text-[17px] sm:text-[18px] leading-[1.6] text-field-muted">
@@ -49,12 +48,12 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-          <div className="animate-frame-settle">
-            <LedgerScan />
+          <div className="min-w-0">
+            <LedgerMatrix />
           </div>
         </div>
 
-        <div className="max-w-page mx-auto px-5 sm:px-8 pt-16 sm:pt-20 pb-40 sm:pb-48">
+        <div className="max-w-page mx-auto px-5 sm:px-8 pt-16 sm:pt-24 pb-40 sm:pb-48">
           <SystemsStrip />
         </div>
       </section>
@@ -76,7 +75,9 @@ export default function HomePage() {
             {/* The promise in one line of figures: the example file, before and after */}
             <div className="flex items-end gap-5 sm:gap-8" role="img" aria-label="1,431 rows in, 5 findings out">
               <Figure_ value="1,431" caption="rows in the example file" muted />
-              <ArrowLongRightIcon aria-hidden className="mb-12 sm:mb-14 w-10 sm:w-14 h-10 sm:h-14 shrink-0 text-border-strong" />
+              <svg aria-hidden viewBox="0 0 64 24" className="mb-14 sm:mb-16 w-12 sm:w-16 shrink-0 text-border-strong" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M2 12h58M50 3l10 9-10 9" />
+              </svg>
               <Figure_ value="5" caption="findings worth a person’s time" />
             </div>
             <div>

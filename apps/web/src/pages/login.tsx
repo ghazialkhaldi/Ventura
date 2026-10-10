@@ -2,10 +2,10 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
-import { Eye, EyeOff, AlertCircle, ArrowRight, ArrowLeft, CheckCircle, ShieldCheck, Mail } from 'lucide-react'
 import { saveUser } from '../hooks/useCurrentUser'
 import { createClient } from '../utils/supabase/client'
 import VenturaLogo from '../components/VenturaLogo'
+import { EyeOpenIcon as Eye, EyeNoneIcon as EyeOff, CrossCircledIcon as AlertCircle, ArrowRightIcon as ArrowRight, ArrowLeftIcon as ArrowLeft, CheckCircledIcon as CheckCircle, LockClosedIcon as ShieldCheck, EnvelopeClosedIcon as Mail } from '@radix-ui/react-icons'
 
 export async function getServerSideProps() {
   return { props: {} }
@@ -257,15 +257,14 @@ export default function LoginPage() {
                 Every finding traced to the rows behind it, and nothing changes
                 until someone on your team decides.
               </p>
-              <ul className="space-y-3.5">
+              <ul className="border-t border-ink-line">
                 {[
                   'Ten checks, from duplicates to period cut-off',
                   'Confidence and reasoning on every finding',
                   'Every status change logged with who and when',
                   'Role-based access with email verification',
                 ].map(item => (
-                  <li key={item} className="flex items-start gap-2.5 text-[14.5px] text-ink-text">
-                    <CheckCircle className="w-4 h-4 text-accent-300 flex-shrink-0 mt-0.5" />
+                  <li key={item} className="py-3 border-b border-ink-line text-[14.5px] text-ink-text">
                     {item}
                   </li>
                 ))}
@@ -291,15 +290,14 @@ export default function LoginPage() {
                   : 'Ventura requires a second verification step each time you sign in, keeping your financial data secure even if your password is compromised.'
                 }
               </p>
-              <ul className="space-y-3">
+              <ul className="border-t border-ink-line">
                 {[
                   'MFA enforced for all workspace members',
                   mfaIsEmail ? 'Email verification code sent securely' : 'TOTP authenticator app support',
                   'Each session verified independently',
                   'Role based access control',
                 ].map(item => (
-                  <li key={item} className="flex items-start gap-2.5 text-[14.5px] text-ink-text">
-                    <CheckCircle className="w-4 h-4 text-accent-300 flex-shrink-0 mt-0.5" />
+                  <li key={item} className="py-3 border-b border-ink-line text-[14.5px] text-ink-text">
                     {item}
                   </li>
                 ))}

@@ -3,24 +3,10 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import clsx from 'clsx'
-import {
-  Squares2X2Icon,
-  BoltIcon,
-  Bars3Icon,
-  XMarkIcon,
-  BuildingOfficeIcon,
-  ArrowRightOnRectangleIcon,
-  ChartBarIcon,
-  ExclamationTriangleIcon,
-  ArrowsRightLeftIcon,
-  ScaleIcon,
-  DocumentTextIcon,
-  DocumentArrowDownIcon,
-  LockClosedIcon,
-} from '@heroicons/react/24/outline'
 import VenturaLogo from '../VenturaLogo'
 import { useCurrentUser, clearUser, initials } from '../../hooks/useCurrentUser'
 import { createClient } from '../../utils/supabase/client'
+import { DashboardIcon as Squares2X2Icon, LightningBoltIcon as BoltIcon, HamburgerMenuIcon as Bars3Icon, Cross2Icon as XMarkIcon, HomeIcon as BuildingOfficeIcon, ExitIcon as ArrowRightOnRectangleIcon, BarChartIcon as ChartBarIcon, ExclamationTriangleIcon, LoopIcon as ArrowsRightLeftIcon, MixerHorizontalIcon as ScaleIcon, FileTextIcon as DocumentTextIcon, DownloadIcon as DocumentArrowDownIcon, LockClosedIcon } from '@radix-ui/react-icons'
 
 interface EmployeeLayoutProps {
   children: React.ReactNode

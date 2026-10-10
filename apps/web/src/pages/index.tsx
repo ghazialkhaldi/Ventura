@@ -28,7 +28,7 @@ export default function HomePage() {
     <PublicLayout>
 
       {/* ── Hero: the ultramarine field, with the scan as its proof ── */}
-      <section className="bg-field text-white">
+      <section className="bg-field field-surface text-white">
         <div className="max-w-page mx-auto px-5 sm:px-8 pt-12 sm:pt-16 lg:pt-20 grid gap-14 lg:grid-cols-[minmax(0,29rem)_minmax(0,1fr)] lg:gap-16 lg:items-center">
           <div>
             <h1 className="font-display font-medium text-[2.5rem] leading-[1.04] tracking-[-0.035em] sm:text-[3.5rem] lg:text-[3.75rem] max-w-[13ch] text-white">

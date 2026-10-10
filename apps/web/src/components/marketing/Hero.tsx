@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode, type CSSProperties } from 'react'
 import {
   siQuickbooks, siXero, siSage, siSap, siZoho, siAdp, siGusto, siStripe, siExpensify, siGooglesheets,
   type SimpleIcon,
@@ -212,6 +212,59 @@ function FindingCard({ decide, logged }: { decide: number; logged: number }) {
   )
 }
 
+// ── Depth on the field ───────────────────────────────────────────────────────
+// White light from both edges and the grid's own cell, blown up, in the side
+// margins. Each layer drifts at its own rate as the story scrolls, so the blue
+// reads as space rather than a flat fill. Decorative only.
+// Each shape sits in the side margin, placed by its gap from the content
+// column, so on narrower screens the margins shrink and the shapes slide off
+// the edge rather than behind the copy or the grid.
+const SHAPES: { side: 'left' | 'right'; gap: number; top: string; size: number; fill: number; line: number; depth: number; turn: number }[] = [
+  { side: 'left',  gap: 36,  top: '14%', size: 156, fill: 0.08, line: 0,    depth: 90,  turn: -6  },
+  { side: 'left',  gap: 58,  top: '45%', size: 58,  fill: 0,    line: 0.32, depth: 170, turn: 10  },
+  { side: 'left',  gap: 30,  top: '64%', size: 104, fill: 0.06, line: 0.18, depth: 60,  turn: -4  },
+  { side: 'left',  gap: 34,  top: '84%', size: 28,  fill: 0.2,  line: 0,    depth: 220, turn: 14  },
+  { side: 'left',  gap: 40,  top: '30%', size: 18,  fill: 0.26, line: 0,    depth: 260, turn: 0   },
+  { side: 'right', gap: 30,  top: '9%',  size: 176, fill: 0,    line: 0.22, depth: 70,  turn: 5   },
+  { side: 'right', gap: 44,  top: '40%', size: 66,  fill: 0.1,  line: 0,    depth: 150, turn: -9  },
+  { side: 'right', gap: 26,  top: '60%', size: 124, fill: 0.07, line: 0,    depth: 95,  turn: 4   },
+  { side: 'right', gap: 54,  top: '86%', size: 34,  fill: 0,    line: 0.36, depth: 210, turn: -12 },
+  { side: 'right', gap: 46,  top: '24%', size: 18,  fill: 0.24, line: 0,    depth: 250, turn: 0   },
+]
+
+function HeroDepth({ p }: { p: number }) {
+  // The content column's outer edge: centred 1200px page with 32px padding.
+  const edge = 'max(0px, 50vw - 600px + 32px)'
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[100svh] lg:h-full overflow-hidden">
+      {/* Light from both edges, kept clear of the header seam */}
+      <div className="absolute -left-[24vw] top-[6%] h-[80vh] w-[58vw]"
+        style={{ background: 'radial-gradient(closest-side, rgb(255 255 255 / 0.24), rgb(255 255 255 / 0.06) 55%, transparent)', transform: `translate3d(0, ${(-p * 70).toFixed(1)}px, 0)` }} />
+      <div className="absolute -right-[22vw] top-[38%] h-[85vh] w-[56vw]"
+        style={{ background: 'radial-gradient(closest-side, rgb(255 255 255 / 0.20), rgb(255 255 255 / 0.05) 55%, transparent)', transform: `translate3d(0, ${(-p * 130).toFixed(1)}px, 0)` }} />
+      {/* The grid's cell, at scale, in the margins (desktop only) */}
+      <div className="hidden lg:block">
+        {SHAPES.map((sh, i) => (
+          <span
+            key={i}
+            className="absolute block"
+            style={{
+              [sh.side]: `calc(${edge} - ${sh.gap + sh.size}px)`,
+              top: sh.top,
+              width: sh.size,
+              height: sh.size,
+              borderRadius: sh.size * 0.22,
+              background: sh.fill ? `rgb(255 255 255 / ${sh.fill})` : undefined,
+              boxShadow: sh.line ? `inset 0 0 0 1px rgb(255 255 255 / ${sh.line})` : undefined,
+              transform: `translate3d(0, ${(-p * sh.depth).toFixed(1)}px, 0) rotate(${(sh.turn * p).toFixed(2)}deg)`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 const STEPS = [
   { label: 'Scan',   caption: 'Every row read against its vendor and category' },
   { label: 'Trace',  caption: 'Each finding opens to the rows behind it' },
@@ -245,9 +298,10 @@ export function ScrollScanHero({ children }: { children: ReactNode }) {
     const measure = () => {
       const el = lg.matches ? sectionRef.current : trackRef.current
       if (!el) return
-      const r = el.getBoundingClientRect()
-      const travel = r.height - (window.innerHeight - 64)
-      target = clamp((64 - r.top) / Math.max(1, travel))
+      const r  = el.getBoundingClientRect()
+      const hh = document.querySelector('header')?.getBoundingClientRect().height ?? 64
+      const travel = r.height - (window.innerHeight - hh)
+      target = clamp((hh - r.top) / Math.max(1, travel))
     }
     const tick = () => {
       current += (target - current) * 0.16
@@ -326,7 +380,9 @@ export function ScrollScanHero({ children }: { children: ReactNode }) {
 
   return (
     <section ref={sectionRef} data-field className={`bg-field text-white ${still ? '' : 'lg:h-[330vh]'}`}>
-      <div className={`${still ? '' : 'lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)]'} max-w-page mx-auto px-5 sm:px-8 lg:flex lg:items-center`}>
+      <div className={`relative ${still ? '' : 'lg:sticky lg:top-20 lg:h-[calc(100vh-5rem)]'}`}>
+      <HeroDepth p={still ? 0 : p} />
+      <div className="relative max-w-page mx-auto px-5 sm:px-8 lg:flex lg:items-center lg:h-full">
         <div className="w-full grid gap-12 pt-12 sm:pt-16 lg:pt-0 lg:grid-cols-[minmax(0,27rem)_minmax(0,1fr)] lg:gap-16 lg:items-center">
           <div>{children}</div>
           {/* Phones: the stage pins on its own once the copy has scrolled away. */}
@@ -336,6 +392,7 @@ export function ScrollScanHero({ children }: { children: ReactNode }) {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </section>
   )

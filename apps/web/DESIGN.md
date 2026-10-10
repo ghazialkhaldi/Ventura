@@ -308,8 +308,9 @@ A cool, low-chroma neutral system with a single saturated ultramarine for action
 - **Sidebar Mist** (#f4f6f9, `sidebar-bg`) with **Sidebar Graphite** (#2f3747, `sidebar-text`): the app sidebar is a half-step cooler than the canvas.
 
 ### Field
-- **Ultramarine Field** (#2440d6, `field`): whole regions on marketing pages: the hero and every page intro (the header takes on whichever surface is beneath it; field regions mark themselves with `data-field`), the systems logo strip, and the full-width closing band. White type on it measures 7.6:1. **Field Mist** (#c7d1ff, `field-muted`) is secondary text on the field (4.9:1). On the field, the primary action inverts: a white button with `accent-800` text.
+- **Ultramarine Field** (#2440d6, `field`): whole regions on marketing pages: the hero and every page intro (the header (64px on phones, 80px on desktop) takes on whichever surface is beneath it; field regions mark themselves with `data-field`), the systems logo strip, and the full-width closing band. White type on it measures 7.6:1. **Field Mist** (#c7d1ff, `field-muted`) is secondary text on the field (4.9:1). On the field, the primary action inverts: a white button with `accent-800` text.
 - **Field Deep** (#1b32b8, `field-deep`): reserved for pressed or recessed states on the field.
+- **Hero depth**: the home hero's field is never flat. Soft white light comes in from both edges (radial, 20–24% at the core), and the grid's cell, blown up to 18–176px and set as 6–10% fills or 18–36% hairline outlines, sits in the side margins. Each layer drifts and turns at its own rate with the scroll story. The shapes are placed by their gap from the content column, so they slide off the edge as margins narrow, and they are hidden below 1024px, where only the light remains.
 
 ### Ink
 - **Deep Ink** (#0c111d, `ink`): the single dark band on marketing pages, the login brand panel, the workspace monogram tile, and the modal and drawer scrim at 30%.

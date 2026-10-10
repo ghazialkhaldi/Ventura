@@ -68,7 +68,8 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 4)
-      const el = document.elementFromPoint(window.innerWidth / 2, 66)
+      const hh = document.querySelector('header')?.getBoundingClientRect().height ?? 64
+      const el = document.elementFromPoint(window.innerWidth / 2, hh + 2)
       setOverField(!!el?.closest('[data-field]'))
     }
     onScroll()
@@ -89,14 +90,14 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
         {/* Every marketing page opens on the ultramarine field; the bar sits on
             it until content scrolls beneath, then turns white. */}
         <header className={`sticky top-0 z-50 border-b transition-colors duration-200 ${onField ? 'bg-field border-transparent' : `bg-surface-raised ${scrolled ? 'border-border' : 'border-transparent'}`}`}>
-          <div className="max-w-page mx-auto h-16 px-5 sm:px-8 flex items-center gap-8">
+          <div className="max-w-page mx-auto h-16 lg:h-20 px-5 sm:px-8 flex items-center gap-10">
             <Link href="/" className="shrink-0 py-2" onClick={close} aria-label="Ventura home">
-              <VenturaLogo variant={onField ? 'light' : 'dark'} height={17} />
+              <VenturaLogo variant={onField ? 'light' : 'dark'} height={20} />
             </Link>
 
             <nav className="hidden md:flex items-center gap-1" aria-label="Main">
               {NAV_LINKS.map(l => (
-                <Link key={l.href} href={l.href} className={`px-3 py-2 rounded-md text-[14px] ${onField ? 'text-white/85 hover:text-white hover:bg-white/10' : 'text-text-secondary hover:text-text-primary hover:bg-surface-overlay'}`}>
+                <Link key={l.href} href={l.href} className={`px-3.5 py-2 rounded-md text-[15px] ${onField ? 'text-white/90 hover:text-white hover:bg-white/10' : 'text-text-secondary hover:text-text-primary hover:bg-surface-overlay'}`}>
                   {l.label}
                 </Link>
               ))}
@@ -104,15 +105,15 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
 
             <div className="hidden md:flex items-center gap-1 ml-auto">
               {loggedIn ? (
-                <Link href={portalHref} className={`inline-flex items-center h-9 px-4 rounded-md text-[14px] font-medium ${onField ? 'bg-white text-accent-800 hover:bg-accent-50' : 'bg-accent-600 hover:bg-accent-700 text-white'}`}>
+                <Link href={portalHref} className={`inline-flex items-center h-11 px-5 rounded-md text-[15px] font-medium ${onField ? 'bg-white text-accent-800 hover:bg-accent-50' : 'bg-accent-600 hover:bg-accent-700 text-white'}`}>
                   {portalLabel}
                 </Link>
               ) : (
                 <>
-                  <Link href="/login" className={`px-3 py-2 rounded-md text-[14px] ${onField ? 'text-white/85 hover:text-white hover:bg-white/10' : 'text-text-secondary hover:text-text-primary hover:bg-surface-overlay'}`}>
+                  <Link href="/login" className={`px-3.5 py-2 rounded-md text-[15px] ${onField ? 'text-white/90 hover:text-white hover:bg-white/10' : 'text-text-secondary hover:text-text-primary hover:bg-surface-overlay'}`}>
                     Sign in
                   </Link>
-                  <Link href="/demo" className={`ml-2 inline-flex items-center h-9 px-4 rounded-md text-[14px] font-medium ${onField ? 'bg-white text-accent-800 hover:bg-accent-50' : 'bg-accent-600 hover:bg-accent-700 text-white'}`}>
+                  <Link href="/demo" className={`ml-3 inline-flex items-center h-11 px-5 rounded-md text-[15px] font-medium ${onField ? 'bg-white text-accent-800 hover:bg-accent-50' : 'bg-accent-600 hover:bg-accent-700 text-white'}`}>
                     Walk through the demo
                   </Link>
                 </>

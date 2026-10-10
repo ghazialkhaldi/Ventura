@@ -63,7 +63,7 @@ export default function DemoPage() {
       </section>
 
       {/* ── Step rail ── */}
-      <nav aria-label="Demo steps" className="sticky top-16 z-40 bg-surface-raised/95 backdrop-blur-sm border-b border-border">
+      <nav aria-label="Demo steps" className="sticky top-16 lg:top-20 z-40 bg-surface-raised/95 backdrop-blur-sm border-b border-border">
         <div className="max-w-page mx-auto px-5 sm:px-8 h-12 flex items-center gap-1 overflow-x-auto">
           {STEPS.map(s => (
             <a key={s.id} href={`#${s.id}`} className="shrink-0 inline-flex items-center gap-2 h-8 px-2.5 rounded-md text-[13.5px] text-text-secondary hover:text-text-primary hover:bg-surface-overlay">

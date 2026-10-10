@@ -1,4 +1,5 @@
 import PublicLayout from '../components/layout/PublicLayout'
+import { Sheet } from '../components/marketing/Sky'
 import { PageIntro, Prose, InlineLink } from '../components/marketing/Marketing'
 
 const SECTIONS = [
@@ -87,7 +88,7 @@ export default function PrivacyPage() {
         meta="Last updated: September 2026"
         lead="What information Ventura collects, how it is used, and where it is stored, in plain language and specific to our actual practices."
       />
-      <div className="max-w-page mx-auto px-5 sm:px-8 py-14 sm:py-20">
+      <Sheet className="mb-16 sm:mb-24">
         <Prose>
           {SECTIONS.map(section => (
             <div key={section.title}>
@@ -100,7 +101,7 @@ export default function PrivacyPage() {
             <InlineLink href="/contact">Contact our team</InlineLink>.
           </p>
         </Prose>
-      </div>
+      </Sheet>
     </PublicLayout>
   )
 }

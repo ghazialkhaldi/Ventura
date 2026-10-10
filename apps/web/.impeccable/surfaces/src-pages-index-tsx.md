@@ -2,30 +2,29 @@
 version: 1
 slug: "src-pages-index-tsx"
 primary_target: "src/pages/index.tsx"
-related_targets: ["src/components/layout/PublicLayout.tsx"]
+related_targets: ["src/components/layout/PublicLayout.tsx","src/components/marketing/Marketing.tsx"]
 ---
 
 # Landing (/)
 
-Scope: the public marketing site's home page, plus the shared public chrome (PublicLayout nav and footer) that every marketing page inherits.
+Scope: the public marketing site's home page and the shared public chrome (PublicLayout header and footer, marketing blocks) that every marketing page inherits. Redesign of 2026-10-10 replaces every earlier visual world (canon, ultramarine field, ledger ruling, margin squares).
 Visitor mode: Persuade.
 
-Audience: controllers and finance managers at mid-size companies evaluating a spend-review tool before month-end close. Pre-launch: no customers, logos, testimonials or results exist; all product visuals use labelled example data.
+Audience: controllers and finance managers at mid-size companies evaluating spend review before month-end close. Pre-launch: no customers, logos, testimonials or results exist; product visuals use labelled example data.
 Primary action: walk through the demo (/demo). Secondary: talk to us (/contact).
-Proof: the product's own mechanism shown at work (a finding opened to its rows, baseline, rule and confidence; the reviewer's decision). Never claim live syncing or integrations.
-Must not feel like: a generic AI startup (gradients, glow, "AI-powered"), or playful/casual.
-Peers whose craft sets the bar: Linear, Mercury.
+References the owner chose: Mercury (cinematic, calm, premium, colour shifting as you scroll) and Stripe (a signature colour that recurs down the page, confident type). Kept from before: the systems logo strip (official marks only).
+Must not feel like: a generic AI startup, playful, bland, a flat solid fill, decorative squares or ruled patterns.
 
 ## Direction contract
 
-THESIS: The category standard, played straight at Linear/Mercury craft: a confident headline over the real product at work. It refuses the category's abstract chart hero with invented savings, AI glow, and grids of identical icon cards. The page proves the mechanism with the interface itself.
+THESIS: The close ends at dawn. The whole site is one sky that moves from pre-dawn indigo to full morning as the visitor scrolls, and the page ends in daylight, closed, with nothing unexplained. It refuses the category's flat product-screenshot hero and any solid colour block.
 
-OWN-WORLD (revised 2026-10-09 after the owner found the first build bland, chose the "ultramarine field"): an ultramarine field (#2440d6) owns the hero, page intros, logo strip and closing band, with white type, and the header sits on it until scroll. The signature (revised again 2026-10-10) is the ledger matrix: all 1,431 example transactions as a grid, a scan line passing down it, and five flagged cells igniting with leader lines to their findings. The idea came from reference heroes (Stripe's gradient, Numeric and Rillet's dither textures) whose signature is an ownable asset; this one is built from the product's own data. A strip of systems the product reads exports from scrolls on the field, and the findings inbox lifts over the field's edge. Below that it is light, A white canvas with cool tinted neutrals running to a near-black blue ink. One ultramarine accent for actions, links and focus only. Severity red, orange, amber and slate appear only on findings. Archivo set semi-expanded for display (echoing the extended wordmark), Archivo at normal width for body, and JetBrains Mono only for IDs and event names. Hairline borders, 6px controls, 10px product frames with a soft offset shadow. A single deep-ink band carries the human-decision story.
+OWN-WORLD: A painted dawn sky (night indigo #12133a, indigo #2b2a6b, violet #4b3f8f, rose #c4718f, coral #f39a7c, gold #ffd3a1, morning blue #a9c8ee) over still water, with soft cloud bands and a sun glint. Content sits on white paper sheets floating on the sky with deep soft shadows. White type on the sky; ink on paper. One deep dawn-indigo action colour on paper, and a white button on the sky. Archivo semi-expanded display, at large sizes.
 
-STORY: A controller sees that Ventura reads a spend export and returns a short ranked list of findings, each traceable to rows, with a person deciding. They believe it because each differentiator is demonstrated in UI: baselines, approval-limit clustering, period cut-off, the upload. They walk through the demo.
+STORY: The controller sees the night of close resolve into morning: every row read, a few findings traced to evidence, a person deciding, nothing left unexplained. They walk through the demo.
 
-FIRST VIEWPORT: Nav: logo, Product, Security, Contact, Sign in, and a primary "Walk through the demo". A left-aligned two-line headline at about 64px with a one-sentence subline, the primary button and a "Talk to us" link. Under it, at full content width, the product frame: a findings inbox (left) and the open finding with its evidence rows, baseline and Resolve/Dismiss (right), labelled Example data. The frame enters the fold at about 60% of the height.
+FIRST VIEWPORT: The header sits transparent on the sky. Headline "Close the month with nothing unexplained." at about 72px, left, over the indigo upper sky, with the subline and a white "Walk through the demo" button. The finding card floats right in the dawn light, its flagged row held in focus brackets. The horizon sits at about 77% height, with sea, glint and a far headland below.
 
-FORM: Category standard (the canon card, chosen by the user on the decision page), executed without irony; peers Linear and Mercury; seed key da23ab24. Signature interaction: selecting a finding in the hero inbox swaps the detail pane and highlights its evidence rows. Motion: one orchestrated hero entrance with an expo ease-out from a visible default, 160–220ms state transitions, and reduced-motion respected.
+FORM: The assigned direction, number 3 of the grounded list, seed key fcd4d654. Raises: scroll is a journey from night to full morning (from Mesophotic deep dive); sections are stepped exposures of the same sky (from Darkroom safelight); focus brackets lock onto each flagged row (from Camcorder viewfinder). Signature interaction: the sun rises as the hero scrolls, the glint on the water lengthens, and the sky behind every later section is a later hour. Motion: one scroll-linked sky timeline with expo-eased reveals, reduced motion holding a still dawn.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance

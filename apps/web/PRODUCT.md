@@ -44,7 +44,7 @@ Ventura reads a company's spend records and surfaces the specific transactions a
 
 - Name: Ventura. Logo assets: `public/ventura-logo.png`, `public/ventura-logo-white.png`, and the `VenturaLogo` component.
 - Voice already in use: plain, factual and specific, with no hype. Prefer "finding", "evidence", "review" and "close" over "AI magic". Never imply autonomous action.
-- Visual register (chosen 2026-10-09): the category standard, executed at full craft rather than a themed world. Peers that set the quality bar: Linear and Mercury. It must not read as a generic AI startup (gradients, glow, "AI-powered") or as playful/casual.
+- Visual world (chosen 2026-10-10, replacing the earlier category-standard and ultramarine builds): "Close at dawn". It is a cinematic dawn sky that moves from night to morning as you scroll, with content on paper sheets. References the owner chose: Mercury and Stripe. It must not read as a generic AI startup, playful, bland, a flat solid fill, or decorative squares and ruled patterns.
 
 ## Evidence on Hand
 

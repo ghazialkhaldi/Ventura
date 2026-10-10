@@ -1,4 +1,5 @@
 import PublicLayout from '../components/layout/PublicLayout'
+import { Sheet } from '../components/marketing/Sky'
 import { PageIntro, Prose, InlineLink } from '../components/marketing/Marketing'
 
 const sections = [
@@ -48,7 +49,7 @@ export default function TermsPage() {
   return (
     <PublicLayout title="Terms of Service">
       <PageIntro title="Terms of Service" meta="Last updated: July 2026" />
-      <div className="max-w-page mx-auto px-5 sm:px-8 py-14 sm:py-20">
+      <Sheet className="mb-16 sm:mb-24">
         <Prose>
           {sections.map(s => (
             <div key={s.title}>
@@ -60,7 +61,7 @@ export default function TermsPage() {
             Questions about these terms? <InlineLink href="/contact">Contact us</InlineLink>.
           </p>
         </Prose>
-      </div>
+      </Sheet>
     </PublicLayout>
   )
 }

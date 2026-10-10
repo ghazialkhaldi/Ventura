@@ -1,4 +1,5 @@
 import PublicLayout from '../components/layout/PublicLayout'
+import { Sheet } from '../components/marketing/Sky'
 import { PageIntro, InlineLink } from '../components/marketing/Marketing'
 import { CheckCircledIcon as CheckCircleIcon } from '@radix-ui/react-icons'
 
@@ -15,7 +16,7 @@ export default function StatusPage() {
   return (
     <PublicLayout title="System Status">
       <PageIntro title="System status" />
-      <div className="max-w-page mx-auto px-5 sm:px-8 py-14 sm:py-20">
+      <Sheet className="mb-16 sm:mb-24">
         <div className="max-w-[44rem]">
           <div className="flex items-center gap-3 rounded-lg border border-positive-line bg-positive-bg px-5 py-4">
             <span className="status-dot w-2.5 h-2.5 bg-positive" />
@@ -41,7 +42,7 @@ export default function StatusPage() {
             Experiencing an issue not shown here? <InlineLink href="/contact">Contact support</InlineLink>.
           </p>
         </div>
-      </div>
+      </Sheet>
     </PublicLayout>
   )
 }

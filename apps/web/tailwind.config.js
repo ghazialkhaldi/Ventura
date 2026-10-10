@@ -64,11 +64,17 @@ module.exports = {
           muted:     v('text-muted'),
           inverse:   v('text-inverse'),
         },
-        // The ultramarine field: the brand colour owning whole regions.
-        field: {
-          DEFAULT: v('field'),
-          deep:    v('field-deep'),
-          muted:   v('field-muted'),
+        // The dawn sky behind every marketing page.
+        sky: {
+          night:   v('sky-night'),
+          indigo:  v('sky-indigo'),
+          violet:  v('sky-violet'),
+          rose:    v('sky-rose'),
+          coral:   v('sky-coral'),
+          gold:    v('sky-gold'),
+          morning: v('sky-morning'),
+          day:     v('sky-day'),
+          muted:   v('sky-muted'),
         },
         // The one deep band on marketing pages, and the app's dark surfaces.
         ink: {
@@ -94,6 +100,7 @@ module.exports = {
         card:      '0 1px 2px 0 rgb(15 21 36 / 0.05)',
         'card-md': '0 4px 12px -2px rgb(15 21 36 / 0.08), 0 2px 4px -2px rgb(15 21 36 / 0.05)',
         frame:     '0 24px 48px -16px rgb(15 21 36 / 0.18), 0 8px 16px -8px rgb(15 21 36 / 0.08)',
+        sheet:     '0 50px 100px -40px rgb(28 18 72 / 0.45), 0 18px 36px -18px rgb(28 18 72 / 0.25)',
         pop:       '0 12px 32px -8px rgb(15 21 36 / 0.22), 0 2px 6px -2px rgb(15 21 36 / 0.08)',
       },
       transitionTimingFunction: {
@@ -101,6 +108,7 @@ module.exports = {
       },
       maxWidth: {
         page: '1200px',
+        sheet: '1280px',
       },
     },
   },

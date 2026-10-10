@@ -59,11 +59,11 @@ export default function ContactPage() {
 
   return (
     <PublicLayout title="Contact">
-      <div data-field className="bg-field text-white">
+      <div data-field className="text-white">
       <div className="max-w-page mx-auto px-5 sm:px-8 pt-12 sm:pt-16 pb-20 sm:pb-28 grid gap-12 lg:grid-cols-[1fr_minmax(0,34rem)] lg:gap-20">
         <div>
           <h1 className={`${H1_CLASS} !text-white`}>Talk to us</h1>
-          <p className="mt-6 max-w-[30rem] text-[17px] sm:text-[18px] leading-[1.6] text-field-muted">
+          <p className="mt-6 max-w-[30rem] text-[17px] sm:text-[18px] leading-[1.6] text-sky-muted">
             Tell us about your finance team and how you review spend today, and we&rsquo;ll show
             you how Ventura can help.
           </p>

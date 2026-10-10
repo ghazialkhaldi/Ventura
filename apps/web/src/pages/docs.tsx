@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import PublicLayout from '../components/layout/PublicLayout'
+import { Sheet } from '../components/marketing/Sky'
 import { PageIntro, InlineLink } from '../components/marketing/Marketing'
 
 const guides = [
@@ -49,9 +50,10 @@ export default function DocsPage() {
         lead="How to set up a workspace, bring in your data and work through findings."
       />
 
-      <div className="max-w-page mx-auto px-5 sm:px-8 py-14 sm:py-20 grid gap-12 lg:grid-cols-[14rem_1fr] lg:gap-16">
+      <Sheet className="mb-16 sm:mb-24">
+      <div className="grid gap-12 lg:grid-cols-[14rem_1fr] lg:gap-16">
         <nav aria-label="On this page" className="hidden lg:block">
-          <ul className="sticky top-24 space-y-1 border-l border-border">
+          <ul className="sticky top-28 space-y-1 border-l border-border">
             {guides.map(g => (
               <li key={g.id}>
                 <a href={`#${g.id}`} className="block -ml-px pl-4 py-1.5 border-l border-transparent text-[14px] text-text-muted hover:text-text-primary hover:border-border-strong">
@@ -89,6 +91,7 @@ export default function DocsPage() {
           </p>
         </div>
       </div>
+      </Sheet>
     </PublicLayout>
   )
 }

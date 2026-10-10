@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import PublicLayout from '../components/layout/PublicLayout'
 import { ClosingCTA, H2_CLASS } from '../components/marketing/Marketing'
+import { Sheet } from '../components/marketing/Sky'
 import {
   FINDINGS, FindingsFrame, MappingPanel, AuditTrail, type AuditEvent, type Status,
 } from '../components/marketing/ProductPreview'
@@ -50,12 +51,12 @@ export default function DemoPage() {
     <PublicLayout title="Product Demo">
 
       {/* ── Intro ── */}
-      <section data-field className="bg-field text-white">
+      <section data-field className="text-white">
         <div className="max-w-page mx-auto px-5 sm:px-8 pt-12 sm:pt-16 pb-14 sm:pb-16">
           <h1 className="font-display font-medium text-[2.25rem] leading-[1.06] tracking-[-0.03em] sm:text-[3.25rem] text-white max-w-[20ch]">
             A month&#8209;end review, on sample data
           </h1>
-          <p className="mt-5 max-w-[40rem] text-[17px] leading-[1.6] text-field-muted">
+          <p className="mt-5 max-w-[40rem] text-[17px] leading-[1.6] text-sky-muted">
             Five findings from a sample company&rsquo;s AP register. Work them the way your team
             would: open each one, check the rows behind it, and decide. Every figure here is an example.
           </p>
@@ -63,8 +64,8 @@ export default function DemoPage() {
       </section>
 
       {/* ── Step rail ── */}
-      <nav aria-label="Demo steps" className="sticky top-16 lg:top-20 z-40 bg-surface-raised/95 backdrop-blur-sm border-b border-border">
-        <div className="max-w-page mx-auto px-5 sm:px-8 h-12 flex items-center gap-1 overflow-x-auto">
+      <nav aria-label="Demo steps" className="sticky top-20 lg:top-24 z-40 mb-10 px-3 sm:px-5">
+        <div className="max-w-page mx-auto h-12 px-3 flex items-center gap-1 overflow-x-auto rounded-full bg-surface-raised/90 backdrop-blur-md shadow-pop ring-1 ring-black/5">
           {STEPS.map(s => (
             <a key={s.id} href={`#${s.id}`} className="shrink-0 inline-flex items-center gap-2 h-8 px-2.5 rounded-md text-[13.5px] text-text-secondary hover:text-text-primary hover:bg-surface-overlay">
               <span className="flex h-5 w-5 items-center justify-center rounded-full border border-border-strong text-[11px] font-medium tabular-nums">{s.n}</span>
@@ -78,8 +79,8 @@ export default function DemoPage() {
       </nav>
 
       {/* ── 1. Upload ── */}
-      <section id="upload" className="scroll-mt-28 py-16 sm:py-24">
-        <div className="max-w-page mx-auto px-5 sm:px-8 grid gap-12 lg:grid-cols-[minmax(0,26rem)_1fr] lg:gap-20 lg:items-center">
+      <Sheet id="upload" className="mb-10 sm:mb-14">
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,26rem)_1fr] lg:gap-20 lg:items-center">
           <div>
             <StepLabel n={1} />
             <h2 className={`${H2_CLASS} mt-4`}>Start from an export</h2>
@@ -91,11 +92,11 @@ export default function DemoPage() {
           </div>
           <MappingPanel />
         </div>
-      </section>
+      </Sheet>
 
       {/* ── 2. Review ── */}
-      <section id="review" className="scroll-mt-28 py-16 sm:py-24 bg-surface border-y border-border-subtle">
-        <div className="max-w-page mx-auto px-5 sm:px-8">
+      <Sheet id="review" className="mb-10 sm:mb-14">
+        <div>
           <div className="max-w-[40rem]">
             <StepLabel n={2} />
             <h2 className={`${H2_CLASS} mt-4`}>Work the review queue</h2>
@@ -109,11 +110,11 @@ export default function DemoPage() {
             <FindingsFrame status={status} onDecide={decide} />
           </div>
         </div>
-      </section>
+      </Sheet>
 
       {/* ── 3. Record ── */}
-      <section id="record" className="scroll-mt-28 py-16 sm:py-24 bg-ink text-ink-text">
-        <div className="max-w-page mx-auto px-5 sm:px-8 grid gap-12 lg:grid-cols-[minmax(0,26rem)_1fr] lg:gap-20 lg:items-start">
+      <Sheet id="record" tone="ink" className="mb-10 sm:mb-14">
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,26rem)_1fr] lg:gap-20 lg:items-start">
           <div>
             <StepLabel n={3} dark />
             <h2 className={`${H2_CLASS} mt-4 !text-white`}>Every decision is on the record</h2>
@@ -124,11 +125,11 @@ export default function DemoPage() {
           </div>
           <AuditTrail events={events} label="" />
         </div>
-      </section>
+      </Sheet>
 
       {/* ── 4. Close ── */}
-      <section id="close" className="scroll-mt-28 py-16 sm:py-24">
-        <div className="max-w-page mx-auto px-5 sm:px-8">
+      <Sheet id="close" className="mb-10 sm:mb-14">
+        <div>
           <div className="max-w-[40rem]">
             <StepLabel n={4} />
             <h2 className={`${H2_CLASS} mt-4`}>Close the period with nothing left unexplained</h2>
@@ -156,7 +157,7 @@ export default function DemoPage() {
             </a>
           )}
         </div>
-      </section>
+      </Sheet>
 
       <ClosingCTA
         title="See it on your own export"

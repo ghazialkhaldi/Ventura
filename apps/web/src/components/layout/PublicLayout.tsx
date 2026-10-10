@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import VenturaLogo from '../VenturaLogo'
+import { SkyBackdrop } from '../marketing/Sky'
 import { createClient } from '../../utils/supabase/client'
 import { HamburgerMenuIcon as Bars3Icon, Cross2Icon as XMarkIcon } from '@radix-ui/react-icons'
 
@@ -85,11 +86,12 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
       <Head>
         <title>{title ? `${title} · Ventura` : 'Ventura · Spend review for month-end close'}</title>
       </Head>
-      <div className="min-h-screen flex flex-col bg-surface-raised">
+      <div className="relative isolate min-h-screen flex flex-col">
+        <SkyBackdrop />
 
-        {/* Every marketing page opens on the ultramarine field; the bar sits on
-            it until content scrolls beneath, then turns white. */}
-        <header className={`sticky top-0 z-50 border-b transition-colors duration-200 ${onField ? 'bg-field border-transparent' : `bg-surface-raised ${scrolled ? 'border-border' : 'border-transparent'}`}`}>
+        {/* Over the dawn sky the bar is transparent with a white mark; over paper
+            it turns to frosted white. Sky regions mark themselves with data-field. */}
+        <header className={`sticky top-0 z-50 border-b transition-colors duration-200 ${onField ? 'bg-transparent border-transparent' : 'bg-surface-raised/85 backdrop-blur-md border-border/70'}`}>
           <div className="max-w-page mx-auto h-16 lg:h-20 px-5 sm:px-8 flex items-center gap-10">
             <Link href="/" className="shrink-0 py-2" onClick={close} aria-label="Ventura home">
               <VenturaLogo variant={onField ? 'light' : 'dark'} height={20} />
@@ -113,7 +115,7 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
                   <Link href="/login" className={`px-3.5 py-2 rounded-md text-[15px] ${onField ? 'text-white/90 hover:text-white hover:bg-white/10' : 'text-text-secondary hover:text-text-primary hover:bg-surface-overlay'}`}>
                     Sign in
                   </Link>
-                  <Link href="/demo" className={`ml-3 inline-flex items-center h-11 px-5 rounded-md text-[15px] font-medium ${onField ? 'bg-white text-accent-800 hover:bg-accent-50' : 'bg-accent-600 hover:bg-accent-700 text-white'}`}>
+                  <Link href="/demo" className={`ml-3 inline-flex items-center h-11 px-5 rounded-full text-[15px] font-medium ${onField ? 'bg-white text-accent-800 hover:bg-accent-50' : 'bg-accent-600 hover:bg-accent-700 text-white'}`}>
                     Walk through the demo
                   </Link>
                 </>
@@ -170,9 +172,9 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
           </div>
         </div>
 
-        <main className="flex-1">{children}</main>
+        <main className="relative flex-1">{children}</main>
 
-        <footer className="border-t border-border bg-surface-raised">
+        <footer className="relative border-t border-border bg-surface-raised">
           <div className="max-w-page mx-auto px-5 sm:px-8 pt-14 pb-10">
             <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
               <div className="col-span-2 lg:col-span-1">

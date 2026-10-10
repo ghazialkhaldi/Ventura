@@ -22,17 +22,17 @@
   --text-muted:      99 110 130;
   --text-inverse:    255 255 255;
 
-  --accent-50:  238 242 255;
-  --accent-100: 224 231 255;
-  --accent-200: 195 208 255;
-  --accent-300: 156 176 253;
-  --accent-400: 113 137 246;
-  --accent-500: 74 103 238;
-  --accent-600: 53 80 220;
-  --accent-700: 42 64 184;
-  --accent-800: 38 55 147;
-  --accent-900: 35 49 116;
-  --accent-950: 22 29 69;
+  --accent-50:  241 240 251;
+  --accent-100: 228 225 248;
+  --accent-200: 201 195 241;
+  --accent-300: 167 157 230;
+  --accent-400: 128 112 216;
+  --accent-500: 95 77 200;
+  --accent-600: 74 58 176;
+  --accent-700: 61 47 147;
+  --accent-800: 51 40 119;
+  --accent-900: 42 34 96;
+  --accent-950: 25 20 58;
 
   --sidebar-bg:     244 246 249;
   --sidebar-hover:  234 237 242;
@@ -41,11 +41,18 @@
   --sidebar-text:   47 55 71;
   --sidebar-muted:  99 110 130;
 
-  /* The ultramarine field: whole regions in the brand colour (hero, intros,
-     closing band). White type on it is 7.6:1; field-muted is 4.9:1. */
-  --field:       36 64 214;
-  --field-deep:  27 50 184;
-  --field-muted: 199 209 255;
+  /* The dawn sky every marketing page sits on. It moves from night to
+     morning with scroll; these are its fixed reference colours. White type
+     on the night end is 13:1; sky-muted on night is 9:1. */
+  --sky-night:   18 19 58;
+  --sky-indigo:  43 42 107;
+  --sky-violet:  75 63 143;
+  --sky-rose:    196 113 143;
+  --sky-coral:   243 154 124;
+  --sky-gold:    255 211 161;
+  --sky-morning: 169 200 238;
+  --sky-day:     226 236 249;
+  --sky-muted:   222 218 246;
 
   --ink:        12 17 29;
   --ink-raised: 21 27 42;
@@ -127,7 +134,7 @@ td, th {
 }
 
 ::selection {
-  background: rgb(var(--accent-200) / 0.7);
+  background: rgb(var(--accent-200) / 0.75);
   color: rgb(var(--text-primary));
 }
 
@@ -203,17 +210,12 @@ button, a {
 .animate-marquee { animation: marquee-left 48s linear infinite; }
 .animate-marquee:hover { animation-play-state: paused; }
 
-/* Ledger scan: each tick slides the register up one row */
-@keyframes ledger-step {
-  from { transform: translateY(var(--row-h, 44px)); }
-  to   { transform: translateY(0); }
+/* Focus brackets tighten onto the flagged evidence row */
+@keyframes bracket-in {
+  from { inset: -6px 2px; opacity: 0; }
+  to   { inset: 3px 10px; opacity: 1; }
 }
-.animate-ledger-step { animation: ledger-step 520ms cubic-bezier(0.16, 1, 0.3, 1) both; }
-
-@keyframes caught {
-  0%   { background-color: rgb(var(--accent-100)); }
-  100% { background-color: var(--caught-bg); }
-}
+.animate-bracket-in { animation: bracket-in 900ms cubic-bezier(0.16, 1, 0.3, 1) 500ms both; }
 
 @keyframes pane-in {
   from { transform: translateY(6px); opacity: 0; }

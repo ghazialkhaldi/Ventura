@@ -24,7 +24,7 @@ module.exports = {
         mono: ['var(--font-mono)', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       colors: {
-        // Ultramarine: actions, links, focus and selection only.
+        // Dawn indigo: actions, links, focus and selection only.
         accent: {
           50:  v('accent-50'),
           100: v('accent-100'),

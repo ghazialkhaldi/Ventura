@@ -9,10 +9,11 @@ const severityMap: Record<Severity, string> = {
   LOW:      'bg-surface-overlay text-text-muted border border-border',
 }
 
-// Status: kept apart from severity, so an open Low finding never reads as red
+// Status: kept apart from severity (indigo and neutrals only), so an open Low
+// finding never reads as red and "under review" never reads as a warning
 const statusMap: Record<AnomalyStatus, string> = {
   'Open':         'bg-accent-50 text-accent-700 border border-accent-200',
-  'Under Review': 'bg-medium-bg text-medium-fg border border-medium-line',
+  'Under Review': 'bg-surface-overlay text-text-primary border border-border-strong',
   'Resolved':     'bg-positive-bg text-positive-fg border border-positive-line',
   'Dismissed':    'bg-surface-overlay text-text-muted border border-border',
 }
@@ -47,14 +48,18 @@ const auditSeverityMap: Record<string, string> = {
 
 const dotColor: Record<string, string> = {
   CRITICAL: 'bg-critical', HIGH: 'bg-high', MEDIUM: 'bg-medium', LOW: 'bg-low',
-  Open: 'bg-accent-500', 'Under Review': 'bg-medium', Resolved: 'bg-positive', Dismissed: 'bg-low',
+  Open: 'bg-accent-500', 'Under Review': 'bg-accent-300', Resolved: 'bg-positive', Dismissed: 'bg-low',
   Critical: 'bg-critical', Bottleneck: 'bg-high', Warning: 'bg-medium', 'On Track': 'bg-positive',
   Connected: 'bg-positive', Disconnected: 'bg-critical', Degraded: 'bg-medium', Pending: 'bg-low',
   'Not connected': 'bg-low',
 }
 
+// The one spelling of each severity, wherever a chip shows it.
+export const SEVERITY_LABEL: Record<Severity, string> = { CRITICAL: 'Critical', HIGH: 'High', MEDIUM: 'Medium', LOW: 'Low' }
+
 interface BadgeProps {
-  children: React.ReactNode
+  // Severity chips write their own label from `value`; every other variant needs children.
+  children?: React.ReactNode
   variant?: 'severity' | 'status' | 'workflow' | 'integration' | 'aiStatus' | 'auditSeverity' | 'neutral' | 'blue' | 'green' | 'red' | 'amber'
   value?: string
   className?: string
@@ -84,7 +89,7 @@ export default function Badge({ children, variant = 'neutral', value, className,
       {dot && value && (
         <span className={clsx('w-1.5 h-1.5 rounded-full flex-shrink-0', dotColor[value] || 'bg-low')} />
       )}
-      {children}
+      {variant === 'severity' && value ? SEVERITY_LABEL[value as Severity] ?? children : children}
     </span>
   )
 }

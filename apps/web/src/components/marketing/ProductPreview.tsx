@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, type KeyboardEvent, type ReactNode } from 'react'
 import { ArrowRightIcon, CheckIcon, ResetIcon as ArrowUturnLeftIcon } from '@radix-ui/react-icons'
+import FocusBrackets from '../FocusBrackets'
 
 // The product, shown working on labelled example data. Shared by the home page
 // and the demo so both demonstrate the same mechanism: findings traced to rows,
@@ -285,11 +286,14 @@ function FindingDetail({ f, status, onDecide }: { f: Finding; status: Status; on
             </thead>
             <tbody>
               {f.rows.map(r => (
-                <tr key={r.cells[0]} className={`border-t border-border-subtle ${r.flagged ? 'bg-high-bg' : ''}`}>
+                <tr key={r.cells[0]} className={`relative border-t border-border-subtle ${r.flagged ? 'bg-high-bg' : ''}`}>
                   {r.cells.map((c, i) => (
                     <td key={i} className={`px-3 py-2 whitespace-nowrap ${i === 0 ? 'text-text-muted' : 'text-text-primary'} ${i === r.cells.length - 1 ? 'text-right font-medium' : ''} ${MOBILE_HIDDEN.has(f.cols[i]) ? 'hidden sm:table-cell' : ''}`}>{c}</td>
                   ))}
-                  <td className={`px-3 py-2 text-right whitespace-nowrap text-[12px] ${r.flagged ? 'text-high-fg font-medium' : 'text-text-muted'}`}>{r.note ?? (r.flagged ? 'Flagged' : '')}</td>
+                  <td className={`px-3 py-2 text-right whitespace-nowrap text-[12px] ${r.flagged ? 'text-high-fg font-medium' : 'text-text-muted'}`}>
+                    {r.note ?? (r.flagged ? 'Flagged' : '')}
+                    {r.flagged && status === 'open' && <FocusBrackets inset="2px" />}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -358,12 +362,12 @@ function HistoryStrip({ values }: { values: number[] }) {
 
 export function Figure({ caption, children, className = '' }: { caption: string; children: ReactNode; className?: string }) {
   return (
-    <figure className={`min-w-0 rounded-xl border border-border bg-surface-raised shadow-card-md ${className}`}>
-      <figcaption className="flex items-center gap-3 px-5 py-3.5 border-b border-border text-[13px]">
+    <figure className={`min-w-0 ${className}`}>
+      <figcaption className="flex items-center gap-3 pb-3 border-b border-border text-[13px]">
         <span className="font-medium text-text-primary">{caption}</span>
         <span className="ml-auto shrink-0 whitespace-nowrap text-text-muted">Example data</span>
       </figcaption>
-      <div className="p-5 sm:p-6">{children}</div>
+      <div className="pt-6">{children}</div>
     </figure>
   )
 }
@@ -467,7 +471,7 @@ export function MappingPanel() {
     ['GL Account',    'Account'],
   ]
   return (
-    <div className="rounded-xl border border-border bg-surface-raised shadow-card-md overflow-hidden">
+    <div className="rounded-xl border border-border bg-surface-raised overflow-hidden">
       <div className="flex items-center gap-3 px-5 py-3.5 border-b border-border text-[13px]">
         <span className="font-medium text-text-primary">AP Detail, Sep 2026.xlsx</span>
         <span className="ml-auto shrink-0 whitespace-nowrap text-text-muted">Example data</span>

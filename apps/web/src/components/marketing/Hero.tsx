@@ -5,6 +5,7 @@ import {
 } from 'simple-icons'
 import { CheckIcon, ResetIcon } from '@radix-ui/react-icons'
 import { FINDINGS, SEV } from './ProductPreview'
+import FocusBrackets from '../FocusBrackets'
 
 // ── The finding, held in the dawn light ──────────────────────────────────────
 // The hero's product proof: one finding with its evidence, the flagged row held
@@ -69,25 +70,8 @@ export function DawnFindingCard() {
   )
 }
 
-/** Corner brackets that tighten onto the flagged row, like a lens finding focus. */
-function FocusBrackets() {
-  const corner = (rot: number, pos: string) => (
-    <svg viewBox="0 0 12 12" className={`absolute h-3 w-3 text-high ${pos}`} style={{ transform: `rotate(${rot}deg)` }} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-      <path d="M1 11V3a2 2 0 0 1 2-2h8" />
-    </svg>
-  )
-  return (
-    <span aria-hidden className="pointer-events-none absolute animate-bracket-in" style={{ inset: '3px 10px' }}>
-      {corner(0, 'left-0 top-0')}
-      {corner(90, 'right-0 top-0')}
-      {corner(270, 'left-0 bottom-0')}
-      {corner(180, 'right-0 bottom-0')}
-    </span>
-  )
-}
-
 // ── Systems strip ────────────────────────────────────────────────────────────
-// Official marks only, all in white on the field. Ventura reads exports from
+// Official marks only, all in white on the sea. Ventura reads exports from
 // these systems; it does not sync with them, so the strip says "exports".
 
 // 'word' marks are wordmarks and stand alone; 'symbol' marks carry the name.

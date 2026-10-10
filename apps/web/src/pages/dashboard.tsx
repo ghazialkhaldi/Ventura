@@ -6,7 +6,7 @@ import Badge from '../components/ui/Badge'
 import DataUploadWidget from '../components/ui/DataUploadWidget'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import { useDataReady } from '../hooks/useDataReady'
-import { loadDataset } from '../lib/dataStore'
+import { loadDataset, isUndecided } from '../lib/dataStore'
 import type { Dataset } from '../lib/dataStore'
 import { computeTierSummary, loadTierConfig, tierLabel, tierColor, tierDot } from '../lib/dataLayers'
 import type { TierSummary } from '../lib/dataLayers'
@@ -16,7 +16,6 @@ import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts'
 import {
-  ExclamationTriangleIcon,
   ArrowRightIcon,
   ChevronRightIcon,
   CheckCircleIcon,
@@ -52,20 +51,6 @@ function timeAgo(iso: string): string {
   if (sec < 3600)  return `${Math.floor(sec / 60)}m ago`
   if (sec < 86400) return `${Math.floor(sec / 3600)}h ago`
   return `${Math.floor(sec / 86400)}d ago`
-}
-
-const SEV_AMT: Record<string, string> = {
-  CRITICAL: 'text-critical-fg',
-  HIGH:     'text-high-fg',
-  MEDIUM:   'text-medium-fg',
-  LOW:      'text-text-muted',
-}
-
-const SEV_LABEL: Record<string, string> = {
-  CRITICAL: 'text-critical-fg',
-  HIGH:     'text-high-fg',
-  MEDIUM:   'text-medium-fg',
-  LOW:      'text-text-muted',
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -247,12 +232,9 @@ export default function DashboardPage() {
   }
 
   // ── Data derivations ───────────────────────────────────────────────────────
-  const openAnomalies      = dataset.anomalies.filter(a => a.status !== 'Resolved')
-  const criticalCount      = openAnomalies.filter(a => a.severity === 'CRITICAL').length
-  const highCount          = openAnomalies.filter(a => a.severity === 'HIGH').length
+  const openAnomalies      = dataset.anomalies.filter(isUndecided)
   const totalExposure      = openAnomalies.reduce((s, a) => s + a.amount, 0)
   const topAnomaly         = openAnomalies[0] ?? null
-  const topSeverity        = criticalCount > 0 ? 'CRITICAL' : highCount > 0 ? 'HIGH' : 'MEDIUM'
   const duplicates         = openAnomalies.filter(a => a.type === 'duplicate')
   const duplicateSavings   = duplicates.reduce((s, a) => s + a.amount, 0)
   const highConf           = openAnomalies.filter(a => a.confidence >= getConfidenceThreshold())
@@ -323,27 +305,20 @@ export default function DashboardPage() {
           <div className="flex flex-col sm:flex-row sm:items-stretch divide-y sm:divide-y-0 sm:divide-x divide-border">
             {/* Content */}
             <div className="flex-1 p-5 min-w-0">
-              <div className="flex items-center gap-2 mb-2">
-                <span className={`text-[12px] font-medium ${SEV_LABEL[topSeverity]}`}>
-                  {criticalCount > 0 ? 'Critical, needs review' : highCount > 0 ? 'High priority' : 'Needs review'}
-                </span>
-                <span className="text-[12px] text-text-muted">·</span>
-                <span className="text-[12px] text-text-muted">
-                  {openAnomalies.length} open alert{openAnomalies.length !== 1 ? 's' : ''}
-                  {highConf.length > 0 ? ` · ${highConf.length} high-confidence` : ''}
-                </span>
-              </div>
-              <p className="text-text-primary font-medium text-base leading-snug">{topAnomaly.title}</p>
-              <p className="text-text-muted text-xs mt-1">
-                {topAnomaly.vendor}{topAnomaly.category ? ` · ${topAnomaly.category}` : ''}
+              <p className="flex flex-wrap items-center gap-2 text-text-primary font-medium text-[17px] leading-snug">
+                {topAnomaly.title}
+                <Badge variant="severity" value={topAnomaly.severity} dot />
               </p>
-              <p className="text-text-secondary text-xs mt-2 leading-relaxed line-clamp-2">{topAnomaly.description}</p>
+              <p className="text-text-muted text-[13px] mt-1">
+                {topAnomaly.vendor}{topAnomaly.category ? ` · ${topAnomaly.category}` : ''} · most urgent of {openAnomalies.length} to decide
+              </p>
+              <p className="text-text-secondary text-[13px] mt-2 leading-relaxed line-clamp-2">{topAnomaly.description}</p>
             </div>
 
             {/* Amount */}
             <div className="px-5 py-4 sm:py-5 flex flex-row sm:flex-col items-center justify-between sm:justify-center gap-1.5 flex-shrink-0">
               <p className="text-[12px] font-medium text-text-muted">At risk</p>
-              <p className={`text-2xl font-medium tracking-[-0.02em] ${SEV_AMT[topSeverity]}`}>
+              <p className="text-2xl font-medium tracking-[-0.02em] text-text-primary tabular-nums">
                 {fmtC(topAnomaly.amount)}
               </p>
               <div className="flex items-center gap-1.5">
@@ -363,7 +338,7 @@ export default function DashboardPage() {
                 Investigate <ArrowRightIcon className="w-3.5 h-3.5" />
               </Link>
               <Link href="/anomalies" className="text-[12px] text-text-muted hover:text-text-primary">
-                View all {openAnomalies.length} alerts
+                View all {openAnomalies.length}
               </Link>
             </div>
           </div>
@@ -389,8 +364,8 @@ export default function DashboardPage() {
       {/* ── Page header ── */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h1 className="text-lg font-medium tracking-[-0.015em] text-text-primary">{company}</h1>
-          <p className="text-xs text-text-muted mt-0.5">{dateLabel} · {dataset.files.length} file{dataset.files.length !== 1 ? 's' : ''} · {dataset.totalTransactions.toLocaleString()} transactions</p>
+          <h1 className="font-display text-[26px] font-medium leading-tight tracking-[-0.025em] text-text-primary">{company}</h1>
+          <p className="text-[13px] text-text-muted mt-1">{dateLabel} · {dataset.files.length} file{dataset.files.length !== 1 ? 's' : ''} · {dataset.totalTransactions.toLocaleString()} transactions</p>
         </div>
         <Link
           href="/integrations"
@@ -400,32 +375,21 @@ export default function DashboardPage() {
         </Link>
       </div>
 
-      {/* ── KPI row ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        <div className="bg-surface-raised border border-border rounded-xl shadow-card px-5 py-4">
-          <p className="text-[12px] font-medium text-text-muted mb-2">Total Spend</p>
-          <p className="text-3xl font-medium tracking-[-0.025em] leading-none text-text-primary">{fmtC(dataset.totalSpend)}</p>
-          <p className="text-xs text-text-muted mt-1.5">{dateLabel}</p>
-        </div>
-
-        <div className="bg-surface-raised border border-border rounded-xl shadow-card px-5 py-4">
-          <p className="text-[12px] font-medium text-text-muted mb-2">Risk Exposure</p>
-          <p className={`text-3xl font-medium tracking-[-0.025em] leading-none ${totalExposure > 0 ? 'text-critical-fg' : 'text-text-muted'}`}>{fmtC(totalExposure)}</p>
-          <p className="text-xs text-text-muted mt-1.5">{openAnomalies.length} open anomal{openAnomalies.length !== 1 ? 'ies' : 'y'}</p>
-        </div>
-
-        <div className="bg-surface-raised border border-border rounded-xl shadow-card px-5 py-4">
-          <p className="text-[12px] font-medium text-text-muted mb-2">Savings Identified</p>
-          <p className={`text-3xl font-medium tracking-[-0.025em] leading-none ${duplicateSavings > 0 ? 'text-text-primary' : 'text-text-muted'}`}>{fmtC(duplicateSavings)}</p>
-          <p className="text-xs text-text-muted mt-1.5">{duplicates.length} duplicate payment{duplicates.length !== 1 ? 's' : ''}</p>
-        </div>
-
-        <div className="bg-surface-raised border border-border rounded-xl shadow-card px-5 py-4">
-          <p className="text-[12px] font-medium text-text-muted mb-2">Transactions</p>
-          <p className="text-3xl font-medium tracking-[-0.025em] leading-none text-text-primary">{dataset.totalTransactions.toLocaleString()}</p>
-          <p className="text-xs text-text-muted mt-1.5">{dataset.uniqueVendors.toLocaleString()} unique vendors</p>
-        </div>
-      </div>
+      {/* ── The period in four figures: one strip, not four tiles ── */}
+      <dl className="grid grid-cols-2 lg:grid-cols-4 gap-px mb-6 bg-border border border-border rounded-xl shadow-card overflow-hidden">
+        {[
+          { k: 'Total spend',     v: fmtC(dataset.totalSpend),                     sub: dateLabel },
+          { k: 'At risk',         v: fmtC(totalExposure),                          sub: `${openAnomalies.length} to decide` },
+          { k: 'Recoverable',     v: fmtC(duplicateSavings),                       sub: `${duplicates.length} duplicate payment${duplicates.length !== 1 ? 's' : ''}` },
+          { k: 'Transactions',    v: dataset.totalTransactions.toLocaleString(),   sub: `${dataset.uniqueVendors.toLocaleString()} vendors` },
+        ].map(x => (
+          <div key={x.k} className="bg-surface-raised px-5 py-4 min-w-0">
+            <dt className="text-[12.5px] text-text-muted">{x.k}</dt>
+            <dd className="mt-1.5 text-[26px] font-medium tracking-[-0.02em] leading-none text-text-primary tabular-nums">{x.v}</dd>
+            <dd className="mt-1.5 text-[12.5px] text-text-muted truncate">{x.sub}</dd>
+          </div>
+        ))}
+      </dl>
 
       {/* ── Risk & Savings Chart ── */}
       {openAnomalies.length > 0 && (() => {
@@ -489,7 +453,7 @@ export default function DashboardPage() {
             <div className="bg-surface-raised border border-border rounded-xl shadow-card overflow-hidden">
               <div className="px-5 py-3.5 flex items-center justify-between border-b border-border-subtle">
                 <div>
-                  <p className="text-sm font-medium text-text-primary">Spend Trend</p>
+                  <p className="text-sm font-medium text-text-primary">Spend trend</p>
                   <p className="text-xs text-text-muted">{dataset.monthlyBreakdown.length} months</p>
                 </div>
                 <span className="text-xs font-medium text-text-secondary">{fmtC(dataset.totalSpend)} total</span>
@@ -521,9 +485,9 @@ export default function DashboardPage() {
           <div>
             <div className="flex items-center justify-between mb-3">
               <div>
-                <p className="text-sm font-medium text-text-primary">Open Anomalies</p>
+                <p className="text-sm font-medium text-text-primary">To decide</p>
                 <p className="text-xs text-text-muted mt-0.5">
-                  {openAnomalies.length} require review
+                  {openAnomalies.length} need a decision
                   {highConf.length > 0 ? ` · ${highConf.length} high-confidence` : ''}
                 </p>
               </div>
@@ -548,14 +512,14 @@ export default function DashboardPage() {
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-0.5">
-                        <Badge variant="severity" value={a.severity} dot>{a.severity}</Badge>
+                        <Badge variant="severity" value={a.severity} dot />
                         <span className="text-[12px] text-text-muted font-medium">{a.type.replace(/_/g, ' ')}</span>
                       </div>
                       <p className="text-sm font-medium text-text-primary group-hover:text-text-secondary transition-colors truncate">{a.title}</p>
                       <p className="text-xs text-text-muted truncate">{a.vendor}{a.category ? ` · ${a.category}` : ''}</p>
                     </div>
                     <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                      <p className={`text-sm font-medium ${SEV_AMT[a.severity]}`}>{fmtC(a.amount)}</p>
+                      <p className="text-sm font-medium text-text-primary tabular-nums">{fmtC(a.amount)}</p>
                       <div className="flex items-center gap-1.5">
                         <div className="w-10 h-1 bg-surface-overlay overflow-hidden">
                           <div className="h-full bg-low" style={{ width: `${a.confidence}%` }} />
@@ -585,7 +549,7 @@ export default function DashboardPage() {
           <div className="bg-surface-raised border border-border rounded-xl shadow-card overflow-hidden">
             <div className="px-5 py-3.5 border-b border-border-subtle flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-text-primary">Savings Opportunities</p>
+                <p className="text-sm font-medium text-text-primary">Savings opportunities</p>
                 <p className="text-xs text-text-muted">Duplicate & recoverable spend</p>
               </div>
               {duplicateSavings > 0 && (
@@ -625,7 +589,7 @@ export default function DashboardPage() {
           {categories.length > 0 && (
             <div className="bg-surface-raised border border-border rounded-xl shadow-card overflow-hidden">
               <div className="px-5 py-3.5 border-b border-border-subtle">
-                <p className="text-sm font-medium text-text-primary">Spend by Category</p>
+                <p className="text-sm font-medium text-text-primary">Spend by category</p>
                 <p className="text-xs text-text-muted">Top {categories.length} categories</p>
               </div>
               <div className="p-5 space-y-2.5">
@@ -655,7 +619,7 @@ export default function DashboardPage() {
             <div className="bg-surface-raised border border-border rounded-xl shadow-card overflow-hidden">
               <div className="px-5 py-3.5 border-b border-border-subtle flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-text-primary">Vendor Concentration</p>
+                  <p className="text-sm font-medium text-text-primary">Vendor concentration</p>
                   <p className="text-xs text-text-muted">Top vendors by spend</p>
                 </div>
                 {topVendorShare > 40 && (
@@ -696,7 +660,7 @@ export default function DashboardPage() {
       {recentAudit.length > 0 && (
         <div className="bg-surface-raised border border-border rounded-xl shadow-card overflow-hidden mb-6">
           <div className="px-5 py-3.5 flex items-center justify-between border-b border-border-subtle">
-            <p className="text-sm font-medium text-text-primary">Processing Log</p>
+            <p className="text-sm font-medium text-text-primary">Processing log</p>
             <Link href="/audit-logs" className="text-xs text-text-secondary hover:text-text-primary flex items-center gap-0.5 transition-colors">
               Full audit log <ChevronRightIcon className="w-3 h-3" />
             </Link>
@@ -718,7 +682,7 @@ export default function DashboardPage() {
       <div className="bg-surface-raised border border-border rounded-xl shadow-card overflow-hidden">
         <div className="px-5 py-3.5 border-b border-border-subtle flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-text-primary">Team Access</p>
+            <p className="text-sm font-medium text-text-primary">Team access</p>
             <p className="text-xs text-text-muted">
               {members.length === 0 ? 'No members yet' : `${members.length} member${members.length !== 1 ? 's' : ''}`}
             </p>

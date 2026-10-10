@@ -1,58 +1,41 @@
 import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import AppLayout from '../../components/layout/AppLayout'
-import Badge from '../../components/ui/Badge'
-import Button from '../../components/ui/Button'
+import PageHeader from '../../components/ui/PageHeader'
+import Badge, { SEVERITY_LABEL } from '../../components/ui/Badge'
+import Segmented from '../../components/ui/Segmented'
 import DataEmptyState from '../../components/ui/DataEmptyState'
 import { useDataReady } from '../../hooks/useDataReady'
-import { loadDataset } from '../../lib/dataStore'
+import { loadDataset, isUndecided } from '../../lib/dataStore'
 import type { DetectedAnomaly, Severity, AnomalyStatus } from '../../lib/dataStore'
-import {
-  Search, Download, ChevronRight, AlertTriangle,
-  CheckCircle, Clock, XCircle, Filter,
-} from 'lucide-react'
+import { MagnifyingGlassIcon, DownloadIcon, CaretUpIcon, CaretDownIcon } from '@radix-ui/react-icons'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function fmtC(n: number): string {
-  if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(1) + 'M'
-  if (n >= 1_000)     return '$' + (n / 1_000).toFixed(0) + 'K'
-  return '$' + n.toFixed(0)
-}
 
 function fmtFull(n: number): string {
   return n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
 }
 
-function suggestedAction(type: string, severity: string): string {
-  if (type === 'duplicate')       return 'Void the duplicate payment if confirmed'
-  if (type === 'missing_vendor')  return 'Identify the counterparty and update records'
-  if (severity === 'CRITICAL')    return 'Escalate to CFO: requires immediate review'
-  if (severity === 'HIGH')        return 'Request documentation from payment approver'
-  if (type === 'round_number')    return 'Verify invoice exists and amount is accurate'
-  if (type === 'high_frequency')  return 'Confirm split billing or check for submission error'
-  return 'Review transaction and mark as approved or investigate further'
-}
+const fmtDay = (iso: string) => new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 
-const SEV_AMT: Record<string, string> = {
-  CRITICAL: 'text-critical-fg',
-  HIGH:     'text-high-fg',
-  MEDIUM:   'text-medium-fg',
-  LOW:      'text-text-muted',
-}
+const SEV_RANK: Record<Severity, number> = { CRITICAL: 3, HIGH: 2, MEDIUM: 1, LOW: 0 }
+
+type View    = 'decide' | 'Under Review' | 'Resolved' | 'Dismissed' | 'All'
+type SortKey = 'severity' | 'title' | 'amount' | 'confidence' | 'detectedAt'
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-const severities: Severity[]    = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']
-const statuses: AnomalyStatus[] = ['Open', 'Under Review', 'Resolved', 'Dismissed']
+const severities: Severity[] = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']
 
 export default function AnomaliesPage() {
+  const router = useRouter()
   const { isReady, mounted } = useDataReady()
   const [anomalies, setAnomalies] = useState<DetectedAnomaly[]>([])
-  const [search,       setSearch]  = useState('')
-  const [sevFilter,    setSev]     = useState<Severity | 'All'>('All')
-  const [statusFilter, setStatus]  = useState<AnomalyStatus | 'All'>('Open')
-  const [sortBy,       setSortBy]  = useState<'amount' | 'confidence' | 'detectedAt'>('detectedAt')
+  const [search,    setSearch]    = useState('')
+  const [sevFilter, setSev]       = useState<Severity | 'All'>('All')
+  const [view,      setView]      = useState<View>('decide')
+  const [sort,      setSort]      = useState<{ key: SortKey; dir: 'asc' | 'desc' }>({ key: 'severity', dir: 'desc' })
 
   useEffect(() => {
     if (isReady) {
@@ -61,30 +44,64 @@ export default function AnomaliesPage() {
     }
   }, [isReady])
 
-  const totals = useMemo(() => ({
-    all:       anomalies.length,
-    open:      anomalies.filter(a => a.status === 'Open').length,
-    review:    anomalies.filter(a => a.status === 'Under Review').length,
-    resolved:  anomalies.filter(a => a.status === 'Resolved').length,
-    critical:  anomalies.filter(a => a.severity === 'CRITICAL').length,
-    exposure:  anomalies.filter(a => a.status !== 'Resolved').reduce((s, a) => s + a.amount, 0),
-  }), [anomalies])
+  const totals = useMemo(() => {
+    const count = (st: AnomalyStatus) => anomalies.filter(a => a.status === st).length
+    const open  = anomalies.filter(isUndecided)
+    return {
+      all:       anomalies.length,
+      decide:    open.length,
+      review:    count('Under Review'),
+      resolved:  count('Resolved'),
+      dismissed: count('Dismissed'),
+      exposure:  open.reduce((s, a) => s + a.amount, 0),
+    }
+  }, [anomalies])
 
   const filtered = useMemo(() => {
+    const q   = search.toLowerCase()
+    const dir = sort.dir === 'asc' ? 1 : -1
     return anomalies
       .filter(a => {
-        const q = search.toLowerCase()
         if (q && !a.title.toLowerCase().includes(q) && !a.vendor.toLowerCase().includes(q) && !a.id.toLowerCase().includes(q)) return false
         if (sevFilter !== 'All' && a.severity !== sevFilter) return false
-        if (statusFilter !== 'All' && a.status !== statusFilter) return false
+        if (view === 'decide') return isUndecided(a)
+        if (view !== 'All' && a.status !== view) return false
         return true
       })
       .sort((a, b) => {
-        if (sortBy === 'amount')     return b.amount - a.amount
-        if (sortBy === 'confidence') return b.confidence - a.confidence
-        return b.detectedAt.localeCompare(a.detectedAt)
+        let d = 0
+        if (sort.key === 'severity')   d = SEV_RANK[a.severity] - SEV_RANK[b.severity] || a.confidence - b.confidence
+        if (sort.key === 'title')      d = a.title.localeCompare(b.title)
+        if (sort.key === 'amount')     d = a.amount - b.amount
+        if (sort.key === 'confidence') d = a.confidence - b.confidence
+        if (sort.key === 'detectedAt') d = a.detectedAt.localeCompare(b.detectedAt)
+        return d * dir
       })
-  }, [anomalies, search, sevFilter, statusFilter, sortBy])
+  }, [anomalies, search, sevFilter, view, sort])
+
+  function sortBy(key: SortKey) {
+    setSort(prev => prev.key === key
+      ? { key, dir: prev.dir === 'desc' ? 'asc' : 'desc' }
+      : { key, dir: key === 'title' ? 'asc' : 'desc' })
+  }
+
+  function exportCsv() {
+    const rows = [
+      ['ID', 'Title', 'Type', 'Vendor', 'Amount', 'Severity', 'Status', 'Confidence', 'Detected At', 'Category'],
+      ...anomalies.map(a => [
+        a.id, a.title, a.type, a.vendor, String(a.amount), a.severity, a.status,
+        `${a.confidence}%`, a.detectedAt, a.category,
+      ]),
+    ]
+    const csv  = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    a.href     = url
+    a.download = `ventura-anomalies-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
 
   if (mounted && !isReady) {
     return (
@@ -97,191 +114,130 @@ export default function AnomaliesPage() {
     )
   }
 
+  const Th = ({ k, children, className = '', right = false }: { k: SortKey; children: string; className?: string; right?: boolean }) => {
+    const on = sort.key === k
+    return (
+      <th aria-sort={on ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'} className={`px-4 py-2.5 font-medium ${right ? 'text-right' : 'text-left'} ${className}`}>
+        <button type="button" onClick={() => sortBy(k)} className={`inline-flex items-center gap-1 hover:text-text-primary ${on ? 'text-text-primary' : ''}`}>
+          {children}
+          {on
+            ? (sort.dir === 'asc' ? <CaretUpIcon className="w-3.5 h-3.5" /> : <CaretDownIcon className="w-3.5 h-3.5" />)
+            : <span className="w-3.5" aria-hidden />}
+        </button>
+      </th>
+    )
+  }
+
   return (
     <AppLayout title="Anomalies">
-      {/* ── Page header ── */}
-      <div className="flex items-start justify-between mb-5">
-        <div>
-          <h1 className="text-lg font-medium tracking-[-0.015em] text-text-primary">Anomaly Investigation</h1>
-          <p className="text-xs text-text-muted mt-0.5">Findings from your uploaded data, ranked by severity and confidence</p>
-        </div>
-        <button
-          onClick={() => {
-            const rows = [
-              ['ID', 'Title', 'Type', 'Vendor', 'Amount', 'Severity', 'Status', 'Confidence', 'Detected At', 'Category'],
-              ...anomalies.map(a => [
-                a.id, a.title, a.type, a.vendor, String(a.amount), a.severity, a.status,
-                `${a.confidence}%`, a.detectedAt, a.category,
-              ]),
-            ]
-            const csv  = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n')
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-            const url  = URL.createObjectURL(blob)
-            const a    = document.createElement('a')
-            a.href     = url
-            a.download = `ventura-anomalies-${new Date().toISOString().slice(0, 10)}.csv`
-            a.click()
-            URL.revokeObjectURL(url)
-          }}
-          disabled={anomalies.length === 0}
-          className="inline-flex items-center gap-1.5 text-xs text-text-muted border border-border rounded-lg px-3 py-1.5 bg-surface-raised hover:bg-surface-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-        >
-          <Download className="w-3 h-3" /> Export CSV
-        </button>
-      </div>
+      <PageHeader
+        title="Anomalies"
+        subtitle={totals.decide > 0
+          ? `${totals.decide} finding${totals.decide !== 1 ? 's' : ''} to decide, ${fmtFull(totals.exposure)} at risk. Ranked by severity, then confidence.`
+          : 'Every finding has a decision.'}
+        actions={
+          <button
+            onClick={exportCsv}
+            disabled={anomalies.length === 0}
+            className="inline-flex items-center gap-1.5 h-8 px-3 rounded-md border border-border-strong bg-surface-raised hover:bg-surface-overlay text-[13px] font-medium text-text-primary disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <DownloadIcon className="w-3.5 h-3.5" /> Export CSV
+          </button>
+        }
+        className="mb-6"
+      />
 
-      {/* ── Clickable KPI strip ── */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5 mb-5">
-        {[
-          { label: 'All',           count: totals.all,      value: null,                icon: Filter,        filter: () => { setSev('All'); setStatus('All') },  active: statusFilter === 'All' && sevFilter === 'All', color: 'text-text-secondary', bg: 'bg-surface-raised', border: 'border-border' },
-          { label: 'Open',          count: totals.open,     value: null,                icon: AlertTriangle, filter: () => setStatus('Open'),                     active: statusFilter === 'Open',                      color: 'text-accent-700',         bg: 'bg-surface-raised',  border: 'border-border' },
-          { label: 'Under Review',  count: totals.review,   value: null,                icon: Clock,         filter: () => setStatus('Under Review'),             active: statusFilter === 'Under Review',              color: 'text-medium-fg',      bg: 'bg-surface-raised', border: 'border-border' },
-          { label: 'Resolved',      count: totals.resolved, value: null,                icon: CheckCircle,   filter: () => setStatus('Resolved'),                 active: statusFilter === 'Resolved',                  color: 'text-positive-fg',    bg: 'bg-surface-raised', border: 'border-border' },
-          { label: 'Risk Exposure', count: null,            value: fmtC(totals.exposure), icon: XCircle,     filter: () => { setSev('All'); setStatus('Open') },  active: false,                                        color: 'text-text-primary',   bg: 'bg-surface-raised', border: 'border-border' },
-        ].map((s) => {
-          const Icon = s.icon
-          return (
-            <button
-              key={s.label}
-              onClick={s.filter}
-              className={`flex items-center gap-2.5 ${s.bg} border ${s.border} rounded-xl shadow-card px-3.5 py-3 hover:bg-surface-overlay text-left ${s.active ? 'ring-2 ring-accent-500 ring-offset-1 ring-offset-surface' : ''}`}
-            >
-              <Icon className={`w-4 h-4 ${s.color} flex-shrink-0`} />
-              <div>
-                <p className={`text-[17px] font-medium tabular-nums ${s.color} leading-none`}>{s.count !== null ? s.count : s.value}</p>
-                <p className="text-[12.5px] text-text-muted mt-1">{s.label}</p>
-              </div>
-            </button>
-          )
-        })}
-      </div>
-
-      {/* ── Filters ── */}
-      <div className="flex flex-wrap items-center gap-2.5 mb-4 p-3 bg-surface-raised border border-border rounded-lg">
-        <div className="flex items-center gap-2 bg-surface-sunken border border-border rounded-md px-3 py-1.5 flex-1 min-w-48 max-w-72">
-          <Search className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />
+      {/* ── One row of views and filters ── */}
+      <div className="flex flex-wrap items-center gap-2.5 mb-4">
+        <Segmented<View>
+          label="Show findings"
+          value={view}
+          onChange={setView}
+          segments={[
+            { value: 'decide',       label: 'To decide',    count: totals.decide },
+            { value: 'Under Review', label: 'Under review', count: totals.review },
+            { value: 'Resolved',     label: 'Resolved',     count: totals.resolved },
+            { value: 'Dismissed',    label: 'Dismissed',    count: totals.dismissed },
+            { value: 'All',          label: 'All',          count: totals.all },
+          ]}
+        />
+        <label className="flex items-center gap-2 h-9 px-3 rounded-md border border-border bg-surface-raised flex-1 min-w-[12rem] max-w-[20rem]">
+          <MagnifyingGlassIcon className="w-4 h-4 text-text-muted flex-shrink-0" />
+          <span className="sr-only">Search findings</span>
           <input
             type="text"
-            placeholder="Search by title, vendor, or ID…"
+            placeholder="Search title, vendor or ID"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="bg-transparent text-sm text-text-secondary placeholder-text-muted outline-none w-full"
+            className="bg-transparent text-[13.5px] text-text-primary placeholder-text-muted outline-none w-full"
           />
-        </div>
+        </label>
         <select
           value={sevFilter}
           onChange={e => setSev(e.target.value as Severity | 'All')}
-          className="text-xs border border-border rounded-md px-2.5 py-1.5 text-text-muted bg-surface-raised"
+          aria-label="Severity"
+          className="h-9 text-[13px] border border-border rounded-md px-2.5 text-text-secondary bg-surface-raised"
         >
           <option value="All">All severities</option>
-          {severities.map(s => <option key={s} value={s}>{s}</option>)}
+          {severities.map(s => <option key={s} value={s}>{SEVERITY_LABEL[s]}</option>)}
         </select>
-        <select
-          value={statusFilter}
-          onChange={e => setStatus(e.target.value as AnomalyStatus | 'All')}
-          className="text-xs border border-border rounded-md px-2.5 py-1.5 text-text-muted bg-surface-raised"
-        >
-          <option value="All">All statuses</option>
-          {statuses.map(s => <option key={s} value={s}>{s}</option>)}
-        </select>
-        <select
-          value={sortBy}
-          onChange={e => setSortBy(e.target.value as typeof sortBy)}
-          className="text-xs border border-border rounded-md px-2.5 py-1.5 text-text-muted bg-surface-raised"
-        >
-          <option value="detectedAt">Latest first</option>
-          <option value="amount">Highest amount</option>
-          <option value="confidence">Highest confidence</option>
-        </select>
-        <span className="text-xs text-text-muted ml-auto">{filtered.length} result{filtered.length !== 1 ? 's' : ''}</span>
       </div>
 
-      {/* ── Investigation cards ── */}
+      {/* ── The findings, as a table ── */}
       {filtered.length === 0 ? (
-        <div className="bg-surface-raised border border-border rounded-lg p-12 text-center">
-          <CheckCircle className="w-10 h-10 text-text-muted mx-auto mb-3" />
-          <p className="text-sm font-medium text-text-secondary">
-            {anomalies.length === 0 ? 'No anomalies detected' : 'No anomalies match the current filters'}
+        <div className="bg-surface-raised border border-border rounded-xl p-12 text-center">
+          <p className="text-[14px] font-medium text-text-primary">
+            {anomalies.length === 0 ? 'No anomalies detected' : 'No findings match this view'}
           </p>
-          <p className="text-xs text-text-muted mt-1 max-w-xs mx-auto">
+          <p className="text-[13px] text-text-muted mt-1 max-w-xs mx-auto">
             {anomalies.length === 0
-              ? 'Anomaly detection runs automatically when you upload or connect financial data.'
-              : 'Try adjusting the severity, status, or search filters above.'}
+              ? 'Anomaly detection runs when you upload financial data.'
+              : 'Try another view, severity or search.'}
           </p>
-          {!isReady && (
-            <Link href="/integrations" className="inline-flex items-center gap-1.5 mt-4 text-xs bg-accent-600 hover:bg-accent-700 text-white px-4 py-2 rounded-lg font-medium hover:bg-[#1a2640] transition-colors">
-              Connect data source
-            </Link>
-          )}
         </div>
       ) : (
-        <div className="space-y-3">
-          {filtered.map(a => (
-            <div
-              key={a.id}
-              className={`bg-surface-raised border border-border rounded-lg overflow-hidden transition-shadow`}
-            >
-              <div className="p-4">
-                <div className="flex items-start gap-4">
-                  {/* Main content */}
-                  <div className="flex-1 min-w-0">
-                    {/* Top row */}
-                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                      <Badge variant="severity" value={a.severity} dot>{a.severity}</Badge>
-                      <span className="text-[12px] font-medium text-text-muted">{a.type.replace(/_/g, ' ')}</span>
-                      <span className="text-[10px] text-text-muted">·</span>
-                      <span className="text-[10px] font-mono text-text-muted">{a.id}</span>
-                    </div>
-
-                    <Link href={`/anomalies/${a.id}`} className="group">
-                      <p className="text-sm font-medium text-text-primary group-hover:text-accent-800 transition-colors">{a.title}</p>
-                    </Link>
-                    <p className="text-xs text-text-muted mt-0.5">{a.vendor}{a.category ? ` · ${a.category}` : ''}</p>
-                    <p className="text-xs text-text-muted mt-2 leading-relaxed line-clamp-2">{a.description}</p>
-
-                    {/* Suggested action */}
-                    <div className="mt-2.5 flex items-start gap-1.5">
-                      <span className="text-[12px] font-medium text-text-muted mt-0.5 flex-shrink-0">Suggested:</span>
-                      <span className="text-xs text-text-muted">{suggestedAction(a.type, a.severity)}</span>
-                    </div>
-                  </div>
-
-                  {/* Right column */}
-                  <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                    <p className={`text-xl font-medium tracking-[-0.02em] ${SEV_AMT[a.severity] ?? 'text-text-secondary'}`}>{fmtFull(a.amount)}</p>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-16 h-1.5 bg-surface-overlay rounded-full overflow-hidden">
-                        <div className="h-full rounded-full bg-accent-500" style={{ width: `${a.confidence}%` }} />
-                      </div>
-                      <span className="text-xs text-text-muted font-medium">{a.confidence}% conf.</span>
-                    </div>
-                    <Badge variant="status" value={a.status}>{a.status}</Badge>
-                    <Link
-                      href={`/anomalies/${a.id}`}
-                      className="inline-flex items-center gap-1 text-xs font-medium text-accent-700 hover:text-accent-800 transition-colors mt-1"
-                    >
-                      Investigate <ChevronRight className="w-3 h-3" />
-                    </Link>
-                  </div>
-                </div>
-              </div>
-
-              {/* Transaction refs strip */}
-              {a.rowRefs.length > 0 && (
-                <div className="border-t border-border-subtle px-4 py-2 bg-surface-sunken flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[12px] font-medium text-text-muted">Refs:</span>
-                  {a.rowRefs.slice(0, 6).map(ref => (
-                    <span key={ref} className="text-[10px] font-mono bg-surface-overlay border border-border text-text-muted px-1.5 py-0.5 rounded">
-                      {ref}
-                    </span>
-                  ))}
-                  {a.rowRefs.length > 6 && (
-                    <span className="text-[10px] text-text-muted">+{a.rowRefs.length - 6} more</span>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
+        <div className="bg-surface-raised border border-border rounded-xl shadow-card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-[13.5px]">
+              <thead className="bg-surface text-[12.5px] text-text-muted border-b border-border">
+                <tr>
+                  <Th k="severity" className="w-[8.5rem]">Severity</Th>
+                  <Th k="title">Finding</Th>
+                  <Th k="amount" right>Amount</Th>
+                  <Th k="confidence" right className="hidden sm:table-cell">Confidence</Th>
+                  <th className="hidden md:table-cell px-4 py-2.5 text-left font-medium">Status</th>
+                  <Th k="detectedAt" className="hidden lg:table-cell">Detected</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map(a => (
+                  <tr
+                    key={a.id}
+                    onClick={() => router.push(`/anomalies/${a.id}`)}
+                    className="border-t border-border-subtle first:border-t-0 hover:bg-surface-hover cursor-pointer"
+                  >
+                    <td className="px-4 py-2.5 align-top whitespace-nowrap">
+                      <Badge variant="severity" value={a.severity} dot />
+                    </td>
+                    <td className="px-4 py-2.5 min-w-[15rem]">
+                      <Link href={`/anomalies/${a.id}`} onClick={e => e.stopPropagation()} className="font-medium text-text-primary hover:text-accent-700">
+                        {a.title}
+                      </Link>
+                      <p className="mt-0.5 text-[12.5px] text-text-muted truncate max-w-[34rem]">
+                        {a.vendor || 'No vendor'} · {a.type.replace(/_/g, ' ')} · <span className="font-mono text-[12px]">{a.id}</span>
+                      </p>
+                    </td>
+                    <td className="px-4 py-2.5 align-top text-right font-medium text-text-primary tabular-nums whitespace-nowrap">{fmtFull(a.amount)}</td>
+                    <td className="hidden sm:table-cell px-4 py-2.5 align-top text-right tabular-nums text-text-secondary">{a.confidence}</td>
+                    <td className="hidden md:table-cell px-4 py-2.5 align-top whitespace-nowrap">
+                      <Badge variant="status" value={a.status}>{a.status === 'Under Review' ? 'Under review' : a.status}</Badge>
+                    </td>
+                    <td className="hidden lg:table-cell px-4 py-2.5 align-top text-text-muted tabular-nums whitespace-nowrap">{fmtDay(a.detectedAt)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </AppLayout>

@@ -4,12 +4,10 @@ import Link from 'next/link'
 import AppLayout from '../../components/layout/AppLayout'
 import Badge from '../../components/ui/Badge'
 import Button from '../../components/ui/Button'
-import { loadDataset, saveDataset } from '../../lib/dataStore'
+import FocusBrackets from '../../components/FocusBrackets'
+import { loadDataset, saveDataset, isUndecided } from '../../lib/dataStore'
 import type { DetectedAnomaly, StoredTransaction } from '../../lib/dataStore'
-import {
-  ChevronLeft, ChevronRight, AlertTriangle, CheckCircle,
-  XCircle, Info, Activity, FileText,
-} from 'lucide-react'
+import { ChevronLeftIcon as ChevronLeft, ChevronRightIcon as ChevronRight } from '@radix-ui/react-icons'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -98,7 +96,6 @@ export default function AnomalyDetailPage() {
     return (
       <AppLayout title="Anomaly not found">
         <div className="flex flex-col items-center justify-center py-24 text-center">
-          <AlertTriangle className="w-10 h-10 text-text-muted mb-4" />
           <p className="text-text-secondary font-medium">Anomaly not found</p>
           <p className="text-xs text-text-muted mt-1">It may have been cleared when data was re-uploaded.</p>
           <Link href="/anomalies" className="text-accent-700 text-sm mt-4 hover:text-accent-800 flex items-center gap-1">
@@ -125,14 +122,14 @@ export default function AnomalyDetailPage() {
       {/* ── Title ── */}
       <div className="flex items-start justify-between gap-4 mb-5">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Badge variant="severity" value={anomaly.severity} dot>{anomaly.severity}</Badge>
-            <span className="text-[12px] font-medium text-text-muted">{anomaly.type.replace(/_/g, ' ')}</span>
+          <div className="flex items-center gap-2 mb-2">
+            <Badge variant="severity" value={anomaly.severity} dot />
+            <span className="text-[12.5px] text-text-muted">{anomaly.type.replace(/_/g, ' ')}</span>
           </div>
-          <h1 className="text-lg font-medium tracking-[-0.015em] text-text-primary leading-snug">{anomaly.title}</h1>
-          <p className="text-xs text-text-muted mt-0.5">{anomaly.vendor}{anomaly.category ? ` · ${anomaly.category}` : ''}</p>
+          <h1 className="font-display text-[26px] font-medium tracking-[-0.025em] text-text-primary leading-tight">{anomaly.title}</h1>
+          <p className="text-[13.5px] text-text-muted mt-1">{anomaly.vendor}{anomaly.category ? ` · ${anomaly.category}` : ''}</p>
         </div>
-        <Badge variant="status" value={anomaly.status} className="flex-shrink-0 mt-1">{anomaly.status}</Badge>
+        <Badge variant="status" value={anomaly.status} className="flex-shrink-0 mt-1">{anomaly.status === 'Under Review' ? 'Under review' : anomaly.status}</Badge>
       </div>
 
       {/* ── Key metrics bar ── */}
@@ -169,12 +166,9 @@ export default function AnomalyDetailPage() {
           {/* Root cause analysis */}
           <div className="bg-surface-raised border border-border rounded-lg overflow-hidden">
             <div className="px-5 py-3.5 border-b border-border-subtle flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Activity className="w-4 h-4 text-text-muted" />
-                <div>
-                  <p className="text-sm font-medium text-text-primary">Why this was flagged</p>
-                  <p className="text-xs text-text-muted">From the detection rule that raised it</p>
-                </div>
+              <div>
+                <p className="text-sm font-medium text-text-primary">Why this was flagged</p>
+                <p className="text-xs text-text-muted">From the detection rule that raised it</p>
               </div>
             </div>
             <div className="p-5 space-y-3 max-w-[70ch]">
@@ -186,12 +180,9 @@ export default function AnomalyDetailPage() {
           {/* Source transactions */}
           {anomaly.rowRefs.length > 0 && (
             <div className="bg-surface-raised border border-border rounded-lg overflow-hidden">
-              <div className="px-5 py-3.5 border-b border-border-subtle flex items-center gap-2">
-                <FileText className="w-4 h-4 text-text-muted" />
-                <div>
-                  <p className="text-sm font-medium text-text-primary">Evidence</p>
-                  <p className="text-xs text-text-muted">{anomaly.rowRefs.length} row{anomaly.rowRefs.length !== 1 ? 's' : ''} referenced</p>
-                </div>
+              <div className="px-5 py-3.5 border-b border-border-subtle">
+                <p className="text-sm font-medium text-text-primary">Evidence</p>
+                <p className="text-xs text-text-muted">{anomaly.rowRefs.length} row{anomaly.rowRefs.length !== 1 ? 's' : ''} referenced</p>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-[13px]">
@@ -209,13 +200,16 @@ export default function AnomalyDetailPage() {
                     {sourceTx.map(tx => {
                       const role = rowRole(anomaly, tx.id)
                       return (
-                      <tr key={tx.id} className={role === 'Flagged' ? 'bg-high-bg' : ''}>
+                      <tr key={tx.id} className={`relative ${role === 'Flagged' ? 'bg-high-bg' : ''}`}>
                         <td className="px-4 py-2.5 text-text-muted tabular-nums" title={tx.id}>{(tx.rowIndex + 2).toLocaleString()}</td>
                         <td className="px-4 py-2.5 text-text-muted">{tx.date}</td>
                         <td className="px-4 py-2.5 font-medium text-text-secondary truncate max-w-[140px]">{tx.vendor}</td>
                         <td className="px-4 py-2.5 text-text-muted hidden md:table-cell">{tx.category || 'N/A'}</td>
                         <td className="px-4 py-2.5 text-right font-medium text-text-primary tabular-nums">{fmtFull(tx.amount)}</td>
-                        <td className={`px-4 py-2.5 text-right whitespace-nowrap text-[12px] ${role === 'Flagged' ? 'font-medium text-high-fg' : 'text-text-muted'}`}>{role}</td>
+                        <td className={`px-4 py-2.5 text-right whitespace-nowrap text-[12px] ${role === 'Flagged' ? 'font-medium text-high-fg' : 'text-text-muted'}`}>
+                          {role}
+                          {role === 'Flagged' && isUndecided(anomaly) && <FocusBrackets inset="2px" />}
+                        </td>
                       </tr>
                       )
                     })}
@@ -232,19 +226,14 @@ export default function AnomalyDetailPage() {
 
           {/* Suggested actions */}
           <div className="bg-surface-raised border border-border rounded-lg overflow-hidden">
-            <div className="px-5 py-3.5 border-b border-border-subtle flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-text-muted" />
-              <div>
-                <p className="text-sm font-medium text-text-primary">Suggested actions</p>
-                <p className="text-xs text-text-muted">Typical responses for this type of finding</p>
-              </div>
+            <div className="px-5 py-3.5 border-b border-border-subtle">
+              <p className="text-sm font-medium text-text-primary">Suggested actions</p>
+              <p className="text-xs text-text-muted">Typical responses for this type of finding. Ventura never takes them for you.</p>
             </div>
             <div className="divide-y divide-border-subtle">
               {actions.map((action, i) => (
                 <div key={i} className="flex items-center gap-3 px-5 py-3">
-                  <div className="w-6 h-6 rounded-full bg-surface-overlay text-text-muted text-xs font-medium flex items-center justify-center flex-shrink-0">
-                    {i + 1}
-                  </div>
+                  <span className="w-4 text-[13px] text-text-muted tabular-nums flex-shrink-0">{i + 1}</span>
                   <p className="text-sm font-medium text-text-secondary flex-1">{action.label}</p>
                   <span className={`text-[12px] font-medium px-2 py-0.5 rounded-full border whitespace-nowrap ${RISK_CLASSES[action.risk]}`}>
                     {action.risk === 'None' ? 'No risk' : `${action.risk} risk`}
@@ -270,7 +259,6 @@ export default function AnomalyDetailPage() {
                 disabled={updating || anomaly.status === 'Resolved'}
                 className="w-full flex items-center gap-2 justify-center h-10 bg-accent-600 hover:bg-accent-700 disabled:opacity-50 text-white text-[14px] font-medium px-4 rounded-md shadow-card"
               >
-                <CheckCircle className="w-4 h-4" />
                 {anomaly.status === 'Resolved' ? 'Resolved' : 'Mark resolved'}
               </button>
               <button
@@ -278,7 +266,6 @@ export default function AnomalyDetailPage() {
                 disabled={updating || anomaly.status === 'Under Review'}
                 className="w-full flex items-center gap-2 justify-center h-10 bg-surface-raised hover:bg-surface-overlay disabled:opacity-50 text-text-primary text-[14px] font-medium px-4 rounded-md border border-border-strong shadow-card"
               >
-                <AlertTriangle className="w-4 h-4 text-medium-fg" />
                 Send for review
               </button>
               <button
@@ -286,13 +273,11 @@ export default function AnomalyDetailPage() {
                 disabled={updating || anomaly.status === 'Dismissed'}
                 className="w-full flex items-center gap-2 justify-center h-10 text-text-secondary hover:text-text-primary hover:bg-surface-overlay disabled:opacity-50 text-[14px] font-medium px-4 rounded-md"
               >
-                <XCircle className="w-4 h-4" />
                 Dismiss
               </button>
             </div>
             <div className="px-5 pb-4">
-              <p className="text-[12.5px] text-text-muted flex items-start gap-1.5 leading-relaxed">
-                <Info className="w-3 h-3 flex-shrink-0 mt-0.5" />
+              <p className="text-[12.5px] text-text-muted leading-relaxed">
                 All actions are logged to the audit trail and require an override to reverse.
               </p>
             </div>
@@ -301,7 +286,7 @@ export default function AnomalyDetailPage() {
           {/* Quick facts */}
           <div className="bg-surface-raised border border-border rounded-lg overflow-hidden">
             <div className="px-5 py-3.5 border-b border-border-subtle">
-              <p className="text-sm font-medium text-text-primary">Finding Details</p>
+              <p className="text-sm font-medium text-text-primary">Finding details</p>
             </div>
             <div className="px-5 py-4 space-y-3">
               {[
@@ -327,7 +312,7 @@ export default function AnomalyDetailPage() {
           {related.length > 0 && (
             <div className="bg-surface-raised border border-border rounded-lg overflow-hidden">
               <div className="px-5 py-3.5 border-b border-border-subtle">
-                <p className="text-sm font-medium text-text-primary">Same Vendor</p>
+                <p className="text-sm font-medium text-text-primary">Same vendor</p>
                 <p className="text-xs text-text-muted">{related.length} related anomal{related.length !== 1 ? 'ies' : 'y'}</p>
               </div>
               <div className="divide-y divide-border-subtle">
@@ -337,7 +322,7 @@ export default function AnomalyDetailPage() {
                     href={`/anomalies/${a.id}`}
                     className="flex items-start gap-3 px-5 py-3 hover:bg-surface-hover transition-colors group"
                   >
-                    <Badge variant="severity" value={a.severity} dot className="mt-0.5 flex-shrink-0">{a.severity.slice(0, 1)}</Badge>
+                    <Badge variant="severity" value={a.severity} dot className="mt-0.5 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium text-text-secondary truncate group-hover:text-accent-800 transition-colors">{a.title}</p>
                       <p className="text-[10px] text-text-muted mt-0.5">{fmtFull(a.amount)}</p>

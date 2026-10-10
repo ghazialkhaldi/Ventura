@@ -28,7 +28,7 @@ export default function PageHeader({ title, subtitle, breadcrumbs, actions, clas
             ))}
           </nav>
         )}
-        <h1 className="text-[22px] font-medium leading-tight tracking-[-0.02em] text-text-primary">{title}</h1>
+        <h1 className="font-display text-[26px] font-medium leading-tight tracking-[-0.025em] text-text-primary">{title}</h1>
         {subtitle && <p className="text-[14px] text-text-muted mt-1.5 max-w-[70ch]">{subtitle}</p>}
       </div>
       {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}

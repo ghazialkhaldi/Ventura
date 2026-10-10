@@ -325,7 +325,7 @@ export default function AIGovernancePage() {
                     <span className="text-xs font-mono bg-surface-overlay text-text-secondary px-1.5 py-0.5 rounded">{a.type}</span>
                   </td>
                   <td className="px-4 py-3">
-                    <Badge variant="severity" value={a.severity}>{a.severity}</Badge>
+                    <Badge variant="severity" value={a.severity} />
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1.5">

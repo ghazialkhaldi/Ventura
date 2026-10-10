@@ -3,7 +3,7 @@ import AppLayout from '../components/layout/AppLayout'
 import DataEmptyState from '../components/ui/DataEmptyState'
 import { useDataReady } from '../hooks/useDataReady'
 import { useCurrentUser } from '../hooks/useCurrentUser'
-import { loadDataset } from '../lib/dataStore'
+import { loadDataset, isUndecided } from '../lib/dataStore'
 import type { Dataset } from '../lib/dataStore'
 import {
   FileText, Download, Building2, AlertTriangle,
@@ -109,7 +109,7 @@ async function generateAndDownload(dataset: Dataset, company: string, includeAud
   }
 
   // ── Derived data ──
-  const open      = dataset.anomalies.filter(a => a.status !== 'Resolved' && a.status !== 'Dismissed')
+  const open      = dataset.anomalies.filter(isUndecided)
   const critical  = open.filter(a => a.severity === 'CRITICAL')
   const high      = open.filter(a => a.severity === 'HIGH')
   const medium    = open.filter(a => a.severity === 'MEDIUM')
@@ -612,7 +612,7 @@ export default function ReportsPage() {
   if (!mounted || !dataset) return <AppLayout title="Reports"><div className="h-96" /></AppLayout>
 
   const company    = user?.company || 'Your Organization'
-  const open       = dataset.anomalies.filter(a => a.status !== 'Resolved' && a.status !== 'Dismissed')
+  const open       = dataset.anomalies.filter(isUndecided)
   const critical   = open.filter(a => a.severity === 'CRITICAL')
   const high       = open.filter(a => a.severity === 'HIGH')
   const exposure   = open.reduce((s,a) => s + a.amount, 0)

@@ -68,7 +68,7 @@ export default function DemoPage() {
         <div className="max-w-page mx-auto h-12 px-3 flex items-center gap-1 overflow-x-auto rounded-full bg-surface-raised/90 backdrop-blur-md shadow-pop ring-1 ring-black/5">
           {STEPS.map(s => (
             <a key={s.id} href={`#${s.id}`} className="shrink-0 inline-flex items-center gap-2 h-8 px-2.5 rounded-md text-[13.5px] text-text-secondary hover:text-text-primary hover:bg-surface-overlay">
-              <span className="flex h-5 w-5 items-center justify-center rounded-full border border-border-strong text-[11px] font-medium tabular-nums">{s.n}</span>
+              <span className="font-medium text-text-muted tabular-nums">{s.n}</span>
               {s.label}
             </a>
           ))}
@@ -82,8 +82,7 @@ export default function DemoPage() {
       <Sheet id="upload" className="mb-10 sm:mb-14">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,26rem)_1fr] lg:gap-20 lg:items-center">
           <div>
-            <StepLabel n={1} />
-            <h2 className={`${H2_CLASS} mt-4`}>Start from an export</h2>
+            <h2 className={H2_CLASS}><StepNo n={1} />Start from an export</h2>
             <p className="mt-4 text-[16px] leading-[1.7] text-text-secondary">
               The controller exports September&rsquo;s AP register from their accounting system and
               drops it in. Ventura finds the header row, maps the columns and sets credits aside,
@@ -98,8 +97,7 @@ export default function DemoPage() {
       <Sheet id="review" className="mb-10 sm:mb-14">
         <div>
           <div className="max-w-[40rem]">
-            <StepLabel n={2} />
-            <h2 className={`${H2_CLASS} mt-4`}>Work the review queue</h2>
+            <h2 className={H2_CLASS}><StepNo n={2} />Work the review queue</h2>
             <p className="mt-4 text-[16px] leading-[1.7] text-text-secondary">
               Five findings out of 1,431 rows. Open each one to see the rule that fired, its
               baseline and the rows behind it, then mark it resolved or dismiss it. You can undo
@@ -116,8 +114,7 @@ export default function DemoPage() {
       <Sheet id="record" tone="ink" className="mb-10 sm:mb-14">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,26rem)_1fr] lg:gap-20 lg:items-start">
           <div>
-            <StepLabel n={3} dark />
-            <h2 className={`${H2_CLASS} mt-4 !text-white`}>Every decision is on the record</h2>
+            <h2 className={`${H2_CLASS} !text-white`}><StepNo n={3} dark />Every decision is on the record</h2>
             <p className="mt-4 text-[16px] leading-[1.7] text-ink-muted">
               Ventura raised the findings; every status change after that is yours, recorded with
               who, what and when. This trail fills in as you decide above.
@@ -131,21 +128,20 @@ export default function DemoPage() {
       <Sheet id="close" className="mb-10 sm:mb-14">
         <div>
           <div className="max-w-[40rem]">
-            <StepLabel n={4} />
-            <h2 className={`${H2_CLASS} mt-4`}>Close the period with nothing left unexplained</h2>
+            <h2 className={H2_CLASS}><StepNo n={4} />Close the period with nothing left unexplained</h2>
             <p className="mt-4 text-[16px] leading-[1.7] text-text-secondary">
               {stillOpen.length === 0
                 ? 'Every finding has a decision and a name against it.'
                 : `${stillOpen.length} finding${stillOpen.length !== 1 ? 's are' : ' is'} still open. Each one needs a decision before close.`}
             </p>
           </div>
-          <dl className="mt-10 grid grid-cols-1 sm:grid-cols-3 rounded-xl border border-border bg-surface-raised shadow-card divide-y sm:divide-y-0 sm:divide-x divide-border">
+          <dl className="mt-10 grid grid-cols-1 sm:grid-cols-3 border-y border-border divide-y sm:divide-y-0 sm:divide-x divide-border">
             {[
               { k: 'Decided',            v: `${decided.length} of ${FINDINGS.length}` },
               { k: 'Resolved at risk',   v: fmtMoney(sum(resolved)) },
               { k: 'Still open at risk', v: fmtMoney(sum(stillOpen)) },
             ].map(x => (
-              <div key={x.k} className="px-6 py-5">
+              <div key={x.k} className="py-5 sm:px-6 sm:first:pl-0">
                 <dt className="text-[13px] text-text-muted">{x.k}</dt>
                 <dd className="mt-1 text-[24px] font-medium tracking-[-0.02em] text-text-primary tabular-nums">{x.v}</dd>
               </div>
@@ -169,10 +165,7 @@ export default function DemoPage() {
   )
 }
 
-function StepLabel({ n, dark = false }: { n: number; dark?: boolean }) {
-  return (
-    <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full border text-[13px] font-medium tabular-nums ${dark ? 'border-ink-line text-ink-muted' : 'border-border-strong text-text-secondary'}`}>
-      {n}
-    </span>
-  )
+// The step number reads as part of the heading, quieter than the words.
+function StepNo({ n, dark = false }: { n: number; dark?: boolean }) {
+  return <span className={`mr-3 tabular-nums ${dark ? 'text-ink-muted' : 'text-text-muted'}`}>{n}</span>
 }

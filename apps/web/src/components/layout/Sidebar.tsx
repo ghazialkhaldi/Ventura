@@ -4,7 +4,7 @@ import { useRouter } from 'next/router'
 import clsx from 'clsx'
 import VenturaLogo from '../VenturaLogo'
 import { useCurrentUser, clearUser, initials } from '../../hooks/useCurrentUser'
-import { loadDataset } from '../../lib/dataStore'
+import { loadDataset, isUndecided } from '../../lib/dataStore'
 import { createClient } from '../../utils/supabase/client'
 import { Cross2Icon as XMarkIcon, DashboardIcon as Squares2X2Icon, ExclamationTriangleIcon, LoopIcon as ArrowsRightLeftIcon, LightningBoltIcon as BoltIcon, MixerHorizontalIcon as ScaleIcon, FileTextIcon as DocumentTextIcon, GearIcon as Cog6ToothIcon, ExitIcon as ArrowRightOnRectangleIcon, HomeIcon as BuildingOfficeIcon, EnvelopeClosedIcon as EnvelopeIcon, DownloadIcon as DocumentArrowDownIcon } from '@radix-ui/react-icons'
 
@@ -33,8 +33,8 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         if (!isReady) { setAnomalyCount(0); setWorkflowCount(0); return }
         const ds = loadDataset()
         if (!ds) return
-        const open  = ds.anomalies.filter(a => a.status !== 'Resolved').length
-        const types = new Set(ds.anomalies.filter(a => a.status !== 'Resolved').map(a => a.type)).size
+        const open  = ds.anomalies.filter(isUndecided).length
+        const types = new Set(ds.anomalies.filter(isUndecided).map(a => a.type)).size
         setAnomalyCount(open)
         setWorkflowCount(types)
         setClose({
@@ -223,16 +223,21 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
  */
 function CloseHorizon({ decided, total }: { decided: number; total: number }) {
   if (!total) return null
-  const p = decided / total
+  const p    = decided / total
+  const done = decided === total
   return (
-    <Link href="/anomalies" className="group relative mx-3 mb-3 block h-[72px] overflow-hidden rounded-lg ring-1 ring-white/10" aria-label={`Close progress: ${decided} of ${total} findings decided`}>
-      <span aria-hidden className="absolute inset-0" style={{ backgroundImage: 'linear-gradient(to bottom, #2e2a6c 0%, #6b4c9a 55%, #c4718f 78%, #f39a7c 100%)' }} />
-      <span aria-hidden className="absolute left-1/2 h-16 w-16 -translate-x-1/2 rounded-full transition-[top] duration-700 ease-out-expo"
-        style={{ top: `${78 - p * 58}%`, background: 'radial-gradient(closest-side, rgb(255 244 220), rgb(255 214 170 / 0.75) 40%, transparent)' }} />
-      <span aria-hidden className="absolute inset-x-0 bottom-0 h-[22%]" style={{ background: 'linear-gradient(to bottom, #b0708f, #4b3f8f)' }} />
-      <span className="absolute left-2.5 top-2 text-[11.5px] font-medium text-white">Close</span>
-      <span className="absolute right-2.5 top-2 text-[11.5px] text-white/85 tabular-nums">{decided} of {total} decided</span>
+    <Link href="/anomalies" className="group relative mx-3 mb-3 block h-[132px] overflow-hidden rounded-xl ring-1 ring-white/10 hover:ring-white/25" aria-label={`Close progress: ${decided} of ${total} findings decided`}>
+      {/* the sky warms as the sun climbs */}
+      <span aria-hidden className="absolute inset-0" style={{ backgroundImage: 'linear-gradient(to bottom, #1c1d52 0%, #4b3f8f 45%, #c4718f 72%, #f39a7c 90%)' }} />
+      <span aria-hidden className="absolute inset-0 transition-opacity duration-700" style={{ opacity: p, backgroundImage: 'linear-gradient(to bottom, #6f8fd6 0%, #b9a8d8 50%, #f6c7a8 80%, #ffe3c0 92%)' }} />
+      <span aria-hidden className="absolute left-[62%] h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full transition-[top] duration-700 ease-out-expo"
+        style={{ top: `${80 - p * 52}%`, background: 'radial-gradient(closest-side, rgb(255 248 228), rgb(255 222 182 / 0.8) 30%, rgb(255 190 160 / 0.25) 62%, transparent)' }} />
+      {/* the sea, with the sun's path on it */}
+      <span aria-hidden className="absolute inset-x-0 bottom-0 h-[22%]" style={{ background: 'linear-gradient(to bottom, #d79a95, #4b3f8f 70%, #2e2a6c)' }} />
+      <span aria-hidden className="absolute bottom-[8%] left-[62%] h-[12%] w-10 -translate-x-1/2 transition-opacity duration-700"
+        style={{ opacity: 0.35 + p * 0.5, background: 'radial-gradient(closest-side, rgb(255 236 204 / 0.85), transparent)' }} />
+      <span className="absolute left-3 top-2.5 font-display text-[15px] font-medium text-white">{done ? 'Closed' : 'Close'}</span>
+      <span className="absolute left-3 top-[30px] text-[12px] text-white/85 tabular-nums">{decided} of {total} decided</span>
     </Link>
   )
 }
-

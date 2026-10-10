@@ -65,22 +65,15 @@ export default function HomePage() {
 
       {/* ── The queue ── */}
       <Sheet id="product" className="mb-10 sm:mb-14">
-        <div className="grid gap-12 lg:grid-cols-[auto_minmax(0,28rem)] lg:justify-between lg:items-end">
-          <div className="flex items-end gap-5 sm:gap-8" role="img" aria-label="1,431 rows in, 5 findings out">
-            <Figure_ value="1,431" caption="rows in the example file" muted />
-            <svg aria-hidden viewBox="0 0 64 24" className="mb-14 sm:mb-16 w-12 sm:w-16 shrink-0 text-border-strong" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M2 12h58M50 3l10 9-10 9" />
-            </svg>
-            <Figure_ value="5" caption="findings worth a person’s time" />
-          </div>
-          <div>
-            <h2 className={`${H2} text-text-primary`}>Fewer findings. The right ones.</h2>
-            <p className="mt-5 text-[17px] leading-[1.65] text-text-secondary">
-              A list nobody trusts gets ignored. Ventura judges each payment in its own context,
-              merges findings that describe the same event, and ranks what is left by severity
-              and confidence. Open one, check its rows, and decide.
-            </p>
-          </div>
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-16 lg:items-end">
+          <h2 className="font-display font-medium text-[2.25rem] leading-[1.04] tracking-[-0.03em] sm:text-[3.25rem] lg:text-[3.75rem] text-text-primary max-w-[15ch]">
+            1,431 rows in. <span className="text-accent-600">Five worth a person&rsquo;s time.</span>
+          </h2>
+          <p className="text-[17px] leading-[1.65] text-text-secondary">
+            A list nobody trusts gets ignored. Ventura judges each payment in its own context,
+            merges findings that describe the same event, and ranks what is left by severity
+            and confidence. Open one below, check its rows, and decide.
+          </p>
         </div>
         <div className="mt-14">
           <FindingsFrame />
@@ -126,14 +119,14 @@ export default function HomePage() {
             <p className="mt-5 text-[17px] leading-[1.65] text-text-secondary">
               No integration project. Start from the file your system already produces.
             </p>
-            <ol className="mt-12 space-y-9">
+            <ol className="mt-12 space-y-8">
               {[
                 { t: 'Export', b: 'Pull a GL detail, AP register or bank statement from the system you already use. CSV, Excel and PDF all work.' },
                 { t: 'Upload', b: 'Ventura finds the header row, searches every sheet and maps date, vendor, amount and debit or credit columns. Credits are set aside, not dropped.' },
                 { t: 'Review', b: 'Findings arrive ranked by severity and confidence, each with its rows. Resolve or dismiss them; every action is logged.' },
               ].map((st, i) => (
-                <li key={st.t} className="grid grid-cols-[2rem_1fr] gap-4">
-                  <span className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-accent-50 text-[13px] font-medium text-accent-700 tabular-nums">{i + 1}</span>
+                <li key={st.t} className="grid grid-cols-[1.75rem_1fr] gap-3">
+                  <span className="font-display text-[17px] font-medium text-accent-600 tabular-nums">{i + 1}</span>
                   <div>
                     <p className="text-[17px] font-medium text-text-primary">{st.t}</p>
                     <p className="mt-1.5 text-[15.5px] leading-[1.65] text-text-secondary">{st.b}</p>
@@ -199,16 +192,5 @@ export default function HomePage() {
         body="Walk through a month-end review on a sample AP register: 1,431 rows, five findings, and the decisions a reviewer makes on them."
       />
     </PublicLayout>
-  )
-}
-
-function Figure_({ value, caption, muted = false }: { value: string; caption: string; muted?: boolean }) {
-  return (
-    <div>
-      <p className={`font-display font-medium leading-[0.9] tracking-[-0.045em] tabular-nums text-[4rem] sm:text-[5.5rem] lg:text-[6rem] ${muted ? 'text-text-muted/60' : 'text-accent-600'}`}>
-        {value}
-      </p>
-      <p className="mt-3 max-w-[11rem] text-[15px] leading-snug text-text-muted">{caption}</p>
-    </div>
   )
 }

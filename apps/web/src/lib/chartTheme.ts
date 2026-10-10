@@ -2,8 +2,8 @@
 // as a pair against the white chart surface (colour-vision separation and
 // 3:1 contrast); anything past two series folds into "Other" or a table.
 export const CHART = {
-  series1: '#2a78d6',   // azure; the ultramarine accent stays reserved for actions
-  series2: '#0e9468',
+  series1: '#4f46c4',   // dawn indigo, one step off the action colour
+  series2: '#d97757',   // dawn coral
   muted:   '#cbd2dc',   // border-strong: context bars that are not the point
   grid:    '#edf0f4',   // border-subtle
   axis:    '#636e82',   // text-muted

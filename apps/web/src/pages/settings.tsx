@@ -6,10 +6,7 @@ import { Card, CardHeader, CardDivider } from '../components/ui/Card'
 import { useCurrentUser, saveUser } from '../hooks/useCurrentUser'
 import { clearDataset } from '../lib/dataStore'
 import {
-  Users, Shield, Building2, Settings, Plus, Edit,
-  CheckCircle, Lock, Key, RefreshCw, AlertTriangle,
-  Eye, Mail, Database, Trash2, AlertCircle, Loader2,
-  ChevronDown, Clock, X, ArrowLeft,
+  Users, Shield, Building2, Settings, Plus, Edit, CheckCircle, Key, RefreshCw, AlertTriangle, Eye, Database, Trash2, AlertCircle, Loader2, ChevronDown, Clock, X, ArrowLeft,
 } from 'lucide-react'
 
 type SettingsTab = 'users' | 'roles' | 'security' | 'tenant' | 'data'
@@ -296,12 +293,12 @@ export default function SettingsPage() {
     }
   }
 
-  const tabs: { id: SettingsTab; label: string; icon: React.ReactElement }[] = [
-    { id: 'users',    label: 'Users',    icon: <Users    className="w-3.5 h-3.5" /> },
-    { id: 'roles',    label: 'Roles',    icon: <Shield   className="w-3.5 h-3.5" /> },
-    { id: 'security', label: 'Security', icon: <Lock     className="w-3.5 h-3.5" /> },
-    { id: 'tenant',   label: 'Tenant',   icon: <Building2 className="w-3.5 h-3.5" /> },
-    { id: 'data',     label: 'Data',     icon: <Database  className="w-3.5 h-3.5" /> },
+  const tabs: { id: SettingsTab; label: string }[] = [
+    { id: 'users',    label: 'Users'    },
+    { id: 'roles',    label: 'Roles'    },
+    { id: 'security', label: 'Security' },
+    { id: 'tenant',   label: 'Tenant'   },
+    { id: 'data',     label: 'Data'     },
   ]
 
   return (
@@ -318,11 +315,10 @@ export default function SettingsPage() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
+            className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
               activeTab === tab.id ? 'border-accent-500 text-accent-700' : 'border-transparent text-text-muted hover:text-text-secondary'
             }`}
           >
-            {tab.icon}
             {tab.label}
           </button>
         ))}

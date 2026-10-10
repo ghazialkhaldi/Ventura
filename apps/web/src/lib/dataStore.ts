@@ -8,6 +8,9 @@ export type { NormalizedInvoice, ImportBatch, FieldMapping, LineItem } from './i
 
 export type Severity = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW'
 export type AnomalyStatus = 'Open' | 'Under Review' | 'Resolved' | 'Dismissed'
+// A finding still needs a decision while it is Open or Under Review. Every
+// "open" count in the app uses this, so the sidebar, dashboard and lists agree.
+export const isUndecided = (a: { status: AnomalyStatus }) => a.status === 'Open' || a.status === 'Under Review'
 // Used by Badge.tsx for workflow/integration status color mapping.
 export type WorkflowStatus = 'On Track' | 'Warning' | 'Bottleneck' | 'Critical'
 export type IntegrationStatus = 'Connected' | 'Disconnected' | 'Degraded' | 'Pending' | 'Not connected'

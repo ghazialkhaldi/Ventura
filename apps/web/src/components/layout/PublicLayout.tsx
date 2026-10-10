@@ -62,9 +62,9 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
 
   // The header gains its hairline only once content scrolls beneath it
   const [scrolled, setScrolled] = useState(false)
-  // The bar takes on the surface beneath it: on the ultramarine field it is
-  // blue with a white mark, over paper it is white. Regions mark themselves
-  // with data-field.
+  // The bar takes on the surface beneath it: over the open sky it is clear
+  // with a white mark, over a paper sheet it is frosted paper. Sky regions
+  // mark themselves with data-field.
   const [overField, setOverField] = useState(true)
   useEffect(() => {
     const onScroll = () => {
@@ -89,9 +89,13 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
       <div className="relative isolate min-h-screen flex flex-col">
         <SkyBackdrop />
 
-        {/* Over the dawn sky the bar is transparent with a white mark; over paper
-            it turns to frosted white. Sky regions mark themselves with data-field. */}
-        <header className={`sticky top-0 z-50 border-b transition-colors duration-200 ${onField ? 'bg-transparent border-transparent' : 'bg-surface-raised/85 backdrop-blur-md border-border/70'}`}>
+        {/* Over the dawn sky the bar is clear with a white mark, and turns to night
+            glass once the sky's own content scrolls beneath it; over paper it is
+            frosted white. Sky regions mark themselves with data-field. */}
+        <header className={`sticky top-0 z-50 border-b transition-colors duration-200 ${
+          !onField ? 'bg-surface-raised/85 backdrop-blur-md border-border/70'
+          : scrolled ? 'bg-sky-night/45 backdrop-blur-lg border-white/10'
+          : 'bg-transparent border-transparent'}`}>
           <div className="max-w-page mx-auto h-16 lg:h-20 px-5 sm:px-8 flex items-center gap-10">
             <Link href="/" className="shrink-0 py-2" onClick={close} aria-label="Ventura home">
               <VenturaLogo variant={onField ? 'light' : 'dark'} height={20} />
@@ -174,29 +178,30 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
 
         <main className="relative flex-1">{children}</main>
 
-        <footer className="relative border-t border-border bg-surface-raised">
+        {/* The footer sits on the day sky the page has scrolled into, not on a slab of paper. */}
+        <footer className="relative border-t border-sky-night/10">
           <div className="max-w-page mx-auto px-5 sm:px-8 pt-14 pb-10">
             <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
               <div className="col-span-2 lg:col-span-1">
                 <VenturaLogo variant="dark" height={15} />
-                <p className="mt-4 text-[14px] text-text-muted max-w-[16rem] leading-relaxed">
+                <p className="mt-4 text-[14px] text-sky-indigo max-w-[16rem] leading-relaxed">
                   Spend review for month-end close. Every finding traced to its rows, and a person decides.
                 </p>
               </div>
               {FOOTER_COLUMNS.map(col => (
                 <div key={col.heading}>
-                  <p className="text-[13px] font-medium text-text-primary">{col.heading}</p>
+                  <p className="text-[13px] font-medium text-sky-night">{col.heading}</p>
                   <ul className="mt-4 space-y-3">
                     {col.links.map(l => (
                       <li key={l.label}>
-                        <Link href={l.href} className="text-[14px] text-text-muted hover:text-text-primary">{l.label}</Link>
+                        <Link href={l.href} className="text-[14px] text-sky-indigo hover:text-sky-night hover:underline underline-offset-4">{l.label}</Link>
                       </li>
                     ))}
                   </ul>
                 </div>
               ))}
             </div>
-            <div className="mt-14 pt-6 border-t border-border text-[13px] text-text-muted">
+            <div className="mt-14 pt-6 border-t border-sky-night/10 text-[13px] text-sky-indigo">
               © 2026 Ventura Financial Intelligence, Inc.
             </div>
           </div>

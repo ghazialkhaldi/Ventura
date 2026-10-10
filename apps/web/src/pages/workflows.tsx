@@ -2,14 +2,15 @@ import React, { useState, useEffect, useMemo } from 'react'
 import AppLayout from '../components/layout/AppLayout'
 import PageHeader from '../components/ui/PageHeader'
 import Badge from '../components/ui/Badge'
+import Segmented from '../components/ui/Segmented'
 import Button from '../components/ui/Button'
 import DataEmptyState from '../components/ui/DataEmptyState'
 import { useDataReady } from '../hooks/useDataReady'
-import { loadDataset } from '../lib/dataStore'
+import { loadDataset, isUndecided } from '../lib/dataStore'
 import type { DetectedAnomaly, AnomalyType } from '../lib/dataStore'
 import {
-  GitMerge, Clock, AlertTriangle, CheckCircle, ChevronDown,
-  ChevronRight, AlertCircle, Users, ArrowRight,
+  Clock, AlertTriangle, CheckCircle, ChevronDown,
+  ChevronRight, Users, ArrowRight,
 } from 'lucide-react'
 
 function fmtCurrency(n: number): string {
@@ -147,7 +148,7 @@ function buildWorkflows(anomalies: DetectedAnomaly[]): WorkflowItem[] {
 
   const items: WorkflowItem[] = []
   for (const [type, group] of grouped) {
-    const open     = group.filter(a => a.status !== 'Resolved')
+    const open     = group.filter(isUndecided)
     const critical = open.filter(a => a.severity === 'CRITICAL').length
     const high     = open.filter(a => a.severity === 'HIGH').length
 
@@ -196,6 +197,7 @@ export default function WorkflowsPage() {
   const { isReady, mounted } = useDataReady()
   const [workflows, setWorkflows] = useState<WorkflowItem[]>([])
   const [expanded,  setExpanded]  = useState<string | null>(null)
+  const [view,      setView]      = useState<WorkflowItem['status'] | 'All'>('All')
 
   useEffect(() => {
     if (isReady) {
@@ -207,7 +209,6 @@ export default function WorkflowsPage() {
   // useMemo must be called before any conditional returns (React hooks rules)
   const stats = useMemo(() => ({
     total:       workflows.length,
-    bottleneck:  workflows.filter(w => w.status === 'Critical' || w.status === 'Bottleneck').length,
     warning:     workflows.filter(w => w.status === 'Warning').length,
     totalInProg: workflows.reduce((s, w) => s + w.inProgress, 0),
     totalOverdue: workflows.reduce((s, w) => s + w.overdue, 0),
@@ -245,30 +246,28 @@ export default function WorkflowsPage() {
         </div>
       ) : (
         <>
-          {/* ── Stats ── */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            {[
-              { label: 'Workflow types',     value: stats.total,        icon: GitMerge,      color: 'text-text-secondary', bg: 'bg-surface-raised', border: 'border-border' },
-              { label: 'Critical/Bottleneck', value: stats.bottleneck,   icon: AlertTriangle, color: 'text-critical-fg',   bg: 'bg-surface-raised', border: 'border-border' },
-              { label: 'Items in review',    value: stats.totalInProg,  icon: Clock,         color: 'text-positive-fg',  bg: 'bg-surface-raised', border: 'border-border' },
-              { label: 'Overdue items',      value: stats.totalOverdue, icon: AlertCircle,   color: 'text-medium-fg', bg: 'bg-surface-raised', border: 'border-border' },
-            ].map((s) => {
-              const Icon = s.icon
-              return (
-                <div key={s.label} className={`${s.bg} border ${s.border} rounded-xl shadow-card px-4 py-3 flex items-center gap-3`}>
-                  <Icon className={`w-5 h-5 ${s.color} flex-shrink-0`} />
-                  <div>
-                    <p className={`text-xl font-medium tracking-[-0.02em] ${s.color}`}>{s.value}</p>
-                    <p className="text-xs text-text-muted">{s.label}</p>
-                  </div>
-                </div>
-              )
-            })}
+          {/* ── One row of views ── */}
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-3 mb-4">
+            <Segmented<WorkflowItem['status'] | 'All'>
+              label="Show workflows"
+              value={view}
+              onChange={setView}
+              segments={[
+                { value: 'All',        label: 'All',        count: stats.total },
+                { value: 'Critical',   label: 'Critical',   count: workflows.filter(w => w.status === 'Critical').length },
+                { value: 'Bottleneck', label: 'Bottleneck', count: workflows.filter(w => w.status === 'Bottleneck').length },
+                { value: 'Warning',    label: 'Warning',    count: stats.warning },
+                { value: 'On Track',   label: 'On track',   count: workflows.filter(w => w.status === 'On Track').length },
+              ]}
+            />
+            <p className="text-[13px] text-text-muted tabular-nums">
+              {stats.totalInProg} finding{stats.totalInProg !== 1 ? 's' : ''} to decide · {stats.totalOverdue} critical or high
+            </p>
           </div>
 
           {/* ── Workflow cards ── */}
           <div className="space-y-3">
-            {workflows.map((wf) => {
+            {workflows.filter(w => view === 'All' || w.status === view).map((wf) => {
               const meta    = TYPE_META[wf.type]
               const isOpen  = expanded === wf.type
               const slaDays = meta.slaDays
@@ -357,7 +356,7 @@ export default function WorkflowsPage() {
                           </p>
                           <div className="space-y-2 mb-4 max-h-52 overflow-y-auto">
                             {wf.anomalies
-                              .filter(a => a.status !== 'Resolved')
+                              .filter(isUndecided)
                               .slice(0, 10)
                               .map((a) => (
                                 <a
@@ -365,9 +364,7 @@ export default function WorkflowsPage() {
                                   href={`/anomalies/${a.id}`}
                                   className="flex items-start gap-2.5 p-2.5 bg-surface-raised border border-border rounded-lg hover:border-accent-400 transition-colors group"
                                 >
-                                  <Badge variant="severity" value={a.severity} dot className="mt-0.5 flex-shrink-0">
-                                    {a.severity.slice(0, 1)}
-                                  </Badge>
+                                  <Badge variant="severity" value={a.severity} dot className="mt-0.5 flex-shrink-0" />
                                   <div className="flex-1 min-w-0">
                                     <p className="text-xs font-medium text-text-secondary truncate group-hover:text-accent-800">{a.title}</p>
                                     <p className="text-[10px] text-text-muted">{a.vendor} · {fmtCurrency(a.amount)}</p>

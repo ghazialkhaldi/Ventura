@@ -4,7 +4,7 @@
 
 /* ── Palette ───────────────────────────────────────────────────────────────
    Channels only ("R G B") so Tailwind can apply opacity modifiers.
-   Neutrals carry a faint blue tint; ultramarine is reserved for actions,
+   Neutrals carry a faint blue tint; the dawn indigo is reserved for actions,
    links and focus; severity colours appear only on findings. */
 :root {
   --surface:         247 248 250;
@@ -211,9 +211,10 @@ button, a {
 .animate-marquee:hover { animation-play-state: paused; }
 
 /* Focus brackets tighten onto the flagged evidence row */
+/* Brackets settle on the inset each row asks for (set inline as --bracket-inset). */
 @keyframes bracket-in {
   from { inset: -6px 2px; opacity: 0; }
-  to   { inset: 3px 10px; opacity: 1; }
+  to   { inset: var(--bracket-inset, 3px 10px); opacity: 1; }
 }
 .animate-bracket-in { animation: bracket-in 900ms cubic-bezier(0.16, 1, 0.3, 1) 500ms both; }
 

@@ -1,901 +1,1047 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-10T00:30:33+00:00",
+  "generatedAt": "2026-10-10T16:16:06+00:00",
   "title": "Design System: Ventura",
   "extensions": {
     "colorMeta": {
       "accent-50": {
         "role": "primary",
-        "displayName": "Selection Wash",
-        "canonical": "rgb(238 242 255)",
+        "displayName": "Indigo Mist",
+        "canonical": "rgb(241 240 251)",
+        "cssVar": "--accent-50",
+        "oklch": "oklch(95.9% 0.015 290.3)",
         "tonalRamp": [
-          "#161d45",
-          "#263793",
-          "#2a40b8",
-          "#3550dc",
-          "#4a67ee",
-          "#7189f6",
-          "#c3d0ff",
-          "#eef2ff"
+          "#19143a",
+          "#2a2260",
+          "#332877",
+          "#3d2f93",
+          "#4a3ab0",
+          "#5f4dc8",
+          "#8070d8",
+          "#a79de6",
+          "#c9c3f1",
+          "#e4e1f8",
+          "#f1f0fb"
         ]
       },
       "accent-100": {
         "role": "primary",
-        "displayName": "Monogram Tint",
-        "canonical": "rgb(224 231 255)",
+        "displayName": "Indigo Mist, deeper",
+        "canonical": "rgb(228 225 248)",
+        "cssVar": "--accent-100",
+        "oklch": "oklch(91.9% 0.031 291.8)",
         "tonalRamp": [
-          "#161d45",
-          "#263793",
-          "#2a40b8",
-          "#3550dc",
-          "#4a67ee",
-          "#7189f6",
-          "#c3d0ff",
-          "#eef2ff"
+          "#19143a",
+          "#2a2260",
+          "#332877",
+          "#3d2f93",
+          "#4a3ab0",
+          "#5f4dc8",
+          "#8070d8",
+          "#a79de6",
+          "#c9c3f1",
+          "#e4e1f8",
+          "#f1f0fb"
         ]
       },
       "accent-200": {
         "role": "primary",
-        "displayName": "Selection Edge",
-        "canonical": "rgb(195 208 255)",
+        "displayName": "Selection Indigo",
+        "canonical": "rgb(201 195 241)",
+        "cssVar": "--accent-200",
+        "oklch": "oklch(83.7% 0.064 290.9)",
         "tonalRamp": [
-          "#161d45",
-          "#263793",
-          "#2a40b8",
-          "#3550dc",
-          "#4a67ee",
-          "#7189f6",
-          "#c3d0ff",
-          "#eef2ff"
-        ]
-      },
-      "accent-300": {
-        "role": "primary",
-        "displayName": "Ultramarine 300",
-        "canonical": "rgb(156 176 253)",
-        "tonalRamp": [
-          "#161d45",
-          "#263793",
-          "#2a40b8",
-          "#3550dc",
-          "#4a67ee",
-          "#7189f6",
-          "#c3d0ff",
-          "#eef2ff"
+          "#19143a",
+          "#2a2260",
+          "#332877",
+          "#3d2f93",
+          "#4a3ab0",
+          "#5f4dc8",
+          "#8070d8",
+          "#a79de6",
+          "#c9c3f1",
+          "#e4e1f8",
+          "#f1f0fb"
         ]
       },
       "accent-400": {
         "role": "primary",
-        "displayName": "Link Underline Hover",
-        "canonical": "rgb(113 137 246)",
+        "displayName": "Focus Indigo, light",
+        "canonical": "rgb(128 112 216)",
+        "cssVar": "--accent-400",
+        "oklch": "oklch(60.8% 0.153 288.0)",
         "tonalRamp": [
-          "#161d45",
-          "#263793",
-          "#2a40b8",
-          "#3550dc",
-          "#4a67ee",
-          "#7189f6",
-          "#c3d0ff",
-          "#eef2ff"
+          "#19143a",
+          "#2a2260",
+          "#332877",
+          "#3d2f93",
+          "#4a3ab0",
+          "#5f4dc8",
+          "#8070d8",
+          "#a79de6",
+          "#c9c3f1",
+          "#e4e1f8",
+          "#f1f0fb"
         ]
       },
       "accent-500": {
         "role": "primary",
-        "displayName": "Focus Ultramarine",
-        "canonical": "rgb(74 103 238)",
+        "displayName": "Focus Indigo",
+        "canonical": "rgb(95 77 200)",
+        "cssVar": "--accent-500",
+        "oklch": "oklch(50.9% 0.183 284.5)",
         "tonalRamp": [
-          "#161d45",
-          "#263793",
-          "#2a40b8",
-          "#3550dc",
-          "#4a67ee",
-          "#7189f6",
-          "#c3d0ff",
-          "#eef2ff"
+          "#19143a",
+          "#2a2260",
+          "#332877",
+          "#3d2f93",
+          "#4a3ab0",
+          "#5f4dc8",
+          "#8070d8",
+          "#a79de6",
+          "#c9c3f1",
+          "#e4e1f8",
+          "#f1f0fb"
         ]
       },
       "accent-600": {
         "role": "primary",
-        "displayName": "Ledger Ultramarine",
-        "canonical": "rgb(53 80 220) ≈ oklch(50.4% 0.214 268.6)",
+        "displayName": "Dawn Indigo",
+        "canonical": "rgb(74 58 176)",
+        "cssVar": "--accent-600",
+        "oklch": "oklch(44.1% 0.179 282.4)",
         "tonalRamp": [
-          "#161d45",
-          "#263793",
-          "#2a40b8",
-          "#3550dc",
-          "#4a67ee",
-          "#7189f6",
-          "#c3d0ff",
-          "#eef2ff"
+          "#19143a",
+          "#2a2260",
+          "#332877",
+          "#3d2f93",
+          "#4a3ab0",
+          "#5f4dc8",
+          "#8070d8",
+          "#a79de6",
+          "#c9c3f1",
+          "#e4e1f8",
+          "#f1f0fb"
         ]
       },
       "accent-700": {
         "role": "primary",
-        "displayName": "Pressed Ultramarine",
-        "canonical": "rgb(42 64 184)",
+        "displayName": "Deep Dawn Indigo",
+        "canonical": "rgb(61 47 147)",
+        "cssVar": "--accent-700",
+        "oklch": "oklch(38.7% 0.157 282.6)",
         "tonalRamp": [
-          "#161d45",
-          "#263793",
-          "#2a40b8",
-          "#3550dc",
-          "#4a67ee",
-          "#7189f6",
-          "#c3d0ff",
-          "#eef2ff"
+          "#19143a",
+          "#2a2260",
+          "#332877",
+          "#3d2f93",
+          "#4a3ab0",
+          "#5f4dc8",
+          "#8070d8",
+          "#a79de6",
+          "#c9c3f1",
+          "#e4e1f8",
+          "#f1f0fb"
         ]
       },
       "accent-800": {
         "role": "primary",
-        "displayName": "Monogram Ink",
-        "canonical": "rgb(38 55 147)",
+        "displayName": "Deepest Dawn Indigo",
+        "canonical": "rgb(51 40 119)",
+        "cssVar": "--accent-800",
+        "oklch": "oklch(34.1% 0.129 283.5)",
         "tonalRamp": [
-          "#161d45",
-          "#263793",
-          "#2a40b8",
-          "#3550dc",
-          "#4a67ee",
-          "#7189f6",
-          "#c3d0ff",
-          "#eef2ff"
+          "#19143a",
+          "#2a2260",
+          "#332877",
+          "#3d2f93",
+          "#4a3ab0",
+          "#5f4dc8",
+          "#8070d8",
+          "#a79de6",
+          "#c9c3f1",
+          "#e4e1f8",
+          "#f1f0fb"
+        ]
+      },
+      "sky-night": {
+        "role": "sky",
+        "displayName": "Night Indigo",
+        "canonical": "rgb(18 19 58)",
+        "cssVar": "--sky-night",
+        "oklch": "oklch(21.4% 0.074 277.0)",
+        "tonalRamp": [
+          "#070429",
+          "#1c1f47",
+          "#363b66",
+          "#535a87",
+          "#757cac",
+          "#98a1d3",
+          "#bec7fb",
+          "#eaedff"
+        ]
+      },
+      "sky-indigo": {
+        "role": "sky",
+        "displayName": "Pre-dawn Indigo",
+        "canonical": "rgb(43 42 107)",
+        "cssVar": "--sky-indigo",
+        "oklch": "oklch(32.7% 0.110 279.1)",
+        "tonalRamp": [
+          "#080030",
+          "#1c1757",
+          "#353678",
+          "#51559a",
+          "#7278c1",
+          "#969de9",
+          "#bfc6ff",
+          "#ebedfe"
+        ]
+      },
+      "sky-violet": {
+        "role": "sky",
+        "displayName": "Twilight Violet",
+        "canonical": "rgb(75 63 143)",
+        "cssVar": "--sky-violet",
+        "oklch": "oklch(42.4% 0.127 286.5)",
+        "tonalRamp": [
+          "#0c002d",
+          "#240e5d",
+          "#3d307e",
+          "#5a4fa1",
+          "#7b73c8",
+          "#9f98f0",
+          "#c6c3ff",
+          "#ededfe"
+        ]
+      },
+      "sky-rose": {
+        "role": "sky",
+        "displayName": "Dawn Rose",
+        "canonical": "rgb(196 113 143)",
+        "cssVar": "--sky-rose",
+        "oklch": "oklch(64.9% 0.110 357.5)",
+        "tonalRamp": [
+          "#1d000b",
+          "#480024",
+          "#6a2040",
+          "#8d405e",
+          "#b46380",
+          "#dc87a5",
+          "#feb0cb",
+          "#fee8ee"
+        ]
+      },
+      "sky-coral": {
+        "role": "sky",
+        "displayName": "Sunrise Coral",
+        "canonical": "rgb(243 154 124)",
+        "cssVar": "--sky-coral",
+        "oklch": "oklch(77.0% 0.115 39.4)",
+        "tonalRamp": [
+          "#1b0300",
+          "#431000",
+          "#6f2302",
+          "#924327",
+          "#ba664a",
+          "#e28a6d",
+          "#feb79f",
+          "#ffe9e2"
+        ]
+      },
+      "sky-gold": {
+        "role": "sky",
+        "displayName": "Horizon Gold",
+        "canonical": "rgb(255 211 161)",
+        "cssVar": "--sky-gold",
+        "oklch": "oklch(89.3% 0.081 70.1)",
+        "tonalRamp": [
+          "#140800",
+          "#351e01",
+          "#5a3701",
+          "#7b5525",
+          "#9f7848",
+          "#c69c6c",
+          "#edc290",
+          "#feebd6"
+        ]
+      },
+      "sky-morning": {
+        "role": "sky",
+        "displayName": "Morning Blue",
+        "canonical": "rgb(169 200 238)",
+        "cssVar": "--sky-morning",
+        "oklch": "oklch(82.3% 0.063 253.7)",
+        "tonalRamp": [
+          "#000b1e",
+          "#0b2442",
+          "#274160",
+          "#446081",
+          "#6683a6",
+          "#89a7cc",
+          "#aecef4",
+          "#e4f0fe"
+        ]
+      },
+      "sky-day": {
+        "role": "sky",
+        "displayName": "Daylight",
+        "canonical": "rgb(226 236 249)",
+        "cssVar": "--sky-day",
+        "oklch": "oklch(93.9% 0.021 254.9)",
+        "tonalRamp": [
+          "#060c14",
+          "#1d252e",
+          "#39404b",
+          "#565e69",
+          "#78818d",
+          "#9ca6b2",
+          "#c2cbd8",
+          "#e5f0fd"
+        ]
+      },
+      "sky-muted": {
+        "role": "sky",
+        "displayName": "Lavender Haze",
+        "canonical": "rgb(222 218 246)",
+        "cssVar": "--sky-muted",
+        "oklch": "oklch(90.0% 0.038 292.2)",
+        "tonalRamp": [
+          "#0c081a",
+          "#242135",
+          "#403c53",
+          "#5e5a72",
+          "#807c96",
+          "#a5a1bb",
+          "#cac7e2",
+          "#eeecfe"
         ]
       },
       "surface": {
         "role": "neutral",
-        "displayName": "Cool Paper",
+        "displayName": "Cool Paper Ground",
         "canonical": "rgb(247 248 250)",
+        "cssVar": "--surface",
+        "oklch": "oklch(97.9% 0.003 264.5)",
         "tonalRamp": [
-          "#0f1524",
-          "#2f3747",
-          "#465062",
-          "#636e82",
-          "#98a2b3",
-          "#cbd2dc",
-          "#e2e6ec",
-          "#f7f8fa"
+          "#0b0b0c",
+          "#232425",
+          "#3f4041",
+          "#5d5e5f",
+          "#7f8082",
+          "#a4a4a6",
+          "#c9cacc",
+          "#edeef0"
         ]
       },
       "surface-raised": {
         "role": "neutral",
-        "displayName": "White Sheet",
+        "displayName": "Paper",
         "canonical": "rgb(255 255 255)",
+        "cssVar": "--surface-raised",
+        "oklch": "oklch(100.0% 0.000 89.9)",
         "tonalRamp": [
-          "#0f1524",
-          "#2f3747",
-          "#465062",
-          "#636e82",
-          "#98a2b3",
-          "#cbd2dc",
-          "#e2e6ec",
-          "#f7f8fa"
+          "#0b0b0b",
+          "#242424",
+          "#404040",
+          "#5d5d5d",
+          "#808080",
+          "#a4a4a4",
+          "#cacaca",
+          "#eeeeee"
         ]
       },
       "surface-overlay": {
         "role": "neutral",
         "displayName": "Overlay Grey",
         "canonical": "rgb(242 244 247)",
+        "cssVar": "--surface-overlay",
+        "oklch": "oklch(96.6% 0.005 258.3)",
         "tonalRamp": [
-          "#0f1524",
-          "#2f3747",
-          "#465062",
-          "#636e82",
-          "#98a2b3",
-          "#cbd2dc",
-          "#e2e6ec",
-          "#f7f8fa"
+          "#0a0b0d",
+          "#232426",
+          "#3e4042",
+          "#5c5e60",
+          "#7e8083",
+          "#a3a5a7",
+          "#c9cbcd",
+          "#edeff2"
         ]
       },
       "surface-hover": {
         "role": "neutral",
         "displayName": "Hover Grey",
         "canonical": "rgb(238 241 245)",
+        "cssVar": "--surface-hover",
+        "oklch": "oklch(95.7% 0.006 255.5)",
         "tonalRamp": [
-          "#0f1524",
-          "#2f3747",
-          "#465062",
-          "#636e82",
-          "#98a2b3",
-          "#cbd2dc",
-          "#e2e6ec",
-          "#f7f8fa"
+          "#090b0e",
+          "#222427",
+          "#3e4043",
+          "#5b5e61",
+          "#7e8084",
+          "#a2a5a8",
+          "#c8cbcf",
+          "#eceff3"
         ]
       },
       "surface-sunken": {
         "role": "neutral",
-        "displayName": "Sunken Grey",
+        "displayName": "Well Grey",
         "canonical": "rgb(236 239 243)",
+        "cssVar": "--surface-sunken",
+        "oklch": "oklch(95.1% 0.006 255.5)",
         "tonalRamp": [
-          "#0f1524",
-          "#2f3747",
-          "#465062",
-          "#636e82",
-          "#98a2b3",
-          "#cbd2dc",
-          "#e2e6ec",
-          "#f7f8fa"
+          "#090b0e",
+          "#222427",
+          "#3e4043",
+          "#5b5e61",
+          "#7e8084",
+          "#a2a5a8",
+          "#c8cbcf",
+          "#eceff3"
         ]
       },
       "border": {
         "role": "neutral",
         "displayName": "Hairline",
         "canonical": "rgb(226 230 236)",
+        "cssVar": "--border",
+        "oklch": "oklch(92.4% 0.009 258.3)",
         "tonalRamp": [
-          "#0f1524",
-          "#2f3747",
-          "#465062",
-          "#636e82",
-          "#98a2b3",
-          "#cbd2dc",
-          "#e2e6ec",
-          "#f7f8fa"
+          "#090b0f",
+          "#212429",
+          "#3d4045",
+          "#5a5e63",
+          "#7d8086",
+          "#a1a5aa",
+          "#c7cbd1",
+          "#ebeff5"
         ]
       },
       "border-subtle": {
         "role": "neutral",
         "displayName": "Faint Hairline",
         "canonical": "rgb(237 240 244)",
+        "cssVar": "--border-subtle",
+        "oklch": "oklch(95.4% 0.006 255.5)",
         "tonalRamp": [
-          "#0f1524",
-          "#2f3747",
-          "#465062",
-          "#636e82",
-          "#98a2b3",
-          "#cbd2dc",
-          "#e2e6ec",
-          "#f7f8fa"
+          "#090b0e",
+          "#222427",
+          "#3e4043",
+          "#5b5e61",
+          "#7e8084",
+          "#a2a5a8",
+          "#c8cbcf",
+          "#eceff3"
         ]
       },
       "border-strong": {
         "role": "neutral",
-        "displayName": "Firm Hairline",
+        "displayName": "Strong Hairline",
         "canonical": "rgb(203 210 220)",
+        "cssVar": "--border-strong",
+        "oklch": "oklch(86.1% 0.016 257.2)",
         "tonalRamp": [
-          "#0f1524",
-          "#2f3747",
-          "#465062",
-          "#636e82",
-          "#98a2b3",
-          "#cbd2dc",
-          "#e2e6ec",
-          "#f7f8fa"
+          "#070b12",
+          "#1f242c",
+          "#3b4048",
+          "#585e67",
+          "#7a818a",
+          "#9ea5af",
+          "#c4cbd5",
+          "#e8eff9"
         ]
       },
       "text-primary": {
         "role": "neutral",
-        "displayName": "Ledger Ink",
-        "canonical": "rgb(15 21 36) ≈ oklch(19.8% 0.032 266.9)",
+        "displayName": "Ink Type",
+        "canonical": "rgb(15 21 36)",
+        "cssVar": "--text-primary",
+        "oklch": "oklch(19.8% 0.032 266.9)",
         "tonalRamp": [
-          "#0f1524",
-          "#2f3747",
-          "#465062",
-          "#636e82",
-          "#98a2b3",
-          "#cbd2dc",
-          "#e2e6ec",
-          "#f7f8fa"
+          "#060a18",
+          "#1d2434",
+          "#383f51",
+          "#555d70",
+          "#788094",
+          "#9ca5b9",
+          "#c1cae0",
+          "#e8eefe"
         ]
       },
       "text-secondary": {
         "role": "neutral",
-        "displayName": "Graphite",
+        "displayName": "Reading Grey",
         "canonical": "rgb(70 80 98)",
+        "cssVar": "--text-secondary",
+        "oklch": "oklch(43.0% 0.033 262.1)",
         "tonalRamp": [
-          "#0f1524",
-          "#2f3747",
-          "#465062",
-          "#636e82",
-          "#98a2b3",
-          "#cbd2dc",
-          "#e2e6ec",
-          "#f7f8fa"
+          "#050b19",
+          "#1b2434",
+          "#364051",
+          "#545e70",
+          "#768194",
+          "#9aa5ba",
+          "#bfcbe0",
+          "#e6effe"
         ]
       },
       "text-muted": {
         "role": "neutral",
-        "displayName": "Slate Note",
+        "displayName": "Muted Grey",
         "canonical": "rgb(99 110 130)",
+        "cssVar": "--text-muted",
+        "oklch": "oklch(53.6% 0.034 262.4)",
         "tonalRamp": [
-          "#0f1524",
-          "#2f3747",
-          "#465062",
-          "#636e82",
-          "#98a2b3",
-          "#cbd2dc",
-          "#e2e6ec",
-          "#f7f8fa"
-        ]
-      },
-      "sidebar-bg": {
-        "role": "neutral",
-        "displayName": "Sidebar Mist",
-        "canonical": "rgb(244 246 249)",
-        "tonalRamp": [
-          "#0f1524",
-          "#2f3747",
-          "#465062",
-          "#636e82",
-          "#98a2b3",
-          "#cbd2dc",
-          "#e2e6ec",
-          "#f7f8fa"
-        ]
-      },
-      "sidebar-hover": {
-        "role": "neutral",
-        "displayName": "Sidebar Hover",
-        "canonical": "rgb(234 237 242)",
-        "tonalRamp": [
-          "#0f1524",
-          "#2f3747",
-          "#465062",
-          "#636e82",
-          "#98a2b3",
-          "#cbd2dc",
-          "#e2e6ec",
-          "#f7f8fa"
-        ]
-      },
-      "sidebar-active": {
-        "role": "neutral",
-        "displayName": "Sidebar Pill",
-        "canonical": "rgb(226 231 240)",
-        "tonalRamp": [
-          "#0f1524",
-          "#2f3747",
-          "#465062",
-          "#636e82",
-          "#98a2b3",
-          "#cbd2dc",
-          "#e2e6ec",
-          "#f7f8fa"
-        ]
-      },
-      "sidebar-text": {
-        "role": "neutral",
-        "displayName": "Sidebar Graphite",
-        "canonical": "rgb(47 55 71)",
-        "tonalRamp": [
-          "#0f1524",
-          "#2f3747",
-          "#465062",
-          "#636e82",
-          "#98a2b3",
-          "#cbd2dc",
-          "#e2e6ec",
-          "#f7f8fa"
+          "#040b19",
+          "#1b2435",
+          "#364052",
+          "#535e71",
+          "#758195",
+          "#99a5bb",
+          "#bfcbe2",
+          "#e7effe"
         ]
       },
       "ink": {
-        "role": "neutral",
-        "displayName": "Deep Ink",
-        "canonical": "rgb(12 17 29) ≈ oklch(17.9% 0.026 266.5)",
+        "role": "ink",
+        "displayName": "Night Ink",
+        "canonical": "rgb(12 17 29)",
+        "cssVar": "--ink",
+        "oklch": "oklch(17.9% 0.026 266.5)",
         "tonalRamp": [
-          "#0c111d",
-          "#151b2a",
-          "#252d3f",
-          "#5a6171",
-          "#7b8293",
-          "#9aa4b8",
-          "#c1c9db",
-          "#e9edf5"
+          "#060b16",
+          "#1e2431",
+          "#39404e",
+          "#575e6d",
+          "#798090",
+          "#9da5b6",
+          "#c3cbdc",
+          "#e8effe"
         ]
       },
       "ink-raised": {
-        "role": "neutral",
-        "displayName": "Raised Ink",
+        "role": "ink",
+        "displayName": "Night Ink, raised",
         "canonical": "rgb(21 27 42)",
+        "cssVar": "--ink-raised",
+        "oklch": "oklch(22.4% 0.031 267.2)",
         "tonalRamp": [
-          "#0c111d",
-          "#151b2a",
-          "#252d3f",
-          "#5a6171",
-          "#7b8293",
-          "#9aa4b8",
-          "#c1c9db",
-          "#e9edf5"
+          "#060a18",
+          "#1d2433",
+          "#383f50",
+          "#565d70",
+          "#788093",
+          "#9ca4b9",
+          "#c1cadf",
+          "#e8eefe"
         ]
       },
       "ink-line": {
-        "role": "neutral",
-        "displayName": "Ink Rule",
+        "role": "ink",
+        "displayName": "Night Ink rule",
         "canonical": "rgb(37 45 63)",
+        "cssVar": "--ink-line",
+        "oklch": "oklch(29.8% 0.035 265.8)",
         "tonalRamp": [
-          "#0c111d",
-          "#151b2a",
-          "#252d3f",
-          "#5a6171",
-          "#7b8293",
-          "#9aa4b8",
-          "#c1c9db",
-          "#e9edf5"
+          "#050a1a",
+          "#1c2435",
+          "#374053",
+          "#545e72",
+          "#768096",
+          "#9aa5bb",
+          "#c0cbe2",
+          "#e7effe"
         ]
       },
       "ink-text": {
-        "role": "neutral",
-        "displayName": "Ink Paper",
+        "role": "ink",
+        "displayName": "Night Ink type",
         "canonical": "rgb(233 237 245)",
+        "cssVar": "--ink-text",
+        "oklch": "oklch(94.5% 0.012 264.5)",
         "tonalRamp": [
-          "#0c111d",
-          "#151b2a",
-          "#252d3f",
-          "#5a6171",
-          "#7b8293",
-          "#9aa4b8",
-          "#c1c9db",
-          "#e9edf5"
+          "#090b10",
+          "#21242a",
+          "#3d4046",
+          "#5a5e64",
+          "#7d8087",
+          "#a1a5ac",
+          "#c7cbd2",
+          "#ebeff7"
         ]
       },
       "ink-muted": {
-        "role": "neutral",
-        "displayName": "Ink Note",
+        "role": "ink",
+        "displayName": "Night Ink muted type",
         "canonical": "rgb(154 164 184)",
+        "cssVar": "--ink-muted",
+        "oklch": "oklch(71.7% 0.031 264.4)",
         "tonalRamp": [
-          "#0c111d",
-          "#151b2a",
-          "#252d3f",
-          "#5a6171",
-          "#7b8293",
-          "#9aa4b8",
-          "#c1c9db",
-          "#e9edf5"
+          "#050b18",
+          "#1c2433",
+          "#374051",
+          "#555e70",
+          "#778094",
+          "#9ba5b9",
+          "#c0cbe0",
+          "#e7efff"
         ]
       },
       "critical": {
         "role": "severity",
         "displayName": "Critical Red",
-        "canonical": "rgb(217 45 32) ≈ oklch(57.6% 0.209 29.5)",
+        "canonical": "rgb(217 45 32)",
+        "cssVar": "--critical",
+        "oklch": "oklch(57.6% 0.209 29.5)",
         "tonalRamp": [
           "#1f0000",
-          "#4d0100",
-          "#800301",
-          "#b70903",
-          "#e43a2b",
-          "#fd7563",
-          "#fdb4a8",
-          "#fee9e5"
+          "#4b0100",
+          "#7d0100",
+          "#b10501",
+          "#e23729",
+          "#fe7461",
+          "#feb6aa",
+          "#ffe9e5"
         ]
       },
       "critical-fg": {
         "role": "severity",
-        "displayName": "Critical Red Text",
+        "displayName": "Critical Red, text",
         "canonical": "rgb(180 35 24)",
+        "cssVar": "--critical-fg",
+        "oklch": "oklch(50.0% 0.182 29.5)",
         "tonalRamp": [
           "#1f0000",
-          "#4d0100",
-          "#800301",
-          "#b70903",
-          "#e43a2b",
-          "#fd7563",
-          "#fdb4a8",
+          "#4b0000",
+          "#7c0300",
+          "#ad1a10",
+          "#d74839",
+          "#ff7361",
+          "#ffb5a9",
           "#fee9e5"
         ]
       },
       "critical-bg": {
         "role": "severity",
-        "displayName": "Critical Red Wash",
+        "displayName": "Critical tint",
         "canonical": "rgb(254 243 242)",
+        "cssVar": "--critical-bg",
+        "oklch": "oklch(97.2% 0.012 23.7)",
         "tonalRamp": [
-          "#1f0000",
-          "#4d0100",
-          "#800301",
-          "#b70903",
-          "#e43a2b",
-          "#fd7563",
-          "#fdb4a8",
-          "#fee9e5"
+          "#100909",
+          "#2a2221",
+          "#463d3d",
+          "#645b5a",
+          "#877e7d",
+          "#aca2a1",
+          "#d2c8c7",
+          "#f6eceb"
         ]
       },
       "critical-line": {
         "role": "severity",
-        "displayName": "Critical Red Line",
+        "displayName": "Critical line",
         "canonical": "rgb(254 205 202)",
+        "cssVar": "--critical-line",
+        "oklch": "oklch(89.0% 0.056 22.3)",
         "tonalRamp": [
-          "#1f0000",
-          "#4d0100",
-          "#800301",
-          "#b70903",
-          "#e43a2b",
-          "#fd7563",
-          "#fdb4a8",
-          "#fee9e5"
+          "#1d0102",
+          "#3b1817",
+          "#5a3332",
+          "#7a514f",
+          "#9f7371",
+          "#c69795",
+          "#edbdba",
+          "#fee9e7"
         ]
       },
       "high": {
         "role": "severity",
         "displayName": "High Orange",
-        "canonical": "rgb(239 104 32) ≈ oklch(67.5% 0.184 43.9)",
+        "canonical": "rgb(239 104 32)",
+        "cssVar": "--high",
+        "oklch": "oklch(67.5% 0.184 43.9)",
         "tonalRamp": [
-          "#190400",
-          "#421500",
-          "#6f2900",
-          "#a03f03",
-          "#d35607",
-          "#fc7a3d",
-          "#feb697",
-          "#ffe9e1"
+          "#1a0400",
+          "#401400",
+          "#6c2700",
+          "#9b3c01",
+          "#d05404",
+          "#ff7733",
+          "#feb89a",
+          "#feeae1"
         ]
       },
       "high-fg": {
         "role": "severity",
-        "displayName": "High Orange Text",
+        "displayName": "High Orange, text",
         "canonical": "rgb(185 56 21)",
+        "cssVar": "--high-fg",
+        "oklch": "oklch(52.8% 0.171 35.1)",
         "tonalRamp": [
-          "#190400",
-          "#421500",
-          "#6f2900",
-          "#a03f03",
-          "#d35607",
-          "#fc7a3d",
-          "#feb697",
-          "#ffe9e1"
+          "#1d0200",
+          "#460b00",
+          "#751a00",
+          "#a72901",
+          "#d2502f",
+          "#fd7655",
+          "#ffb6a3",
+          "#ffe9e3"
         ]
       },
       "high-bg": {
         "role": "severity",
-        "displayName": "High Orange Wash (flagged rows)",
+        "displayName": "High tint",
         "canonical": "rgb(254 246 238)",
+        "cssVar": "--high-bg",
+        "oklch": "oklch(97.7% 0.014 67.7)",
         "tonalRamp": [
-          "#190400",
-          "#421500",
-          "#6f2900",
-          "#a03f03",
-          "#d35607",
-          "#fc7a3d",
-          "#feb697",
-          "#ffe9e1"
+          "#0f0a06",
+          "#29231d",
+          "#453e38",
+          "#635c56",
+          "#867f78",
+          "#aba39c",
+          "#d1c9c1",
+          "#f5ede5"
         ]
       },
       "high-line": {
         "role": "severity",
-        "displayName": "High Orange Line",
+        "displayName": "High line",
         "canonical": "rgb(249 219 175)",
+        "cssVar": "--high-line",
+        "oklch": "oklch(90.6% 0.066 77.2)",
         "tonalRamp": [
-          "#190400",
-          "#421500",
-          "#6f2900",
-          "#a03f03",
-          "#d35607",
-          "#fc7a3d",
-          "#feb697",
-          "#ffe9e1"
+          "#130900",
+          "#322000",
+          "#533b10",
+          "#735930",
+          "#977b52",
+          "#bca076",
+          "#e3c69a",
+          "#ffecd0"
         ]
       },
       "medium": {
         "role": "severity",
         "displayName": "Medium Amber",
-        "canonical": "rgb(234 170 8) ≈ oklch(77.8% 0.159 81.1)",
+        "canonical": "rgb(234 170 8)",
+        "cssVar": "--medium",
+        "oklch": "oklch(77.8% 0.159 81.1)",
         "tonalRamp": [
           "#120900",
-          "#322200",
-          "#573d01",
-          "#7e5a03",
-          "#a87908",
-          "#d29a18",
-          "#febd32",
-          "#ffeccc"
+          "#312100",
+          "#543b01",
+          "#795704",
+          "#a57702",
+          "#d39907",
+          "#ffbe34",
+          "#feeccd"
         ]
       },
       "medium-fg": {
         "role": "severity",
-        "displayName": "Medium Amber Text",
+        "displayName": "Medium Amber, text",
         "canonical": "rgb(145 94 0)",
+        "cssVar": "--medium-fg",
+        "oklch": "oklch(52.5% 0.112 72.6)",
         "tonalRamp": [
-          "#120900",
-          "#322200",
-          "#573d01",
-          "#7e5a03",
-          "#a87908",
-          "#d29a18",
-          "#febd32",
-          "#ffeccc"
+          "#130900",
+          "#341f01",
+          "#583801",
+          "#805301",
+          "#a97426",
+          "#cf994f",
+          "#f7bf75",
+          "#ffebd3"
         ]
       },
       "medium-bg": {
         "role": "severity",
-        "displayName": "Medium Amber Wash",
+        "displayName": "Medium tint",
         "canonical": "rgb(255 250 235)",
+        "cssVar": "--medium-bg",
+        "oklch": "oklch(98.5% 0.020 91.6)",
         "tonalRamp": [
-          "#120900",
-          "#322200",
-          "#573d01",
-          "#7e5a03",
-          "#a87908",
-          "#d29a18",
-          "#febd32",
-          "#ffeccc"
+          "#0e0b03",
+          "#282419",
+          "#444034",
+          "#625d51",
+          "#858073",
+          "#a9a497",
+          "#cfcabc",
+          "#f3eedf"
         ]
       },
       "medium-line": {
         "role": "severity",
-        "displayName": "Medium Amber Line",
+        "displayName": "Medium line",
         "canonical": "rgb(254 223 137)",
+        "cssVar": "--medium-line",
+        "oklch": "oklch(91.1% 0.111 90.3)",
         "tonalRamp": [
-          "#120900",
-          "#322200",
-          "#573d01",
-          "#7e5a03",
-          "#a87908",
-          "#d29a18",
-          "#febd32",
-          "#ffeccc"
+          "#100a00",
+          "#2e2200",
+          "#4f3d01",
+          "#735a03",
+          "#9a7d21",
+          "#bfa14b",
+          "#e6c872",
+          "#ffeebf"
         ]
       },
       "low": {
         "role": "severity",
-        "displayName": "Low Slate",
+        "displayName": "Low Grey",
         "canonical": "rgb(152 162 179)",
+        "cssVar": "--low",
+        "oklch": "oklch(71.0% 0.027 261.1)",
         "tonalRamp": [
           "#050b17",
-          "#1e2532",
-          "#3a4251",
-          "#596271",
-          "#798393",
-          "#9ca6b7",
-          "#bfcadb",
-          "#e6efff"
-        ]
-      },
-      "low-fg": {
-        "role": "severity",
-        "displayName": "Low Slate Text",
-        "canonical": "rgb(71 84 103)",
-        "tonalRamp": [
-          "#050b17",
-          "#1e2532",
-          "#3a4251",
-          "#596271",
-          "#798393",
-          "#9ca6b7",
-          "#bfcadb",
-          "#e6efff"
-        ]
-      },
-      "low-bg": {
-        "role": "severity",
-        "displayName": "Low Slate Wash",
-        "canonical": "rgb(242 244 247)",
-        "tonalRamp": [
-          "#050b17",
-          "#1e2532",
-          "#3a4251",
-          "#596271",
-          "#798393",
-          "#9ca6b7",
-          "#bfcadb",
+          "#1d2431",
+          "#38404e",
+          "#555e6d",
+          "#778191",
+          "#9ba5b6",
+          "#c1cbdd",
           "#e6efff"
         ]
       },
       "positive": {
         "role": "outcome",
-        "displayName": "Outcome Green",
-        "canonical": "rgb(23 178 106) ≈ oklch(67.3% 0.160 155.6)",
+        "displayName": "Resolved Green",
+        "canonical": "rgb(23 178 106)",
+        "cssVar": "--positive",
+        "oklch": "oklch(67.3% 0.160 155.6)",
         "tonalRamp": [
-          "#000f05",
-          "#012e17",
-          "#03502c",
-          "#0a7443",
-          "#129b5b",
-          "#34c278",
-          "#62e79c",
+          "#001005",
+          "#002d16",
+          "#014d2a",
+          "#057040",
+          "#059959",
+          "#33c178",
+          "#63e99d",
           "#c5ffd9"
         ]
       },
       "positive-fg": {
         "role": "outcome",
-        "displayName": "Outcome Green Text",
+        "displayName": "Resolved Green, text",
         "canonical": "rgb(6 118 71)",
+        "cssVar": "--positive-fg",
+        "oklch": "oklch(49.9% 0.117 157.1)",
         "tonalRamp": [
-          "#000f05",
-          "#012e17",
-          "#03502c",
-          "#0a7443",
-          "#129b5b",
-          "#34c278",
-          "#62e79c",
-          "#c5ffd9"
+          "#001005",
+          "#012c18",
+          "#024d2c",
+          "#047043",
+          "#369564",
+          "#5fbb87",
+          "#86e2ac",
+          "#c4ffda"
         ]
       },
       "positive-bg": {
         "role": "outcome",
-        "displayName": "Outcome Green Wash",
+        "displayName": "Resolved tint",
         "canonical": "rgb(236 253 243)",
+        "cssVar": "--positive-bg",
+        "oklch": "oklch(97.9% 0.022 160.2)",
         "tonalRamp": [
-          "#000f05",
-          "#012e17",
-          "#03502c",
-          "#0a7443",
-          "#129b5b",
-          "#34c278",
-          "#62e79c",
-          "#c5ffd9"
+          "#040e08",
+          "#1b2720",
+          "#36443c",
+          "#536259",
+          "#75857c",
+          "#99a9a0",
+          "#bfcfc6",
+          "#e2f3e9"
         ]
       },
       "positive-line": {
         "role": "outcome",
-        "displayName": "Outcome Green Line",
+        "displayName": "Resolved line",
         "canonical": "rgb(171 239 198)",
+        "cssVar": "--positive-line",
+        "oklch": "oklch(89.6% 0.089 157.6)",
         "tonalRamp": [
-          "#000f05",
-          "#012e17",
-          "#03502c",
-          "#0a7443",
-          "#129b5b",
-          "#34c278",
-          "#62e79c",
-          "#c5ffd9"
+          "#000f06",
+          "#012c18",
+          "#014d2d",
+          "#2a6c4a",
+          "#4f906b",
+          "#74b68f",
+          "#99ddb4",
+          "#c4ffdb"
         ]
       },
       "chart-series-1": {
-        "role": "data",
-        "displayName": "Azure",
-        "canonical": "#2a78d6 (src/lib/chartTheme.ts) ≈ oklch(57.5% 0.163 255.5)",
+        "role": "chart",
+        "displayName": "Series Dawn Indigo",
+        "canonical": "#4f46c4",
+        "source": "src/lib/chartTheme.ts",
+        "oklch": "oklch(48.1% 0.189 279.8)",
         "tonalRamp": [
-          "#000a1f",
-          "#00244e",
-          "#014083",
-          "#055fba",
-          "#3582e1",
-          "#63a7ff",
-          "#a7ccfd",
-          "#e5f0fe"
+          "#090032",
+          "#1b1059",
+          "#302982",
+          "#4842ae",
+          "#6967e2",
+          "#8c91fc",
+          "#b6bdff",
+          "#e9edff"
         ]
       },
       "chart-series-2": {
-        "role": "data",
-        "displayName": "Teal Green",
-        "canonical": "#0e9468 (src/lib/chartTheme.ts) ≈ oklch(59.1% 0.125 163.2)",
+        "role": "chart",
+        "displayName": "Series Dawn Coral",
+        "canonical": "#d97757",
+        "source": "src/lib/chartTheme.ts",
+        "oklch": "oklch(67.2% 0.131 38.8)",
         "tonalRamp": [
-          "#000f08",
-          "#022d1d",
-          "#064f36",
-          "#107350",
-          "#1a996d",
-          "#4cbd8f",
-          "#74e3b2",
-          "#c1ffe0"
+          "#200000",
+          "#410d00",
+          "#64230c",
+          "#893a1f",
+          "#b85c3e",
+          "#d8866c",
+          "#f7b19a",
+          "#ffe7dc"
         ]
-      },
-      "field": {
-        "name": "Ultramarine Field",
-        "hex": "#2440d6",
-        "role": "Whole regions on marketing pages: hero, page intros, logo strip, closing band. White type 7.6:1."
-      },
-      "field-muted": {
-        "name": "Field Mist",
-        "hex": "#c7d1ff",
-        "role": "Secondary text on the field (4.9:1)."
-      },
-      "field-deep": {
-        "name": "Field Deep",
-        "hex": "#1b32b8",
-        "role": "Pressed or recessed states on the field."
       }
     },
     "typographyMeta": {
       "display": {
         "displayName": "Display",
-        "purpose": "Home hero headline only. 38px → 52px (≥640) → 64px (≥1024). Semi-expanded via .font-display (wdth 112)."
+        "purpose": "The home hero headline only: 2.75rem, 4rem at sm, 4.75rem at lg; white on the dark upper sky, left aligned, max 11ch."
+      },
+      "display-page": {
+        "displayName": "Display, page",
+        "purpose": "Page intros on the sky (white) and the closing headline on the daylight sky (sky-night); 2.25rem rising to 3.5rem."
       },
       "headline": {
         "displayName": "Headline",
-        "purpose": "H1 on inner marketing pages and error pages. 36px → 48px. Auth pages use the same face at 28–32px."
+        "purpose": "Section headings on sheets; 1.875rem rising to 2.5rem. A sheet opening the product story may use a larger statement headline (up to 3.75rem) with one phrase in dawn indigo."
       },
       "title": {
         "displayName": "Title",
-        "purpose": "Home section headings (Tailwind text-title). 30px → 40px."
+        "purpose": "Sub-sections inside a sheet, at normal width."
       },
-      "title-compact": {
-        "displayName": "Title compact",
-        "purpose": "Section headings on inner marketing pages, demo and closing CTA (H2_CLASS). 28px → 36px."
-      },
-      "heading": {
-        "displayName": "Heading",
-        "purpose": "Sub-sections beside a figure (Tailwind text-heading). Normal width."
-      },
-      "app-title": {
-        "displayName": "App title",
-        "purpose": "Page titles in the signed-in app (PageHeader). Normal width."
+      "page-title": {
+        "displayName": "Page title",
+        "purpose": "App page headings."
       },
       "body-lead": {
         "displayName": "Body lead",
-        "purpose": "Subline under marketing headlines, 17–18px, capped at 36–40rem."
+        "purpose": "Section leads, 17 to 18px, max about 38 to 40rem."
       },
       "body": {
         "displayName": "Body",
-        "purpose": "Marketing paragraphs and list bodies, 15.5–16px, capped at 62ch."
+        "purpose": "Marketing reading text, 15.5 to 16px, max 62ch."
       },
       "body-app": {
-        "displayName": "Body app",
-        "purpose": "Document default and the app's working size."
-      },
-      "ui": {
-        "displayName": "UI",
-        "purpose": "Buttons, sidebar items, search, top-bar controls."
+        "displayName": "Body, app",
+        "purpose": "The app base size; controls run at 13.5px."
       },
       "label": {
         "displayName": "Label",
-        "purpose": "Field labels, table headers, card subtitles, metadata. Sentence case, no tracking."
+        "purpose": "Form labels, column heads, chips, rail section labels and captions; sentence case, never uppercase."
       },
-      "caption": {
-        "displayName": "Caption",
-        "purpose": "Chips and count pills."
-      },
-      "mono": {
-        "displayName": "Mono",
-        "purpose": "Machine strings only: finding IDs, invite and one-time codes, event and resource names, field keys."
+      "mono-id": {
+        "displayName": "Mono ID",
+        "purpose": "Identifiers only, such as ANO-0142."
       }
     },
     "shadows": [
       {
-        "name": "card",
-        "value": "0 1px 2px 0 rgb(15 21 36 / 0.05)",
-        "purpose": "Resting cards, stat cards, primary and secondary buttons, the active sidebar item, inputs."
-      },
-      {
-        "name": "card-md",
-        "value": "0 4px 12px -2px rgb(15 21 36 / 0.08), 0 2px 4px -2px rgb(15 21 36 / 0.05)",
-        "purpose": "Figures and panels on marketing pages."
-      },
-      {
-        "name": "frame",
-        "value": "0 24px 48px -16px rgb(15 21 36 / 0.18), 0 8px 16px -8px rgb(15 21 36 / 0.08)",
-        "purpose": "The single product frame that leads a page."
+        "name": "sheet",
+        "value": "0 50px 100px -40px rgb(28 18 72 / 0.45), 0 18px 36px -18px rgb(28 18 72 / 0.25)",
+        "purpose": "Paper sheets and the hero finding card floating on the sky; tinted with the sky's indigo."
       },
       {
         "name": "pop",
         "value": "0 12px 32px -8px rgb(15 21 36 / 0.22), 0 2px 6px -2px rgb(15 21 36 / 0.08)",
-        "purpose": "Floating layers: mobile drawer, chart tooltips."
+        "purpose": "Floating controls: the white sky pill, demo step rail, contact form on the sky, open mobile drawer, chart tooltips."
       },
       {
-        "name": "focus-ring",
-        "value": "0 0 0 2px rgb(255 255 255), 0 0 0 4px rgb(74 103 238)",
-        "purpose": "2px accent-500 ring offset 2px from the white surface on every :focus-visible."
+        "name": "frame",
+        "value": "0 24px 48px -16px rgb(15 21 36 / 0.18), 0 8px 16px -8px rgb(15 21 36 / 0.08)",
+        "purpose": "The large product frame (findings inbox) inside a sheet."
       },
       {
-        "name": "frosted-bar",
-        "value": "background: rgb(255 255 255 / 0.95); backdrop-filter: blur(4px)",
-        "purpose": "Sticky app top bar and demo step rail."
+        "name": "card-md",
+        "value": "0 4px 12px -2px rgb(15 21 36 / 0.08), 0 2px 4px -2px rgb(15 21 36 / 0.05)",
+        "purpose": "A raised panel inside the app, such as a finding evidence panel. Figures and side panels on a sheet carry no shadow."
       },
       {
-        "name": "scrim",
-        "value": "rgb(12 17 29 / 0.30)",
-        "purpose": "Backdrop behind the mobile drawer and app sidebar drawer."
+        "name": "card",
+        "value": "0 1px 2px 0 rgb(15 21 36 / 0.05)",
+        "purpose": "App cards, inputs, buttons and the active rail item."
+      },
+      {
+        "name": "sun-glow",
+        "value": "radial-gradient(closest-side, rgb(255 240 210 / 0.55), rgb(255 214 176 / 0.22) 45%, transparent)",
+        "purpose": "The page-long sun glow in SkyBackdrop; light as depth, not a shadow."
       }
     ],
     "motion": [
       {
         "name": "ease-out-expo",
         "value": "cubic-bezier(0.16, 1, 0.3, 1)",
-        "purpose": "The system's only easing curve, for every transition and keyframe."
+        "purpose": "The one easing curve: state transitions, reveals, drawer and rail slides, the CloseHorizon sun."
       },
       {
-        "name": "state",
+        "name": "duration-ui",
         "value": "140ms",
-        "purpose": "Default colour, border, shadow and opacity transition on buttons and links."
+        "purpose": "Colour, border, shadow and opacity transitions on every button and link."
       },
       {
-        "name": "nudge",
-        "value": "200ms translateX(2px)",
-        "purpose": "Trailing arrow on the marketing CTA on hover."
+        "name": "sky-hour",
+        "value": "scroll-linked; t = scrollY / (scrollHeight - innerHeight); keyframes dawn 0, sunrise 0.35, morning 0.70, day 1.00; five stops at 0/38/66/86/100%",
+        "purpose": "SkyBackdrop repaints the fixed sky each animation frame; the sun glow climbs 55vh over the page; three blurred cloud masses drift slightly and crossfade from warm dawn light to white daylight (warm = 1 - 1.4t). Reduced motion holds t = 0."
       },
       {
-        "name": "pane-in",
-        "value": "220ms, from translateY(6px) opacity 0",
-        "purpose": "Swapping the open finding in the product frame."
-      },
-      {
-        "name": "drawer",
-        "value": "300ms transform",
-        "purpose": "Mobile nav drawer and app sidebar slide."
+        "name": "hero-sunrise",
+        "value": "scroll-linked; sun rises 240px as the hero scrolls away; seeded broken-dash glint, reach 0.9 to 1.6, brightness 0.85 to 1.2",
+        "purpose": "HeroHorizon: the sun lifts off the horizon and the glint on the water lengthens and brightens. Reduced motion holds it on the horizon."
       },
       {
         "name": "frame-settle",
-        "value": "900ms, 120ms delay, from translateY(14px) scale(0.985) opacity 0.55",
-        "purpose": "The one authored entrance: the home hero product frame. Nothing else animates in."
+        "value": "900ms cubic-bezier(0.16, 1, 0.3, 1) 120ms; from translateY(14px) scale(0.985) opacity 0.55",
+        "purpose": "The hero finding card settles into place from an already visible state."
+      },
+      {
+        "name": "bracket-in",
+        "value": "900ms cubic-bezier(0.16, 1, 0.3, 1) 500ms; inset -6px 2px to 3px 10px",
+        "purpose": "Focus brackets tighten onto the flagged evidence row."
+      },
+      {
+        "name": "pane-in",
+        "value": "220ms cubic-bezier(0.16, 1, 0.3, 1); translateY(6px), opacity 0 to 1",
+        "purpose": "A finding's detail pane when the selection changes."
+      },
+      {
+        "name": "marquee",
+        "value": "48s linear infinite",
+        "purpose": "The systems strip drift; paused on hover, stopped under reduced motion."
+      },
+      {
+        "name": "slide-panel",
+        "value": "300ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Mobile drawer and app rail slide-in."
+      },
+      {
+        "name": "close-horizon-sun",
+        "value": "700ms cubic-bezier(0.16, 1, 0.3, 1) on top; top = 78% - decided/total x 58%",
+        "purpose": "The CloseHorizon sun climbs as findings are decided."
       },
       {
         "name": "reduced-motion",
-        "value": "1ms",
-        "purpose": "prefers-reduced-motion collapses every animation and transition to 1ms with no delay."
+        "value": "animation and transition durations 1ms; sky and sun hold dawn; marquee off",
+        "purpose": "prefers-reduced-motion: a still dawn."
       }
     ],
     "breakpoints": [
@@ -918,14 +1064,6 @@
       {
         "name": "2xl",
         "value": "1536px"
-      },
-      {
-        "name": "page-max",
-        "value": "1200px"
-      },
-      {
-        "name": "sidebar",
-        "value": "240px"
       }
     ]
   },
@@ -934,195 +1072,174 @@
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "The one action colour. Mark resolved, Continue, Upload; 36px, 6px radius, card shadow.",
+      "description": "The action on paper: dawn indigo, 6px corners. Used for decisions such as Mark resolved, form submits and app actions.",
       "html": "<button class=\"ds-btn-primary\">Mark resolved</button>",
-      "css": ".ds-btn-primary { font-family: var(--font-sans, 'Archivo'), ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 14px; border-radius: 6px; border: 1px solid rgb(var(--accent-600, 53 80 220)); background: rgb(var(--accent-600, 53 80 220)); color: #fff; font-size: 13.5px; font-weight: 500; white-space: nowrap; box-shadow: 0 1px 2px 0 rgb(15 21 36 / 0.05); cursor: pointer; transition: background-color 140ms cubic-bezier(0.16, 1, 0.3, 1), border-color 140ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 140ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-primary:hover { background: rgb(var(--accent-700, 42 64 184)); border-color: rgb(var(--accent-700, 42 64 184)); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 2px rgb(var(--surface-raised, 255 255 255)), 0 0 0 4px rgb(var(--accent-500, 74 103 238)); } .ds-btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }"
+      "css": ".ds-btn-primary { font-family: var(--font-sans, Archivo), ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border-radius: 6px; border: 1px solid rgb(var(--accent-600, 74 58 176)); background: rgb(var(--accent-600, 74 58 176)); color: #fff; font-size: 13.5px; font-weight: 500; box-shadow: 0 1px 2px 0 rgb(15 21 36 / 0.05); cursor: pointer; transition: background-color 140ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 140ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-primary:hover { background: rgb(var(--accent-700, 61 47 147)); border-color: rgb(var(--accent-700, 61 47 147)); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgb(var(--accent-500, 95 77 200)); } .ds-btn-primary:active { background: rgb(var(--accent-800, 51 40 119)); }"
     },
     {
       "name": "Secondary Button",
       "kind": "button",
       "refersTo": "button-secondary",
-      "description": "White with a firm hairline; the companion to a primary action (Dismiss, Upload more).",
+      "description": "Paper fill, strong hairline, ink text. The quieter choice beside a primary, such as Dismiss.",
       "html": "<button class=\"ds-btn-secondary\">Dismiss</button>",
-      "css": ".ds-btn-secondary { font-family: var(--font-sans, 'Archivo'), ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 14px; border-radius: 6px; border: 1px solid rgb(var(--border-strong, 203 210 220)); background: rgb(var(--surface-raised, 255 255 255)); color: rgb(var(--text-primary, 15 21 36)); font-size: 13.5px; font-weight: 500; white-space: nowrap; box-shadow: 0 1px 2px 0 rgb(15 21 36 / 0.05); cursor: pointer; transition: background-color 140ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-secondary:hover { background: rgb(var(--surface-overlay, 242 244 247)); } .ds-btn-secondary:focus-visible { outline: none; box-shadow: 0 0 0 2px rgb(var(--surface-raised, 255 255 255)), 0 0 0 4px rgb(var(--accent-500, 74 103 238)); }"
+      "css": ".ds-btn-secondary { font-family: var(--font-sans, Archivo), ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border-radius: 6px; border: 1px solid rgb(var(--border-strong, 203 210 220)); background: rgb(var(--surface-raised, 255 255 255)); color: rgb(var(--text-primary, 15 21 36)); font-size: 13.5px; font-weight: 500; box-shadow: 0 1px 2px 0 rgb(15 21 36 / 0.05); cursor: pointer; transition: background-color 140ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-secondary:hover { background: rgb(var(--surface-overlay, 242 244 247)); } .ds-btn-secondary:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgb(var(--accent-500, 95 77 200)); }"
     },
     {
-      "name": "Marketing CTA",
+      "name": "Sky Pill",
       "kind": "button",
-      "refersTo": "button-cta",
-      "description": "44px primary link on marketing pages, paired with an underlined text link; the arrow nudges 2px on hover.",
-      "html": "<div class=\"ds-cta-row\"><a href=\"#\" class=\"ds-cta\">Walk through the demo <svg width=\"16\" height=\"16\" viewBox=\"0 0 20 20\" fill=\"currentColor\" aria-hidden=\"true\"><path fill-rule=\"evenodd\" d=\"M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z\" clip-rule=\"evenodd\"/></svg></a><a href=\"#\" class=\"ds-textlink\">Talk to us</a></div>",
-      "css": ".ds-cta-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; } .ds-cta { font-family: var(--font-sans, 'Archivo'), ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 20px; border-radius: 6px; background: rgb(var(--accent-600, 53 80 220)); color: #fff; font-size: 15px; font-weight: 500; text-decoration: none; box-shadow: 0 1px 2px 0 rgb(15 21 36 / 0.05); transition: background-color 140ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-cta svg { transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-cta:hover { background: rgb(var(--accent-700, 42 64 184)); } .ds-cta:hover svg { transform: translateX(2px); } .ds-cta:focus-visible, .ds-textlink:focus-visible { outline: none; box-shadow: 0 0 0 2px rgb(var(--surface-raised, 255 255 255)), 0 0 0 4px rgb(var(--accent-500, 74 103 238)); border-radius: 6px; } .ds-textlink { font-family: var(--font-sans, 'Archivo'), ui-sans-serif, system-ui, sans-serif; font-size: 15px; font-weight: 500; color: rgb(var(--text-primary, 15 21 36)); text-decoration: underline; text-decoration-color: rgb(var(--border-strong, 203 210 220)); text-decoration-thickness: 1px; text-underline-offset: 3px; transition: color 140ms cubic-bezier(0.16, 1, 0.3, 1), text-decoration-color 140ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-textlink:hover { color: rgb(var(--accent-700, 42 64 184)); text-decoration-color: rgb(var(--accent-400, 113 137 246)); }"
+      "refersTo": "button-sky",
+      "description": "The action on the dark sky: a white pill with deep dawn indigo text and a Radix arrow that nudges right on hover. Never used on paper.",
+      "html": "<div class=\"ds-sky-stage\"><a class=\"ds-btn-sky\" href=\"#\">Walk through the demo <svg width=\"16\" height=\"16\" viewBox=\"0 0 15 15\" fill=\"none\" aria-hidden=\"true\"><path fill=\"currentColor\" fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z\"/></svg></a></div>",
+      "css": ".ds-sky-stage { background-image: linear-gradient(to bottom, #1a1b4d 0%, #4b3f8f 38%, #c4718f 66%, #f39a7c 86%, #ffd3a1 100%); padding: 40px 24px; border-radius: 14px; } .ds-btn-sky { font-family: var(--font-sans, Archivo), ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; gap: 8px; height: 48px; padding: 0 24px; border-radius: 9999px; background: #fff; color: rgb(var(--accent-800, 51 40 119)); font-size: 15.5px; font-weight: 500; text-decoration: none; box-shadow: 0 12px 32px -8px rgb(15 21 36 / 0.22), 0 2px 6px -2px rgb(15 21 36 / 0.08); transition: background-color 140ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-sky svg { transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-sky:hover { background: rgb(var(--accent-50, 241 240 251)); } .ds-btn-sky:hover svg { transform: translateX(2px); } .ds-btn-sky:focus-visible { outline: none; box-shadow: 0 0 0 2px rgb(var(--sky-night, 18 19 58)), 0 0 0 4px #fff; }"
+    },
+    {
+      "name": "Paper Pill",
+      "kind": "button",
+      "refersTo": "button-paper-pill",
+      "description": "The marketing action on paper and on the daylight close: a dawn indigo pill with a Radix arrow, paired with an ink text link.",
+      "html": "<div class=\"ds-day-stage\"><a class=\"ds-btn-pill\" href=\"#\">Walk through the demo <svg width=\"16\" height=\"16\" viewBox=\"0 0 15 15\" fill=\"none\" aria-hidden=\"true\"><path fill=\"currentColor\" fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M8.14645 3.14645C8.34171 2.95118 8.65829 2.95118 8.85355 3.14645L12.8536 7.14645C13.0488 7.34171 13.0488 7.65829 12.8536 7.85355L8.85355 11.8536C8.65829 12.0488 8.34171 12.0488 8.14645 11.8536C7.95118 11.6583 7.95118 11.3417 8.14645 11.1464L11.2929 8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H11.2929L8.14645 3.85355C7.95118 3.65829 7.95118 3.34171 8.14645 3.14645Z\"/></svg></a><a class=\"ds-text-link\" href=\"#\">Talk to us</a></div>",
+      "css": ".ds-day-stage { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; padding: 40px 24px; border-radius: 14px; background-image: linear-gradient(to bottom, #7aa2e0 0%, #b4cdf0 38%, #dce8f8 66%, #eef3fb 86%, #fbf6ee 100%); } .ds-btn-pill { font-family: var(--font-sans, Archivo), ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; gap: 8px; height: 48px; padding: 0 24px; border-radius: 9999px; background: rgb(var(--accent-600, 74 58 176)); color: #fff; font-size: 15px; font-weight: 500; text-decoration: none; box-shadow: 0 1px 2px 0 rgb(15 21 36 / 0.05); transition: background-color 140ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-pill svg { transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-pill:hover { background: rgb(var(--accent-700, 61 47 147)); } .ds-btn-pill:hover svg { transform: translateX(2px); } .ds-btn-pill:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgb(var(--accent-500, 95 77 200)); } .ds-text-link { font-family: var(--font-sans, Archivo), ui-sans-serif, system-ui, sans-serif; font-size: 15px; font-weight: 500; color: rgb(var(--text-primary, 15 21 36)); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; text-decoration-color: rgb(var(--border-strong, 203 210 220)); } .ds-text-link:hover { color: rgb(var(--accent-700, 61 47 147)); text-decoration-color: rgb(var(--accent-400, 128 112 216)); }"
     },
     {
       "name": "Text Field",
       "kind": "input",
       "refersTo": "input",
-      "description": "40px white field with a firm hairline; focus turns the border ultramarine with a soft 30% ring.",
-      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Work email</span><input class=\"ds-input\" type=\"email\" placeholder=\"you@company.com\" /></label>",
-      "css": ".ds-field { font-family: var(--font-sans, 'Archivo'), ui-sans-serif, system-ui, sans-serif; display: grid; gap: 6px; max-width: 360px; } .ds-field-label { font-size: 13px; font-weight: 500; color: rgb(var(--text-primary, 15 21 36)); } .ds-input { font-family: var(--font-sans, 'Archivo'), ui-sans-serif, system-ui, sans-serif; height: 40px; padding: 0 12px; border-radius: 6px; border: 1px solid rgb(var(--border-strong, 203 210 220)); background: rgb(var(--surface-raised, 255 255 255)); color: rgb(var(--text-primary, 15 21 36)); font-size: 14.5px; box-shadow: 0 1px 2px 0 rgb(15 21 36 / 0.05); transition: border-color 140ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 140ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-input::placeholder { color: rgb(var(--text-muted, 99 110 130)); opacity: 1; } .ds-input:focus, .ds-input:focus-visible { outline: none; border-color: rgb(var(--accent-500, 74 103 238)); box-shadow: 0 0 0 2px rgb(var(--accent-500, 74 103 238) / 0.3); }"
+      "description": "40px field on paper with a strong hairline; focus shifts the border to indigo with a soft ring. Label above in sentence case.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Work email</span><input class=\"ds-input\" type=\"email\" placeholder=\"jane@company.com\" /></label>",
+      "css": ".ds-field { font-family: var(--font-sans, Archivo), ui-sans-serif, system-ui, sans-serif; display: block; max-width: 320px; } .ds-field-label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: rgb(var(--text-primary, 15 21 36)); } .ds-input { font-family: var(--font-sans, Archivo), ui-sans-serif, system-ui, sans-serif; width: 100%; height: 40px; padding: 0 12px; border-radius: 6px; border: 1px solid rgb(var(--border-strong, 203 210 220)); background: rgb(var(--surface-raised, 255 255 255)); color: rgb(var(--text-primary, 15 21 36)); font-size: 14.5px; box-shadow: 0 1px 2px 0 rgb(15 21 36 / 0.05); outline: none; transition: border-color 140ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 140ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-input::placeholder { color: rgb(var(--text-muted, 99 110 130)); } .ds-input:focus { border-color: rgb(var(--accent-500, 95 77 200)); box-shadow: 0 0 0 2px rgb(var(--accent-500, 95 77 200) / 0.3); }"
     },
     {
-      "name": "Severity Chips",
+      "name": "Severity and Status Chips",
       "kind": "chip",
-      "refersTo": "chip-severity-critical",
-      "description": "Findings only. Pale family fill, dark family text, family-line ring and a 6px solid dot; 4px radius, sentence case.",
-      "html": "<div class=\"ds-chips\"><span class=\"ds-sev ds-sev-critical\"><i></i>Critical</span><span class=\"ds-sev ds-sev-high\"><i></i>High</span><span class=\"ds-sev ds-sev-medium\"><i></i>Medium</span><span class=\"ds-sev ds-sev-low\"><i></i>Low</span></div>",
-      "css": ".ds-chips { display: flex; flex-wrap: wrap; gap: 8px; } .ds-sev { font-family: var(--font-sans, 'Archivo'), ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px; border-radius: 4px; font-size: 12px; font-weight: 500; line-height: 1; white-space: nowrap; } .ds-sev i { width: 6px; height: 6px; border-radius: 9999px; flex-shrink: 0; } .ds-sev-critical { background: rgb(var(--critical-bg, 254 243 242)); color: rgb(var(--critical-fg, 180 35 24)); box-shadow: inset 0 0 0 1px rgb(var(--critical-line, 254 205 202)); } .ds-sev-critical i { background: rgb(var(--critical, 217 45 32)); } .ds-sev-high { background: rgb(var(--high-bg, 254 246 238)); color: rgb(var(--high-fg, 185 56 21)); box-shadow: inset 0 0 0 1px rgb(var(--high-line, 249 219 175)); } .ds-sev-high i { background: rgb(var(--high, 239 104 32)); } .ds-sev-medium { background: rgb(var(--medium-bg, 255 250 235)); color: rgb(var(--medium-fg, 145 94 0)); box-shadow: inset 0 0 0 1px rgb(var(--medium-line, 254 223 137)); } .ds-sev-medium i { background: rgb(var(--medium, 234 170 8)); } .ds-sev-low { background: rgb(var(--surface-overlay, 242 244 247)); color: rgb(var(--text-muted, 99 110 130)); box-shadow: inset 0 0 0 1px rgb(var(--border, 226 230 236)); } .ds-sev-low i { background: rgb(var(--low, 152 162 179)); }"
+      "refersTo": "chip-critical",
+      "description": "Severity chips (findings only) carry a dot and the severity tint; status chips use their own vocabulary and never a severity hue.",
+      "html": "<div class=\"ds-chips\"><span class=\"ds-chip ds-chip-critical\"><i></i>Critical</span><span class=\"ds-chip ds-chip-high\"><i></i>High</span><span class=\"ds-chip ds-chip-medium\"><i></i>Medium</span><span class=\"ds-chip ds-chip-conf\">Confidence 96</span><span class=\"ds-chip ds-chip-open\">Open</span><span class=\"ds-chip ds-chip-resolved\">Resolved</span><span class=\"ds-chip ds-chip-dismissed\">Dismissed</span><span class=\"ds-example\">Example data</span></div>",
+      "css": ".ds-chips { font-family: var(--font-sans, Archivo), ui-sans-serif, system-ui, sans-serif; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; } .ds-chip { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px; border-radius: 4px; font-size: 12px; font-weight: 500; white-space: nowrap; } .ds-chip i { width: 6px; height: 6px; border-radius: 9999px; display: inline-block; } .ds-chip-critical { background: rgb(var(--critical-bg, 254 243 242)); color: rgb(var(--critical-fg, 180 35 24)); box-shadow: inset 0 0 0 1px rgb(var(--critical-line, 254 205 202)); } .ds-chip-critical i { background: rgb(var(--critical, 217 45 32)); } .ds-chip-high { background: rgb(var(--high-bg, 254 246 238)); color: rgb(var(--high-fg, 185 56 21)); box-shadow: inset 0 0 0 1px rgb(var(--high-line, 249 219 175)); } .ds-chip-high i { background: rgb(var(--high, 239 104 32)); } .ds-chip-medium { background: rgb(var(--medium-bg, 255 250 235)); color: rgb(var(--medium-fg, 145 94 0)); box-shadow: inset 0 0 0 1px rgb(var(--medium-line, 254 223 137)); } .ds-chip-medium i { background: rgb(var(--medium, 234 170 8)); } .ds-chip-conf { background: rgb(var(--surface-overlay, 242 244 247)); color: rgb(var(--text-secondary, 70 80 98)); font-variant-numeric: tabular-nums; } .ds-chip-open { height: 20px; padding: 0 6px; background: rgb(var(--accent-50, 241 240 251)); color: rgb(var(--accent-700, 61 47 147)); box-shadow: inset 0 0 0 1px rgb(var(--accent-200, 201 195 241)); } .ds-chip-resolved { height: 20px; padding: 0 6px; background: rgb(var(--positive-bg, 236 253 243)); color: rgb(var(--positive-fg, 6 118 71)); box-shadow: inset 0 0 0 1px rgb(var(--positive-line, 171 239 198)); } .ds-chip-dismissed { height: 20px; padding: 0 6px; background: rgb(var(--surface-overlay, 242 244 247)); color: rgb(var(--text-muted, 99 110 130)); box-shadow: inset 0 0 0 1px rgb(var(--border, 226 230 236)); } .ds-example { display: inline-flex; align-items: center; height: 24px; padding: 0 8px; border-radius: 6px; border: 1px dashed rgb(var(--border-strong, 203 210 220)); font-size: 12px; color: rgb(var(--text-muted, 99 110 130)); }"
     },
     {
-      "name": "Status Chips",
-      "kind": "chip",
-      "refersTo": "chip-status-open",
-      "description": "Review status, kept apart from severity: Open in the ultramarine tint, Resolved in outcome green, Dismissed neutral.",
-      "html": "<div class=\"ds-chips\"><span class=\"ds-status ds-status-open\"><i></i>Open</span><span class=\"ds-status ds-status-resolved\"><i></i>Resolved</span><span class=\"ds-status ds-status-dismissed\"><i></i>Dismissed</span></div>",
-      "css": ".ds-chips { display: flex; flex-wrap: wrap; gap: 8px; } .ds-status { font-family: var(--font-sans, 'Archivo'), ui-sans-serif, system-ui, sans-serif; display: inline-flex; align-items: center; gap: 6px; height: 20px; padding: 0 6px; border-radius: 4px; font-size: 12px; font-weight: 500; line-height: 1; white-space: nowrap; border: 1px solid; } .ds-status i { width: 6px; height: 6px; border-radius: 9999px; } .ds-status-open { background: rgb(var(--accent-50, 238 242 255)); color: rgb(var(--accent-700, 42 64 184)); border-color: rgb(var(--accent-200, 195 208 255)); } .ds-status-open i { background: rgb(var(--accent-500, 74 103 238)); } .ds-status-resolved { background: rgb(var(--positive-bg, 236 253 243)); color: rgb(var(--positive-fg, 6 118 71)); border-color: rgb(var(--positive-line, 171 239 198)); } .ds-status-resolved i { background: rgb(var(--positive, 23 178 106)); } .ds-status-dismissed { background: rgb(var(--surface-overlay, 242 244 247)); color: rgb(var(--text-muted, 99 110 130)); border-color: rgb(var(--border, 226 230 236)); } .ds-status-dismissed i { background: rgb(var(--low, 152 162 179)); }"
-    },
-    {
-      "name": "Card with stat",
+      "name": "Paper Sheet on the Sky",
       "kind": "card",
+      "refersTo": "sheet",
+      "description": "Every marketing section between the opening and the close: white paper, 28px corners, a deep indigo-tinted shadow, the sky showing around it.",
+      "html": "<div class=\"ds-sheet-sky\"><section class=\"ds-sheet\"><h2 class=\"ds-sheet-h\">Fewer findings. The right ones.</h2><p class=\"ds-sheet-p\">Ventura judges each payment in its own context, merges findings that describe the same event, and ranks what is left by severity and confidence.</p><dl class=\"ds-facts\"><div><dt>Duplicate payment</dt><dd>Same vendor and amount within 30 days.</dd></div><div><dt>Period cut-off</dt><dd>A transaction dated outside its accounting period.</dd></div></dl></section></div>",
+      "css": ".ds-sheet-sky { padding: 48px 20px; background-image: linear-gradient(to bottom, #2e3478 0%, #7a63a8 38%, #e38f8f 66%, #f8b98e 86%, #ffe1b5 100%); } .ds-sheet { font-family: var(--font-sans, Archivo), ui-sans-serif, system-ui, sans-serif; max-width: 1280px; margin: 0 auto; padding: 56px 40px; border-radius: 28px; background: rgb(var(--surface-raised, 255 255 255)); color: rgb(var(--text-primary, 15 21 36)); box-shadow: 0 50px 100px -40px rgb(28 18 72 / 0.45), 0 18px 36px -18px rgb(28 18 72 / 0.25); } .ds-sheet-h { margin: 0; font-size: 2.25rem; font-weight: 500; line-height: 1.08; letter-spacing: -0.03em; font-variation-settings: \"wdth\" 112; text-wrap: balance; } .ds-sheet-p { margin: 20px 0 0; max-width: 38rem; font-size: 17px; line-height: 1.65; color: rgb(var(--text-secondary, 70 80 98)); } .ds-facts { margin: 40px 0 0; border-top: 1px solid rgb(var(--border, 226 230 236)); } .ds-facts div { display: grid; gap: 4px; padding: 20px 0; border-bottom: 1px solid rgb(var(--border, 226 230 236)); } .ds-facts dt { font-size: 15.5px; font-weight: 500; } .ds-facts dd { margin: 0; font-size: 15px; line-height: 1.6; color: rgb(var(--text-secondary, 70 80 98)); }"
+    },
+    {
+      "name": "Finding Card with Focus Brackets",
+      "kind": "custom",
       "refersTo": "card",
-      "description": "White sheet on cool paper: 10px radius, hairline border, card shadow; stat figures are 28px medium tabular.",
-      "html": "<div class=\"ds-canvas\"><div class=\"ds-card\"><p class=\"ds-card-label\">Transactions</p><p class=\"ds-card-value\">1,431</p><p class=\"ds-card-sub\">28 unique vendors</p></div></div>",
-      "css": ".ds-canvas { background: rgb(var(--surface, 247 248 250)); padding: 24px; } .ds-card { font-family: var(--font-sans, 'Archivo'), ui-sans-serif, system-ui, sans-serif; max-width: 260px; background: rgb(var(--surface-raised, 255 255 255)); border: 1px solid rgb(var(--border, 226 230 236)); border-radius: 10px; box-shadow: 0 1px 2px 0 rgb(15 21 36 / 0.05); padding: 16px 20px; } .ds-card-label { margin: 0 0 8px; font-size: 13px; font-weight: 500; color: rgb(var(--text-muted, 99 110 130)); } .ds-card-value { margin: 0; font-size: 28px; font-weight: 500; line-height: 1; letter-spacing: -0.02em; color: rgb(var(--text-primary, 15 21 36)); font-variant-numeric: tabular-nums; } .ds-card-sub { margin: 6px 0 0; font-size: 12.5px; color: rgb(var(--text-muted, 99 110 130)); }"
+      "description": "Signature: one finding held in the dawn light, its flagged evidence row locked in high-orange focus brackets, and a decision only a person makes.",
+      "html": "<div class=\"ds-finding\"><div class=\"ds-finding-top\"><span class=\"ds-fchip\"><i></i>Critical</span><span class=\"ds-fconf\">Confidence 96</span><span class=\"ds-fid\">ANO-0142</span><span class=\"ds-fex\">Example data</span></div><p class=\"ds-ftitle\">Duplicate payment <span>· Corva Freight</span></p><p class=\"ds-frule\">Rule: Same vendor and amount within 30 days</p><div class=\"ds-frow\"><span>2026-09-04</span><b>$18,420.00</b><em>Original</em></div><div class=\"ds-frow ds-flagged\"><span class=\"ds-br ds-br-tl\"></span><span class=\"ds-br ds-br-tr\"></span><span class=\"ds-br ds-br-bl\"></span><span class=\"ds-br ds-br-br\"></span><span>2026-09-18</span><b>$18,420.00</b><em>Flagged</em></div><div class=\"ds-ffoot\"><span>Open, awaiting a reviewer</span><button class=\"ds-fsec\">Dismiss</button><button class=\"ds-fpri\">Mark resolved</button></div></div>",
+      "css": ".ds-finding { font-family: var(--font-sans, Archivo), ui-sans-serif, system-ui, sans-serif; max-width: 32rem; border-radius: 14px; overflow: hidden; background: rgb(255 255 255 / 0.97); color: rgb(var(--text-primary, 15 21 36)); box-shadow: 0 50px 100px -40px rgb(28 18 72 / 0.45), 0 18px 36px -18px rgb(28 18 72 / 0.25), 0 0 0 1px rgb(0 0 0 / 0.05); } .ds-finding-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 20px 24px 0; } .ds-fchip { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px; border-radius: 4px; font-size: 12px; font-weight: 500; background: rgb(var(--critical-bg, 254 243 242)); color: rgb(var(--critical-fg, 180 35 24)); box-shadow: inset 0 0 0 1px rgb(var(--critical-line, 254 205 202)); } .ds-fchip i { width: 6px; height: 6px; border-radius: 9999px; background: rgb(var(--critical, 217 45 32)); } .ds-fconf { height: 22px; display: inline-flex; align-items: center; padding: 0 8px; border-radius: 4px; background: rgb(var(--surface-overlay, 242 244 247)); font-size: 12px; font-weight: 500; color: rgb(var(--text-secondary, 70 80 98)); } .ds-fid { font-family: var(--font-mono, \"JetBrains Mono\"), ui-monospace, Menlo, monospace; font-size: 12px; color: rgb(var(--text-muted, 99 110 130)); } .ds-fex { margin-left: auto; height: 24px; display: inline-flex; align-items: center; padding: 0 8px; border-radius: 6px; border: 1px dashed rgb(var(--border-strong, 203 210 220)); font-size: 11.5px; color: rgb(var(--text-muted, 99 110 130)); } .ds-ftitle { margin: 12px 24px 0; font-size: 19px; font-weight: 500; letter-spacing: -0.015em; } .ds-ftitle span { font-weight: 400; color: rgb(var(--text-muted, 99 110 130)); } .ds-frule { margin: 4px 24px 16px; font-size: 13.5px; color: rgb(var(--text-muted, 99 110 130)); } .ds-frow { position: relative; display: grid; grid-template-columns: 1fr auto 4.5rem; gap: 12px; padding: 10px 24px; border-top: 1px solid rgb(var(--border-subtle, 237 240 244)); font-size: 13.5px; font-variant-numeric: tabular-nums; } .ds-frow b { font-weight: 500; text-align: right; } .ds-frow em { font-style: normal; text-align: right; font-size: 12.5px; color: rgb(var(--text-muted, 99 110 130)); } .ds-flagged { background: rgb(var(--high-bg, 254 246 238)); } .ds-flagged em { color: rgb(var(--high-fg, 185 56 21)); font-weight: 500; } .ds-br { position: absolute; width: 12px; height: 12px; border: 0 solid rgb(var(--high, 239 104 32)); animation: ds-bracket 900ms cubic-bezier(0.16, 1, 0.3, 1) 500ms both; } .ds-br-tl { left: 10px; top: 3px; border-left-width: 2px; border-top-width: 2px; border-top-left-radius: 3px; } .ds-br-tr { right: 10px; top: 3px; border-right-width: 2px; border-top-width: 2px; border-top-right-radius: 3px; } .ds-br-bl { left: 10px; bottom: 3px; border-left-width: 2px; border-bottom-width: 2px; border-bottom-left-radius: 3px; } .ds-br-br { right: 10px; bottom: 3px; border-right-width: 2px; border-bottom-width: 2px; border-bottom-right-radius: 3px; } @keyframes ds-bracket { from { opacity: 0; transform: scale(1.4); } to { opacity: 1; transform: none; } } .ds-ffoot { display: flex; align-items: center; gap: 8px; padding: 16px 24px; border-top: 1px solid rgb(var(--border-subtle, 237 240 244)); } .ds-ffoot span { margin-right: auto; font-size: 13px; color: rgb(var(--text-muted, 99 110 130)); } .ds-fsec, .ds-fpri { font-family: var(--font-sans, Archivo), ui-sans-serif, system-ui, sans-serif; height: 36px; padding: 0 14px; border-radius: 6px; font-size: 13.5px; font-weight: 500; cursor: pointer; transition: background-color 140ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-fsec { background: #fff; color: rgb(var(--text-primary, 15 21 36)); border: 1px solid rgb(var(--border-strong, 203 210 220)); } .ds-fsec:hover { background: rgb(var(--surface-overlay, 242 244 247)); } .ds-fpri { background: rgb(var(--accent-600, 74 58 176)); color: #fff; border: 0; } .ds-fpri:hover { background: rgb(var(--accent-700, 61 47 147)); } .ds-fsec:focus-visible, .ds-fpri:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgb(var(--accent-500, 95 77 200)); } @media (prefers-reduced-motion: reduce) { .ds-br { animation: none; } }"
     },
     {
-      "name": "Sidebar Navigation",
+      "name": "Dawn Rail",
       "kind": "nav",
-      "refersTo": "nav-item",
-      "description": "Sidebar mist panel; 32px rows, sentence-case group labels, active item lifts to a white chip with an ultramarine icon.",
-      "html": "<nav class=\"ds-side\"><p class=\"ds-side-group\">Workspace</p><a href=\"#\" class=\"ds-side-item ds-active\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z\"/></svg><span>Dashboard</span></a><a href=\"#\" class=\"ds-side-item\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z\"/></svg><span>Anomalies</span><b>5</b></a><a href=\"#\" class=\"ds-side-item\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" aria-hidden=\"true\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5\"/></svg><span>Workflows</span></a></nav>",
-      "css": ".ds-side { font-family: var(--font-sans, 'Archivo'), ui-sans-serif, system-ui, sans-serif; width: 216px; padding: 12px; background: rgb(var(--sidebar-bg, 244 246 249)); border-right: 1px solid rgb(var(--border, 226 230 236)); display: flex; flex-direction: column; gap: 1px; } .ds-side-group { margin: 0 0 4px; padding: 0 8px; font-size: 12px; font-weight: 500; color: rgb(var(--text-muted, 99 110 130)); } .ds-side-item { display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: 6px; font-size: 13.5px; font-weight: 500; color: rgb(var(--sidebar-text, 47 55 71)); text-decoration: none; transition: background-color 140ms cubic-bezier(0.16, 1, 0.3, 1), color 140ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-side-item svg { color: rgb(var(--text-muted, 99 110 130)); flex-shrink: 0; } .ds-side-item span { flex: 1; } .ds-side-item b { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 9999px; background: rgb(var(--sidebar-active, 226 231 240)); color: rgb(var(--text-secondary, 70 80 98)); font-size: 11px; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; } .ds-side-item:hover { background: rgb(var(--sidebar-hover, 234 237 242)); color: rgb(var(--text-primary, 15 21 36)); } .ds-side-item.ds-active { background: rgb(var(--surface-raised, 255 255 255)); color: rgb(var(--text-primary, 15 21 36)); box-shadow: 0 1px 2px 0 rgb(15 21 36 / 0.05), 0 0 0 1px rgb(var(--border, 226 230 236)); } .ds-side-item.ds-active svg { color: rgb(var(--accent-600, 53 80 220)); } .ds-side-item:focus-visible { outline: none; box-shadow: 0 0 0 2px rgb(var(--surface-raised, 255 255 255)), 0 0 0 4px rgb(var(--accent-500, 74 103 238)); }"
+      "refersTo": "rail-item-active",
+      "description": "The app sidebar: a 240px dawn gradient with white type, sentence-case section labels, a white active plate with an indigo icon, and count badges.",
+      "html": "<nav class=\"ds-rail\"><p class=\"ds-rail-label\">Workspace</p><a class=\"ds-rail-item ds-rail-active\" href=\"#\" aria-current=\"page\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 15 15\" fill=\"none\" aria-hidden=\"true\"><path fill=\"currentColor\" fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M8.4449 0.608765C8.0183 -0.107015 6.9817 -0.107015 6.55509 0.608766L0.161178 11.3368C-0.275824 12.07 0.252503 13 1.10608 13H13.8939C14.7475 13 15.2758 12.07 14.8388 11.3368L8.4449 0.608765ZM7.4141 1.12073C7.45288 1.05566 7.54712 1.05566 7.5859 1.12073L13.9798 11.8488C14.0196 11.9154 13.9715 12 13.8939 12H1.10608C1.02849 12 0.980454 11.9154 1.02018 11.8488L7.4141 1.12073ZM6.8269 4.48611C6.81221 4.10423 7.11783 3.78663 7.5 3.78663C7.88217 3.78663 8.18778 4.10423 8.1731 4.48612L8.01921 8.48701C8.00848 8.766 7.7792 8.98664 7.5 8.98664C7.2208 8.98664 6.99151 8.766 6.98078 8.48701L6.8269 4.48611ZM8.24989 10.476C8.24989 10.8902 7.9141 11.226 7.49989 11.226C7.08567 11.226 6.74989 10.8902 6.74989 10.476C6.74989 10.0618 7.08567 9.72599 7.49989 9.72599C7.9141 9.72599 8.24989 10.0618 8.24989 10.476Z\"/></svg><span>Anomalies</span><b>60</b></a><a class=\"ds-rail-item\" href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 15 15\" fill=\"none\" aria-hidden=\"true\"><path fill=\"currentColor\" fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M3.35355 1.85355C3.54882 1.65829 3.54882 1.34171 3.35355 1.14645C3.15829 0.951184 2.84171 0.951184 2.64645 1.14645L0.646447 3.14645C0.451184 3.34171 0.451184 3.65829 0.646447 3.85355L2.64645 5.85355C2.84171 6.04882 3.15829 6.04882 3.35355 5.85355C3.54882 5.65829 3.54882 5.34171 3.35355 5.14645L2.20711 4H9.5C11.433 4 13 5.567 13 7.5C13 7.77614 13.2239 8 13.5 8C13.7761 8 14 7.77614 14 7.5C14 5.01472 11.9853 3 9.5 3H2.20711L3.35355 1.85355ZM2 7.5C2 7.22386 1.77614 7 1.5 7C1.22386 7 1 7.22386 1 7.5C1 9.98528 3.01472 12 5.5 12H12.7929L11.6464 13.1464C11.4512 13.3417 11.4512 13.6583 11.6464 13.8536C11.8417 14.0488 12.1583 14.0488 12.3536 13.8536L14.3536 11.8536C14.5488 11.6583 14.5488 11.3417 14.3536 11.1464L12.3536 9.14645C12.1583 8.95118 11.8417 8.95118 11.6464 9.14645C11.4512 9.34171 11.4512 9.65829 11.6464 9.85355L12.7929 11H5.5C3.567 11 2 9.433 2 7.5Z\"/></svg><span>Workflows</span><b>2</b></a><a class=\"ds-rail-item\" href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 15 15\" fill=\"none\" aria-hidden=\"true\"><path fill=\"currentColor\" fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M7.50005 1.04999C7.74858 1.04999 7.95005 1.25146 7.95005 1.49999V8.41359L10.1819 6.18179C10.3576 6.00605 10.6425 6.00605 10.8182 6.18179C10.994 6.35753 10.994 6.64245 10.8182 6.81819L7.81825 9.81819C7.64251 9.99392 7.35759 9.99392 7.18185 9.81819L4.18185 6.81819C4.00611 6.64245 4.00611 6.35753 4.18185 6.18179C4.35759 6.00605 4.64251 6.00605 4.81825 6.18179L7.05005 8.41359V1.49999C7.05005 1.25146 7.25152 1.04999 7.50005 1.04999ZM2.5 10C2.77614 10 3 10.2239 3 10.5V12C3 12.5539 3.44565 13 3.99635 13H11.0012C11.5529 13 12 12.5528 12 12V10.5C12 10.2239 12.2239 10 12.5 10C12.7761 10 13 10.2239 13 10.5V12C13 13.1041 12.1062 14 11.0012 14H3.99635C2.89019 14 2 13.103 2 12V10.5C2 10.2239 2.22386 10 2.5 10Z\"/></svg><span>Reports</span></a></nav>",
+      "css": ".ds-rail { font-family: var(--font-sans, Archivo), ui-sans-serif, system-ui, sans-serif; width: 240px; padding: 16px 12px; border-radius: 10px; color: #fff; background-image: linear-gradient(to bottom, #12133a 0%, #1c1d52 42%, #2e2a6c 78%, #3f3484 100%); } .ds-rail-label { margin: 0 0 4px; padding: 0 8px; font-size: 12px; font-weight: 500; color: rgb(255 255 255 / 0.55); } .ds-rail-item { display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; margin-top: 1px; border-radius: 6px; font-size: 13.5px; font-weight: 500; color: rgb(255 255 255 / 0.8); text-decoration: none; transition: background-color 140ms cubic-bezier(0.16, 1, 0.3, 1), color 140ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-rail-item svg { flex-shrink: 0; color: rgb(255 255 255 / 0.6); } .ds-rail-item span { flex: 1; } .ds-rail-item b { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; background: rgb(255 255 255 / 0.15); color: #fff; font-variant-numeric: tabular-nums; } .ds-rail-item:hover { color: #fff; background: rgb(255 255 255 / 0.1); } .ds-rail-item:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff; } .ds-rail-active, .ds-rail-active:hover { background: #fff; color: rgb(var(--sky-night, 18 19 58)); box-shadow: 0 1px 2px 0 rgb(15 21 36 / 0.05); } .ds-rail-active svg { color: rgb(var(--accent-600, 74 58 176)); } .ds-rail-active b { background: rgb(var(--accent-50, 241 240 251)); color: rgb(var(--accent-700, 61 47 147)); }"
     },
     {
-      "name": "Findings Frame",
+      "name": "CloseHorizon",
       "kind": "custom",
-      "refersTo": "product-frame",
-      "description": "Signature: the real product on labelled example data. Inbox with severity dots, selected row in the ultramarine wash, evidence table with the flagged row tinted, mono ID, frame shadow.",
-      "html": "<div class=\"ds-frame\"><div class=\"ds-frame-head\"><b>Findings</b><span class=\"ds-pill\">5 open</span><span class=\"ds-tag\">Example data</span></div><div class=\"ds-frame-body\"><div class=\"ds-inbox\"><button class=\"ds-row ds-sel\"><span class=\"ds-dot\" style=\"background:rgb(var(--critical, 217 45 32))\"></span><span class=\"ds-t\">Duplicate payment</span><span class=\"ds-amt\">$18,420.00</span><small>Corva Freight · Critical, 96</small></button><button class=\"ds-row\"><span class=\"ds-dot\" style=\"background:rgb(var(--high, 239 104 32))\"></span><span class=\"ds-t\">Split under approval limit</span><span class=\"ds-amt\">$39,100.00</span><small>Brightline Staffing · High, 91</small></button></div><div class=\"ds-detail\"><div class=\"ds-meta\"><span class=\"ds-sevchip\"><i></i>Critical</span><span class=\"ds-pill\">Confidence 96</span><code>ANO-0142</code></div><p class=\"ds-title\">Duplicate payment <span>· Corva Freight</span></p><table class=\"ds-ev\"><thead><tr><th>Date</th><th>Amount</th><th></th></tr></thead><tbody><tr><td>2026-09-04</td><td>$18,420.00</td><td class=\"ds-note\">Original</td></tr><tr class=\"ds-flag\"><td>2026-09-18</td><td>$18,420.00</td><td class=\"ds-note\">Flagged</td></tr></tbody></table></div></div></div>",
-      "css": ".ds-frame { font-family: var(--font-sans, 'Archivo'), ui-sans-serif, system-ui, sans-serif; max-width: 720px; background: rgb(var(--surface-raised, 255 255 255)); border: 1px solid rgb(var(--border, 226 230 236)); border-radius: 10px; box-shadow: 0 24px 48px -16px rgb(15 21 36 / 0.18), 0 8px 16px -8px rgb(15 21 36 / 0.08); overflow: hidden; color: rgb(var(--text-primary, 15 21 36)); } .ds-frame-head { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 20px; border-bottom: 1px solid rgb(var(--border, 226 230 236)); font-size: 14px; } .ds-frame-head b { font-weight: 500; } .ds-pill { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 4px; background: rgb(var(--surface-overlay, 242 244 247)); color: rgb(var(--text-secondary, 70 80 98)); font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums; } .ds-tag { margin-left: auto; display: inline-flex; align-items: center; height: 24px; padding: 0 8px; border-radius: 6px; border: 1px dashed rgb(var(--border-strong, 203 210 220)); color: rgb(var(--text-muted, 99 110 130)); font-size: 12px; } .ds-frame-body { display: grid; grid-template-columns: 15rem 1fr; } .ds-inbox { border-right: 1px solid rgb(var(--border, 226 230 236)); } .ds-row { font-family: var(--font-sans, 'Archivo'), ui-sans-serif, system-ui, sans-serif; display: grid; grid-template-columns: 6px 1fr auto; column-gap: 8px; align-items: center; width: 100%; text-align: left; padding: 14px 16px; border: 0; border-bottom: 1px solid rgb(var(--border-subtle, 237 240 244)); background: transparent; color: rgb(var(--text-primary, 15 21 36)); cursor: pointer; transition: background-color 140ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-row:hover { background: rgb(var(--surface-overlay, 242 244 247)); } .ds-row.ds-sel { background: rgb(var(--accent-50, 238 242 255)); } .ds-row:focus-visible { outline: none; box-shadow: inset 0 0 0 2px rgb(var(--accent-500, 74 103 238)); } .ds-dot { width: 6px; height: 6px; border-radius: 9999px; } .ds-t { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .ds-amt { font-size: 13px; color: rgb(var(--text-secondary, 70 80 98)); font-variant-numeric: tabular-nums; } .ds-row small { grid-column: 2 / 4; margin-top: 4px; font-size: 12.5px; color: rgb(var(--text-muted, 99 110 130)); } .ds-detail { padding: 20px 24px; } .ds-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; } .ds-meta code { font-family: var(--font-mono, 'JetBrains Mono'), ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: rgb(var(--text-muted, 99 110 130)); } .ds-sevchip { display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px; border-radius: 4px; font-size: 12px; font-weight: 500; background: rgb(var(--critical-bg, 254 243 242)); color: rgb(var(--critical-fg, 180 35 24)); box-shadow: inset 0 0 0 1px rgb(var(--critical-line, 254 205 202)); } .ds-sevchip i { width: 6px; height: 6px; border-radius: 9999px; background: rgb(var(--critical, 217 45 32)); } .ds-title { margin: 12px 0 16px; font-size: 20px; font-weight: 500; letter-spacing: -0.015em; } .ds-title span { color: rgb(var(--text-muted, 99 110 130)); font-weight: 400; } .ds-ev { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid rgb(var(--border, 226 230 236)); border-radius: 8px; overflow: hidden; font-size: 13px; font-variant-numeric: tabular-nums; } .ds-ev th { background: rgb(var(--surface, 247 248 250)); color: rgb(var(--text-muted, 99 110 130)); font-weight: 500; text-align: left; padding: 8px 12px; } .ds-ev th:nth-child(2), .ds-ev td:nth-child(2), .ds-ev td.ds-note { text-align: right; } .ds-ev td { padding: 8px 12px; border-top: 1px solid rgb(var(--border-subtle, 237 240 244)); } .ds-ev td:nth-child(2) { font-weight: 500; } .ds-note { font-size: 12px; color: rgb(var(--text-muted, 99 110 130)); } .ds-flag td { background: rgb(var(--high-bg, 254 246 238)); } .ds-flag .ds-note { color: rgb(var(--high-fg, 185 56 21)); font-weight: 500; }"
-    },
-    {
-      "name": "Hairline Fact List",
-      "kind": "custom",
-      "refersTo": "body",
-      "description": "Signature: parallel marketing content as title-and-body rows on 1px hairlines, never a grid of identical cards.",
-      "html": "<dl class=\"ds-facts\"><div><dt>Duplicate payment</dt><dd>Same vendor and amount within 30 days. The later payment is flagged; the original is kept as evidence.</dd></div><div><dt>Split under approval limit</dt><dd>Several payments to one vendor just under the approval limit, inside a short window.</dd></div><div><dt>Period cut-off</dt><dd>A transaction dated outside the accounting period it is labelled with.</dd></div></dl>",
-      "css": ".ds-facts { font-family: var(--font-sans, 'Archivo'), ui-sans-serif, system-ui, sans-serif; margin: 0; max-width: 760px; border-top: 1px solid rgb(var(--border, 226 230 236)); } .ds-facts div { display: grid; grid-template-columns: minmax(0, 13rem) 1fr; gap: 4px 24px; padding: 20px 0; border-bottom: 1px solid rgb(var(--border, 226 230 236)); } .ds-facts dt { font-size: 15.5px; font-weight: 500; color: rgb(var(--text-primary, 15 21 36)); } .ds-facts dd { margin: 0; font-size: 15px; line-height: 1.6; color: rgb(var(--text-secondary, 70 80 98)); max-width: 62ch; } @media (max-width: 640px) { .ds-facts div { grid-template-columns: 1fr; } }"
+      "refersTo": "rail",
+      "description": "Signature: the period close as a sunrise at the foot of the rail. The sun climbs as findings are decided and is fully up at the last decision.",
+      "html": "<div class=\"ds-rail-foot\"><a class=\"ds-horizon\" href=\"#\" aria-label=\"Close progress: 18 of 72 findings decided\" style=\"--p: 0.25\"><span class=\"ds-h-sky\"></span><span class=\"ds-h-sun\"></span><span class=\"ds-h-sea\"></span><span class=\"ds-h-l\">Close</span><span class=\"ds-h-r\">18 of 72 decided</span></a></div>",
+      "css": ".ds-rail-foot { width: 240px; padding: 12px; border-radius: 10px; background: #3f3484; } .ds-horizon { font-family: var(--font-sans, Archivo), ui-sans-serif, system-ui, sans-serif; position: relative; display: block; height: 132px; overflow: hidden; border-radius: 12px; box-shadow: 0 0 0 1px rgb(255 255 255 / 0.1); text-decoration: none; } .ds-h-sky { position: absolute; inset: 0; background-image: linear-gradient(to bottom, #2e2a6c 0%, #6b4c9a 55%, #c4718f 78%, #f39a7c 100%); } .ds-h-sun { position: absolute; left: 62%; width: 112px; height: 112px; transform: translate(-50%, -50%); border-radius: 9999px; top: calc(80% - var(--p) * 52%); background: radial-gradient(closest-side, rgb(255 244 220), rgb(255 214 170 / 0.75) 40%, transparent); transition: top 700ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-horizon:hover .ds-h-sun { top: calc(80% - (var(--p) + 0.08) * 52%); } .ds-h-sea { position: absolute; left: 0; right: 0; bottom: 0; height: 22%; background: linear-gradient(to bottom, #b0708f, #4b3f8f); } .ds-h-l, .ds-h-r { position: absolute; top: 8px; font-size: 11.5px; color: #fff; } .ds-h-l { left: 10px; font-weight: 500; } .ds-h-r { right: 10px; color: rgb(255 255 255 / 0.85); font-variant-numeric: tabular-nums; } .ds-horizon:focus-visible { outline: none; box-shadow: 0 0 0 2px #fff; } @media (prefers-reduced-motion: reduce) { .ds-h-sun { transition: none; } }"
     }
   ],
   "narrative": {
-    "northStar": "The Clean Ledger",
-    "overview": "Ventura looks like a well-kept ledger on a white desk: cool paper, hairline rules, figures that line up in columns, and one blue pen used only to act. It is the category standard played straight, held to the craft bar of Linear and Mercury. The interface itself is the proof, so marketing pages lead with the real product at work on labelled example data rather than abstract charts or illustration. Nothing glows, nothing is tilted, and no surface competes with the evidence.\n\nDensity follows the reader. Marketing pages are generous and quiet: a left-aligned semi-expanded headline, a short subline, then wide product frames and hairline lists with long vertical rhythm. The signed-in app is compact and calm: a 14px base, 32px navigation rows, 36px buttons, white cards on a faintly blue-grey canvas. Colour carries meaning, never mood. Ultramarine means \"you can act here\". The severity hues mean \"this finding needs attention\". Everything else is cool neutral.\n\nThe system refuses the generic AI-startup register (gradients, glow, \"AI-powered\" sparkle) and anything playful. Depth comes from hairlines and tonal steps first, with soft ink-tinted shadows reserved for raised product frames and floating layers. Motion is one authored entrance and quick, quiet state changes.",
+    "northStar": "Close at Dawn",
+    "overview": "The public site is one painted sky. It opens on pre-dawn indigo over still water, with soft cloud masses lit from below by a low sun, and as the visitor scrolls it passes through sunrise into full morning, so every page ends in daylight: the close, done, with nothing left unexplained. The light carries the story. Night is the open period, morning is the period closed. Content never sits on the sky as loose text blocks. It rides on white paper sheets that float above the sky with deep, soft, indigo-tinted shadows, and the sky shows as a band of colour between one sheet and the next.\n\nThe two layers have different densities. The sky is spacious and cinematic, with large semi-expanded Archivo display type set left. The paper is exact: product visuals are real-looking, dense, tabular and labelled as example data, and every claim traces back to rows. One deep dawn indigo marks actions on paper. On the sky the action is a white pill. Severity hues appear only where a finding is.\n\nThe signed-in app is a calm, neutral workspace on cool paper grey. The dawn enters it in three places only: the sky-gradient rail, the dawn indigo accent, and the CloseHorizon, a small sunrise in the rail that climbs as the period's findings are decided. The world must not read as a generic AI startup, as playful, or as bland, and it uses no flat solid fills and no decorative squares or ruled patterns.",
     "keyCharacteristics": [
-      "An ultramarine field owns whole regions on marketing pages; the home hero carries a live ledger scan as its signature.",
-      "Light, cool canvas with blue-tinted neutrals running to a near-black blue ink.",
-      "One ultramarine accent, reserved for actions, links, focus and selection.",
-      "Archivo throughout; display sizes run semi-expanded on the font's width axis to echo the extended wordmark.",
-      "Hairline lists and ruled tables in place of grids of identical cards.",
-      "Product visuals are the real components on labelled example data.",
-      "Two weights (400 and 500), sentence case everywhere, tabular figures for every amount.",
-      "One deep-ink band per marketing page, carrying the \"a person decides\" story."
+      "One scroll-linked dawn sky behind every marketing page, with clouds that turn from warm to white. Its hour follows the scroll and it is never a flat fill.",
+      "White paper sheets (28px corners, deep indigo-tinted shadow) carry all content between the opening and the close.",
+      "White type on the dark upper sky; ink type on the daylight close and on paper.",
+      "Dawn indigo for actions on paper; white pills for actions on the sky.",
+      "Archivo display at width 112, weight 500, tight negative tracking. Body at normal width.",
+      "Severity colours on findings only. Status is a separate vocabulary.",
+      "Every product visual is labelled \"Example data\".",
+      "Sentence case everywhere, no uppercase micro-labels, no coloured side borders."
     ],
     "rules": [
       {
-        "name": "The One Ultramarine Rule",
-        "body": "Ultramarine marks what you can act on: buttons, links, focus, selection, and the Open status (an open finding is waiting for your action). It is never a chart series, a decoration or a heading colour. Charts use Azure precisely so the accent stays unambiguous.",
+        "name": "The Moving Sky Rule",
+        "body": "The sky is never a flat fill. On every scrolling marketing page it is the five-stop gradient above, and its hour is set by scroll position (scrollY ÷ scrollable height), so the page moves from dawn to day. A solid colour block behind content, or a static single-hour gradient on a scrolling page, breaks the world. Under reduced motion, and on fixed panels that do not scroll such as sign-in, the sky holds a still dawn.",
         "section": "colors"
       },
       {
-        "name": "The Findings-Only Rule",
-        "body": "Red, orange, amber and slate belong to findings: severity chips and dots, flagged evidence rows, and the marks that show why a finding fired. Outcome green belongs to decisions. No other surface borrows these hues for emphasis.",
+        "name": "The Hour of Type Rule",
+        "body": "White type sits only on the dark upper sky: the night, indigo and violet bands at the top of a page (8.7:1 or better). It never sits on the rose, coral or gold bands, where white falls to 3.4:1. By the page's close the sky is daylight, and type there is ink: sky-night for headlines and sky-indigo for body (10:1 or better on the day sky).",
         "section": "colors"
       },
       {
-        "name": "The Status Is Not Severity Rule",
-        "body": "Review status never reuses severity colour. Open wears the ultramarine tint, Resolved wears outcome green, Dismissed is neutral grey. An open Low finding must never read as red.",
+        "name": "The Two Actions Rule",
+        "body": "Dawn indigo is the action on paper and on the daylight close. On the dark sky the action is a white pill with deep dawn indigo text. An indigo button never sits on the dark sky, and a white pill never sits on paper. Indigo otherwise marks only links, focus, selection, the active or selected item, step numbers and at most one emphasised phrase per sheet. It never fills an area.",
         "section": "colors"
       },
       {
-        "name": "The Width Is the Voice Rule",
-        "body": "Only marketing, auth and error headlines take the semi-expanded width. Everything inside the product, including app page titles, stays at normal width.",
+        "name": "The Findings-Only Severity Rule",
+        "body": "Critical, high and medium belong to findings: their chips, dots, flagged rows, chart points and focus brackets. Status is a separate vocabulary (Open in indigo mist, Resolved in positive, Dismissed in neutral grey) and never borrows a severity hue, so an open low-severity finding never reads as red.",
+        "section": "colors"
+      },
+      {
+        "name": "The Wide Display Rule",
+        "body": "The `wdth 112` setting belongs only to display and headline type and step numbers. Body, labels and interface text stay at normal width. Weight 500 is the heading weight throughout; nothing is set at 700. 600 appears only in avatar initials and short chart callouts.",
         "section": "typography"
       },
       {
-        "name": "The Two Weights Rule",
-        "body": "Regular (400) reads and medium (500) leads. Headlines are medium, never bold. Semibold (600) is allowed only at glyph scale: avatar initials at 11px and chart callouts at 12px.",
+        "name": "The Mono-for-IDs Rule",
+        "body": "JetBrains Mono is for identifiers and nothing else. Figures, amounts and dates are Archivo with tabular numerals, and every financial figure and table cell aligns with `tabular-nums`.",
         "section": "typography"
       },
       {
         "name": "The Sentence Case Rule",
-        "body": "Headings, buttons, nav items, labels and chips are written in sentence case. There are no uppercase, letter-spaced micro-labels anywhere.",
+        "body": "Every heading, label, button, chip and navigation item is in sentence case. There are no uppercase micro-labels, no letter-spaced caps, and no eyebrow or kicker lines above headings.",
         "section": "typography"
       },
       {
-        "name": "The Mono Means Machine Rule",
-        "body": "JetBrains Mono is for strings a system generated (ANO-0142, an invite code, an event name). Amounts, dates and prose stay in Archivo with tabular figures.",
-        "section": "typography"
-      },
-      {
-        "name": "The Columns Line Up Rule",
-        "body": "Every amount, count and table cell uses tabular figures; amounts right-align in tables.",
-        "section": "typography"
+        "name": "The Paper Sheet Rule",
+        "body": "Content sits on paper. Every section between a page's opening and its close is a sheet with 28px corners and the sheet shadow. Only the opening (headline, lead, actions, systems strip) and the close are set directly on the sky. A page may carry one ink sheet, and only for the human-decision and audit-record story.",
+        "section": "layout"
       },
       {
         "name": "The Hairline List Rule",
-        "body": "On marketing pages, a set of parallel items (checks, practices, values, principles) is a ruled list of title-and-body rows on hairlines, never a grid of identical cards. Two-column variants keep the same rule lines.",
+        "body": "Feature and fact lists are title-and-body rows separated by 1px hairlines, not icon cards in a grid.",
         "section": "layout"
       },
       {
-        "name": "The One Ink Band Rule",
-        "body": "A marketing page carries at most one Deep Ink band, and it tells the human-decision story (home: \"Ventura recommends. Your team decides.\"; demo: the record of decisions). The login page's brand panel is its one ink surface. Inside the app, ink appears only as small marks (the workspace monogram) and the drawer scrim.",
-        "section": "layout"
-      },
-      {
-        "name": "The Example Data Rule",
-        "body": "Every product visual on a public page carries the words \"Example data\" in its header, right-aligned in muted text (a dashed-outline tag on the hero frame). Nothing on the site implies real customers or results.",
-        "section": "layout"
-      },
-      {
-        "name": "The Hairline First Rule",
-        "body": "Separate with a rule or a tonal step before reaching for a shadow. A shadow without a hairline beside it is the exception.",
+        "name": "The Tinted Shadow Rule",
+        "body": "A shadow cast onto the sky carries the sky's indigo (28 18 72), never neutral grey. Shadows inside paper or the app are neutral ink (15 21 36) and small.",
         "section": "elevation"
-      },
-      {
-        "name": "The One Frame Rule",
-        "body": "The large frame shadow belongs to the single product frame that leads a page. Supporting figures use the raised card shadow.",
-        "section": "elevation"
-      },
-      {
-        "name": "The Frosted Bar Rule",
-        "body": "Sticky bars (the app top bar, the demo step rail) are 95% white with a light backdrop blur, so content passing beneath stays faintly legible without a heavy edge.",
-        "section": "elevation"
-      },
-      {
-        "name": "The Field Rule",
-        "text": "The brand colour appears at scale or not at all: as the ultramarine field owning a whole region (hero, intro, closing band), or as an action. A marketing page opens on the field and closes on it; the app stays on paper."
       }
     ],
     "dos": [
-      "**Do** reserve ultramarine (`accent-500` to `accent-700`) for buttons, links, focus rings, selection and the Open status.",
-      "**Do** keep severity colour on findings only, and keep review status visibly separate from severity.",
-      "**Do** set marketing, auth and error headlines in Archivo at width 112 and weight 500, left-aligned, with tight negative tracking (-0.025em to -0.035em).",
-      "**Do** write every heading, button, nav item and label in sentence case.",
-      "**Do** use tabular figures for every amount and right-align amounts in tables.",
-      "**Do** separate surfaces with 1px hairlines and tonal steps first; use the card, card raised, frame and pop shadows by role.",
-      "**Do** label every product visual on a public page \"Example data\".",
-      "**Do** present parallel marketing content as a hairline list of title-and-body rows.",
-      "**Do** give each marketing page at most one Deep Ink band, used for the human-decision story.",
-      "**Do** keep state transitions short (140ms colour changes, 220ms pane swaps) on the expo ease-out, and respect reduced motion."
+      "**Do** put every marketing page on `SkyBackdrop` and let scroll set its hour, from dawn at the top to day at the bottom.",
+      "**Do** set all content between a page's opening and its close on a paper sheet (28px corners, the indigo-tinted sheet shadow), with the sky showing 40 to 56px between sheets.",
+      "**Do** keep white type on the night, indigo and violet bands at the top of a page, and use sky-muted for its secondary lines.",
+      "**Do** close every page on the daylight sky with sky-night headlines, sky-indigo body and a dawn indigo pill.",
+      "**Do** use the white pill (accent-800 text) as the action on the dark sky, and dawn indigo (accent-600, hover accent-700) as the action on paper.",
+      "**Do** label every product visual, chart and sample record \"Example data\".",
+      "**Do** set every amount, count and date in tabular numerals, and identifiers in 12px JetBrains Mono.",
+      "**Do** use Radix icons only where they do a job, such as a direction, a state, a control or a disclosure, sized 14 to 16px in the current colour.",
+      "**Do** show external systems only by their official marks.",
+      "**Do** let the app carry the world only through the dawn rail, the indigo accent and the CloseHorizon. Keep its canvas cool paper grey with white cards and hairlines.",
+      "**Do** hold a still dawn under `prefers-reduced-motion`: no sky change, no sunrise, no marquee, and 1ms transitions."
     ],
     "donts": [
-      "**Don't** use ultramarine for chart series, headings, decorative fills or emphasis; charts use Azure and Teal Green.",
-      "**Don't** colour an Open finding red, or borrow severity hues for status, banners or general warnings.",
-      "**Don't** add coloured side borders to cards, rows or alerts; tint the whole row or use a dot.",
-      "**Don't** set uppercase, letter-spaced micro-labels or eyebrows above headlines.",
-      "**Don't** use bold (700); headlines are 500.",
-      "**Don't** set amounts, dates or prose in mono.",
-      "**Don't** build marketing sections from grids of identical icon cards.",
-      "**Don't** put gradients, glow or neon on surfaces, buttons, text or backgrounds.",
-      "**Don't** show customer logos, testimonials, results or unlabelled product data.",
-      "**Don't** use Tailwind's default palette colours or default shadows; every colour and shadow comes from the tokens above."
+      "**Don't** put a flat solid colour fill behind content, or freeze a scrolling page at one hour of the sky.",
+      "**Don't** place body text or sections directly on the mid-page sky. Only the opening and the close sit on it.",
+      "**Don't** set white type on the rose, coral or gold bands, or ink type on the dark upper sky.",
+      "**Don't** use dawn indigo on the dark sky, or put a white pill on paper.",
+      "**Don't** use critical, high or medium for anything but a finding, and don't colour a status with a severity hue.",
+      "**Don't** add coloured side borders or left-stripe accents to cards, alerts or rows.",
+      "**Don't** use uppercase micro-labels, letter-spaced caps, eyebrows or kickers. Write in sentence case.",
+      "**Don't** use decorative icons, icon tiles on feature lists, or any icon set other than Radix. Don't draw or approximate a brand's mark.",
+      "**Don't** use monospace for figures, timestamps, labels or code-like decoration. It is for IDs only.",
+      "**Don't** show customers, logos, testimonials or results that do not exist, or unlabelled sample data.",
+      "**Don't** add decorative squares, ruled grids or pattern fills. The sky, the sun and the water are the only decoration.",
+      "**Don't** bring the sky gradient, sheets or display-width type into the app's working surfaces beyond the rail and the CloseHorizon."
     ]
   }
 }

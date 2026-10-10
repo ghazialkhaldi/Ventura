@@ -80,7 +80,7 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
 
         {/* Every marketing page opens on the ultramarine field; the bar sits on
             it until content scrolls beneath, then turns white. */}
-        <header className={`sticky top-0 z-50 border-b transition-colors duration-200 ${scrolled ? 'bg-surface-raised border-border' : 'bg-field field-surface border-transparent'}`}>
+        <header className={`sticky top-0 z-50 border-b transition-colors duration-200 ${scrolled ? 'bg-surface-raised border-border' : 'bg-field border-transparent'}`}>
           <div className="max-w-page mx-auto h-16 px-5 sm:px-8 flex items-center gap-8">
             <Link href="/" className="shrink-0 py-2" onClick={close} aria-label="Ventura home">
               <VenturaLogo variant={scrolled ? 'dark' : 'light'} height={17} />

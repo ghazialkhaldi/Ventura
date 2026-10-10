@@ -59,7 +59,7 @@ export default function ContactPage() {
 
   return (
     <PublicLayout title="Contact">
-      <div className="bg-field field-surface text-white">
+      <div className="bg-field text-white">
       <div className="max-w-page mx-auto px-5 sm:px-8 pt-12 sm:pt-16 pb-20 sm:pb-28 grid gap-12 lg:grid-cols-[1fr_minmax(0,34rem)] lg:gap-20">
         <div>
           <h1 className={`${H1_CLASS} !text-white`}>Talk to us</h1>

@@ -5,7 +5,7 @@ import { ArrowLeftIcon } from '@radix-ui/react-icons'
 export default function ForgotPasswordPage() {
   return (
     <PublicLayout title="Reset Password">
-      <div className="bg-field field-surface text-white">
+      <div className="bg-field text-white">
       <div className="max-w-page mx-auto px-5 sm:px-8 py-20 sm:py-28">
         <div className="max-w-[28rem]">
           <h1 className="font-display font-medium text-[2.25rem] leading-[1.06] tracking-[-0.03em] text-white">

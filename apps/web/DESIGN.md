@@ -310,7 +310,6 @@ A cool, low-chroma neutral system with a single saturated ultramarine for action
 ### Field
 - **Ultramarine Field** (#2440d6, `field`): whole regions on marketing pages: the hero and every page intro (the header sits on it until the page scrolls), the systems logo strip, and the full-width closing band. White type on it measures 7.6:1. **Field Mist** (#c7d1ff, `field-muted`) is secondary text on the field (4.9:1). On the field, the primary action inverts: a white button with `accent-800` text.
 - **Field Deep** (#1b32b8, `field-deep`): reserved for pressed or recessed states on the field.
-- **Ledger ruling** (`.field-surface`): the field is never a flat fill. Every field region carries blue ledger paper: white rules at 7% every 32px (the 64px header and the hero beneath share one continuous ruling), a double margin rule at 10% just left of the content column (hidden below 640px), and a fine print grain. Type and controls sit on it untouched.
 
 ### Ink
 - **Deep Ink** (#0c111d, `ink`): the single dark band on marketing pages, the login brand panel, the workspace monogram tile, and the modal and drawer scrim at 30%.

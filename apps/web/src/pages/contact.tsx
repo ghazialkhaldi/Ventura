@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import Head from 'next/head'
 import Link from 'next/link'
-import { CheckCircleIcon, ArrowLeftIcon } from '@heroicons/react/24/outline'
-import VenturaLogo from '../components/VenturaLogo'
+import { CheckCircleIcon, ChevronDownIcon } from '@heroicons/react/20/solid'
+import PublicLayout from '../components/layout/PublicLayout'
+import { H1_CLASS } from '../components/marketing/Marketing'
 
 const COMPANY_SIZES = [
   '1–10 employees',
@@ -54,195 +54,120 @@ export default function ContactPage() {
     }
   }
 
+  const field = 'w-full h-10 rounded-md border border-border-strong bg-surface-raised px-3 text-[14.5px] text-text-primary placeholder-text-muted shadow-card outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-500/30 focus-visible:ring-offset-0'
+  const label = 'block text-[13px] font-medium text-text-primary mb-1.5'
+
   return (
-    <>
-      <Head>
-        <title>Contact Us · Ventura</title>
-      </Head>
-
-      {/* Nav header */}
-      <header className="sticky top-0 z-50 bg-surface/95 backdrop-blur border-b border-border">
-        <div className="h-16 px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 flex items-center justify-between">
-          <Link href="/" className="no-underline">
-            <VenturaLogo variant="light" height={28} />
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/login" className="text-base font-medium text-text-secondary hover:text-text-primary transition-colors">Sign in</Link>
-            <Link href="/contact" className="bg-accent-500 hover:bg-accent-600 text-white text-base font-medium px-5 py-2.5 transition-colors">Get started</Link>
-          </div>
-        </div>
-      </header>
-
-      <div className="min-h-[calc(100vh-64px)] flex">
-
-        {/* ── Left panel: branding ── */}
-        <div className="hidden lg:flex lg:w-1/2 bg-[#0c1526] flex-col items-center justify-center px-16 relative">
-
-          {/* Back link */}
-          <Link
-            href="/"
-            className="absolute top-8 left-8 inline-flex items-center gap-1.5 text-sm text-[#8ea4c0] hover:text-white transition-colors"
-          >
-            <ArrowLeftIcon className="w-4 h-4" />
-            Back to home
-          </Link>
-
-          {/* Wordmark */}
-          <VenturaLogo variant="light" height={52} className="mb-6" />
-          <p className="text-[#8ea4c0] text-base text-center leading-relaxed max-w-xs mb-12">
-            Financial operations intelligence for enterprise finance teams.
+    <PublicLayout title="Contact">
+      <div className="max-w-page mx-auto px-5 sm:px-8 pt-14 sm:pt-20 pb-20 sm:pb-28 grid gap-12 lg:grid-cols-[1fr_minmax(0,34rem)] lg:gap-20">
+        <div>
+          <h1 className={H1_CLASS}>Talk to us</h1>
+          <p className="mt-6 max-w-[30rem] text-[17px] sm:text-[18px] leading-[1.6] text-text-secondary">
+            Tell us about your finance team and how you review spend today, and we&rsquo;ll show
+            you how Ventura can help.
           </p>
-
-          {/* Trust points */}
-          <div className="space-y-4 w-full max-w-xs">
+          <ul className="mt-10 max-w-[30rem] border-t border-border">
             {[
-              'Role based access control',
-              'Append only server side audit trail',
               'Response within one business day',
+              'Role-based access control',
+              'Append-only, server-side security log',
             ].map(point => (
-              <div key={point} className="flex items-center gap-3">
-                <CheckCircleIcon className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                <span className="text-sm text-[#8ea4c0]">{point}</span>
-              </div>
+              <li key={point} className="flex items-center gap-3 py-4 border-b border-border text-[15.5px] text-text-primary">
+                <CheckCircleIcon className="w-5 h-5 text-accent-600 flex-shrink-0" />
+                {point}
+              </li>
             ))}
-          </div>
-
-          {/* Bottom tagline */}
-          <p className="absolute bottom-8 text-[11px] text-[#4d6a8a] tracking-widest uppercase">
-            © 2026 Ventura Financial Intelligence, Inc.
-          </p>
+          </ul>
         </div>
 
-        {/* ── Right panel: form ── */}
-        <div className="flex-1 flex flex-col justify-center bg-surface px-8 sm:px-14 lg:px-16 py-12 overflow-y-auto">
-
-          <div className="max-w-md w-full mx-auto lg:mx-0">
-
-            <div className="mb-8">
-              <p className="text-xs font-medium text-text-muted uppercase tracking-widest mb-3">Get in touch</p>
-              <h1 className="text-[1.9rem] font-normal text-text-primary leading-tight mb-3">
-                Talk to our team
-              </h1>
-              <p className="text-sm text-text-muted leading-relaxed">
-                Tell us about your finance team and we'll show you how Ventura can help.
+        <div>
+          {submitted ? (
+            <div className="rounded-xl border border-border bg-surface-raised shadow-card-md p-10 text-center" role="status">
+              <span className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-positive-bg ring-1 ring-inset ring-positive-line">
+                <CheckCircleIcon className="w-6 h-6 text-positive-fg" />
+              </span>
+              <h2 className="text-[20px] font-medium tracking-[-0.015em] text-text-primary">Message sent</h2>
+              <p className="mt-2 text-[14.5px] text-text-muted max-w-xs mx-auto">
+                Thanks for reaching out. We&rsquo;ll be in touch within one business day.
               </p>
+              <button
+                onClick={() => { setSubmitted(false); setForm({ name: '', email: '', businessName: '', companySize: '', message: '' }) }}
+                className="mt-6 h-9 px-3.5 rounded-md border border-border-strong bg-surface-raised hover:bg-surface-overlay text-[13.5px] font-medium text-text-primary"
+              >
+                Send another message
+              </button>
             </div>
-
-            {submitted ? (
-              <div className="bg-surface-raised border border-border p-10 text-center">
-                <CheckCircleIcon className="w-10 h-10 text-emerald-400 mx-auto mb-4" />
-                <h2 className="text-lg font-normal text-text-primary mb-2">Message sent</h2>
-                <p className="text-sm text-text-muted max-w-xs mx-auto">
-                  Thanks for reaching out. We'll be in touch within one business day.
-                </p>
-                <button
-                  onClick={() => { setSubmitted(false); setForm({ name: '', email: '', businessName: '', companySize: '', message: '' }) }}
-                  className="mt-5 text-sm text-text-secondary font-medium hover:text-text-primary transition-colors"
-                >
-                  Send another message
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="bg-surface-raised border border-border overflow-hidden">
-                <div className="p-7 space-y-5">
-
-                  {/* Row 1 */}
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-text-muted uppercase tracking-widest mb-1.5">
-                        Full Name <span className="text-red-400">*</span>
-                      </label>
-                      <input
-                        required type="text" name="name" value={form.name}
-                        onChange={handleChange} placeholder="Jane Smith"
-                        className="w-full border border-border-strong px-3 py-2.5 text-sm text-text-primary placeholder-text-muted outline-none focus:border-accent-500 focus:ring-1 focus:ring-accent-500 transition-colors bg-surface-raised"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-text-muted uppercase tracking-widest mb-1.5">
-                        Work Email <span className="text-red-400">*</span>
-                      </label>
-                      <input
-                        required type="email" name="email" value={form.email}
-                        onChange={handleChange} placeholder="jane@company.com"
-                        className="w-full border border-border-strong px-3 py-2.5 text-sm text-text-primary placeholder-text-muted outline-none focus:border-accent-500 focus:ring-1 focus:ring-accent-500 transition-colors bg-surface-raised"
-                      />
-                    </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-surface-raised shadow-card-md overflow-hidden">
+              <div className="p-6 sm:p-7 space-y-5">
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="c-name" className={label}>Full name</label>
+                    <input id="c-name" required type="text" name="name" value={form.name} onChange={handleChange} placeholder="Jane Smith" autoComplete="name" className={field} />
                   </div>
-
-                  {/* Row 2 */}
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-text-muted uppercase tracking-widest mb-1.5">
-                        Business Name <span className="text-red-400">*</span>
-                      </label>
-                      <input
-                        required type="text" name="businessName" value={form.businessName}
-                        onChange={handleChange} placeholder="Acme Corp"
-                        className="w-full border border-border-strong px-3 py-2.5 text-sm text-text-primary placeholder-text-muted outline-none focus:border-accent-500 focus:ring-1 focus:ring-accent-500 transition-colors bg-surface-raised"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-text-muted uppercase tracking-widest mb-1.5">
-                        Company Size <span className="text-red-400">*</span>
-                      </label>
-                      <select
-                        required name="companySize" value={form.companySize}
-                        onChange={handleChange}
-                        className="w-full border border-border-strong px-3 py-2.5 text-sm text-text-primary outline-none focus:border-accent-500 focus:ring-1 focus:ring-accent-500 transition-colors bg-surface-raised appearance-none"
-                      >
-                        <option value="">Select size…</option>
+                  <div>
+                    <label htmlFor="c-email" className={label}>Work email</label>
+                    <input id="c-email" required type="email" name="email" value={form.email} onChange={handleChange} placeholder="jane@company.com" autoComplete="email" className={field} />
+                  </div>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="c-business" className={label}>Company</label>
+                    <input id="c-business" required type="text" name="businessName" value={form.businessName} onChange={handleChange} placeholder="Acme Corp" autoComplete="organization" className={field} />
+                  </div>
+                  <div>
+                    <label htmlFor="c-size" className={label}>Company size</label>
+                    <div className="relative">
+                      <select id="c-size" required name="companySize" value={form.companySize} onChange={handleChange} className={`${field} appearance-none pr-9`}>
+                        <option value="">Select size</option>
                         {COMPANY_SIZES.map(s => <option key={s} value={s}>{s}</option>)}
                       </select>
+                      <ChevronDownIcon aria-hidden className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                     </div>
                   </div>
-
-                  {/* Message */}
-                  <div>
-                    <label className="block text-xs font-medium text-text-muted uppercase tracking-widest mb-1.5">
-                      Message <span className="text-red-400">*</span>
-                    </label>
-                    <textarea
-                      required name="message" value={form.message}
-                      onChange={handleChange} rows={5}
-                      placeholder="Tell us about your use case, the size of your finance team, or any questions you have…"
-                      className="w-full border border-border-strong px-3 py-2.5 text-sm text-text-primary placeholder-text-muted outline-none focus:border-accent-500 focus:ring-1 focus:ring-accent-500 transition-colors bg-surface-raised resize-none"
-                    />
-                  </div>
                 </div>
-
-                {/* Footer */}
-                <div className="border-t border-border-subtle px-7 py-4 bg-surface-raised flex items-center justify-between gap-4">
-                  <p className="text-xs text-text-muted leading-snug">
-                    By submitting you agree to our{' '}
-                    <Link href="/privacy" className="underline hover:text-text-secondary transition-colors">privacy policy</Link>. We never share your data.
-                  </p>
-                  <button
-                    type="submit"
-                    disabled={sending}
-                    className="inline-flex items-center gap-2 bg-accent-500 hover:bg-accent-600 disabled:opacity-60 text-white text-sm font-medium px-5 py-2.5 transition-colors flex-shrink-0"
-                  >
-                    {sending ? (
-                      <>
-                        <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                        </svg>
-                        Sending…
-                      </>
-                    ) : 'Send Message'}
-                  </button>
+                <div>
+                  <label htmlFor="c-message" className={label}>Message</label>
+                  <textarea
+                    id="c-message" required name="message" value={form.message} onChange={handleChange} rows={5}
+                    placeholder="How your team reviews spend today, the size of your finance team, or any questions you have"
+                    className={`${field} h-auto py-2.5 leading-relaxed resize-none`}
+                  />
                 </div>
-                {submitError && (
-                  <div className="px-7 py-3 bg-red-500/10 border-t border-red-500/20">
-                    <p className="text-xs text-red-400">{submitError}</p>
-                  </div>
-                )}
-              </form>
-            )}
-          </div>
+                <p className="text-[12.5px] text-text-muted">All fields are required.</p>
+              </div>
+
+              {submitError && (
+                <div role="alert" className="mx-6 sm:mx-7 mb-5 rounded-md bg-critical-bg border border-critical-line px-3.5 py-3 text-[14px] text-critical-fg">
+                  {submitError}
+                </div>
+              )}
+
+              <div className="border-t border-border-subtle px-6 sm:px-7 py-4 bg-surface flex flex-wrap items-center justify-between gap-4">
+                <p className="text-[13px] text-text-muted leading-snug max-w-[18rem]">
+                  By submitting you agree to our{' '}
+                  <Link href="/privacy" className="underline decoration-border-strong hover:text-text-primary">privacy policy</Link>.
+                </p>
+                <button
+                  type="submit"
+                  disabled={sending}
+                  className="inline-flex items-center gap-2 h-10 px-4 rounded-md bg-accent-600 hover:bg-accent-700 disabled:opacity-60 text-white text-[14.5px] font-medium shadow-card flex-shrink-0"
+                >
+                  {sending ? (
+                    <>
+                      <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24" aria-hidden>
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Sending
+                    </>
+                  ) : 'Send message'}
+                </button>
+              </div>
+            </form>
+          )}
         </div>
       </div>
-    </>
+    </PublicLayout>
   )
 }

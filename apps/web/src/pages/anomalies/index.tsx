@@ -34,17 +34,10 @@ function suggestedAction(type: string, severity: string): string {
   return 'Review transaction and mark as approved or investigate further'
 }
 
-const SEV_LEFT: Record<string, string> = {
-  CRITICAL: 'border-l-red-400',
-  HIGH:     'border-l-orange-500',
-  MEDIUM:   'border-l-amber-400',
-  LOW:      'border-l-border-strong',
-}
-
 const SEV_AMT: Record<string, string> = {
-  CRITICAL: 'text-red-400',
-  HIGH:     'text-orange-400',
-  MEDIUM:   'text-amber-400',
+  CRITICAL: 'text-critical-fg',
+  HIGH:     'text-high-fg',
+  MEDIUM:   'text-medium-fg',
   LOW:      'text-text-muted',
 }
 
@@ -109,8 +102,8 @@ export default function AnomaliesPage() {
       {/* ── Page header ── */}
       <div className="flex items-start justify-between mb-5">
         <div>
-          <h1 className="text-lg font-normal text-text-primary">Anomaly Investigation</h1>
-          <p className="text-xs text-text-muted mt-0.5">AI-detected spend anomalies, policy violations, and risk signals</p>
+          <h1 className="text-lg font-medium tracking-[-0.015em] text-text-primary">Anomaly Investigation</h1>
+          <p className="text-xs text-text-muted mt-0.5">Findings from your uploaded data, ranked by severity and confidence</p>
         </div>
         <button
           onClick={() => {
@@ -141,9 +134,9 @@ export default function AnomaliesPage() {
       <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5 mb-5">
         {[
           { label: 'All',           count: totals.all,      value: null,                icon: Filter,        filter: () => { setSev('All'); setStatus('All') },  active: statusFilter === 'All' && sevFilter === 'All', color: 'text-text-secondary', bg: 'bg-surface-raised', border: 'border-border' },
-          { label: 'Open',          count: totals.open,     value: null,                icon: AlertTriangle, filter: () => setStatus('Open'),                     active: statusFilter === 'Open',                      color: 'text-red-400',        bg: 'bg-red-500/10',     border: 'border-red-500/30' },
-          { label: 'Under Review',  count: totals.review,   value: null,                icon: Clock,         filter: () => setStatus('Under Review'),             active: statusFilter === 'Under Review',              color: 'text-amber-400',      bg: 'bg-amber-500/10',   border: 'border-amber-500/30' },
-          { label: 'Resolved',      count: totals.resolved, value: null,                icon: CheckCircle,   filter: () => setStatus('Resolved'),                 active: statusFilter === 'Resolved',                  color: 'text-emerald-400',    bg: 'bg-emerald-500/10', border: 'border-emerald-500/30' },
+          { label: 'Open',          count: totals.open,     value: null,                icon: AlertTriangle, filter: () => setStatus('Open'),                     active: statusFilter === 'Open',                      color: 'text-accent-700',         bg: 'bg-surface-raised',  border: 'border-border' },
+          { label: 'Under Review',  count: totals.review,   value: null,                icon: Clock,         filter: () => setStatus('Under Review'),             active: statusFilter === 'Under Review',              color: 'text-medium-fg',      bg: 'bg-surface-raised', border: 'border-border' },
+          { label: 'Resolved',      count: totals.resolved, value: null,                icon: CheckCircle,   filter: () => setStatus('Resolved'),                 active: statusFilter === 'Resolved',                  color: 'text-positive-fg',    bg: 'bg-surface-raised', border: 'border-border' },
           { label: 'Risk Exposure', count: null,            value: fmtC(totals.exposure), icon: XCircle,     filter: () => { setSev('All'); setStatus('Open') },  active: false,                                        color: 'text-text-primary',   bg: 'bg-surface-raised', border: 'border-border' },
         ].map((s) => {
           const Icon = s.icon
@@ -151,12 +144,12 @@ export default function AnomaliesPage() {
             <button
               key={s.label}
               onClick={s.filter}
-              className={`flex items-center gap-2.5 ${s.bg} border ${s.border} rounded-lg px-3.5 py-3 hover:opacity-80 transition-all text-left ${s.active ? 'ring-2 ring-accent-400 ring-offset-1' : ''}`}
+              className={`flex items-center gap-2.5 ${s.bg} border ${s.border} rounded-xl shadow-card px-3.5 py-3 hover:bg-surface-overlay text-left ${s.active ? 'ring-2 ring-accent-500 ring-offset-1 ring-offset-surface' : ''}`}
             >
               <Icon className={`w-4 h-4 ${s.color} flex-shrink-0`} />
               <div>
-                <p className={`text-base font-medium ${s.color} leading-none`}>{s.count !== null ? s.count : s.value}</p>
-                <p className="text-[11px] text-text-muted mt-0.5">{s.label}</p>
+                <p className={`text-[17px] font-medium tabular-nums ${s.color} leading-none`}>{s.count !== null ? s.count : s.value}</p>
+                <p className="text-[12.5px] text-text-muted mt-1">{s.label}</p>
               </div>
             </button>
           )
@@ -216,7 +209,7 @@ export default function AnomaliesPage() {
               : 'Try adjusting the severity, status, or search filters above.'}
           </p>
           {!isReady && (
-            <Link href="/integrations" className="inline-flex items-center gap-1.5 mt-4 text-xs bg-[#0c1526] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#1a2640] transition-colors">
+            <Link href="/integrations" className="inline-flex items-center gap-1.5 mt-4 text-xs bg-accent-600 hover:bg-accent-700 text-white px-4 py-2 rounded-lg font-medium hover:bg-[#1a2640] transition-colors">
               Connect data source
             </Link>
           )}
@@ -226,7 +219,7 @@ export default function AnomaliesPage() {
           {filtered.map(a => (
             <div
               key={a.id}
-              className={`bg-surface-raised border border-border border-l-4 ${SEV_LEFT[a.severity] ?? 'border-l-border-strong'} rounded-lg overflow-hidden transition-shadow`}
+              className={`bg-surface-raised border border-border rounded-lg overflow-hidden transition-shadow`}
             >
               <div className="p-4">
                 <div className="flex items-start gap-4">
@@ -235,27 +228,27 @@ export default function AnomaliesPage() {
                     {/* Top row */}
                     <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                       <Badge variant="severity" value={a.severity} dot>{a.severity}</Badge>
-                      <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">{a.type.replace(/_/g, ' ')}</span>
+                      <span className="text-[12px] font-medium text-text-muted">{a.type.replace(/_/g, ' ')}</span>
                       <span className="text-[10px] text-text-muted">·</span>
                       <span className="text-[10px] font-mono text-text-muted">{a.id}</span>
                     </div>
 
                     <Link href={`/anomalies/${a.id}`} className="group">
-                      <p className="text-sm font-medium text-text-primary group-hover:text-accent-400 transition-colors">{a.title}</p>
+                      <p className="text-sm font-medium text-text-primary group-hover:text-accent-800 transition-colors">{a.title}</p>
                     </Link>
                     <p className="text-xs text-text-muted mt-0.5">{a.vendor}{a.category ? ` · ${a.category}` : ''}</p>
                     <p className="text-xs text-text-muted mt-2 leading-relaxed line-clamp-2">{a.description}</p>
 
                     {/* Suggested action */}
                     <div className="mt-2.5 flex items-start gap-1.5">
-                      <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest mt-0.5 flex-shrink-0">Suggested:</span>
+                      <span className="text-[12px] font-medium text-text-muted mt-0.5 flex-shrink-0">Suggested:</span>
                       <span className="text-xs text-text-muted">{suggestedAction(a.type, a.severity)}</span>
                     </div>
                   </div>
 
                   {/* Right column */}
                   <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                    <p className={`text-xl font-normal ${SEV_AMT[a.severity] ?? 'text-text-secondary'}`}>{fmtFull(a.amount)}</p>
+                    <p className={`text-xl font-medium tracking-[-0.02em] ${SEV_AMT[a.severity] ?? 'text-text-secondary'}`}>{fmtFull(a.amount)}</p>
                     <div className="flex items-center gap-1.5">
                       <div className="w-16 h-1.5 bg-surface-overlay rounded-full overflow-hidden">
                         <div className="h-full rounded-full bg-accent-500" style={{ width: `${a.confidence}%` }} />
@@ -265,7 +258,7 @@ export default function AnomaliesPage() {
                     <Badge variant="status" value={a.status}>{a.status}</Badge>
                     <Link
                       href={`/anomalies/${a.id}`}
-                      className="inline-flex items-center gap-1 text-xs font-medium text-accent-400 hover:text-accent-300 transition-colors mt-1"
+                      className="inline-flex items-center gap-1 text-xs font-medium text-accent-700 hover:text-accent-800 transition-colors mt-1"
                     >
                       Investigate <ChevronRight className="w-3 h-3" />
                     </Link>
@@ -276,7 +269,7 @@ export default function AnomaliesPage() {
               {/* Transaction refs strip */}
               {a.rowRefs.length > 0 && (
                 <div className="border-t border-border-subtle px-4 py-2 bg-surface-sunken flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">Refs:</span>
+                  <span className="text-[12px] font-medium text-text-muted">Refs:</span>
                   {a.rowRefs.slice(0, 6).map(ref => (
                     <span key={ref} className="text-[10px] font-mono bg-surface-overlay border border-border text-text-muted px-1.5 py-0.5 rounded">
                       {ref}

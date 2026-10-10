@@ -2,12 +2,15 @@ import '../styles/globals.css'
 import { useEffect } from 'react'
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
-import { Inter } from 'next/font/google'
+import { Archivo, JetBrains_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { createClient } from '../utils/supabase/client'
 import { saveUser } from '../hooks/useCurrentUser'
 
-const inter = Inter({ subsets: ['latin'], weight: ['400', '500', '600', '700'], display: 'swap' })
+// Archivo carries a width axis: display type runs semi-expanded to echo the
+// wordmark, body copy stays at normal width.
+const archivo = Archivo({ subsets: ['latin'], axes: ['wdth'], display: 'swap' })
+const mono    = JetBrains_Mono({ subsets: ['latin'], weight: ['400', '500'], display: 'swap' })
 
 export default function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
@@ -47,27 +50,32 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <title>Ventura · Financial Intelligence Platform</title>
+        <title>Ventura · Spend review for month-end close</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="description" content="Financial operations intelligence for enterprise finance teams. Detect anomalies, streamline workflows, and govern automated decisions with full auditability." />
-        <meta name="theme-color" content="#0b1220" />
+        <meta name="description" content="Ventura finds the spend that needs a second look before close: duplicate payments, invoices split under approval limits, period cut-off errors and outliers, each traced to the rows behind it." />
+        <meta name="theme-color" content="#ffffff" />
         {/* Open Graph */}
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="Ventura" />
-        <meta property="og:title" content="Ventura · Financial Intelligence Platform" />
-        <meta property="og:description" content="Financial operations intelligence for enterprise finance teams." />
+        <meta property="og:title" content="Ventura · Spend review for month-end close" />
+        <meta property="og:description" content="Spend review for month-end close. Every finding traced to the rows behind it, and a person decides." />
         <meta property="og:image" content="/ventura-logo.png" />
         {/* Twitter */}
         <meta name="twitter:card" content="summary" />
-        <meta name="twitter:title" content="Ventura · Financial Intelligence Platform" />
-        <meta name="twitter:description" content="Financial operations intelligence for enterprise finance teams." />
+        <meta name="twitter:title" content="Ventura · Spend review for month-end close" />
+        <meta name="twitter:description" content="Spend review for month-end close. Every finding traced to the rows behind it, and a person decides." />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" type="image/png" href="/favicon.png" />
         <link rel="apple-touch-icon" href="/favicon.png" />
       </Head>
-      <div className={inter.className}>
-        <Component {...pageProps} />
-      </div>
+      {/* Declared on :root so portals and the body itself get the faces too */}
+      <style jsx global>{`
+        :root {
+          --font-sans: ${archivo.style.fontFamily};
+          --font-mono: ${mono.style.fontFamily};
+        }
+      `}</style>
+      <Component {...pageProps} />
       <Analytics />
     </>
   )

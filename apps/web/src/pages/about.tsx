@@ -1,74 +1,44 @@
 import PublicLayout from '../components/layout/PublicLayout'
-import Link from 'next/link'
+import { PageIntro, Section, FactList, ClosingCTA, H2_CLASS } from '../components/marketing/Marketing'
 
 const values = [
-  { title: 'Accuracy above all',   desc: 'Financial data leaves no room for error. Every anomaly we surface is explainable, auditable, and traceable to source transactions.' },
-  { title: 'Human in the loop',    desc: 'Automation accelerates finance teams; it does not replace their judgment. Every consequential action requires human approval by design.' },
-  { title: 'Security by default',  desc: 'Encryption, role based access, and an append only audit trail are built into the platform, not bolted on.' },
-  { title: 'Radical transparency', desc: 'Ventura shows its reasoning. Confidence scores, detection logic, and every decision are visible to every stakeholder.' },
+  { title: 'Accuracy above all',   body: 'Financial data leaves no room for error. Every finding we surface is explainable, auditable, and traceable to source transactions.' },
+  { title: 'Human in the loop',    body: 'Automation should speed finance teams up, not replace their judgment. Every consequential action requires a person, by design.' },
+  { title: 'Security by default',  body: 'Encryption, role-based access, and an append-only security log are built into the platform, not bolted on.' },
+  { title: 'Radical transparency', body: 'Ventura shows its reasoning. Confidence scores, detection logic, and every decision are visible to everyone involved.' },
 ]
 
 export default function AboutPage() {
   return (
     <PublicLayout title="About">
-      {/* Hero */}
-      <section className="bg-surface-raised border-b border-border py-20">
-        <div className="max-w-3xl mx-auto px-6 text-center">
-          <p className="text-xs font-medium text-accent-400 uppercase tracking-widest mb-3">About Ventura</p>
-          <h1 className="text-3xl sm:text-4xl font-normal text-text-primary leading-tight">
-            Financial operations intelligence for the enterprise
-          </h1>
-          <p className="text-base text-text-muted mt-4 leading-relaxed">
-            Ventura helps finance teams detect anomalies, streamline workflows, and govern automated
-            decisions, with full auditability at every step.
+      <PageIntro
+        title="Built for the people who close the books"
+        lead="Ventura helps controllers and finance managers find the spend that needs a second look before close, with every finding traced to its rows and every decision made by a person."
+      />
+
+      <Section>
+        <div className="grid gap-6 md:grid-cols-[minmax(0,18rem)_1fr] md:gap-10">
+          <h2 className={H2_CLASS}>Our mission</h2>
+          <p className="max-w-[62ch] text-[17px] leading-[1.7] text-text-secondary">
+            Finance teams process large volumes of transactions across many systems, and errors,
+            duplicates and policy breaches slip through every month. Ventura was built on a simple
+            conviction: finance teams deserve the same careful tooling that transformed engineering
+            and sales. We combine rule-based anomaly detection with strict human review, so teams move
+            faster without ever losing control.
           </p>
         </div>
-      </section>
+      </Section>
 
-      {/* Mission */}
-      <section className="py-20 bg-surface-raised border-b border-border">
-        <div className="max-w-3xl mx-auto px-6">
-          <h2 className="text-xl font-normal text-text-primary mb-4">Our mission</h2>
-          <p className="text-sm text-text-secondary leading-relaxed">
-            Enterprise finance teams process millions of transactions across dozens of systems, and errors,
-            duplicates, and policy violations slip through every day. Ventura was built on a simple conviction:
-            finance teams deserve the same intelligent tooling that transformed engineering and sales. We combine
-            rule based anomaly detection with strict human in the loop governance, so teams move faster without
-            ever losing control.
-          </p>
-        </div>
-      </section>
+      <Section tone="muted">
+        <h2 className={`${H2_CLASS} mb-10`}>What we believe</h2>
+        <FactList items={values} />
+      </Section>
 
-      {/* Values */}
-      <section className="py-20 bg-surface border-b border-border">
-        <div className="max-w-4xl mx-auto px-6">
-          <h2 className="text-xl font-normal text-text-primary mb-8 text-center">What we believe</h2>
-          <div className="grid sm:grid-cols-2 gap-5">
-            {values.map(v => (
-              <div key={v.title} className="bg-surface-raised border border-border rounded-lg p-5">
-                <h3 className="text-sm font-medium text-text-primary mb-2">{v.title}</h3>
-                <p className="text-sm text-text-muted leading-relaxed">{v.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-20 bg-surface-raised">
-        <div className="max-w-3xl mx-auto px-6 text-center">
-          <h2 className="text-xl font-normal text-text-primary mb-3">Want to learn more?</h2>
-          <p className="text-sm text-text-muted mb-6">See the platform in action or talk to our team about your use case.</p>
-          <div className="flex items-center justify-center gap-3">
-            <Link href="/demo" className="bg-accent-500 hover:bg-accent-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
-              Explore the demo
-            </Link>
-            <Link href="/contact" className="text-sm font-medium text-text-secondary hover:text-text-primary border border-border-strong hover:border-border px-5 py-2.5 rounded-lg transition-colors">
-              Contact us
-            </Link>
-          </div>
-        </div>
-      </section>
+      <div className="pt-16 sm:pt-24" />
+      <ClosingCTA
+        title="See it on a sample close"
+        body="Walk through the demo, or tell us how your team reviews spend today."
+      />
     </PublicLayout>
   )
 }

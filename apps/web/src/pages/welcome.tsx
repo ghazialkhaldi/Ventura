@@ -89,13 +89,13 @@ export default function WelcomePage() {
       <div className="mb-8">
         <div className="flex items-start justify-between gap-6">
           <div>
-            <p className="text-[11px] font-semibold text-text-muted uppercase tracking-widest mb-2">Setup &amp; Onboarding</p>
-            <h1 className="text-2xl font-normal text-text-primary mb-1.5">
+            <p className="text-[12px] font-medium text-text-muted mb-2">Setup &amp; Onboarding</p>
+            <h1 className="text-2xl font-medium tracking-[-0.02em] text-text-primary mb-1.5">
               Welcome to Ventura{companyDisplay !== 'Your Organization' ? `, ${companyDisplay}` : ''}
             </h1>
             <p className="text-sm text-text-muted max-w-xl leading-relaxed">
-              Connect your financial data sources to begin. Most organizations surface their first anomalies
-              and savings opportunities within 24 hours of their first sync.
+              Start with an export from your accounting or banking system. Ventura reads it, maps the
+              columns, and lists the findings for your team to review.
             </p>
           </div>
           <Link
@@ -115,21 +115,21 @@ export default function WelcomePage() {
                 <div className="flex flex-col items-center flex-1 relative z-10">
                   <div className={`w-7 h-7 rounded-full flex items-center justify-center border-2 text-xs font-medium transition-colors ${
                     step.done
-                      ? 'bg-green-500 border-green-500 text-white'
+                      ? 'bg-positive border-green-500 text-white'
                       : step.current
-                      ? 'bg-surface-raised border-emerald-600 text-emerald-600'
+                      ? 'bg-surface-raised border-emerald-600 text-positive-fg'
                       : 'bg-surface-raised border-border-strong text-text-muted'
                   }`}>
                     {step.done ? <CheckCircle className="w-4 h-4" /> : <span>{step.id}</span>}
                   </div>
                   <p className={`text-[10px] mt-1.5 text-center max-w-[72px] leading-tight font-medium ${
-                    step.done ? 'text-green-600' : step.current ? 'text-emerald-700' : 'text-text-muted'
+                    step.done ? 'text-positive-fg' : step.current ? 'text-positive-fg' : 'text-text-muted'
                   }`}>
                     {step.label}
                   </p>
                 </div>
                 {i < SETUP_STEPS.length - 1 && (
-                  <div className={`flex-1 h-0.5 mt-3.5 mx-1 ${step.done ? 'bg-emerald-500/40' : 'bg-border'}`} />
+                  <div className={`flex-1 h-0.5 mt-3.5 mx-1 ${step.done ? 'bg-positive-bg' : 'bg-border'}`} />
                 )}
               </React.Fragment>
             ))}
@@ -170,11 +170,8 @@ export default function WelcomePage() {
                         <p className="text-[10px] text-text-muted mt-0.5">{src.category}</p>
                       </div>
                     </div>
-                    {src.popular && !isConnected && (
-                      <span className="text-[9px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-full flex-shrink-0">Popular</span>
-                    )}
                     {isConnected && (
-                      <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                      <CheckCircle className="w-4 h-4 text-positive-fg flex-shrink-0 mt-0.5" />
                     )}
                   </div>
                   <p className="text-[11px] text-text-muted leading-snug">{src.desc}</p>
@@ -185,7 +182,7 @@ export default function WelcomePage() {
                       className={`flex-1 text-xs font-medium py-2 rounded-md transition-colors flex items-center justify-center gap-1.5 ${
                         isConnected
                           ? 'bg-green-50 text-green-700 border border-green-200 cursor-default'
-                          : 'bg-[#0c1526] hover:bg-[#1a2640] text-white'
+                          : 'bg-accent-600 hover:bg-accent-700 text-white shadow-card'
                       }`}
                     >
                       {isConnected ? (
@@ -198,7 +195,7 @@ export default function WelcomePage() {
                       <button
                         onClick={() => handleDisconnect(src.id)}
                         title="Reset connection"
-                        className="text-red-400 hover:text-red-600 hover:bg-red-50 px-2 rounded-md transition-colors border border-transparent hover:border-red-200"
+                        className="text-critical-fg hover:text-critical-fg hover:bg-red-50 px-2 rounded-md transition-colors border border-transparent hover:border-red-200"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -213,7 +210,7 @@ export default function WelcomePage() {
           {connected.length > 0 && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-5">
               <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <CheckCircle className="w-5 h-5 text-positive-fg flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="text-sm font-medium text-green-800">
                     {connected.length === 1
@@ -228,7 +225,7 @@ export default function WelcomePage() {
                     <Link href="/onboarding" className="inline-flex items-center gap-1.5 text-xs font-medium text-green-800 hover:text-green-900">
                       Continue to field mapping <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
-                    <span className="text-green-400">·</span>
+                    <span className="text-positive-fg">·</span>
                     <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 hover:text-green-900">
                       View dashboard <ChevronRight className="w-3 h-3" />
                     </Link>
@@ -320,7 +317,7 @@ export default function WelcomePage() {
           </div>
 
           {/* Navigate to existing workspace */}
-          <div className="bg-[#0c1526] rounded-lg p-4">
+          <div className="bg-ink rounded-lg p-4">
             <p className="text-xs font-medium text-white mb-1.5">Returning user?</p>
             <p className="text-[11px] text-text-muted mb-3 leading-relaxed">
               If your data is already connected, navigate directly to your workspace to view

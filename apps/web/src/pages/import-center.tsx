@@ -75,15 +75,15 @@ function fmtCurrency(n: number): string {
 }
 
 function confidenceColor(c: number): string {
-  if (c >= 80) return 'text-emerald-400'
-  if (c >= 60) return 'text-amber-400'
-  return 'text-red-400'
+  if (c >= 80) return 'text-positive-fg'
+  if (c >= 60) return 'text-medium-fg'
+  return 'text-critical-fg'
 }
 
 function confidenceBg(c: number): string {
-  if (c >= 80) return 'bg-emerald-500'
-  if (c >= 60) return 'bg-amber-500'
-  return 'bg-red-500'
+  if (c >= 80) return 'bg-positive'
+  if (c >= 60) return 'bg-medium'
+  return 'bg-critical'
 }
 
 // ─── Component ─────────────────────────────────────────────────────────────────
@@ -249,7 +249,7 @@ export default function ImportCenterPage() {
           <div className="flex items-center gap-2">
             <span className="text-xs text-text-muted">{batches.length} batch{batches.length !== 1 ? 'es' : ''} imported</span>
             {reviewQueue.length > 0 && (
-              <span className="inline-flex items-center gap-1 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-medium px-2 py-0.5 rounded-full">
+              <span className="inline-flex items-center gap-1 bg-medium-bg border border-medium-line text-medium-fg text-xs font-medium px-2 py-0.5 rounded-full">
                 <AlertCircle className="w-3 h-3" />
                 {reviewQueue.length} pending review
               </span>
@@ -272,14 +272,14 @@ export default function ImportCenterPage() {
             onClick={() => setTab(key)}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
               tab === key
-                ? 'border-accent-500 text-accent-400'
+                ? 'border-accent-500 text-accent-700'
                 : 'border-transparent text-text-muted hover:text-text-secondary'
             }`}
           >
             <Icon className="w-3.5 h-3.5" />
             {label}
             {badge !== undefined && badge > 0 && (
-              <span className="ml-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">
+              <span className="ml-0.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-positive-bg text-positive-fg text-[10px] font-bold">
                 {badge}
               </span>
             )}
@@ -302,7 +302,7 @@ export default function ImportCenterPage() {
                   onClick={() => { setSource(opt.id); setFile(null); setInvoices([]); setStage('idle') }}
                   className={`flex flex-col items-center gap-2 p-3 rounded-lg border transition-all text-center ${
                     source === opt.id
-                      ? 'border-accent-500 bg-accent-500/10 shadow-sm'
+                      ? 'border-accent-500 bg-accent-50 shadow-sm'
                       : 'border-border hover:border-border-strong'
                   }`}
                 >
@@ -322,7 +322,7 @@ export default function ImportCenterPage() {
             {!file ? (
               <div
                 className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-colors ${
-                  dragOver ? 'border-accent-400 bg-accent-500/10' : 'border-border-strong hover:border-text-muted'
+                  dragOver ? 'border-accent-400 bg-accent-50' : 'border-border-strong hover:border-text-muted'
                 }`}
                 onClick={() => fileRef.current?.click()}
                 onDragOver={e => { e.preventDefault(); setDragOver(true) }}
@@ -342,23 +342,23 @@ export default function ImportCenterPage() {
               </div>
             ) : (
               <div className="flex items-center gap-4 p-4 bg-surface-sunken rounded-lg border border-border">
-                <FileText className="w-8 h-8 text-accent-400 flex-shrink-0" />
+                <FileText className="w-8 h-8 text-accent-700 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-text-secondary">{file.name}</p>
                   <p className="text-xs text-text-muted">{fmtBytes(file.size)} · {SOURCE_OPTS.find(s => s.id === source)?.label}</p>
                 </div>
-                <button onClick={() => { setFile(null); setInvoices([]); setStage('idle') }} className="text-text-muted hover:text-red-400 transition-colors">
+                <button onClick={() => { setFile(null); setInvoices([]); setStage('idle') }} className="text-text-muted hover:text-critical-fg transition-colors">
                   <X className="w-4 h-4" />
                 </button>
               </div>
             )}
 
             {errMsg && (
-              <div className="flex items-start gap-3 mt-4 bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3">
-                <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+              <div className="flex items-start gap-3 mt-4 bg-critical-bg border border-critical-line rounded-lg px-4 py-3">
+                <AlertCircle className="w-4 h-4 text-critical-fg flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-xs font-medium text-red-400">Parsing failed</p>
-                  <p className="text-xs text-red-400 mt-0.5">{errMsg}</p>
+                  <p className="text-xs font-medium text-critical-fg">Parsing failed</p>
+                  <p className="text-xs text-critical-fg mt-0.5">{errMsg}</p>
                 </div>
               </div>
             )}
@@ -368,7 +368,7 @@ export default function ImportCenterPage() {
                 <button
                   onClick={handleImport}
                   disabled={stage === 'parsing'}
-                  className="flex items-center gap-2 bg-[#0c1526] hover:bg-[#1a2640] disabled:opacity-50 text-white font-medium px-6 py-2.5 rounded-lg text-sm transition-colors"
+                  className="flex items-center gap-2 bg-accent-600 hover:bg-accent-700 disabled:opacity-50 text-white shadow-card font-medium px-6 py-2.5 rounded-lg text-sm transition-colors"
                 >
                   {stage === 'parsing'
                     ? <><RefreshCw className="w-4 h-4 animate-spin" /> Processing…</>
@@ -406,8 +406,8 @@ export default function ImportCenterPage() {
                   </div>
                   <div className="flex items-center gap-6 mt-3 text-xs text-text-muted">
                     <span>{summary.total.toLocaleString()} records normalized</span>
-                    {summary.reviewed > 0 && <span className="text-amber-400">{summary.reviewed} need review</span>}
-                    {summary.dups > 0 && <span className="text-red-400">{summary.dups} duplicates flagged</span>}
+                    {summary.reviewed > 0 && <span className="text-medium-fg">{summary.reviewed} need review</span>}
+                    {summary.dups > 0 && <span className="text-critical-fg">{summary.dups} duplicates flagged</span>}
                   </div>
                 </div>
               )}
@@ -417,27 +417,27 @@ export default function ImportCenterPage() {
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="border-b border-border-subtle">
-                      <th className="text-left pb-2 pr-4 font-semibold text-text-muted uppercase tracking-wide text-[10px]">Canonical Field</th>
-                      <th className="text-left pb-2 pr-4 font-semibold text-text-muted uppercase tracking-wide text-[10px]">Raw Column</th>
-                      <th className="text-left pb-2 pr-4 font-semibold text-text-muted uppercase tracking-wide text-[10px]">Sample Value</th>
-                      <th className="text-left pb-2 font-semibold text-text-muted uppercase tracking-wide text-[10px]">Status</th>
+                      <th className="text-left pb-2 pr-4 font-medium text-text-muted text-[12px]">Canonical Field</th>
+                      <th className="text-left pb-2 pr-4 font-medium text-text-muted text-[12px]">Raw Column</th>
+                      <th className="text-left pb-2 pr-4 font-medium text-text-muted text-[12px]">Sample Value</th>
+                      <th className="text-left pb-2 font-medium text-text-muted text-[12px]">Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     {invoices[0].field_mappings.map((fm: FieldMapping) => (
                       <tr key={fm.canonical} className="border-b border-border-subtle last:border-0">
                         <td className="py-2 pr-4 font-mono text-text-secondary">{fm.canonical}</td>
-                        <td className="py-2 pr-4 font-mono text-emerald-400">{fm.raw_column || <span className="text-text-muted">N/A</span>}</td>
+                        <td className="py-2 pr-4 font-mono text-positive-fg">{fm.raw_column || <span className="text-text-muted">N/A</span>}</td>
                         <td className="py-2 pr-4 text-text-muted max-w-[180px] truncate" title={fm.sample_value}>
                           {fm.sample_value || <span className="text-text-muted">empty</span>}
                         </td>
                         <td className="py-2">
                           {fm.mapped ? (
-                            <span className="inline-flex items-center gap-1 text-emerald-400 font-medium">
+                            <span className="inline-flex items-center gap-1 text-positive-fg font-medium">
                               <CheckCircle className="w-3 h-3" /> Mapped
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 text-amber-400 font-medium" title={fm.warning}>
+                            <span className="inline-flex items-center gap-1 text-medium-fg font-medium" title={fm.warning}>
                               <AlertCircle className="w-3 h-3" />
                               {fm.warning ? 'Inferred' : 'Not found'}
                             </span>
@@ -463,16 +463,16 @@ export default function ImportCenterPage() {
           <CardDivider />
           <div className="space-y-2">
             {pipelineStages.map((s, idx) => {
-              const icon = s.status === 'done'    ? <CheckCircle className="w-4 h-4 text-emerald-400" />
-                         : s.status === 'warn'    ? <AlertCircle className="w-4 h-4 text-amber-400" />
-                         : s.status === 'error'   ? <AlertCircle className="w-4 h-4 text-red-400" />
-                         : s.status === 'running' ? <RefreshCw className="w-4 h-4 text-emerald-400 animate-spin" />
+              const icon = s.status === 'done'    ? <CheckCircle className="w-4 h-4 text-positive-fg" />
+                         : s.status === 'warn'    ? <AlertCircle className="w-4 h-4 text-medium-fg" />
+                         : s.status === 'error'   ? <AlertCircle className="w-4 h-4 text-critical-fg" />
+                         : s.status === 'running' ? <RefreshCw className="w-4 h-4 text-positive-fg animate-spin" />
                          : <div className="w-4 h-4 rounded-full border-2 border-border-strong" />
 
-              const bg = s.status === 'done'    ? 'bg-emerald-500/10 border-emerald-500/30'
-                       : s.status === 'warn'    ? 'bg-amber-500/10 border-amber-500/30'
-                       : s.status === 'error'   ? 'bg-red-500/10 border-red-500/30'
-                       : s.status === 'running' ? 'bg-emerald-500/10 border-emerald-500/30'
+              const bg = s.status === 'done'    ? 'bg-positive-bg border-positive-line'
+                       : s.status === 'warn'    ? 'bg-medium-bg border-medium-line'
+                       : s.status === 'error'   ? 'bg-critical-bg border-critical-line'
+                       : s.status === 'running' ? 'bg-positive-bg border-positive-line'
                        : 'bg-surface-sunken border-border'
 
               return (
@@ -492,19 +492,19 @@ export default function ImportCenterPage() {
           </div>
 
           {stage === 'done' && summary && (
-            <div className="mt-6 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
+            <div className="mt-6 p-4 bg-positive-bg border border-positive-line rounded-lg">
               <div className="flex items-center gap-3">
-                <CheckCircle className="w-5 h-5 text-emerald-400" />
+                <CheckCircle className="w-5 h-5 text-positive-fg" />
                 <div>
-                  <p className="text-sm font-medium text-emerald-400">Import complete</p>
-                  <p className="text-xs text-emerald-400 mt-0.5">
+                  <p className="text-sm font-medium text-positive-fg">Import complete</p>
+                  <p className="text-xs text-positive-fg mt-0.5">
                     {summary.total.toLocaleString()} invoices normalized · {summary.avgConf}% avg confidence
                     {summary.reviewed > 0 ? ` · ${summary.reviewed} pending review` : ''}
                   </p>
                 </div>
                 <button
                   onClick={() => setTab('review')}
-                  className="ml-auto text-xs text-emerald-400 font-medium flex items-center gap-1"
+                  className="ml-auto text-xs text-positive-fg font-medium flex items-center gap-1"
                 >
                   Review queue <ChevronRight className="w-3 h-3" />
                 </button>
@@ -528,7 +528,7 @@ export default function ImportCenterPage() {
 
           {reviewQueue.length === 0 ? (
             <div className="py-16 flex flex-col items-center text-center">
-              <CheckCircle className="w-10 h-10 text-emerald-400 mb-3" />
+              <CheckCircle className="w-10 h-10 text-positive-fg mb-3" />
               <p className="text-text-secondary font-medium">Review queue is empty</p>
               <p className="text-xs text-text-muted mt-1">All imported invoices passed confidence thresholds.</p>
             </div>
@@ -538,7 +538,7 @@ export default function ImportCenterPage() {
                 <thead>
                   <tr className="border-b border-border-subtle">
                     {['Invoice', 'Vendor', 'Amount', 'Date', 'Confidence', 'Issues', 'Tier', 'Actions'].map(h => (
-                      <th key={h} className="text-left pb-2.5 pr-3 font-semibold text-text-muted uppercase tracking-wide text-[10px]">{h}</th>
+                      <th key={h} className="text-left pb-2.5 pr-3 font-medium text-text-muted text-[12px]">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -567,8 +567,8 @@ export default function ImportCenterPage() {
                           </td>
                           <td className="py-2.5 pr-3">
                             <div className="flex flex-wrap gap-1">
-                              {inv.duplicate_flag && <span className="bg-red-500/10 border border-red-500/30 text-red-400 px-1.5 py-0.5 rounded text-[10px] font-semibold">Duplicate</span>}
-                              {inv.normalization_warnings.length > 0 && <span className="bg-amber-500/10 border border-amber-500/30 text-amber-400 px-1.5 py-0.5 rounded text-[10px] font-semibold">{inv.normalization_warnings.length} warning{inv.normalization_warnings.length !== 1 ? 's' : ''}</span>}
+                              {inv.duplicate_flag && <span className="bg-critical-bg border border-critical-line text-critical-fg px-1.5 py-0.5 rounded text-[10px] font-semibold">Duplicate</span>}
+                              {inv.normalization_warnings.length > 0 && <span className="bg-medium-bg border border-medium-line text-medium-fg px-1.5 py-0.5 rounded text-[10px] font-semibold">{inv.normalization_warnings.length} warning{inv.normalization_warnings.length !== 1 ? 's' : ''}</span>}
                             </div>
                           </td>
                           <td className="py-2.5 pr-3">
@@ -581,13 +581,13 @@ export default function ImportCenterPage() {
                             <div className="flex items-center gap-1.5">
                               <button
                                 onClick={e => { e.stopPropagation(); handleApprove(inv.id) }}
-                                className="bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 px-2.5 py-1 rounded text-[10px] font-semibold transition-colors"
+                                className="bg-positive-bg hover:bg-positive-bg border border-positive-line text-positive-fg px-2.5 py-1 rounded text-[10px] font-semibold transition-colors"
                               >
                                 Approve
                               </button>
                               <button
                                 onClick={e => { e.stopPropagation(); handleReject(inv.id) }}
-                                className="bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 px-2.5 py-1 rounded text-[10px] font-semibold transition-colors"
+                                className="bg-critical-bg hover:bg-critical-bg border border-critical-line text-critical-fg px-2.5 py-1 rounded text-[10px] font-semibold transition-colors"
                               >
                                 Reject
                               </button>
@@ -601,10 +601,10 @@ export default function ImportCenterPage() {
                             <td colSpan={8} className="pb-3 px-1">
                               <div className="bg-surface-sunken border border-border rounded-lg p-4 space-y-4">
                                 <div className="flex items-center justify-between">
-                                  <p className="text-xs font-medium text-text-secondary uppercase tracking-wide">Record Detail</p>
+                                  <p className="text-[12.5px] font-medium text-text-secondary">Record Detail</p>
                                   <button
                                     onClick={() => setShowRaw(showRaw === inv.id ? null : inv.id)}
-                                    className="text-xs text-accent-400 flex items-center gap-1"
+                                    className="text-xs text-accent-700 flex items-center gap-1"
                                   >
                                     <Eye className="w-3 h-3" />
                                     {showRaw === inv.id ? 'Normalized view' : 'Raw payload'}
@@ -615,7 +615,7 @@ export default function ImportCenterPage() {
                                   <div className="font-mono text-[11px] text-text-secondary bg-surface-raised border border-border rounded p-3 overflow-x-auto">
                                     {Object.entries(inv.raw_invoice_payload).map(([k, v]) => (
                                       <div key={k} className="flex gap-4">
-                                        <span className="text-accent-400 w-32 flex-shrink-0">{k}</span>
+                                        <span className="text-accent-700 w-32 flex-shrink-0">{k}</span>
                                         <span>{v}</span>
                                       </div>
                                     ))}
@@ -646,9 +646,9 @@ export default function ImportCenterPage() {
 
                                 {inv.normalization_warnings.length > 0 && (
                                   <div className="space-y-1">
-                                    <p className="text-[10px] font-semibold text-text-muted uppercase tracking-wide">Warnings</p>
+                                    <p className="text-[12px] font-medium text-text-muted">Warnings</p>
                                     {inv.normalization_warnings.map((w, i) => (
-                                      <div key={i} className="flex items-start gap-2 text-xs text-amber-400">
+                                      <div key={i} className="flex items-start gap-2 text-xs text-medium-fg">
                                         <AlertTriangle className="w-3 h-3 flex-shrink-0 mt-0.5" />
                                         {w}
                                       </div>
@@ -690,7 +690,7 @@ export default function ImportCenterPage() {
                 <thead>
                   <tr className="border-b border-border-subtle">
                     {['Batch ID', 'File', 'Source', 'Records', 'Normalized', 'Avg Confidence', 'Review', 'Duplicates', 'Status', 'Date'].map(h => (
-                      <th key={h} className="text-left pb-2.5 pr-4 font-semibold text-text-muted uppercase tracking-wide text-[10px]">{h}</th>
+                      <th key={h} className="text-left pb-2.5 pr-4 font-medium text-text-muted text-[12px]">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -712,19 +712,19 @@ export default function ImportCenterPage() {
                       </td>
                       <td className="py-2.5 pr-4">
                         {b.review_required > 0
-                          ? <span className="text-amber-400 font-medium">{b.review_required}</span>
+                          ? <span className="text-medium-fg font-medium">{b.review_required}</span>
                           : <span className="text-text-muted">0</span>}
                       </td>
                       <td className="py-2.5 pr-4">
                         {b.duplicates > 0
-                          ? <span className="text-red-400 font-medium">{b.duplicates}</span>
+                          ? <span className="text-critical-fg font-medium">{b.duplicates}</span>
                           : <span className="text-text-muted">0</span>}
                       </td>
                       <td className="py-2.5 pr-4">
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
-                          b.status === 'complete' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' :
-                          b.status === 'partial'  ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' :
-                                                    'bg-red-500/10 border-red-500/30 text-red-400'
+                          b.status === 'complete' ? 'bg-positive-bg border-positive-line text-positive-fg' :
+                          b.status === 'partial'  ? 'bg-medium-bg border-medium-line text-medium-fg' :
+                                                    'bg-critical-bg border-critical-line text-critical-fg'
                         }`}>
                           {b.status}
                         </span>

@@ -9,7 +9,7 @@ import {
   Users, Shield, Building2, Settings, Plus, Edit,
   CheckCircle, Lock, Key, RefreshCw, AlertTriangle,
   Eye, Mail, Database, Trash2, AlertCircle, Loader2,
-  ChevronDown, Clock, X,
+  ChevronDown, Clock, X, ArrowLeft,
 } from 'lucide-react'
 
 type SettingsTab = 'users' | 'roles' | 'security' | 'tenant' | 'data'
@@ -32,9 +32,9 @@ interface ActivityEntry {
 }
 
 const ROLE_COLORS: Record<string, string> = {
-  admin:   'bg-purple-500/10 text-purple-400 border-purple-500/30',
-  editor:  'bg-accent-500/10 text-accent-300 border-accent-500/30',
-  analyst: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+  admin:   'bg-purple-50 text-purple-700 border-purple-200',
+  editor:  'bg-accent-50 text-accent-700 border-accent-200',
+  analyst: 'bg-medium-bg text-medium-fg border-medium-line',
   viewer:  'bg-surface-overlay text-text-muted border-border',
 }
 
@@ -43,12 +43,12 @@ const ROLE_COLORS: Record<string, string> = {
 const roles = [
   {
     name: 'Editor', desc: 'View everything and make changes across the workspace',
-    color: 'bg-accent-500/10 text-accent-300 border-accent-500/30',
+    color: 'bg-accent-50 text-accent-700 border-accent-200',
     permissions: ['View all dashboards, anomalies and reports', 'Change anomaly status and resolve findings', 'Edit workflows', 'Upload and import data'],
   },
   {
     name: 'Analyst', desc: 'View everything and comment on anomalies',
-    color: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+    color: 'bg-medium-bg text-medium-fg border-medium-line',
     permissions: ['View all dashboards, anomalies and reports', 'Comment on anomalies', 'Cannot change anomaly status or edit workflows'],
   },
   {
@@ -59,9 +59,9 @@ const roles = [
 ]
 
 const statusColor: Record<string, string> = {
-  Active:   'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30',
+  Active:   'bg-positive-bg text-positive-fg border border-positive-line',
   Inactive: 'bg-surface-overlay text-text-muted border border-border',
-  Pending:  'bg-amber-500/10 text-amber-400 border border-amber-500/30',
+  Pending:  'bg-medium-bg text-medium-fg border border-medium-line',
 }
 
 export default function SettingsPage() {
@@ -319,7 +319,7 @@ export default function SettingsPage() {
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
-              activeTab === tab.id ? 'border-accent-500 text-accent-400' : 'border-transparent text-text-muted hover:text-text-secondary'
+              activeTab === tab.id ? 'border-accent-500 text-accent-700' : 'border-transparent text-text-muted hover:text-text-secondary'
             }`}
           >
             {tab.icon}
@@ -338,9 +338,8 @@ export default function SettingsPage() {
                 <p className="text-sm font-medium text-text-primary">Invite team member</p>
                 <p className="text-xs text-text-muted mt-0.5">Share this link with employees to join your workspace</p>
               </div>
-              <button onClick={() => setInviteOpen(false)} className="text-text-muted hover:text-text-secondary p-1 rounded transition-colors">
-                <RefreshCw className="w-4 h-4 opacity-0" />
-                ✕
+              <button onClick={() => setInviteOpen(false)} aria-label="Close" className="text-text-muted hover:text-text-primary hover:bg-surface-overlay p-1.5 rounded-md">
+                <X className="w-4 h-4" />
               </button>
             </div>
             <div className="px-5 py-5 space-y-4">
@@ -351,7 +350,7 @@ export default function SettingsPage() {
                 </div>
               )}
               {inviteError && (
-                <div className="flex items-start gap-2 bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg px-3 py-2.5 text-xs">
+                <div className="flex items-start gap-2 bg-critical-bg border border-critical-line text-critical-fg rounded-lg px-3 py-2.5 text-xs">
                   <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                   <span>{inviteError}</span>
                 </div>
@@ -359,19 +358,19 @@ export default function SettingsPage() {
               {inviteState === 'ready' && inviteCode && (
                 <>
                   <div>
-                    <p className="text-xs font-medium text-text-muted uppercase tracking-wider mb-2">Invite code</p>
+                    <p className="text-[12.5px] font-medium text-text-muted mb-2">Invite code</p>
                     <div className="flex items-center gap-2 bg-surface-hover border border-border rounded-lg px-3 py-2.5">
                       <code className="text-xs text-text-secondary font-mono flex-1 truncate">{inviteCode}</code>
                       <button
                         onClick={() => copyInvite('code')}
                         className="flex-shrink-0 text-xs font-medium text-text-muted hover:text-text-secondary flex items-center gap-1 transition-colors"
                       >
-                        {inviteCopied === 'code' ? <><CheckCircle className="w-3.5 h-3.5 text-emerald-500" /> Copied</> : 'Copy'}
+                        {inviteCopied === 'code' ? <><CheckCircle className="w-3.5 h-3.5 text-positive-fg" /> Copied</> : 'Copy'}
                       </button>
                     </div>
                   </div>
                   <div>
-                    <p className="text-xs font-medium text-text-muted uppercase tracking-wider mb-2">Invite link</p>
+                    <p className="text-[12.5px] font-medium text-text-muted mb-2">Invite link</p>
                     <div className="flex items-center gap-2 bg-surface-hover border border-border rounded-lg px-3 py-2.5">
                       <span className="text-xs text-text-muted flex-1 truncate font-mono">
                         {typeof window !== 'undefined' ? window.location.origin : ''}/join?code={inviteCode}
@@ -380,7 +379,7 @@ export default function SettingsPage() {
                         onClick={() => copyInvite('link')}
                         className="flex-shrink-0 text-xs font-medium text-text-muted hover:text-text-secondary flex items-center gap-1 transition-colors"
                       >
-                        {inviteCopied === 'link' ? <><CheckCircle className="w-3.5 h-3.5 text-emerald-500" /> Copied</> : 'Copy'}
+                        {inviteCopied === 'link' ? <><CheckCircle className="w-3.5 h-3.5 text-positive-fg" /> Copied</> : 'Copy'}
                       </button>
                     </div>
                   </div>
@@ -420,7 +419,7 @@ export default function SettingsPage() {
               <thead>
                 <tr className="bg-surface-overlay border-b border-border">
                   {['User', 'Role', 'Joined', 'Logs', ''].map(h => (
-                    <th key={h} className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">{h}</th>
+                    <th key={h} className="text-left px-4 py-3 text-[12.5px] font-medium text-text-muted">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -442,7 +441,7 @@ export default function SettingsPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3.5">
-                      <span className="text-xs font-medium px-2.5 py-1 rounded-full border bg-red-500/10 text-red-400 border-red-500/30">
+                      <span className="text-xs font-medium px-2.5 py-1 rounded-full border bg-accent-50 text-accent-700 border-accent-200">
                         Admin
                       </span>
                     </td>
@@ -510,7 +509,7 @@ export default function SettingsPage() {
                     <td className="px-4 py-3.5">
                       <button
                         onClick={() => openEmployeeLogs(member)}
-                        className="flex items-center gap-1 text-xs text-accent-400 hover:text-accent-300 font-medium transition-colors"
+                        className="flex items-center gap-1 text-xs text-accent-700 hover:text-accent-800 font-medium transition-colors"
                       >
                         <Clock className="w-3.5 h-3.5" />
                         View logs
@@ -521,7 +520,7 @@ export default function SettingsPage() {
                         onClick={() => removeMember(member)}
                         disabled={removing === member.user_id}
                         title="Remove from workspace"
-                        className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded disabled:opacity-40 transition-colors"
+                        className="p-1.5 text-critical-fg hover:text-critical-fg hover:bg-critical-bg rounded disabled:opacity-40 transition-colors"
                       >
                         {removing === member.user_id
                           ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -612,11 +611,11 @@ export default function SettingsPage() {
               </div>
               {expandedRole === role.name && (
                 <div className="px-4 pb-4 pt-1 border-t border-border-subtle bg-surface-hover/50">
-                  <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider mt-3 mb-2">Permissions</p>
+                  <p className="text-[12px] font-medium text-text-muted mt-3 mb-2">Permissions</p>
                   <ul className="space-y-1.5">
                     {role.permissions.map(p => (
                       <li key={p} className="flex items-center gap-2 text-sm text-text-secondary">
-                        <CheckCircle className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                        <CheckCircle className="w-3.5 h-3.5 text-positive-fg flex-shrink-0" />
                         {p}
                       </li>
                     ))}
@@ -627,7 +626,7 @@ export default function SettingsPage() {
           ))}
           <p className="text-xs text-text-muted mt-3">
             Need a custom role for your organization?{' '}
-            <a href="/contact" className="text-accent-400 hover:text-accent-300 font-medium">Contact us</a>. Custom roles are available on Enterprise plans.
+            <a href="/contact" className="text-accent-700 hover:text-accent-800 font-medium">Contact us</a>. Custom roles are available on Enterprise plans.
           </p>
         </div>
       )}
@@ -650,7 +649,7 @@ export default function SettingsPage() {
                     <p className="text-xs text-text-muted mt-0.5">{item.detail}</p>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <p className={`text-xs font-medium ${item.status === 'on' || item.status === 'ok' ? 'text-emerald-400' : 'text-emerald-400'}`}>{item.value}</p>
+                    <p className={`text-xs font-medium ${item.status === 'on' || item.status === 'ok' ? 'text-positive-fg' : 'text-positive-fg'}`}>{item.value}</p>
                   </div>
                 </div>
               ))}
@@ -686,7 +685,7 @@ export default function SettingsPage() {
                 </div>
               </div>
               <p className="text-xs text-text-muted flex items-center gap-1.5">
-                <AlertTriangle className="w-3 h-3 text-amber-400" />
+                <AlertTriangle className="w-3 h-3 text-medium-fg" />
                 API keys grant full read/write access. Never share or commit to version control.
               </p>
             </div>
@@ -702,15 +701,15 @@ export default function SettingsPage() {
             <CardDivider />
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-text-secondary mb-1.5">Organization name</label>
+                <label className="block text-[13px] font-medium text-text-primary mb-1.5">Organization name</label>
                 <input
                   value={tenantName}
                   onChange={e => setTenantName(e.target.value)}
-                  className="w-full bg-surface border border-border-strong rounded-lg px-3.5 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
+                  className="w-full bg-surface border border-border-strong rounded-lg px-3.5 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-500/30 focus:border-accent-500 focus-visible:ring-offset-0"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-text-secondary mb-1.5">Timezone</label>
+                <label className="block text-[13px] font-medium text-text-primary mb-1.5">Timezone</label>
                 <select
                   value={timezone}
                   onChange={e => setTimezone(e.target.value)}
@@ -757,8 +756,8 @@ export default function SettingsPage() {
                   {savingOrgName ? 'Saving…' : 'Save changes'}
                 </Button>
                 <Button variant="secondary" size="md" onClick={() => { setTenantName(currentUser?.company || ''); setOrgNameError('') }}>Discard</Button>
-                {orgNameSaved && <span className="text-xs font-medium text-emerald-400">Saved. Your team will see this the next time they load the app.</span>}
-                {orgNameError && <span className="text-xs font-medium text-red-400">{orgNameError}</span>}
+                {orgNameSaved && <span className="text-xs font-medium text-positive-fg">Saved. Your team will see this the next time they load the app.</span>}
+                {orgNameError && <span className="text-xs font-medium text-critical-fg">{orgNameError}</span>}
               </div>
             </div>
           </Card>
@@ -772,14 +771,14 @@ export default function SettingsPage() {
               ].map((row) => (
                 <div key={row.label} className="flex justify-between items-center text-sm py-1.5 border-b border-border-subtle last:border-0">
                   <span className="text-text-muted">{row.label}</span>
-                  <span className={`font-medium ${'highlight' in row && row.highlight ? 'text-emerald-400' : 'text-text-secondary'}`}>{row.value}</span>
+                  <span className={`font-medium ${'highlight' in row && row.highlight ? 'text-positive-fg' : 'text-text-secondary'}`}>{row.value}</span>
                 </div>
               ))}
             </div>
             <div className="mt-4 flex items-center gap-3">
               <p className="text-xs text-text-muted">
                 You're on the highest tier. Questions about billing?{' '}
-                <a href="/contact" className="text-accent-400 hover:text-accent-300 font-medium">Contact us</a>
+                <a href="/contact" className="text-accent-700 hover:text-accent-800 font-medium">Contact us</a>
               </p>
             </div>
           </Card>
@@ -801,9 +800,9 @@ export default function SettingsPage() {
                   This removes every file you have uploaded and all computed metrics derived from them.
                   Your account and settings are not affected.
                 </p>
-                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 flex gap-3">
-                  <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-red-400">
+                <div className="bg-critical-bg border border-critical-line rounded-lg p-4 flex gap-3">
+                  <AlertCircle className="w-4 h-4 text-critical-fg flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-critical-fg">
                     This action is permanent. All uploaded data, anomaly results, and spend metrics will be erased.
                     You will need to re-upload your files to restore them.
                   </p>
@@ -822,7 +821,7 @@ export default function SettingsPage() {
           {/* ── Confirm ── */}
           {resetStep === 'confirm' && (
             <Card>
-              <CardHeader title="Confirm data reset" icon={<AlertCircle className="w-4 h-4 text-red-400" />} />
+              <CardHeader title="Confirm data reset" icon={<AlertCircle className="w-4 h-4 text-critical-fg" />} />
               <CardDivider />
               <div className="space-y-5">
                 <p className="text-sm text-text-secondary leading-relaxed">
@@ -884,13 +883,13 @@ export default function SettingsPage() {
                       onChange={e => handleCodeDigit(i, e.target.value)}
                       onKeyDown={e => handleCodeKeyDown(i, e)}
                       disabled={resetStep === 'verifying'}
-                      className="w-11 h-14 text-center text-xl font-normal border border-border-strong rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 disabled:opacity-50 text-text-primary"
+                      className="w-11 h-14 text-center text-xl font-medium tracking-[-0.02em] border border-border-strong rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-critical disabled:opacity-50 text-text-primary"
                     />
                   ))}
                 </div>
 
                 {resetError && (
-                  <p className="text-sm text-red-400 flex items-center gap-1.5">
+                  <p className="text-sm text-critical-fg flex items-center gap-1.5">
                     <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
                     {resetError}
                   </p>
@@ -933,7 +932,7 @@ export default function SettingsPage() {
           {/* ── Done ── */}
           {resetStep === 'done' && (
             <Card>
-              <CardHeader title="Data reset complete" icon={<CheckCircle className="w-4 h-4 text-emerald-400" />} />
+              <CardHeader title="Data reset complete" icon={<CheckCircle className="w-4 h-4 text-positive-fg" />} />
               <CardDivider />
               <div className="space-y-4">
                 <p className="text-sm text-text-secondary">
@@ -942,9 +941,9 @@ export default function SettingsPage() {
                 </p>
                 <button
                   onClick={() => { setResetStep('idle'); setResetCode(''); setResetError('') }}
-                  className="text-sm font-medium text-emerald-400 hover:text-emerald-300 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-text-secondary hover:text-text-primary"
                 >
-                  ← Back to data settings
+                  <ArrowLeft className="w-4 h-4" /> Back to data settings
                 </button>
               </div>
             </Card>
@@ -953,10 +952,10 @@ export default function SettingsPage() {
           {/* ── Error ── */}
           {resetStep === 'error' && (
             <Card>
-              <CardHeader title="Could not send code" icon={<AlertCircle className="w-4 h-4 text-red-400" />} />
+              <CardHeader title="Could not send code" icon={<AlertCircle className="w-4 h-4 text-critical-fg" />} />
               <CardDivider />
               <div className="space-y-4">
-                {resetError && <p className="text-sm text-red-400">{resetError}</p>}
+                {resetError && <p className="text-sm text-critical-fg">{resetError}</p>}
                 <div className="flex gap-3">
                   <button
                     onClick={sendResetCode}

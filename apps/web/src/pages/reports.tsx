@@ -633,11 +633,11 @@ export default function ReportsPage() {
     <AppLayout title="Reports">
       <div className="max-w-3xl">
         <div className="mb-8">
-          <h1 className="text-lg font-normal text-text-primary">Reports</h1>
+          <h1 className="text-lg font-medium tracking-[-0.015em] text-text-primary">Reports</h1>
           <p className="text-xs text-text-muted mt-0.5">Download a professional PDF report directly to your computer</p>
         </div>
 
-        <div className="bg-surface-raised border border-border">
+        <div className="bg-surface-raised border border-border rounded-xl shadow-card">
           {/* Header */}
           <div className="px-6 py-5 border-b border-border flex items-start justify-between gap-6">
             <div className="flex items-start gap-4">
@@ -650,7 +650,7 @@ export default function ReportsPage() {
                 <p className="text-xs text-text-muted mt-0.5">Generated {today()}</p>
               </div>
             </div>
-            <span className="text-[10px] font-semibold text-text-muted border border-border bg-surface-overlay px-2 py-1 uppercase tracking-wider flex-shrink-0">PDF</span>
+            <span className="text-[12px] font-medium text-text-muted border border-border bg-surface-overlay px-2 py-1 flex-shrink-0">PDF</span>
           </div>
 
           {/* Contents */}
@@ -673,7 +673,7 @@ export default function ReportsPage() {
                       <p className="text-xs font-medium text-text-secondary">{item.label}</p>
                       <p className="text-[10px] text-text-muted mt-0.5">{item.desc}</p>
                     </div>
-                    <CheckCircle className="w-3.5 h-3.5 text-emerald-400 ml-auto flex-shrink-0" />
+                    <CheckCircle className="w-3.5 h-3.5 text-positive-fg ml-auto flex-shrink-0" />
                   </div>
                 )
               })}
@@ -701,14 +701,14 @@ export default function ReportsPage() {
           <div className="px-6 py-5 flex items-center justify-between gap-4 bg-surface-sunken">
             <div>
               {error
-                ? <p className="text-xs text-red-400">{error}</p>
+                ? <p className="text-xs text-critical-fg">{error}</p>
                 : <p className="text-xs text-text-muted">Downloads directly to your computer as a PDF file</p>
               }
             </div>
             <button
               onClick={handleGenerate}
               disabled={generating}
-              className="inline-flex items-center gap-2 bg-accent-500 hover:bg-accent-600 text-white font-medium px-5 py-2.5 text-sm transition-colors disabled:opacity-50 flex-shrink-0"
+              className="inline-flex items-center gap-2 bg-accent-600 hover:bg-accent-700 text-white font-medium px-5 py-2.5 text-sm transition-colors disabled:opacity-50 flex-shrink-0"
             >
               {generating ? (
                 <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
@@ -725,12 +725,12 @@ export default function ReportsPage() {
         <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
             { label:'Transactions',  value:dataset.totalTransactions.toLocaleString(), color:'text-text-primary' },
-            { label:'Open findings', value:open.length.toString(),                     color:open.length>0    ?'text-red-400'    :'text-text-primary' },
-            { label:'Risk exposure', value:fmtFull(exposure),                          color:exposure>0       ?'text-orange-400' :'text-text-primary' },
-            { label:'Recoverable',   value:fmtFull(savings),                           color:savings>0        ?'text-emerald-400'  :'text-text-muted' },
+            { label:'Open findings', value:open.length.toString(),                     color:open.length>0    ?'text-critical-fg'    :'text-text-primary' },
+            { label:'Risk exposure', value:fmtFull(exposure),                          color:exposure>0       ?'text-high-fg' :'text-text-primary' },
+            { label:'Recoverable',   value:fmtFull(savings),                           color:savings>0        ?'text-positive-fg'  :'text-text-muted' },
           ].map(s => (
-            <div key={s.label} className="bg-surface-raised border border-border px-4 py-3">
-              <p className="text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-1">{s.label}</p>
+            <div key={s.label} className="bg-surface-raised border border-border rounded-xl shadow-card px-4 py-3">
+              <p className="text-[12px] font-medium text-text-muted mb-1">{s.label}</p>
               <p className={`text-base font-medium ${s.color} tabular-nums`}>{s.value}</p>
             </div>
           ))}

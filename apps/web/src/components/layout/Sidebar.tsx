@@ -126,26 +126,25 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       {/* Mobile backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+          className="fixed inset-0 bg-ink/30 z-20 lg:hidden"
           onClick={onClose}
         />
       )}
 
       <aside className={clsx(
-        'fixed inset-y-0 left-0 w-64 flex flex-col bg-sidebar-bg z-30 transition-transform duration-200',
+        'fixed inset-y-0 left-0 w-60 flex flex-col bg-sidebar-bg border-r border-sidebar-border z-30 transition-transform duration-300 ease-out-expo',
         'lg:translate-x-0',
         isOpen ? 'translate-x-0' : '-translate-x-full',
       )}>
 
         {/* Brand */}
-        <div className="h-14 flex items-center px-5 border-b border-sidebar-border flex-shrink-0">
+        <div className="h-14 flex items-center px-5 flex-shrink-0">
           <div className="flex-1">
-            <VenturaLogo variant="light" height={26} />
-            <span className="block text-[10px] text-sidebar-muted mt-0.5">Financial Operations</span>
+            <VenturaLogo variant="dark" height={15} />
           </div>
           <button
             onClick={onClose}
-            className="lg:hidden text-sidebar-muted hover:text-sidebar-text p-1 transition-colors"
+            className="lg:hidden -mr-1 rounded-md text-sidebar-muted hover:text-sidebar-text hover:bg-sidebar-hover p-1.5"
             aria-label="Close navigation"
           >
             <XMarkIcon className="w-5 h-5" />
@@ -153,21 +152,23 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
         </div>
 
         {/* Workspace label */}
-        <div className="px-3 pt-3 pb-1">
-          <div className="flex items-center gap-2.5 px-3 py-2 border border-sidebar-border">
-            <BuildingOfficeIcon className="w-3.5 h-3.5 text-sidebar-muted flex-shrink-0" />
+        <div className="px-3 pb-1">
+          <div className="flex items-center gap-2.5 px-2 py-2 rounded-lg">
+            <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md bg-ink text-[11px] font-semibold text-white">
+              {companyName.charAt(0).toUpperCase()}
+            </span>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-sidebar-text truncate">{companyName}</p>
-              <p className="text-[10px] text-sidebar-muted">Enterprise</p>
+              <p className="text-[13.5px] font-medium text-text-primary truncate">{companyName}</p>
             </div>
+            <BuildingOfficeIcon className="w-4 h-4 text-sidebar-muted flex-shrink-0" aria-hidden />
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto sidebar-scroll px-3 pt-3 pb-4 space-y-4">
+        <nav className="flex-1 overflow-y-auto sidebar-scroll px-3 pt-3 pb-4 space-y-5">
           {navSections.map((section) => (
             <div key={section.label}>
-              <p className="px-3 mb-1 text-[10px] font-semibold tracking-widest text-sidebar-muted uppercase">
+              <p className="px-2 mb-1 text-[12px] font-medium text-sidebar-muted">
                 {section.label}
               </p>
               <ul className="space-y-px">
@@ -179,16 +180,16 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                       <Link
                         href={item.href}
                         className={clsx(
-                          'flex items-center gap-3 px-3 py-2 text-sm font-medium transition-colors',
+                          'flex items-center gap-2.5 h-8 px-2 rounded-md text-[13.5px] font-medium',
                           active
-                            ? 'bg-sidebar-active text-white border-l-2 border-accent-500 pl-[10px]'
-                            : 'text-sidebar-text hover:text-white hover:bg-sidebar-hover',
+                            ? 'bg-surface-raised text-text-primary shadow-card ring-1 ring-border'
+                            : 'text-sidebar-text hover:text-text-primary hover:bg-sidebar-hover',
                         )}
                       >
-                        <Icon className="w-4 h-4 flex-shrink-0" />
+                        <Icon className={clsx('w-4 h-4 flex-shrink-0', active ? 'text-accent-600' : 'text-sidebar-muted')} />
                         <span className="flex-1 truncate">{item.label}</span>
                         {!!item.badge && (
-                          <span className="min-w-[18px] h-4 px-1 text-[10px] font-semibold text-sidebar-text bg-sidebar-border border border-border-strong inline-flex items-center justify-center">
+                          <span className="min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-medium text-text-secondary bg-sidebar-active tabular-nums inline-flex items-center justify-center">
                             {item.badge}
                           </span>
                         )}
@@ -203,20 +204,21 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
 
         {/* User */}
         <div className="border-t border-sidebar-border px-3 py-3">
-          <div className="flex items-center gap-2.5 px-3 py-2">
-            <div className="w-7 h-7 bg-sidebar-active border border-border-strong flex items-center justify-center flex-shrink-0">
-              <span className="text-sidebar-text text-[10px] font-semibold">{userInitials}</span>
+          <div className="flex items-center gap-2.5 px-2 py-1.5">
+            <div className="w-7 h-7 rounded-full bg-accent-100 flex items-center justify-center flex-shrink-0">
+              <span className="text-accent-800 text-[11px] font-semibold">{userInitials}</span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-sidebar-text truncate">{displayName}</p>
-              <p className="text-[10px] text-sidebar-muted">{user?.role ?? 'Admin'}</p>
+              <p className="text-[13px] font-medium text-text-primary truncate">{displayName}</p>
+              <p className="text-[12px] text-sidebar-muted capitalize">{user?.role ?? 'Admin'}</p>
             </div>
             <button
               onClick={handleSignOut}
               title="Sign out"
-              className="text-sidebar-muted hover:text-sidebar-text transition-colors p-1"
+              aria-label="Sign out"
+              className="rounded-md text-sidebar-muted hover:text-text-primary hover:bg-sidebar-hover p-1.5"
             >
-              <ArrowRightOnRectangleIcon className="w-3.5 h-3.5" />
+              <ArrowRightOnRectangleIcon className="w-4 h-4" />
             </button>
           </div>
         </div>

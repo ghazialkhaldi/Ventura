@@ -28,10 +28,10 @@ interface EmployeeLayoutProps {
 }
 
 const ROLE_LABELS: Record<string, { label: string; color: string }> = {
-  viewer:  { label: 'Viewer',  color: 'bg-slate-400/10 text-slate-400 border-slate-400/25' },
-  analyst: { label: 'Analyst', color: 'bg-amber-500/10 text-amber-400 border-amber-500/30'  },
-  editor:  { label: 'Editor',  color: 'bg-accent-500/10 text-accent-300 border-accent-500/30' },
-  admin:   { label: 'Admin',   color: 'bg-purple-500/10 text-purple-400 border-purple-500/30' },
+  viewer:  { label: 'Viewer',  color: 'bg-surface-overlay text-text-muted border-border' },
+  analyst: { label: 'Analyst', color: 'bg-medium-bg text-medium-fg border-medium-line'  },
+  editor:  { label: 'Editor',  color: 'bg-accent-50 text-accent-700 border-accent-200' },
+  admin:   { label: 'Admin',   color: 'bg-purple-50 text-purple-700 border-purple-200' },
 }
 
 export default function EmployeeLayout({ children, title }: EmployeeLayoutProps) {
@@ -92,8 +92,8 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
   const SidebarContent = () => (
     <>
       {/* Brand */}
-      <div className="h-14 flex items-center justify-between px-5 border-b border-border flex-shrink-0">
-        <VenturaLogo variant="light" height={22} />
+      <div className="h-14 flex items-center justify-between px-5 flex-shrink-0">
+        <VenturaLogo variant="dark" height={15} />
         <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-1 text-text-muted hover:text-text-secondary">
           <XMarkIcon className="w-5 h-5" />
         </button>
@@ -101,8 +101,8 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
 
       {/* Company badge */}
       <div className="px-4 pt-4 pb-2">
-        <div className="flex items-center gap-2.5 px-3 py-2.5 bg-surface-overlay border border-border rounded-lg">
-          <div className="w-7 h-7 rounded-full bg-emerald-600 flex items-center justify-center flex-shrink-0">
+        <div className="flex items-center gap-2.5 px-2 py-2 rounded-lg">
+          <div className="w-7 h-7 rounded-md bg-ink flex items-center justify-center flex-shrink-0">
             <BuildingOfficeIcon className="w-4 h-4 text-white" />
           </div>
           <div className="min-w-0 flex-1">
@@ -116,7 +116,7 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto px-4 pt-2 pb-4 space-y-px">
-        <p className="px-3 mb-1.5 text-[10px] font-semibold tracking-widest text-text-muted uppercase">Navigation</p>
+        <p className="px-2 mb-1 text-[12px] font-medium text-sidebar-muted">Navigation</p>
         {navItems.map(item => {
           const active = isActive(item.href)
           const Icon = item.icon
@@ -125,8 +125,8 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
               key={item.href}
               href={item.href}
               className={clsx(
-                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                active ? 'bg-accent-500 text-white' : 'text-text-secondary hover:text-text-primary hover:bg-surface-overlay',
+                'flex items-center gap-2.5 h-8 px-2 rounded-md text-[13.5px] font-medium',
+                active ? 'bg-surface-raised text-text-primary shadow-card ring-1 ring-border' : 'text-sidebar-text hover:text-text-primary hover:bg-sidebar-hover',
               )}
             >
               <Icon className="w-4 h-4 flex-shrink-0" />
@@ -137,7 +137,7 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
 
         {/* Access level notice */}
         <div className="mt-4 mx-1 px-3 py-2.5 bg-surface-overlay border border-border rounded-lg">
-          <p className="text-[10px] font-semibold text-text-muted uppercase tracking-wide mb-1 flex items-center gap-1">
+          <p className="text-[12px] font-medium text-text-muted mb-1 flex items-center gap-1">
             <LockClosedIcon className="w-3 h-3" />
             Access level
           </p>
@@ -154,8 +154,8 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
       {/* User footer */}
       <div className="border-t border-border px-4 py-3">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-full bg-accent-500 flex items-center justify-center flex-shrink-0">
-            <span className="text-white text-[10px] font-bold">{userInitials}</span>
+          <div className="w-7 h-7 rounded-full bg-accent-100 flex items-center justify-center flex-shrink-0">
+            <span className="text-accent-800 text-[11px] font-semibold">{userInitials}</span>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-medium text-text-primary truncate">{displayName}</p>
@@ -182,10 +182,10 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
 
         {/* Sidebar — desktop always visible, mobile as overlay */}
         {sidebarOpen && (
-          <div className="fixed inset-0 bg-black/40 z-20 lg:hidden" onClick={() => setSidebarOpen(false)} />
+          <div className="fixed inset-0 bg-ink/30 z-20 lg:hidden" onClick={() => setSidebarOpen(false)} />
         )}
         <aside className={clsx(
-          'fixed inset-y-0 left-0 w-60 flex flex-col bg-surface-raised border-r border-border z-30 transition-transform duration-200',
+          'fixed inset-y-0 left-0 w-60 flex flex-col bg-sidebar-bg border-r border-sidebar-border z-30 transition-transform duration-300 ease-out-expo',
           'lg:translate-x-0',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full',
         )}>

@@ -86,6 +86,46 @@ const TYPE_META: Record<AnomalyType, {
       { name: 'Controller sign-off',  owner: 'Controller' },
     ],
   },
+  approval_avoidance: {
+    name:        'Approval Threshold Review',
+    description: 'Review payments clustered just below an approval limit for possible invoice splitting.',
+    slaDays:     3,
+    steps: [
+      { name: 'AP invoice review',       owner: 'Accounts Payable' },
+      { name: 'Approver confirmation',   owner: 'Finance Manager' },
+      { name: 'Controller sign-off',     owner: 'Controller' },
+    ],
+  },
+  category_mismatch: {
+    name:        'Coding Correction',
+    description: 'Correct transactions posted to a GL category that does not match the vendor.',
+    slaDays:     5,
+    steps: [
+      { name: 'Finance Analyst review',  owner: 'Finance Analyst' },
+      { name: 'GL reclassification',     owner: 'Accounts Payable' },
+      { name: 'Controller sign-off',     owner: 'Controller' },
+    ],
+  },
+  period_mismatch: {
+    name:        'Period Cut-off Correction',
+    description: 'Correct rows whose transaction date falls outside their stated accounting period.',
+    slaDays:     3,
+    steps: [
+      { name: 'Finance Analyst review',  owner: 'Finance Analyst' },
+      { name: 'Journal correction',      owner: 'Accounts Payable' },
+      { name: 'Controller sign-off',     owner: 'Controller' },
+    ],
+  },
+  new_vendor_risk: {
+    name:        'New Vendor Verification',
+    description: 'Verify first-time vendors whose payment combines risk signals such as a round amount, weekend posting or materiality.',
+    slaDays:     2,
+    steps: [
+      { name: 'Vendor master check',     owner: 'Accounts Payable' },
+      { name: 'Bank detail verification', owner: 'Treasury' },
+      { name: 'CFO / Controller sign-off', owner: 'CFO' },
+    ],
+  },
 }
 
 interface WorkflowItem {
@@ -132,15 +172,15 @@ function buildWorkflows(anomalies: DetectedAnomaly[]): WorkflowItem[] {
 }
 
 const stepStatusIcon: Record<string, React.ReactElement> = {
-  ok:    <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />,
-  slow:  <Clock className="w-3.5 h-3.5 text-amber-500" />,
-  stuck: <AlertTriangle className="w-3.5 h-3.5 text-red-500" />,
+  ok:    <CheckCircle className="w-3.5 h-3.5 text-positive-fg" />,
+  slow:  <Clock className="w-3.5 h-3.5 text-medium-fg" />,
+  stuck: <AlertTriangle className="w-3.5 h-3.5 text-critical-fg" />,
 }
 
 const stepStatusBg: Record<string, string> = {
-  ok:    'bg-emerald-500/10 border-emerald-500/30',
-  slow:  'bg-amber-500/10 border-amber-500/30',
-  stuck: 'bg-red-500/10 border-red-500/30',
+  ok:    'bg-positive-bg border-positive-line',
+  slow:  'bg-medium-bg border-medium-line',
+  stuck: 'bg-critical-bg border-critical-line',
 }
 
 function stepHealth(overdue: number, idx: number, total: number): 'ok' | 'slow' | 'stuck' {
@@ -199,7 +239,7 @@ export default function WorkflowsPage() {
 
       {workflows.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-center">
-          <CheckCircle className="w-10 h-10 text-emerald-400 mb-3" />
+          <CheckCircle className="w-10 h-10 text-positive-fg mb-3" />
           <p className="text-text-secondary font-medium">No open workflows</p>
           <p className="text-xs text-text-muted mt-1">No anomalies were detected in your uploaded data.</p>
         </div>
@@ -209,16 +249,16 @@ export default function WorkflowsPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             {[
               { label: 'Workflow types',     value: stats.total,        icon: GitMerge,      color: 'text-text-secondary', bg: 'bg-surface-raised', border: 'border-border' },
-              { label: 'Critical/Bottleneck', value: stats.bottleneck,   icon: AlertTriangle, color: 'text-red-400',   bg: 'bg-red-500/10',    border: 'border-red-500/30' },
-              { label: 'Items in review',    value: stats.totalInProg,  icon: Clock,         color: 'text-emerald-400',  bg: 'bg-emerald-500/10',   border: 'border-emerald-500/30' },
-              { label: 'Overdue items',      value: stats.totalOverdue, icon: AlertCircle,   color: 'text-amber-400', bg: 'bg-amber-500/10',  border: 'border-amber-500/30' },
+              { label: 'Critical/Bottleneck', value: stats.bottleneck,   icon: AlertTriangle, color: 'text-critical-fg',   bg: 'bg-critical-bg',    border: 'border-critical-line' },
+              { label: 'Items in review',    value: stats.totalInProg,  icon: Clock,         color: 'text-positive-fg',  bg: 'bg-positive-bg',   border: 'border-positive-line' },
+              { label: 'Overdue items',      value: stats.totalOverdue, icon: AlertCircle,   color: 'text-medium-fg', bg: 'bg-medium-bg',  border: 'border-medium-line' },
             ].map((s) => {
               const Icon = s.icon
               return (
                 <div key={s.label} className={`${s.bg} border ${s.border} rounded-lg px-4 py-3 flex items-center gap-3`}>
                   <Icon className={`w-5 h-5 ${s.color} flex-shrink-0`} />
                   <div>
-                    <p className={`text-xl font-normal ${s.color}`}>{s.value}</p>
+                    <p className={`text-xl font-medium tracking-[-0.02em] ${s.color}`}>{s.value}</p>
                     <p className="text-xs text-text-muted">{s.label}</p>
                   </div>
                 </div>
@@ -234,7 +274,7 @@ export default function WorkflowsPage() {
               const slaDays = meta.slaDays
               const avgDays = wf.overdue > 0 ? Math.ceil(slaDays * 1.5) : Math.ceil(slaDays * 0.6)
               const slaRatio = avgDays / slaDays
-              const slaColor = slaRatio >= 1.5 ? 'bg-red-500' : slaRatio >= 1 ? 'bg-amber-500' : 'bg-emerald-500'
+              const slaColor = slaRatio >= 1.5 ? 'bg-critical' : slaRatio >= 1 ? 'bg-medium' : 'bg-positive'
               const pctBar   = Math.min((avgDays / (slaDays * 2)) * 100, 100)
 
               return (
@@ -269,7 +309,7 @@ export default function WorkflowsPage() {
                         <p className="text-text-muted">items</p>
                       </div>
                       <div className="text-center">
-                        <p className={`font-medium ${wf.overdue > 0 ? 'text-red-400' : 'text-text-secondary'}`}>{wf.overdue}</p>
+                        <p className={`font-medium ${wf.overdue > 0 ? 'text-critical-fg' : 'text-text-secondary'}`}>{wf.overdue}</p>
                         <p className="text-text-muted">overdue</p>
                       </div>
                     </div>
@@ -291,7 +331,7 @@ export default function WorkflowsPage() {
                       <div className="grid md:grid-cols-2 gap-6">
                         {/* Steps */}
                         <div>
-                          <p className="text-xs font-medium text-text-muted uppercase tracking-wider mb-3">Process steps</p>
+                          <p className="text-[12.5px] font-medium text-text-muted mb-3">Process steps</p>
                           <div className="space-y-2">
                             {meta.steps.map((step, i) => {
                               const health = stepHealth(wf.overdue, i, meta.steps.length)
@@ -312,7 +352,7 @@ export default function WorkflowsPage() {
 
                         {/* Items list */}
                         <div>
-                          <p className="text-xs font-medium text-text-muted uppercase tracking-wider mb-3">
+                          <p className="text-[12.5px] font-medium text-text-muted mb-3">
                             Open items ({wf.inProgress})
                           </p>
                           <div className="space-y-2 mb-4 max-h-52 overflow-y-auto">
@@ -329,10 +369,10 @@ export default function WorkflowsPage() {
                                     {a.severity.slice(0, 1)}
                                   </Badge>
                                   <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-medium text-text-secondary truncate group-hover:text-accent-400">{a.title}</p>
+                                    <p className="text-xs font-medium text-text-secondary truncate group-hover:text-accent-800">{a.title}</p>
                                     <p className="text-[10px] text-text-muted">{a.vendor} · {fmtCurrency(a.amount)}</p>
                                   </div>
-                                  <ChevronRight className="w-3.5 h-3.5 text-text-muted group-hover:text-accent-400 flex-shrink-0 mt-0.5" />
+                                  <ChevronRight className="w-3.5 h-3.5 text-text-muted group-hover:text-accent-800 flex-shrink-0 mt-0.5" />
                                 </a>
                               ))}
                             {wf.inProgress > 10 && (

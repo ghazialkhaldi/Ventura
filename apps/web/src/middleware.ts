@@ -51,12 +51,17 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
     'camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=()'
   )
 
-  // Content Security Policy
+  // Content Security Policy. `next dev` evaluates its bundles with eval() and is
+  // served over plain http, so local development needs 'unsafe-eval' and must
+  // not upgrade requests; production keeps the strict policy.
+  const isDev = process.env.NODE_ENV === 'development'
   h.set(
     'Content-Security-Policy',
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline'",   // unsafe-inline needed for Next.js inline scripts
+      isDev
+        ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+        : "script-src 'self' 'unsafe-inline'",   // unsafe-inline needed for Next.js inline scripts
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob:",
       "font-src 'self' https://fonts.gstatic.com",
@@ -65,7 +70,7 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
-      "upgrade-insecure-requests",
+      ...(isDev ? [] : ["upgrade-insecure-requests"]),
     ].join('; ')
   )
 

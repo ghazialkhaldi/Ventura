@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import { CHART } from '../lib/chartTheme'
 import AppLayout from '../components/layout/AppLayout'
 import Badge from '../components/ui/Badge'
 import DataUploadWidget from '../components/ui/DataUploadWidget'
@@ -53,31 +54,17 @@ function timeAgo(iso: string): string {
   return `${Math.floor(sec / 86400)}d ago`
 }
 
-const SEV_LEFT: Record<string, string> = {
-  CRITICAL: 'border-l-red-500',
-  HIGH:     'border-l-orange-400',
-  MEDIUM:   'border-l-amber-400',
-  LOW:      'border-l-slate-500',
-}
-
 const SEV_AMT: Record<string, string> = {
-  CRITICAL: 'text-red-400',
-  HIGH:     'text-orange-400',
-  MEDIUM:   'text-amber-400',
+  CRITICAL: 'text-critical-fg',
+  HIGH:     'text-high-fg',
+  MEDIUM:   'text-medium-fg',
   LOW:      'text-text-muted',
 }
 
-const SEV_BANNER: Record<string, string> = {
-  CRITICAL: 'border-l-red-500',
-  HIGH:     'border-l-orange-400',
-  MEDIUM:   'border-l-amber-400',
-  LOW:      'border-l-slate-500',
-}
-
 const SEV_LABEL: Record<string, string> = {
-  CRITICAL: 'text-red-400',
-  HIGH:     'text-orange-400',
-  MEDIUM:   'text-amber-400',
+  CRITICAL: 'text-critical-fg',
+  HIGH:     'text-high-fg',
+  MEDIUM:   'text-medium-fg',
   LOW:      'text-text-muted',
 }
 
@@ -92,9 +79,9 @@ interface TeamMember {
 }
 
 const ROLE_COLORS: Record<string, string> = {
-  admin:   'bg-purple-500/10 text-purple-400 border-purple-500/30',
-  editor:  'bg-accent-500/10 text-accent-300 border-accent-500/30',
-  analyst: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+  admin:   'bg-purple-50 text-purple-700 border-purple-200',
+  editor:  'bg-accent-50 text-accent-700 border-accent-200',
+  analyst: 'bg-medium-bg text-medium-fg border-medium-line',
   viewer:  'bg-surface-overlay text-text-muted border-border',
 }
 
@@ -209,7 +196,7 @@ export default function DashboardPage() {
             <div className="w-14 h-14 bg-surface-overlay border border-border flex items-center justify-center mx-auto mb-4">
               <InboxIcon className="w-7 h-7 text-text-muted" />
             </div>
-            <h1 className="text-xl font-normal text-text-primary mb-2">No data on this device yet</h1>
+            <h1 className="text-xl font-medium tracking-[-0.02em] text-text-primary mb-2">No data on this device yet</h1>
             <p className="text-sm text-text-muted max-w-sm mx-auto">
               Financial data is uploaded per-device by your workspace admin and hasn&apos;t been loaded in this
               browser. Ask your admin to upload from your device, or check back after they&apos;ve connected data
@@ -226,7 +213,7 @@ export default function DashboardPage() {
             <div className="w-14 h-14 bg-surface-overlay border border-border flex items-center justify-center mx-auto mb-4">
               <ChartBarIcon className="w-7 h-7 text-text-muted" />
             </div>
-            <h1 className="text-xl font-normal text-text-primary mb-2">Set up your finance workspace</h1>
+            <h1 className="text-xl font-medium tracking-[-0.02em] text-text-primary mb-2">Set up your finance workspace</h1>
             <p className="text-sm text-text-muted max-w-sm mx-auto">
               Connect your accounting data to detect anomalies, surface savings, and take action on financial risk.
             </p>
@@ -239,7 +226,7 @@ export default function DashboardPage() {
               { n: 3, text: 'Review findings: approve, escalate, or dismiss each alert' },
               { n: 4, text: 'Monitor spend trends, vendor risk, and savings opportunities' },
             ].map(s => (
-              <div key={s.n} className="flex items-center gap-3 p-3.5 bg-surface-raised border border-border">
+              <div key={s.n} className="flex items-center gap-3 p-3.5 bg-surface-raised border border-border rounded-xl shadow-card">
                 <div className="w-6 h-6 bg-surface-overlay text-text-muted text-xs font-medium flex items-center justify-center flex-shrink-0">
                   {s.n}
                 </div>
@@ -284,9 +271,9 @@ export default function DashboardPage() {
       {/* ── Data trust strip ── */}
       <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 mb-5 text-[11px] text-text-muted border-b border-border-subtle pb-3.5">
         <div className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
+          <span className="w-1.5 h-1.5 rounded-full bg-positive flex-shrink-0" />
           <span className="font-medium text-text-secondary">
-            {testMode === 'live' ? 'Live data' : testMode === 'masked' ? 'Masked data' : 'Synthetic data'}
+            {testMode === 'live' ? 'Uploaded data' : testMode === 'masked' ? 'Masked data' : 'Synthetic data'}
           </span>
         </div>
         {dataset.uploadedAt && (
@@ -296,7 +283,7 @@ export default function DashboardPage() {
           </span>
         )}
         {testMode !== 'live' && (
-          <span className="bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold px-2 py-0.5 rounded-full uppercase tracking-wide text-[10px]">
+          <span className="bg-medium-bg border border-medium-line text-medium-fg font-medium px-2 py-0.5 rounded-full text-[12px]">
             {testMode === 'masked' ? 'Masked mode active' : 'Synthetic mode active'}
           </span>
         )}
@@ -321,7 +308,7 @@ export default function DashboardPage() {
           </>
         )}
         {(dataset.pendingReviewCount ?? 0) > 0 && (
-          <Link href="/import-center" className="flex items-center gap-1 text-amber-400 font-medium hover:text-amber-300 transition-colors">
+          <Link href="/import-center" className="flex items-center gap-1 text-medium-fg font-medium hover:text-medium-fg transition-colors">
             <InboxIcon className="w-3 h-3" /> {dataset.pendingReviewCount} pending review
           </Link>
         )}
@@ -332,16 +319,16 @@ export default function DashboardPage() {
 
       {/* ── Priority alert banner ── */}
       {topAnomaly && (
-        <div className={`bg-surface-raised border border-border border-l-4 ${SEV_BANNER[topSeverity]} mb-6 overflow-hidden`}>
-          <div className="flex items-stretch divide-x divide-border">
+        <div className={`bg-surface-raised border border-border rounded-xl shadow-card mb-6 overflow-hidden`}>
+          <div className="flex flex-col sm:flex-row sm:items-stretch divide-y sm:divide-y-0 sm:divide-x divide-border">
             {/* Content */}
             <div className="flex-1 p-5 min-w-0">
               <div className="flex items-center gap-2 mb-2">
-                <span className={`text-[10px] font-bold tracking-widest uppercase ${SEV_LABEL[topSeverity]}`}>
-                  {criticalCount > 0 ? 'Critical: Immediate Action Required' : highCount > 0 ? 'High Priority' : 'Needs Review'}
+                <span className={`text-[12px] font-medium ${SEV_LABEL[topSeverity]}`}>
+                  {criticalCount > 0 ? 'Critical, needs review' : highCount > 0 ? 'High priority' : 'Needs review'}
                 </span>
-                <span className="text-[10px] text-text-muted">·</span>
-                <span className="text-[10px] text-text-muted">
+                <span className="text-[12px] text-text-muted">·</span>
+                <span className="text-[12px] text-text-muted">
                   {openAnomalies.length} open alert{openAnomalies.length !== 1 ? 's' : ''}
                   {highConf.length > 0 ? ` · ${highConf.length} high-confidence` : ''}
                 </span>
@@ -354,28 +341,28 @@ export default function DashboardPage() {
             </div>
 
             {/* Amount */}
-            <div className="px-5 py-5 flex flex-col items-center justify-center gap-1.5 flex-shrink-0">
-              <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest">At Risk</p>
-              <p className={`text-2xl font-normal ${SEV_AMT[topSeverity]}`}>
+            <div className="px-5 py-4 sm:py-5 flex flex-row sm:flex-col items-center justify-between sm:justify-center gap-1.5 flex-shrink-0">
+              <p className="text-[12px] font-medium text-text-muted">At risk</p>
+              <p className={`text-2xl font-medium tracking-[-0.02em] ${SEV_AMT[topSeverity]}`}>
                 {fmtC(topAnomaly.amount)}
               </p>
               <div className="flex items-center gap-1.5">
-                <div className="w-16 h-1 bg-surface-overlay overflow-hidden">
-                  <div className="h-full bg-slate-400" style={{ width: `${topAnomaly.confidence}%` }} />
+                <div className="w-16 h-1 rounded-full bg-surface-overlay overflow-hidden">
+                  <div className="h-full bg-low" style={{ width: `${topAnomaly.confidence}%` }} />
                 </div>
-                <span className="text-[10px] font-semibold text-text-secondary">{topAnomaly.confidence}% conf.</span>
+                <span className="text-[12px] font-medium text-text-secondary tabular-nums">{topAnomaly.confidence}% conf.</span>
               </div>
             </div>
 
             {/* CTA */}
-            <div className="px-5 py-5 flex flex-col items-center justify-center gap-3 flex-shrink-0">
+            <div className="px-5 py-4 sm:py-5 flex flex-row sm:flex-col items-center justify-between sm:justify-center gap-3 flex-shrink-0">
               <Link
                 href={`/anomalies/${topAnomaly.id}`}
-                className="flex items-center gap-2 bg-accent-500 hover:bg-accent-600 text-white text-sm font-medium px-4 py-2.5 transition-colors whitespace-nowrap"
+                className="flex items-center gap-2 h-9 rounded-md bg-accent-600 hover:bg-accent-700 text-white text-[13.5px] font-medium px-3.5 shadow-card whitespace-nowrap"
               >
                 Investigate <ArrowRightIcon className="w-3.5 h-3.5" />
               </Link>
-              <Link href="/anomalies" className="text-[10px] text-text-muted hover:text-text-secondary transition-colors">
+              <Link href="/anomalies" className="text-[12px] text-text-muted hover:text-text-primary">
                 View all {openAnomalies.length} alerts
               </Link>
             </div>
@@ -386,7 +373,7 @@ export default function DashboardPage() {
             <div className="border-t border-border px-5 py-2.5 flex items-center gap-5 overflow-x-auto bg-surface-hover">
               {openAnomalies.slice(1, 5).map(a => (
                 <Link key={a.id} href={`/anomalies/${a.id}`} className="flex items-center gap-2 flex-shrink-0 group">
-                  <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${a.severity === 'CRITICAL' ? 'bg-red-500' : a.severity === 'HIGH' ? 'bg-orange-400' : 'bg-amber-400'}`} />
+                  <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${a.severity === 'CRITICAL' ? 'bg-critical' : a.severity === 'HIGH' ? 'bg-high' : 'bg-medium'}`} />
                   <span className="text-[11px] text-text-secondary group-hover:text-text-primary transition-colors truncate max-w-[160px]">{a.title}</span>
                   <span className="text-[11px] font-semibold text-text-muted">{fmtC(a.amount)}</span>
                 </Link>
@@ -402,40 +389,40 @@ export default function DashboardPage() {
       {/* ── Page header ── */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h1 className="text-lg font-normal text-text-primary">{company}</h1>
+          <h1 className="text-lg font-medium tracking-[-0.015em] text-text-primary">{company}</h1>
           <p className="text-xs text-text-muted mt-0.5">{dateLabel} · {dataset.files.length} file{dataset.files.length !== 1 ? 's' : ''} · {dataset.totalTransactions.toLocaleString()} transactions</p>
         </div>
         <Link
           href="/integrations"
-          className="inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-text-secondary border border-border px-3 py-1.5 bg-surface-raised hover:bg-surface-hover transition-colors"
+          className="inline-flex items-center gap-1.5 h-8 px-3 rounded-md whitespace-nowrap text-[13px] font-medium text-text-primary border border-border-strong bg-surface-raised hover:bg-surface-overlay shadow-card"
         >
-          <ArrowUpTrayIcon className="w-3 h-3" /> Upload more
+          <ArrowUpTrayIcon className="w-3.5 h-3.5" /> Upload more
         </Link>
       </div>
 
       {/* ── KPI row ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        <div className="bg-surface-raised border border-border px-5 py-4">
-          <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-2">Total Spend</p>
-          <p className="text-3xl font-normal leading-none text-text-primary">{fmtC(dataset.totalSpend)}</p>
+        <div className="bg-surface-raised border border-border rounded-xl shadow-card px-5 py-4">
+          <p className="text-[12px] font-medium text-text-muted mb-2">Total Spend</p>
+          <p className="text-3xl font-medium tracking-[-0.025em] leading-none text-text-primary">{fmtC(dataset.totalSpend)}</p>
           <p className="text-xs text-text-muted mt-1.5">{dateLabel}</p>
         </div>
 
-        <div className="bg-surface-raised border border-border px-5 py-4">
-          <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-2">Risk Exposure</p>
-          <p className={`text-3xl font-normal leading-none ${totalExposure > 0 ? 'text-red-400' : 'text-text-muted'}`}>{fmtC(totalExposure)}</p>
+        <div className="bg-surface-raised border border-border rounded-xl shadow-card px-5 py-4">
+          <p className="text-[12px] font-medium text-text-muted mb-2">Risk Exposure</p>
+          <p className={`text-3xl font-medium tracking-[-0.025em] leading-none ${totalExposure > 0 ? 'text-critical-fg' : 'text-text-muted'}`}>{fmtC(totalExposure)}</p>
           <p className="text-xs text-text-muted mt-1.5">{openAnomalies.length} open anomal{openAnomalies.length !== 1 ? 'ies' : 'y'}</p>
         </div>
 
-        <div className="bg-surface-raised border border-border px-5 py-4">
-          <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-2">Savings Identified</p>
-          <p className={`text-3xl font-normal leading-none ${duplicateSavings > 0 ? 'text-text-primary' : 'text-text-muted'}`}>{fmtC(duplicateSavings)}</p>
+        <div className="bg-surface-raised border border-border rounded-xl shadow-card px-5 py-4">
+          <p className="text-[12px] font-medium text-text-muted mb-2">Savings Identified</p>
+          <p className={`text-3xl font-medium tracking-[-0.025em] leading-none ${duplicateSavings > 0 ? 'text-text-primary' : 'text-text-muted'}`}>{fmtC(duplicateSavings)}</p>
           <p className="text-xs text-text-muted mt-1.5">{duplicates.length} duplicate payment{duplicates.length !== 1 ? 's' : ''}</p>
         </div>
 
-        <div className="bg-surface-raised border border-border px-5 py-4">
-          <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-2">Transactions</p>
-          <p className="text-3xl font-normal leading-none text-text-primary">{dataset.totalTransactions.toLocaleString()}</p>
+        <div className="bg-surface-raised border border-border rounded-xl shadow-card px-5 py-4">
+          <p className="text-[12px] font-medium text-text-muted mb-2">Transactions</p>
+          <p className="text-3xl font-medium tracking-[-0.025em] leading-none text-text-primary">{dataset.totalTransactions.toLocaleString()}</p>
           <p className="text-xs text-text-muted mt-1.5">{dataset.uniqueVendors.toLocaleString()} unique vendors</p>
         </div>
       </div>
@@ -451,45 +438,42 @@ export default function DashboardPage() {
           return acc
         }, {})
         const chartData = Object.values(byType).sort((a, b) => b.exposure - a.exposure)
-        const SEV_COLORS: Record<string, string> = {
-          duplicate: '#f87171', outlier: '#fb923c', large_amount: '#fbbf24',
-          round_number: '#c084fc', high_frequency: '#f472b6', missing_vendor: '#94a3b8',
-        }
         return (
-          <div className="bg-surface-raised border border-border overflow-hidden mb-6">
+          <div className="bg-surface-raised border border-border rounded-xl shadow-card overflow-hidden mb-6">
             <div className="px-5 py-3.5 border-b border-border-subtle flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-text-primary">Risk & Savings Overview</p>
-                <p className="text-xs text-text-muted">Anomaly exposure vs recoverable savings by type</p>
+                <p className="text-sm font-medium text-text-primary">Exposure by finding type</p>
+                <p className="text-xs text-text-muted">Amount at risk in open findings, and how much is recoverable</p>
               </div>
-              <div className="flex items-center gap-5 text-xs text-text-muted">
+              <div className="hidden sm:flex items-center gap-5 text-xs text-text-muted">
                 <span className="flex items-center gap-1.5 font-medium">
-                  <span className="w-2.5 h-2.5 bg-red-400 inline-block" /> Risk Exposure
+                  <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: CHART.series1 }} /> At risk
                 </span>
                 <span className="flex items-center gap-1.5 font-medium">
-                  <span className="w-2.5 h-2.5 bg-accent-300 inline-block" /> Savings Identified
+                  <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: CHART.series2 }} /> Recoverable
                 </span>
               </div>
             </div>
-            <div className="px-2 py-4 h-56">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 4 }} barGap={4}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#22304a" vertical={false} />
-                  <XAxis dataKey="type" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={v => fmtC(v)} width={52} />
-                  <Tooltip
-                    contentStyle={{ fontSize: 12, background: '#111a2c', border: '1px solid #22304a', color: '#e8edf5' }}
-                    formatter={(v: number, name: string) => [fmtFull(v), name === 'exposure' ? 'Risk Exposure' : 'Savings Identified']}
-                  />
-                  <Bar dataKey="exposure" name="exposure" maxBarSize={40}>
-                    {chartData.map((entry) => (
-                      <Cell key={entry.type} fill={SEV_COLORS[entry.type.replace(/ /g, '_')] ?? '#94a3b8'} />
-                    ))}
-                  </Bar>
-                  <Bar dataKey="savings" name="savings" fill="#7ea9dc" maxBarSize={40} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            <ul className="px-5 py-3 divide-y divide-border-subtle">
+              {chartData.map(row => {
+                const max = chartData[0]?.exposure || 1
+                return (
+                  <li key={row.type} className="grid grid-cols-[minmax(0,10rem)_1fr_auto] items-center gap-4 py-2.5">
+                    <span className="text-[13.5px] font-medium text-text-primary capitalize truncate">{row.type}</span>
+                    <span className="flex flex-col gap-1" aria-hidden>
+                      <span className="h-2 rounded-full" style={{ width: `${Math.max(1.5, (row.exposure / max) * 100)}%`, background: CHART.series1 }} />
+                      {row.savings > 0 && (
+                        <span className="h-2 rounded-full" style={{ width: `${Math.max(1.5, (row.savings / max) * 100)}%`, background: CHART.series2 }} />
+                      )}
+                    </span>
+                    <span className="text-right text-[13px] tabular-nums leading-tight">
+                      <span className="block font-medium text-text-primary">{fmtFull(row.exposure)}</span>
+                      {row.savings > 0 && <span className="block text-text-muted">{fmtFull(row.savings)} recoverable</span>}
+                    </span>
+                  </li>
+                )
+              })}
+            </ul>
           </div>
         )
       })()}
@@ -498,11 +482,11 @@ export default function DashboardPage() {
       <div className="grid lg:grid-cols-5 gap-5 mb-5">
 
         {/* Left 3/5 */}
-        <div className="lg:col-span-3 space-y-5">
+        <div className="lg:col-span-3 space-y-5 min-w-0">
 
           {/* Spend trend */}
           {dataset.monthlyBreakdown.length > 1 && (
-            <div className="bg-surface-raised border border-border overflow-hidden">
+            <div className="bg-surface-raised border border-border rounded-xl shadow-card overflow-hidden">
               <div className="px-5 py-3.5 flex items-center justify-between border-b border-border-subtle">
                 <div>
                   <p className="text-sm font-medium text-text-primary">Spend Trend</p>
@@ -515,18 +499,18 @@ export default function DashboardPage() {
                   <AreaChart data={dataset.monthlyBreakdown} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                     <defs>
                       <linearGradient id="spendGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%"  stopColor="#7ea9dc" stopOpacity={0.25} />
-                        <stop offset="95%" stopColor="#7ea9dc" stopOpacity={0} />
+                        <stop offset="5%"  stopColor={CHART.series1} stopOpacity={0.14} />
+                        <stop offset="95%" stopColor={CHART.series1} stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#22304a" />
-                    <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={v => fmtC(v)} width={52} />
+                    <CartesianGrid stroke={CHART.grid} vertical={false} />
+                    <XAxis dataKey="month" tick={CHART.tick} axisLine={false} tickLine={false} />
+                    <YAxis tick={CHART.tick} axisLine={false} tickLine={false} tickFormatter={v => fmtC(v)} width={52} />
                     <Tooltip
-                      contentStyle={{ fontSize: 12, background: '#111a2c', border: '1px solid #22304a', color: '#e8edf5' }}
+                      {...CHART.tooltip}
                       formatter={(v: number) => [fmtFull(v), 'Spend']}
                     />
-                    <Area type="monotone" dataKey="spend" stroke="#7ea9dc" strokeWidth={1.5} fill="url(#spendGrad)" />
+                    <Area type="monotone" dataKey="spend" stroke={CHART.series1} strokeWidth={2} fill="url(#spendGrad)" />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -549,23 +533,23 @@ export default function DashboardPage() {
             </div>
 
             {openAnomalies.length === 0 ? (
-              <div className="bg-surface-raised border border-border p-8 text-center">
+              <div className="bg-surface-raised border border-border rounded-xl shadow-card p-8 text-center">
                 <CheckCircleIcon className="w-8 h-8 text-text-muted mx-auto mb-2" />
                 <p className="text-sm font-medium text-text-secondary">No open anomalies</p>
                 <p className="text-xs text-text-muted mt-1">All findings reviewed or none detected in current data.</p>
               </div>
             ) : (
-              <div className="bg-surface-raised border border-border divide-y divide-border-subtle overflow-hidden">
+              <div className="bg-surface-raised border border-border rounded-xl shadow-card divide-y divide-border-subtle overflow-hidden">
                 {openAnomalies.slice(0, 6).map(a => (
                   <Link
                     key={a.id}
                     href={`/anomalies/${a.id}`}
-                    className={`flex items-center gap-3 border-l-4 ${SEV_LEFT[a.severity] ?? 'border-l-slate-500'} px-4 py-3 hover:bg-surface-hover transition-colors group`}
+                    className={`flex items-center gap-3 px-4 py-3 hover:bg-surface-hover transition-colors group`}
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-0.5">
                         <Badge variant="severity" value={a.severity} dot>{a.severity}</Badge>
-                        <span className="text-[10px] text-text-muted font-medium uppercase tracking-wide">{a.type.replace(/_/g, ' ')}</span>
+                        <span className="text-[12px] text-text-muted font-medium">{a.type.replace(/_/g, ' ')}</span>
                       </div>
                       <p className="text-sm font-medium text-text-primary group-hover:text-text-secondary transition-colors truncate">{a.title}</p>
                       <p className="text-xs text-text-muted truncate">{a.vendor}{a.category ? ` · ${a.category}` : ''}</p>
@@ -574,7 +558,7 @@ export default function DashboardPage() {
                       <p className={`text-sm font-medium ${SEV_AMT[a.severity]}`}>{fmtC(a.amount)}</p>
                       <div className="flex items-center gap-1.5">
                         <div className="w-10 h-1 bg-surface-overlay overflow-hidden">
-                          <div className="h-full bg-slate-400" style={{ width: `${a.confidence}%` }} />
+                          <div className="h-full bg-low" style={{ width: `${a.confidence}%` }} />
                         </div>
                         <span className="text-[10px] text-text-muted">{a.confidence}%</span>
                       </div>
@@ -595,10 +579,10 @@ export default function DashboardPage() {
         </div>
 
         {/* Right 2/5 */}
-        <div className="lg:col-span-2 space-y-5">
+        <div className="lg:col-span-2 space-y-5 min-w-0">
 
           {/* Savings opportunities */}
-          <div className="bg-surface-raised border border-border overflow-hidden">
+          <div className="bg-surface-raised border border-border rounded-xl shadow-card overflow-hidden">
             <div className="px-5 py-3.5 border-b border-border-subtle flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-text-primary">Savings Opportunities</p>
@@ -624,7 +608,7 @@ export default function DashboardPage() {
                     <p className="text-[11px] text-text-muted">+{duplicates.length - 4} more duplicates</p>
                   )}
                   <div className="pt-3 border-t border-border-subtle flex items-center justify-between">
-                    <span className="text-[11px] font-bold text-text-muted uppercase tracking-wide">Total recoverable</span>
+                    <span className="text-[12px] font-medium text-text-muted">Total recoverable</span>
                     <span className="text-sm font-medium text-text-primary">{fmtC(duplicateSavings)}</span>
                   </div>
                 </div>
@@ -639,7 +623,7 @@ export default function DashboardPage() {
 
           {/* Category breakdown */}
           {categories.length > 0 && (
-            <div className="bg-surface-raised border border-border overflow-hidden">
+            <div className="bg-surface-raised border border-border rounded-xl shadow-card overflow-hidden">
               <div className="px-5 py-3.5 border-b border-border-subtle">
                 <p className="text-sm font-medium text-text-primary">Spend by Category</p>
                 <p className="text-xs text-text-muted">Top {categories.length} categories</p>
@@ -647,18 +631,17 @@ export default function DashboardPage() {
               <div className="p-5 space-y-2.5">
                 {categories.map(cat => {
                   const pct = Math.round((cat.total / maxCat) * 100)
-                  const hasAlert = openAnomalies.some(a => a.category === cat.category)
                   return (
                     <div key={cat.category}>
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-1.5 min-w-0">
                           <span className="text-xs text-text-secondary font-medium truncate max-w-[120px]">{cat.category || 'Uncategorized'}</span>
-                          {hasAlert && <ExclamationTriangleIcon className="w-2.5 h-2.5 text-amber-400 flex-shrink-0" />}
+                          
                         </div>
                         <span className="text-xs font-medium text-text-secondary ml-2">{fmtC(cat.total)}</span>
                       </div>
-                      <div className="h-1.5 bg-surface-overlay overflow-hidden">
-                        <div className={`h-full ${hasAlert ? 'bg-amber-400' : 'bg-slate-400'}`} style={{ width: `${pct}%` }} />
+                      <div className="h-1.5 rounded-full bg-surface-overlay overflow-hidden">
+                        <div className={`h-full bg-text-secondary/60 rounded-full`} style={{ width: `${pct}%` }} />
                       </div>
                     </div>
                   )
@@ -669,14 +652,14 @@ export default function DashboardPage() {
 
           {/* Vendor concentration */}
           {topVendors.length > 0 && (
-            <div className="bg-surface-raised border border-border overflow-hidden">
+            <div className="bg-surface-raised border border-border rounded-xl shadow-card overflow-hidden">
               <div className="px-5 py-3.5 border-b border-border-subtle flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-text-primary">Vendor Concentration</p>
                   <p className="text-xs text-text-muted">Top vendors by spend</p>
                 </div>
                 {topVendorShare > 40 && (
-                  <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5">
+                  <span className="text-[12px] font-medium text-medium-fg bg-medium-bg border border-medium-line rounded px-1.5 py-0.5">
                     {topVendorShare}% top vendor
                   </span>
                 )}
@@ -685,21 +668,20 @@ export default function DashboardPage() {
                 {topVendors.map(v => {
                   const pct = Math.round((v.total / (topVendors[0]?.total ?? 1)) * 100)
                   const share = Math.round((v.total / dataset.totalSpend) * 100)
-                  const alert = openAnomalies.some(a => a.vendor.toLowerCase() === v.vendor.toLowerCase())
                   return (
                     <div key={v.vendor}>
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-1.5 min-w-0">
                           <span className="text-xs text-text-secondary font-medium truncate max-w-[120px]" title={v.vendor}>{v.vendor}</span>
-                          {alert && <ExclamationTriangleIcon className="w-2.5 h-2.5 text-amber-400 flex-shrink-0" />}
+                          
                         </div>
                         <div className="flex items-center gap-2 ml-2">
                           <span className="text-[10px] text-text-muted">{share}%</span>
                           <span className="text-xs font-medium text-text-secondary">{fmtC(v.total)}</span>
                         </div>
                       </div>
-                      <div className="h-1.5 bg-surface-overlay overflow-hidden">
-                        <div className={`h-full ${alert ? 'bg-amber-400' : 'bg-slate-400'}`} style={{ width: `${pct}%` }} />
+                      <div className="h-1.5 rounded-full bg-surface-overlay overflow-hidden">
+                        <div className={`h-full bg-text-secondary/60 rounded-full`} style={{ width: `${pct}%` }} />
                       </div>
                     </div>
                   )
@@ -712,7 +694,7 @@ export default function DashboardPage() {
 
       {/* ── Processing log ── */}
       {recentAudit.length > 0 && (
-        <div className="bg-surface-raised border border-border overflow-hidden mb-6">
+        <div className="bg-surface-raised border border-border rounded-xl shadow-card overflow-hidden mb-6">
           <div className="px-5 py-3.5 flex items-center justify-between border-b border-border-subtle">
             <p className="text-sm font-medium text-text-primary">Processing Log</p>
             <Link href="/audit-logs" className="text-xs text-text-secondary hover:text-text-primary flex items-center gap-0.5 transition-colors">
@@ -722,7 +704,7 @@ export default function DashboardPage() {
           <div className="divide-y divide-border-subtle">
             {recentAudit.map((item, i) => (
               <div key={i} className="flex items-center gap-3 px-5 py-3">
-                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${item.severity === 'critical' ? 'bg-red-500' : item.severity === 'warning' ? 'bg-amber-500' : 'bg-slate-400'}`} />
+                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${item.severity === 'critical' ? 'bg-critical' : item.severity === 'warning' ? 'bg-medium' : 'bg-low'}`} />
                 <p className="text-xs font-medium text-text-secondary flex-1 truncate">{item.event}</p>
                 <p className="text-xs text-text-muted flex-shrink-0 hidden sm:block">{item.actor}</p>
                 <p className="text-[10px] text-text-muted flex-shrink-0">{timeAgo(item.ts)}</p>
@@ -733,7 +715,7 @@ export default function DashboardPage() {
       )}
 
       {/* ── Team ── */}
-      <div className="bg-surface-raised border border-border overflow-hidden">
+      <div className="bg-surface-raised border border-border rounded-xl shadow-card overflow-hidden">
         <div className="px-5 py-3.5 border-b border-border-subtle flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-text-primary">Team Access</p>
@@ -774,7 +756,7 @@ export default function DashboardPage() {
                     className="flex-shrink-0 text-text-muted hover:text-text-secondary transition-colors"
                     title="Copy invite code"
                   >
-                    {copied === 'code' ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copied === 'code' ? <Check className="w-3.5 h-3.5 text-positive-fg" /> : <Copy className="w-3.5 h-3.5" />}
                   </button>
                 </div>
                 {/* Link display */}
@@ -790,7 +772,7 @@ export default function DashboardPage() {
                     className="flex-shrink-0 text-text-muted hover:text-text-secondary transition-colors"
                     title="Copy invite link"
                   >
-                    {copied === 'link' ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copied === 'link' ? <Check className="w-3.5 h-3.5 text-positive-fg" /> : <Copy className="w-3.5 h-3.5" />}
                   </button>
                 </div>
                 <p className="text-[11px] text-text-muted">
@@ -800,7 +782,7 @@ export default function DashboardPage() {
             ) : (
               <p className="text-xs text-text-muted">
                 No invite link yet.{' '}
-                <button onClick={generateInvite} className="text-accent-400 hover:text-accent-300 font-medium transition-colors">
+                <button onClick={generateInvite} className="text-accent-700 hover:text-accent-800 font-medium transition-colors">
                   Generate one
                 </button>{' '}
                 to let employees join this workspace.
@@ -826,9 +808,9 @@ export default function DashboardPage() {
               <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b border-border-subtle">
-                    <th className="text-left text-[10px] font-semibold text-text-muted uppercase tracking-wider pb-2 pr-4">Member</th>
-                    <th className="text-left text-[10px] font-semibold text-text-muted uppercase tracking-wider pb-2 pr-4">Role</th>
-                    <th className="text-left text-[10px] font-semibold text-text-muted uppercase tracking-wider pb-2 pr-4">Joined</th>
+                    <th className="text-left text-[12px] font-medium text-text-muted pb-2 pr-4">Member</th>
+                    <th className="text-left text-[12px] font-medium text-text-muted pb-2 pr-4">Role</th>
+                    <th className="text-left text-[12px] font-medium text-text-muted pb-2 pr-4">Joined</th>
                     <th className="pb-2" />
                   </tr>
                 </thead>
@@ -857,7 +839,7 @@ export default function DashboardPage() {
                         <button
                           onClick={() => removeMember(m.user_id)}
                           disabled={removingId === m.user_id}
-                          className="opacity-0 group-hover:opacity-100 text-text-muted hover:text-red-400 transition-all disabled:opacity-50"
+                          className="opacity-0 group-hover:opacity-100 text-text-muted hover:text-critical-fg transition-all disabled:opacity-50"
                           title="Remove member"
                         >
                           <Trash2 className="w-3.5 h-3.5" />

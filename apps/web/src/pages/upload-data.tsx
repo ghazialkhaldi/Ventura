@@ -3,7 +3,7 @@ import AppLayout from '../components/layout/AppLayout'
 import PageHeader from '../components/ui/PageHeader'
 import BrandIcon, { type BrandKey } from '../components/ui/BrandIcon'
 import ConnectModal from '../components/ui/ConnectModal'
-import { CheckCircle } from 'lucide-react'
+import { CheckCircle, ArrowRight } from 'lucide-react'
 
 interface SourceCard {
   id:          string
@@ -73,7 +73,7 @@ export default function UploadDataPage() {
               <div className="flex items-start justify-between">
                 <BrandIcon brand={src.brand} size={40} />
                 {isConnected && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-2 py-0.5">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-positive-fg bg-positive-bg border border-positive-line rounded-full px-2 py-0.5">
                     <CheckCircle className="w-2.5 h-2.5" />
                     Connected
                   </span>
@@ -82,7 +82,7 @@ export default function UploadDataPage() {
 
               {/* Name + type */}
               <div>
-                <p className="text-sm font-medium text-text-primary group-hover:text-accent-400 transition-colors leading-snug">
+                <p className="text-sm font-medium text-text-primary group-hover:text-accent-800 transition-colors leading-snug">
                   {src.name}
                 </p>
                 <p className="text-[11px] text-text-muted mt-0.5">{src.type}</p>
@@ -93,8 +93,8 @@ export default function UploadDataPage() {
 
               {/* CTA */}
               <div className="mt-auto">
-                <span className={`text-xs font-medium ${isConnected ? 'text-emerald-400' : 'text-accent-400 group-hover:text-accent-300'}`}>
-                  {isConnected ? 'Reconfigure →' : 'Connect →'}
+                <span className={`inline-flex items-center gap-1 text-xs font-medium ${isConnected ? 'text-positive-fg' : 'text-accent-700 group-hover:text-accent-800'}`}>
+                  {isConnected ? 'Reconfigure' : 'Connect'} <ArrowRight className="w-3.5 h-3.5" />
                 </span>
               </div>
             </button>

@@ -18,6 +18,10 @@ export type AnomalyType =
   | 'round_number'
   | 'high_frequency'
   | 'missing_vendor'
+  | 'approval_avoidance'
+  | 'category_mismatch'
+  | 'period_mismatch'
+  | 'new_vendor_risk'
 
 export interface StoredTransaction {
   id: string
@@ -33,6 +37,8 @@ export interface StoredTransaction {
   // Debit/Credit columns — a single combined Amount column is always spend.
   // Absent on data saved before this field existed; treat as 'debit'.
   direction?: 'debit' | 'credit'
+  // Accounting-period label from the source file (e.g. "Jan-26"), when present.
+  period?: string
 }
 
 export interface DetectedAnomaly {
@@ -89,6 +95,8 @@ export interface ColumnMapping {
   description: string | null
   category:    string | null
   account:     string | null
+  // Accounting-period label column (e.g. "Period", "Posting period"), when present.
+  period?:     string | null
 }
 
 export interface UploadedFile {
@@ -128,6 +136,17 @@ export interface Dataset {
   testingMode?: import('./dataMasking').TestingMode
   lastScanTime?: string
   pendingReviewCount?: number
+}
+
+/**
+ * The rows kept on the device: the first `limit` for browsing, plus every row a
+ * finding cites, so a finding's evidence never points at a row that was dropped.
+ */
+export function keepEvidenceRows(rows: StoredTransaction[], anomalies: DetectedAnomaly[], limit = 100): StoredTransaction[] {
+  const cited = new Set(anomalies.flatMap(a => a.rowRefs))
+  const head  = rows.slice(0, limit)
+  const kept  = new Set(head.map(r => r.id))
+  return [...head, ...rows.filter(r => cited.has(r.id) && !kept.has(r.id))]
 }
 
 const DS_KEY      = 'sf_dataset'
@@ -199,7 +218,7 @@ function mergeSourceDatasets(sources: Dataset[]): Dataset {
     monthlyBreakdown:   [...monthMap.values()],
     anomalies:          sources.flatMap(s => s.anomalies),
     auditLog:           sources.flatMap(s => s.auditLog).sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 500),
-    sampleTransactions: sources.flatMap(s => s.sampleTransactions).slice(0, 100),
+    sampleTransactions: keepEvidenceRows(sources.flatMap(s => s.sampleTransactions), sources.flatMap(s => s.anomalies)),
   }
 }
 

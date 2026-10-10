@@ -164,7 +164,7 @@ export default function BrandIcon({ brand, size = 32, contained = true, classNam
       className={`flex-shrink-0 flex items-center justify-center bg-slate-100 border border-slate-200 ${className}`}
       style={{ width: size, height: size }}
     >
-      <span className="text-slate-500 font-medium text-xs">{brand.slice(0, 2).toUpperCase()}</span>
+      <span className="text-text-muted font-medium text-xs">{brand.slice(0, 2).toUpperCase()}</span>
     </div>
   )
 }

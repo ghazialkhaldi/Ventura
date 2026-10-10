@@ -9,3 +9,12 @@ data.db
 *.log
 *.pdf
 data.json
+
+# macOS and TypeScript build artifacts
+.DS_Store
+*.tsbuildinfo
+
+# Impeccable: local screenshots and decision-page logs
+apps/web/.impeccable/review/
+apps/web/.impeccable/questions/
+apps/web/.impeccable/config.local.json

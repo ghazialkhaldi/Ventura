@@ -6,31 +6,22 @@ export default function ServerErrorPage() {
   return (
     <>
       <Head><title>Something went wrong · Ventura</title></Head>
-      <div className="min-h-screen bg-surface flex flex-col items-center justify-center px-4 text-center">
-        <Link href="/" className="mb-10 no-underline">
-          <VenturaLogo variant="light" height={28} />
-        </Link>
-
-        <p className="text-[80px] leading-none font-medium text-text-muted select-none">500</p>
-        <h1 className="text-xl font-normal text-text-primary mt-4">Something went wrong</h1>
-        <p className="text-sm text-text-muted mt-2 max-w-sm">
-          An unexpected error occurred on our end. Our team has been notified. Please try again in a moment.
-        </p>
-
-        <div className="flex items-center gap-3 mt-8">
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-accent-500 hover:bg-accent-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
-          >
-            Try again
-          </button>
-          <Link
-            href="/"
-            className="text-sm font-medium text-text-muted hover:text-text-primary border border-border-strong hover:border-border-strong px-5 py-2.5 rounded-lg transition-colors"
-          >
-            Back to home
-          </Link>
-        </div>
+      <div className="min-h-screen bg-surface-raised flex flex-col">
+        <header className="max-w-page w-full mx-auto h-16 px-5 sm:px-8 flex items-center">
+          <Link href="/" aria-label="Ventura home"><VenturaLogo variant="dark" height={17} /></Link>
+        </header>
+        <main className="flex-1 max-w-page w-full mx-auto px-5 sm:px-8 flex flex-col justify-center pb-24">
+          <h1 className="font-display font-medium text-[2.25rem] leading-[1.06] tracking-[-0.03em] sm:text-[3rem] text-text-primary">Something went wrong</h1>
+          <p className="mt-4 max-w-[34rem] text-[17px] leading-[1.6] text-text-secondary">An unexpected error occurred on our end. Please try again in a moment. <span className="text-text-muted">(Error 500)</span></p>
+          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+            <Link href="/" className="inline-flex items-center h-11 px-5 rounded-md bg-accent-600 hover:bg-accent-700 text-white text-[15px] font-medium">
+              Back to home
+            </Link>
+            <Link href="/contact" className="text-[15px] font-medium text-text-primary hover:text-accent-700 underline decoration-border-strong hover:decoration-accent-400">
+              Contact support
+            </Link>
+          </div>
+        </main>
       </div>
     </>
   )

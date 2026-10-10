@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
-import { Eye, EyeOff, AlertCircle, ArrowRight, Check, X, Mail } from 'lucide-react'
+import { Eye, EyeOff, AlertCircle, ArrowRight, ArrowLeft, Check, X, Mail } from 'lucide-react'
 import { createClient } from '../utils/supabase/client'
 import { saveUser } from '../hooks/useCurrentUser'
 import VenturaLogo from '../components/VenturaLogo'
@@ -12,7 +12,7 @@ type Step = 'form' | 'verify' | 'mfa'
 
 function PasswordReq({ met, label }: { met: boolean; label: string }) {
   return (
-    <div className={`flex items-center gap-1.5 text-[11px] ${met ? 'text-emerald-400' : 'text-text-muted'}`}>
+    <div className={`flex items-center gap-1.5 text-[11px] ${met ? 'text-positive-fg' : 'text-text-muted'}`}>
       {met ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
       {label}
     </div>
@@ -299,16 +299,16 @@ export default function EmployeeLoginPage() {
 
       <div className="min-h-screen bg-surface flex flex-col items-center justify-center px-4 py-10">
         <Link href="/" className="mb-8 no-underline">
-          <VenturaLogo variant="light" height={32} />
+          <VenturaLogo variant="dark" height={18} />
         </Link>
 
         <div className="w-full max-w-sm">
-          <div className="bg-surface-raised border border-border shadow-sm overflow-hidden">
+          <div className="bg-surface-raised border border-border rounded-xl shadow-card overflow-hidden">
 
             {/* Tabs — hidden during verify step */}
             {step === 'form' && (
               <div className="px-6 pt-6 pb-0">
-                <h1 className="text-lg font-normal text-text-primary">Employee Portal</h1>
+                <h1 className="text-lg font-medium tracking-[-0.015em] text-text-primary">Employee Portal</h1>
                 <p className="text-xs text-text-muted mt-0.5">Access your company's financial workspace</p>
                 <div className="flex gap-0 mt-5 border-b border-border">
                   {(['signin', 'signup'] as Tab[]).map(t => (
@@ -328,7 +328,7 @@ export default function EmployeeLoginPage() {
 
             <div className="px-6 py-6">
               {error && (
-                <div className="flex items-start gap-2 bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg px-3 py-2.5 text-xs mb-4">
+                <div className="flex items-start gap-2 bg-critical-bg border border-critical-line text-critical-fg rounded-lg px-3 py-2.5 text-xs mb-4">
                   <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                   <span>{error}</span>
                 </div>
@@ -338,20 +338,20 @@ export default function EmployeeLoginPage() {
               {tab === 'signin' && step === 'form' && (
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-medium text-text-secondary mb-1.5">Email</label>
+                    <label className="block text-[13px] font-medium text-text-primary mb-1.5">Email</label>
                     <input
                       type="email" value={siEmail} onChange={e => setSiEmail(e.target.value)}
                       placeholder="you@company.com" autoComplete="email"
-                      className="w-full bg-surface border border-border-strong rounded-lg px-3 py-2.5 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
+                      className="w-full bg-surface border border-border-strong rounded-lg px-3 py-2.5 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-500/30 focus:border-accent-500 focus-visible:ring-offset-0"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-text-secondary mb-1.5">Password</label>
+                    <label className="block text-[13px] font-medium text-text-primary mb-1.5">Password</label>
                     <div className="relative">
                       <input
                         type={siShowPw ? 'text' : 'password'} value={siPw} onChange={e => setSiPw(e.target.value)}
                         placeholder="••••••••" autoComplete="current-password"
-                        className="w-full bg-surface border border-border-strong rounded-lg px-3 py-2.5 pr-10 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
+                        className="w-full bg-surface border border-border-strong rounded-lg px-3 py-2.5 pr-10 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-500/30 focus:border-accent-500 focus-visible:ring-offset-0"
                       />
                       <button type="button" onClick={() => setSiShowPw(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary">
                         {siShowPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -362,7 +362,7 @@ export default function EmployeeLoginPage() {
                     </div>
                   </div>
                   <button type="submit" disabled={loading}
-                    className="w-full bg-accent-500 hover:bg-accent-600 active:bg-accent-700 disabled:opacity-50 text-white font-medium py-2.5 rounded-lg transition-colors text-sm flex items-center justify-center gap-2 shadow-sm"
+                    className="w-full bg-accent-600 hover:bg-accent-700 active:bg-accent-800 disabled:opacity-50 text-white font-medium py-2.5 rounded-lg transition-colors text-sm flex items-center justify-center gap-2 shadow-sm"
                   >
                     {loading ? 'Signing in…' : <>Sign In <ArrowRight className="w-4 h-4" /></>}
                   </button>
@@ -374,35 +374,35 @@ export default function EmployeeLoginPage() {
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-medium text-text-secondary mb-1.5">First name</label>
+                      <label className="block text-[13px] font-medium text-text-primary mb-1.5">First name</label>
                       <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)}
                         placeholder="Jane" autoComplete="given-name"
-                        className="w-full border border-border-strong rounded-lg px-3 py-2.5 text-sm placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
+                        className="w-full border border-border-strong rounded-lg px-3 py-2.5 text-sm placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-500/30 focus:border-accent-500 focus-visible:ring-offset-0"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-text-secondary mb-1.5">Last name</label>
+                      <label className="block text-[13px] font-medium text-text-primary mb-1.5">Last name</label>
                       <input type="text" value={lastName} onChange={e => setLastName(e.target.value)}
                         placeholder="Smith" autoComplete="family-name"
-                        className="w-full border border-border-strong rounded-lg px-3 py-2.5 text-sm placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
+                        className="w-full border border-border-strong rounded-lg px-3 py-2.5 text-sm placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-500/30 focus:border-accent-500 focus-visible:ring-offset-0"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-text-secondary mb-1.5">Work email</label>
+                    <label className="block text-[13px] font-medium text-text-primary mb-1.5">Work email</label>
                     <input type="email" value={suEmail} onChange={e => setSuEmail(e.target.value)}
                       placeholder="you@company.com" autoComplete="email"
-                      className="w-full border border-border-strong rounded-lg px-3 py-2.5 text-sm placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
+                      className="w-full border border-border-strong rounded-lg px-3 py-2.5 text-sm placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-500/30 focus:border-accent-500 focus-visible:ring-offset-0"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-text-secondary mb-1.5">Password</label>
+                    <label className="block text-[13px] font-medium text-text-primary mb-1.5">Password</label>
                     <div className="relative">
                       <input type={suShowPw ? 'text' : 'password'} value={suPw} onChange={e => setSuPw(e.target.value)}
                         placeholder="Create a strong password" autoComplete="new-password"
-                        className="w-full border border-border-strong rounded-lg px-3 py-2.5 pr-10 text-sm placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
+                        className="w-full border border-border-strong rounded-lg px-3 py-2.5 pr-10 text-sm placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-500/30 focus:border-accent-500 focus-visible:ring-offset-0"
                       />
                       <button type="button" onClick={() => setSuShowPw(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary">
                         {suShowPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -418,21 +418,21 @@ export default function EmployeeLoginPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-text-secondary mb-1.5">Re-enter password</label>
+                    <label className="block text-[13px] font-medium text-text-primary mb-1.5">Re-enter password</label>
                     <div className="relative">
                       <input type={suShowPw2 ? 'text' : 'password'} value={suPw2} onChange={e => setSuPw2(e.target.value)}
                         placeholder="Confirm password" autoComplete="new-password"
-                        className={`w-full border rounded-lg px-3 py-2.5 pr-10 text-sm placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500 ${suPw2 && suPw !== suPw2 ? 'border-red-400' : 'border-border-strong'}`}
+                        className={`w-full border rounded-lg px-3 py-2.5 pr-10 text-sm placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-500/30 focus:border-accent-500 focus-visible:ring-offset-0 ${suPw2 && suPw !== suPw2 ? 'border-critical' : 'border-border-strong'}`}
                       />
                       <button type="button" onClick={() => setSuShowPw2(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary">
                         {suShowPw2 ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
-                    {suPw2 && suPw !== suPw2 && <p className="text-[11px] text-red-500 mt-1">Passwords do not match</p>}
+                    {suPw2 && suPw !== suPw2 && <p className="text-[11px] text-critical-fg mt-1">Passwords do not match</p>}
                   </div>
 
                   <button type="submit" disabled={loading}
-                    className="w-full bg-accent-500 hover:bg-accent-600 active:bg-accent-700 disabled:opacity-50 text-white font-medium py-2.5 rounded-lg transition-colors text-sm shadow-sm"
+                    className="w-full bg-accent-600 hover:bg-accent-700 active:bg-accent-800 disabled:opacity-50 text-white font-medium py-2.5 rounded-lg transition-colors text-sm shadow-sm"
                   >
                     {loading ? 'Sending code…' : 'Create Account'}
                   </button>
@@ -443,8 +443,8 @@ export default function EmployeeLoginPage() {
               {(step === 'verify' || step === 'mfa') && (
                 <div className="space-y-5">
                   <div className="flex flex-col items-center text-center gap-3 py-2">
-                    <div className="w-12 h-12 rounded-full bg-accent-500/10 border border-accent-500/30 flex items-center justify-center">
-                      <Mail className="w-6 h-6 text-accent-400" />
+                    <div className="w-12 h-12 rounded-full bg-accent-50 border border-accent-200 flex items-center justify-center">
+                      <Mail className="w-6 h-6 text-accent-700" />
                     </div>
                     <div>
                       <p className="text-sm font-medium text-text-primary">Email sent. Wait up to 2 minutes</p>
@@ -469,7 +469,7 @@ export default function EmployeeLoginPage() {
                         onChange={e => handleDigit(i, e.target.value)}
                         onKeyDown={e => handleKey(i, e)}
                         disabled={loading}
-                        className="w-11 h-14 text-center text-xl font-normal border border-border-strong rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500 disabled:opacity-50 text-text-primary"
+                        className="w-11 h-14 text-center text-xl font-medium tracking-[-0.02em] border border-border-strong rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-500/30 focus:border-accent-500 focus-visible:ring-offset-0 disabled:opacity-50 text-text-primary"
                       />
                     ))}
                   </div>
@@ -477,7 +477,7 @@ export default function EmployeeLoginPage() {
                   <button
                     onClick={() => step === 'mfa' ? verifyMfa(digits.join('')) : verifyCode(digits.join(''))}
                     disabled={loading || digits.join('').length !== 6}
-                    className="w-full bg-accent-500 hover:bg-accent-600 disabled:opacity-50 text-white font-medium py-2.5 rounded-lg transition-colors text-sm shadow-sm"
+                    className="w-full bg-accent-600 hover:bg-accent-700 disabled:opacity-50 text-white font-medium py-2.5 rounded-lg transition-colors text-sm shadow-sm"
                   >
                     {loading ? 'Verifying…' : step === 'mfa' ? 'Verify & Sign In' : 'Verify & Create Account'}
                   </button>
@@ -494,13 +494,13 @@ export default function EmployeeLoginPage() {
                         setDigits(['', '', '', '', '', ''])
                         setError('')
                       }}
-                      className="text-text-muted hover:text-text-secondary transition-colors"
+                      className="inline-flex items-center gap-1.5 text-text-muted hover:text-text-primary"
                     >
-                      ← Back
+                      <ArrowLeft className="w-3.5 h-3.5" /> Back
                     </button>
                     <button onClick={resend} disabled={resending}
-                      className="text-accent-400 hover:text-accent-300 font-medium transition-colors disabled:opacity-50">
-                      {resending ? 'Sending…' : resentOk ? '✓ Code resent' : 'Resend code'}
+                      className="text-accent-700 hover:text-accent-800 font-medium transition-colors disabled:opacity-50">
+                      {resending ? 'Sending…' : resentOk ? <span className="inline-flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Code resent</span> : 'Resend code'}
                     </button>
                   </div>
                 </div>

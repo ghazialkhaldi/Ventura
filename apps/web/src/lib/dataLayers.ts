@@ -100,7 +100,7 @@ export function computeTierSummary(
 }
 
 export function tierLabel(tier: StorageTier): string {
-  return tier === 'hot' ? 'Hot Layer' : tier === 'warm' ? 'Warm Layer' : 'Cold Archive'
+  return tier === 'hot' ? 'Current fiscal year' : tier === 'warm' ? 'Prior years' : 'Archive'
 }
 
 export function tierDescription(tier: StorageTier): string {
@@ -112,7 +112,7 @@ export function tierDescription(tier: StorageTier): string {
 }
 
 export function tierColor(tier: StorageTier): string {
-  return tier === 'hot' ? 'text-orange-700' : tier === 'warm' ? 'text-emerald-700' : 'text-slate-500'
+  return tier === 'hot' ? 'text-text-secondary' : tier === 'warm' ? 'text-text-secondary' : 'text-text-muted'
 }
 
 export function tierBg(tier: StorageTier): string {
@@ -120,5 +120,5 @@ export function tierBg(tier: StorageTier): string {
 }
 
 export function tierDot(tier: StorageTier): string {
-  return tier === 'hot' ? 'bg-orange-500' : tier === 'warm' ? 'bg-emerald-500' : 'bg-slate-400'
+  return tier === 'hot' ? 'bg-text-secondary' : tier === 'warm' ? 'bg-low' : 'bg-border-strong'
 }

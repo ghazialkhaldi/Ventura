@@ -12,8 +12,8 @@ import { Search, Download, AlertTriangle, Info, AlertCircle, Laptop } from 'luci
 
 const severityIcon = {
   info:     <Info className="w-3.5 h-3.5 text-text-muted" />,
-  warning:  <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />,
-  critical: <AlertCircle className="w-3.5 h-3.5 text-red-500" />,
+  warning:  <AlertTriangle className="w-3.5 h-3.5 text-medium-fg" />,
+  critical: <AlertCircle className="w-3.5 h-3.5 text-critical-fg" />,
 }
 
 export default function AuditLogsPage() {
@@ -84,12 +84,12 @@ export default function AuditLogsPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {[
           { label: 'Total events',   value: stats.total,    color: 'text-text-secondary', bg: 'bg-surface-raised', border: 'border-border'  },
-          { label: 'Critical',       value: stats.critical, color: 'text-red-400',   bg: 'bg-red-500/10',   border: 'border-red-500/30'    },
-          { label: 'Warnings',       value: stats.warning,  color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/30'  },
-          { label: 'Informational',  value: stats.info,     color: 'text-emerald-400',  bg: 'bg-emerald-500/10',  border: 'border-emerald-500/30'   },
+          { label: 'Critical',       value: stats.critical, color: 'text-critical-fg',   bg: 'bg-critical-bg',   border: 'border-critical-line'    },
+          { label: 'Warnings',       value: stats.warning,  color: 'text-medium-fg', bg: 'bg-medium-bg', border: 'border-medium-line'  },
+          { label: 'Informational',  value: stats.info,     color: 'text-positive-fg',  bg: 'bg-positive-bg',  border: 'border-positive-line'   },
         ].map((s) => (
           <div key={s.label} className={`${s.bg} border ${s.border} rounded-lg px-4 py-3`}>
-            <p className={`text-xl font-normal ${s.color}`}>{s.value}</p>
+            <p className={`text-xl font-medium tracking-[-0.02em] ${s.color}`}>{s.value}</p>
             <p className="text-xs text-text-muted">{s.label}</p>
           </div>
         ))}
@@ -98,9 +98,9 @@ export default function AuditLogsPage() {
       {/* Immutability notice — true today: writes go through a service-role
           API route with no UPDATE/DELETE endpoint anywhere in the app, and
           the table's RLS grants zero access to the browser's anon key. */}
-      <div className="flex items-start gap-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-lg px-4 py-3 mb-4">
-        <Info className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-emerald-400">
+      <div className="flex items-start gap-2.5 bg-positive-bg border border-positive-line rounded-lg px-4 py-3 mb-4">
+        <Info className="w-4 h-4 text-positive-fg flex-shrink-0 mt-0.5" />
+        <p className="text-xs text-positive-fg">
           <span className="font-medium">Append-only.</span> Written server-side when security-relevant actions occur (MFA verification, team role changes, member removal, workspace joins, integration connections). No update or delete path exists in the application for these rows.
         </p>
       </div>
@@ -137,12 +137,12 @@ export default function AuditLogsPage() {
         <table className="w-full data-table">
           <thead>
             <tr className="bg-surface-overlay border-b border-border">
-              <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider w-6"></th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Timestamp</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Actor</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Event</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Resource</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">Detail</th>
+              <th className="text-left px-4 py-3 text-[12.5px] font-medium text-text-muted w-6"></th>
+              <th className="text-left px-4 py-3 text-[12.5px] font-medium text-text-muted">Timestamp</th>
+              <th className="text-left px-4 py-3 text-[12.5px] font-medium text-text-muted">Actor</th>
+              <th className="text-left px-4 py-3 text-[12.5px] font-medium text-text-muted">Event</th>
+              <th className="text-left px-4 py-3 text-[12.5px] font-medium text-text-muted">Resource</th>
+              <th className="text-left px-4 py-3 text-[12.5px] font-medium text-text-muted">Detail</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border-subtle">
@@ -157,7 +157,7 @@ export default function AuditLogsPage() {
                 </td>
               </tr>
             ) : filtered.map((ev) => (
-              <tr key={ev.id} className={`hover:bg-surface-hover transition-colors ${ev.severity === 'critical' ? 'bg-red-500/10' : ''}`}>
+              <tr key={ev.id} className={`hover:bg-surface-hover transition-colors ${ev.severity === 'critical' ? 'bg-critical-bg' : ''}`}>
                 <td className="px-4 py-3">
                   {severityIcon[ev.severity]}
                 </td>
@@ -171,7 +171,7 @@ export default function AuditLogsPage() {
                   <Badge variant="auditSeverity" value={ev.severity}>{ev.event}</Badge>
                 </td>
                 <td className="px-4 py-3">
-                  {ev.resource && <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">{ev.resource}</span>}
+                  {ev.resource && <span className="text-xs font-mono text-positive-fg bg-positive-bg px-1.5 py-0.5 rounded">{ev.resource}</span>}
                 </td>
                 <td className="px-4 py-3 text-sm text-text-secondary max-w-md">
                   <p className="truncate" title={ev.detail ?? ''}>{ev.detail}</p>
@@ -203,7 +203,7 @@ export default function AuditLogsPage() {
           <div className="bg-surface-raised border border-border rounded-lg overflow-hidden divide-y divide-border-subtle">
             {localEntries.slice(0, 20).map((item, i) => (
               <div key={i} className="flex items-center gap-3 px-4 py-2.5">
-                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${item.severity === 'critical' ? 'bg-red-500' : item.severity === 'warning' ? 'bg-amber-500' : 'bg-border-strong'}`} />
+                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${item.severity === 'critical' ? 'bg-critical' : item.severity === 'warning' ? 'bg-medium' : 'bg-border-strong'}`} />
                 <p className="text-xs font-medium text-text-secondary flex-1 truncate">{item.event}</p>
                 <p className="text-xs text-text-muted flex-shrink-0 hidden sm:block">{item.actor}</p>
                 <p className="text-[10px] text-text-muted flex-shrink-0 font-mono">{new Date(item.ts).toLocaleString()}</p>

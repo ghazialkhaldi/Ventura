@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import PublicLayout from '../components/layout/PublicLayout'
+import { PageIntro, Prose, InlineLink } from '../components/marketing/Marketing'
 
 const SECTIONS = [
   {
@@ -82,43 +82,24 @@ const SECTIONS = [
 export default function PrivacyPage() {
   return (
     <PublicLayout title="Privacy Policy">
-      <div className="max-w-2xl mx-auto px-6 py-16">
-        <p className="text-xs font-medium text-text-muted uppercase tracking-widest mb-4">Legal</p>
-        <h1 className="text-3xl font-normal text-text-primary mb-3">Privacy Policy</h1>
-        <p className="text-sm text-text-muted mb-10">Last updated: September 2026</p>
-
-        <p className="text-sm text-text-secondary leading-relaxed mb-10">
-          This policy explains what information Ventura collects, how it's used, and where it's stored.
-          We've tried to write it in plain language and to describe our actual practices specifically,
-          rather than generic language that could apply to any product.
-        </p>
-
-        <div className="space-y-9">
+      <PageIntro
+        title="Privacy Policy"
+        meta="Last updated: September 2026"
+        lead="What information Ventura collects, how it is used, and where it is stored, in plain language and specific to our actual practices."
+      />
+      <div className="max-w-page mx-auto px-5 sm:px-8 py-14 sm:py-20">
+        <Prose>
           {SECTIONS.map(section => (
-            <section key={section.title}>
-              <h2 className="text-base font-medium text-text-primary mb-3">{section.title}</h2>
-              <div className="space-y-3">
-                {section.body.map((p, i) => (
-                  <p key={i} className="text-sm text-text-secondary leading-relaxed">{p}</p>
-                ))}
-              </div>
-            </section>
+            <div key={section.title}>
+              <h2>{section.title}</h2>
+              {section.body.map((p, i) => <p key={i}>{p}</p>)}
+            </div>
           ))}
-        </div>
-
-        <p className="text-sm text-text-secondary leading-relaxed mt-10 pt-8 border-t border-border">
-          Questions about this policy or how Ventura handles your data? Please{' '}
-          <Link href="/contact" className="text-accent-400 hover:text-accent-300 font-medium underline underline-offset-2">
-            contact our team
-          </Link>.
-        </p>
-
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-text-primary transition-colors mt-8"
-        >
-          Back to home
-        </Link>
+          <p className="!mt-14 pt-8 border-t border-border">
+            Questions about this policy or how Ventura handles your data?{' '}
+            <InlineLink href="/contact">Contact our team</InlineLink>.
+          </p>
+        </Prose>
       </div>
     </PublicLayout>
   )

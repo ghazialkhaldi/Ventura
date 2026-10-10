@@ -57,19 +57,19 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
   return (
     <>
       <Head>
-        <title>{title ? `${title} · Ventura` : 'Ventura · Financial Operations Intelligence'}</title>
+        <title>{title ? `${title} · Ventura` : 'Ventura'}</title>
       </Head>
       <div className="min-h-screen flex bg-surface">
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-        <div className="flex-1 flex flex-col lg:ml-64 min-h-screen">
+        <div className="flex-1 flex flex-col lg:ml-60 min-h-screen min-w-0">
           {/* Top bar */}
-          <header className="h-16 bg-surface-raised border-b border-border flex items-center justify-between px-4 xl:px-8 2xl:px-10 flex-shrink-0 sticky top-0 z-10">
+          <header className="h-14 bg-surface-raised/95 backdrop-blur-sm border-b border-border flex items-center justify-between gap-3 px-4 xl:px-8 2xl:px-10 flex-shrink-0 sticky top-0 z-10">
             <div className="flex items-center gap-2 min-w-0">
               {/* Hamburger — mobile only */}
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2 text-text-muted hover:text-text-secondary hover:bg-surface-overlay transition-colors flex-shrink-0 -ml-1"
+                className="lg:hidden p-2 rounded-md text-text-muted hover:text-text-primary hover:bg-surface-overlay flex-shrink-0 -ml-1"
                 aria-label="Open navigation"
               >
                 <Bars3Icon className="w-5 h-5" />
@@ -78,7 +78,7 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
               {showBack && (
                 <button
                   onClick={() => router.back()}
-                  className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-text-muted hover:text-text-primary transition-colors pr-3 border-r border-border mr-1"
+                  className="hidden sm:flex items-center gap-1.5 h-8 px-2 rounded-md text-[13.5px] font-medium text-text-secondary hover:text-text-primary hover:bg-surface-overlay mr-1"
                   title="Go back"
                 >
                   <ArrowLeftIcon className="w-4 h-4" />
@@ -87,24 +87,25 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
               )}
 
               {/* Search — hidden on small mobile to avoid overflow */}
-              <div className="hidden sm:flex items-center gap-2 bg-surface-overlay border border-border px-3 py-1.5 w-52 lg:w-64">
-                <MagnifyingGlassIcon className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />
+              <div className="hidden sm:flex items-center gap-2 h-8 rounded-md bg-surface-overlay border border-transparent focus-within:border-accent-400 focus-within:bg-surface-raised px-2.5 w-56 lg:w-72">
+                <MagnifyingGlassIcon className="w-4 h-4 text-text-muted flex-shrink-0" />
                 <input
                   type="text"
                   placeholder="Search anomalies, vendors…"
-                  className="bg-transparent text-sm text-text-secondary placeholder-text-muted outline-none w-full"
+                  aria-label="Search"
+                  className="bg-transparent text-[13.5px] text-text-primary placeholder-text-muted outline-none w-full focus-visible:ring-0 focus-visible:ring-offset-0"
                 />
               </div>
             </div>
 
             <div className="flex items-center gap-1 flex-shrink-0">
-              <div className="flex items-center gap-2 px-2 py-1.5 hover:bg-surface-overlay cursor-pointer transition-colors">
-                <div className="w-6 h-6 bg-sidebar-active border border-border-strong flex items-center justify-center flex-shrink-0">
-                  <span className="text-white text-[10px] font-bold">{userInitials}</span>
+              <div className="flex items-center gap-2.5 h-9 px-2 rounded-md">
+                <div className="w-7 h-7 rounded-full bg-accent-100 flex items-center justify-center flex-shrink-0">
+                  <span className="text-accent-800 text-[11px] font-semibold">{userInitials}</span>
                 </div>
                 <div className="hidden sm:block">
-                  <p className="text-xs font-medium text-text-secondary leading-none">{displayName}</p>
-                  <p className="text-[10px] text-text-muted mt-0.5">{displayRole}</p>
+                  <p className="text-[13px] font-medium text-text-primary leading-none">{displayName}</p>
+                  <p className="text-[12px] text-text-muted mt-1 capitalize">{displayRole}</p>
                 </div>
               </div>
             </div>
@@ -113,12 +114,12 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
           {/* Employee access banner */}
           {isEmployee && wsRole && (
             wsRole === 'editor' ? (
-              <div className="flex items-center gap-2 bg-emerald-500/10 border-b border-emerald-500/30 text-emerald-300 px-4 sm:px-6 py-2 text-xs font-medium">
+              <div className="flex items-center gap-2 bg-positive-bg border-b border-positive-line text-positive-fg px-4 sm:px-6 py-2 text-xs font-medium">
                 <PencilSquareIcon className="w-3.5 h-3.5 flex-shrink-0" />
                 Editor access: you can view and make changes in this workspace.
               </div>
             ) : (
-              <div className="flex items-center gap-2 bg-amber-500/10 border-b border-amber-500/30 text-amber-300 px-4 sm:px-6 py-2 text-xs font-medium">
+              <div className="flex items-center gap-2 bg-medium-bg border-b border-medium-line text-medium-fg px-4 sm:px-6 py-2 text-xs font-medium">
                 <EyeIcon className="w-3.5 h-3.5 flex-shrink-0" />
                 {wsRole === 'analyst'
                   ? 'Analyst access: you can view everything and comment on anomalies. Ask your admin for edit permission.'

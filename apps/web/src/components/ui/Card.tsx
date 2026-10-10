@@ -10,7 +10,7 @@ interface CardProps {
 export function Card({ children, className, padding = 'md' }: CardProps) {
   const p = { none: '', sm: 'p-4', md: 'p-6', lg: 'p-8' }[padding]
   return (
-    <div className={clsx('bg-surface-raised border border-border rounded-lg', p, className)}>
+    <div className={clsx('bg-surface-raised border border-border rounded-xl shadow-card', p, className)}>
       {children}
     </div>
   )
@@ -29,13 +29,13 @@ export function CardHeader({ title, subtitle, action, icon, className }: CardHea
     <div className={clsx('flex items-start justify-between', className)}>
       <div className="flex items-center gap-3">
         {icon && (
-          <div className="w-9 h-9 rounded-lg bg-accent-500/10 flex items-center justify-center text-accent-400 flex-shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-surface-overlay flex items-center justify-center text-text-secondary flex-shrink-0">
             {icon}
           </div>
         )}
         <div>
-          <h3 className="text-sm font-medium text-text-primary">{title}</h3>
-          {subtitle && <p className="text-xs text-text-muted mt-0.5">{subtitle}</p>}
+          <h3 className="text-[14.5px] font-medium text-text-primary">{title}</h3>
+          {subtitle && <p className="text-[13px] text-text-muted mt-0.5">{subtitle}</p>}
         </div>
       </div>
       {action && <div className="flex-shrink-0 ml-4">{action}</div>}

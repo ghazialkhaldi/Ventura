@@ -9,6 +9,7 @@ const DEBIT_SYN       = ['debit','debit amount','withdrawal','outflow','expense'
 const CREDIT_SYN      = ['credit','credit amount','deposit','inflow','income','payment received','cr','cr amount','refund']
 const DESCRIPTION_SYN = ['description','memo','notes','details','reference','narrative','particulars','remark','line description','note','memo line']
 const CATEGORY_SYN    = ['category','type','account type','expense type','classification','class','cost center','department','budget code','gl category','subcategory','sub-category']
+const PERIOD_SYN      = ['period','fiscal period','posting period','accounting period','gl period','period name','fiscal month','acct period']
 const ACCOUNT_SYN     = ['account','account name','account number','gl account','ledger account','account code','cost account','chart of accounts','gl code','account id']
 
 // ─── Column detection ─────────────────────────────────────────────────────────
@@ -73,6 +74,7 @@ export function detectColumns(headers: string[]): ColumnMapping {
     description: matchCol(headers, DESCRIPTION_SYN),
     category:    matchCol(headers, CATEGORY_SYN),
     account:     matchCol(headers, ACCOUNT_SYN),
+    period:      matchCol(headers, PERIOD_SYN),
   }
 }
 
@@ -162,6 +164,7 @@ export function rowsToTransactions(
     const desc     = mapping.description ? (row[mapping.description] || '').trim() : vendor.trim()
     const category = mapping.category    ? (row[mapping.category]    || '').trim() : ''
     const account  = mapping.account     ? (row[mapping.account]     || '').trim() : ''
+    const period   = mapping.period      ? (row[mapping.period]      || '').trim() : ''
 
     txs.push({
       id:          `TX-${i}`,
@@ -173,6 +176,7 @@ export function rowsToTransactions(
       account,
       rowIndex:    i,
       direction,
+      ...(period ? { period } : {}),
     })
   }
 
@@ -326,6 +330,9 @@ function looksLikeIdOrYear(header: string, rows: RawRow[], col: string): boolean
 function validateMapping(rows: RawRow[], headers: string[], mapping: ColumnMapping): ColumnMapping {
   const m = { ...mapping }
 
+  // A period label is never the transaction date or the payee.
+  if (m.period && (m.period === m.date || m.period === m.vendor)) m.period = null
+
   // If the header names gave us no date column, recover it from the data so
   // it is not later mistaken for the vendor.
   if (!m.date) {
@@ -340,7 +347,7 @@ function validateMapping(rows: RawRow[], headers: string[], mapping: ColumnMappi
     const textCols = headers
       .filter(h => numericRatio(rows, h) < 0.3 && sample(rows, h).length > 0)
       .filter(h => dateRatio(rows, h) <= 0.7)
-      .filter(h => h !== m.date && h !== m.category && h !== m.account)
+      .filter(h => h !== m.date && h !== m.category && h !== m.account && h !== m.period)
     // Prefer the column with the most distinct values: vendors vary, labels repeat.
     const best = textCols
       .map(h => ({ h, distinct: new Set(sample(rows, h).map(v => v.toLowerCase())).size }))

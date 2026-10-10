@@ -1,74 +1,100 @@
 /** @type {import('tailwindcss').Config} */
+
+// Every colour token resolves to a CSS variable declared in globals.css, so the
+// palette lives in one place and opacity modifiers (bg-surface/90) still work.
+const v = name => `rgb(var(--${name}) / <alpha-value>)`
+
 module.exports = {
   content: ['./src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     borderRadius: {
       'none': '0',
-      'sm':   '0',
-      DEFAULT: '0',
-      'md':   '0',
-      'lg':   '0',
-      'xl':   '0',
-      '2xl':  '0',
-      '3xl':  '0',
+      'sm':   '4px',
+      DEFAULT: '6px',
+      'md':   '6px',
+      'lg':   '8px',
+      'xl':   '10px',
+      '2xl':  '14px',
+      '3xl':  '20px',
       'full': '9999px',
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+        sans: ['var(--font-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-mono)', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       colors: {
-        // Steel-blue accent — replaces the previous emerald `brand` scale.
-        // Deliberately desaturated: this is the single biggest lever for
-        // reading as enterprise infrastructure (IBM/Intel) rather than a
-        // bright-green "AI startup" product.
+        // Ultramarine: actions, links, focus and selection only.
         accent: {
-          50:  '#eef4fb',
-          100: '#d9e6f6',
-          200: '#aec9ea',
-          300: '#7ea9dc',
-          400: '#4f88cb',
-          500: '#3574b8',
-          600: '#285d97',
-          700: '#204a79',
-          800: '#1a3b60',
-          900: '#152f4d',
-          950: '#0d1e33',
+          50:  v('accent-50'),
+          100: v('accent-100'),
+          200: v('accent-200'),
+          300: v('accent-300'),
+          400: v('accent-400'),
+          500: v('accent-500'),
+          600: v('accent-600'),
+          700: v('accent-700'),
+          800: v('accent-800'),
+          900: v('accent-900'),
+          950: v('accent-950'),
         },
         sidebar: {
-          bg:     '#0c1526',
-          hover:  '#162036',
-          active: '#1a2d44',
-          border: '#1e2d47',
-          text:   '#8ea4c0',
-          muted:  '#4d6a8a',
+          bg:     v('sidebar-bg'),
+          hover:  v('sidebar-hover'),
+          active: v('sidebar-active'),
+          border: v('sidebar-border'),
+          text:   v('sidebar-text'),
+          muted:  v('sidebar-muted'),
         },
-        // Semantic surface/border/text tokens for the site-wide dark theme.
-        // surface.DEFAULT intentionally matches sidebar.bg's family so the
-        // sidebar stops reading as a separate dark island.
         surface: {
-          DEFAULT: '#0b1220',
-          raised:  '#111a2c',
-          overlay: '#182338',
-          hover:   '#1c2840',
-          sunken:  '#070c16',
+          DEFAULT: v('surface'),
+          raised:  v('surface-raised'),
+          overlay: v('surface-overlay'),
+          hover:   v('surface-hover'),
+          sunken:  v('surface-sunken'),
         },
         border: {
-          DEFAULT: '#22304a',
-          subtle:  '#182338',
-          strong:  '#31456b',
+          DEFAULT: v('border'),
+          subtle:  v('border-subtle'),
+          strong:  v('border-strong'),
         },
         text: {
-          primary:   '#e8edf5',
-          secondary: '#a9b8cf',
-          muted:     '#7186a3',
-          inverse:   '#0b1220',
+          primary:   v('text-primary'),
+          secondary: v('text-secondary'),
+          muted:     v('text-muted'),
+          inverse:   v('text-inverse'),
         },
+        // The one deep band on marketing pages, and the app's dark surfaces.
+        ink: {
+          DEFAULT: v('ink'),
+          raised:  v('ink-raised'),
+          line:    v('ink-line'),
+          text:    v('ink-text'),
+          muted:   v('ink-muted'),
+        },
+        // Finding severity and review outcome. Only findings wear these.
+        critical: { DEFAULT: v('critical'), fg: v('critical-fg'), bg: v('critical-bg'), line: v('critical-line') },
+        high:     { DEFAULT: v('high'),     fg: v('high-fg'),     bg: v('high-bg'),     line: v('high-line') },
+        medium:   { DEFAULT: v('medium'),   fg: v('medium-fg'),   bg: v('medium-bg'),   line: v('medium-line') },
+        low:      { DEFAULT: v('low'),      fg: v('low-fg'),      bg: v('low-bg'),      line: v('low-line') },
+        positive: { DEFAULT: v('positive'), fg: v('positive-fg'), bg: v('positive-bg'), line: v('positive-line') },
+      },
+      fontSize: {
+        'display': ['4rem',    { lineHeight: '1.03', letterSpacing: '-0.035em' }],
+        'title':   ['2.5rem',  { lineHeight: '1.08', letterSpacing: '-0.03em' }],
+        'heading': ['1.5rem',  { lineHeight: '1.2',  letterSpacing: '-0.02em' }],
       },
       boxShadow: {
-        card:    '0 1px 3px 0 rgba(0,0,0,.06), 0 1px 2px -1px rgba(0,0,0,.04)',
-        'card-md': '0 4px 6px -1px rgba(0,0,0,.07), 0 2px 4px -2px rgba(0,0,0,.05)',
+        card:      '0 1px 2px 0 rgb(15 21 36 / 0.05)',
+        'card-md': '0 4px 12px -2px rgb(15 21 36 / 0.08), 0 2px 4px -2px rgb(15 21 36 / 0.05)',
+        frame:     '0 24px 48px -16px rgb(15 21 36 / 0.18), 0 8px 16px -8px rgb(15 21 36 / 0.08)',
+        pop:       '0 12px 32px -8px rgb(15 21 36 / 0.22), 0 2px 6px -2px rgb(15 21 36 / 0.08)',
+      },
+      transitionTimingFunction: {
+        'out-expo': 'cubic-bezier(0.16, 1, 0.3, 1)',
+      },
+      maxWidth: {
+        page: '1200px',
       },
     },
   },

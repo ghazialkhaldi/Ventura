@@ -1,4 +1,5 @@
 import PublicLayout from '../components/layout/PublicLayout'
+import { PageIntro, Prose, InlineLink } from '../components/marketing/Marketing'
 
 const sections = [
   {
@@ -46,29 +47,20 @@ const sections = [
 export default function TermsPage() {
   return (
     <PublicLayout title="Terms of Service">
-      <section className="py-14 bg-surface-raised">
-        <div className="max-w-3xl mx-auto px-6">
-          <p className="text-xs font-medium text-accent-400 uppercase tracking-widest mb-3">Legal</p>
-          <h1 className="text-3xl font-normal text-text-primary">Terms of Service</h1>
-          <p className="text-sm text-text-muted mt-2">Last updated: July 2026</p>
-
-          <div className="mt-10 space-y-8">
-            {sections.map(s => (
-              <div key={s.title}>
-                <h2 className="text-base font-medium text-text-primary mb-2">{s.title}</h2>
-                <p className="text-sm text-text-secondary leading-relaxed">{s.body}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-12 pt-8 border-t border-border">
-            <p className="text-sm text-text-muted">
-              Questions about these terms?{' '}
-              <a href="/contact" className="text-accent-400 hover:text-accent-300 font-medium">Contact us</a>
-            </p>
-          </div>
-        </div>
-      </section>
+      <PageIntro title="Terms of Service" meta="Last updated: July 2026" />
+      <div className="max-w-page mx-auto px-5 sm:px-8 py-14 sm:py-20">
+        <Prose>
+          {sections.map(s => (
+            <div key={s.title}>
+              <h2>{s.title}</h2>
+              <p>{s.body}</p>
+            </div>
+          ))}
+          <p className="!mt-14 pt-8 border-t border-border">
+            Questions about these terms? <InlineLink href="/contact">Contact us</InlineLink>.
+          </p>
+        </Prose>
+      </div>
     </PublicLayout>
   )
 }

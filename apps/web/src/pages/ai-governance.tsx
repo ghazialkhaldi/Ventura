@@ -24,10 +24,10 @@ const modelRoutes = [
 ]
 
 const tierColor: Record<string, string> = {
-  'Low Risk':    'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30',
-  'Medium Risk': 'bg-amber-500/10 text-amber-400 border border-amber-500/30',
-  'High Risk':   'bg-orange-500/10 text-orange-400 border border-orange-500/30',
-  'Critical':    'bg-red-500/10 text-red-400 border border-red-500/30',
+  'Low Risk':    'bg-positive-bg text-positive-fg border border-positive-line',
+  'Medium Risk': 'bg-medium-bg text-medium-fg border border-medium-line',
+  'High Risk':   'bg-high-bg text-high-fg border border-high-line',
+  'Critical':    'bg-critical-bg text-critical-fg border border-critical-line',
 }
 
 function severityTier(a: DetectedAnomaly): string {
@@ -133,12 +133,12 @@ export default function AIGovernancePage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {[
           { label: 'Anomalies analyzed',  value: anomalies.length,   color: 'text-text-secondary' },
-          { label: 'Auto-classified',     value: autoApproved,       color: 'text-emerald-400' },
-          { label: 'Human review needed', value: humanRequired,      color: 'text-red-400'   },
-          { label: 'Avg confidence',      value: `${avgConf}%`,      color: 'text-emerald-400'  },
+          { label: 'Auto-classified',     value: autoApproved,       color: 'text-positive-fg' },
+          { label: 'Human review needed', value: humanRequired,      color: 'text-critical-fg'   },
+          { label: 'Avg confidence',      value: `${avgConf}%`,      color: 'text-positive-fg'  },
         ].map((s) => (
           <div key={s.label} className="bg-surface-raised border border-border rounded-lg px-4 py-3">
-            <p className={`text-xl font-normal ${s.color}`}>{s.value}</p>
+            <p className={`text-xl font-medium tracking-[-0.02em] ${s.color}`}>{s.value}</p>
             <p className="text-xs text-text-muted mt-0.5">{s.label}</p>
           </div>
         ))}
@@ -151,7 +151,7 @@ export default function AIGovernancePage() {
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
-              activeTab === tab.id ? 'border-accent-500 text-accent-400' : 'border-transparent text-text-muted hover:text-text-secondary'
+              activeTab === tab.id ? 'border-accent-500 text-accent-700' : 'border-transparent text-text-muted hover:text-text-secondary'
             }`}
           >
             {tab.label}
@@ -171,10 +171,10 @@ export default function AIGovernancePage() {
               ) : (
                 <div className="space-y-3">
                   {[
-                    { label: 'Critical', count: criticalAnomalies.length, color: 'bg-red-500' },
-                    { label: 'High',     count: highAnomalies.length,     color: 'bg-orange-500' },
-                    { label: 'Medium',   count: anomalies.filter(a => a.severity === 'MEDIUM').length, color: 'bg-amber-500' },
-                    { label: 'Low',      count: anomalies.filter(a => a.severity === 'LOW').length, color: 'bg-emerald-500' },
+                    { label: 'Critical', count: criticalAnomalies.length, color: 'bg-critical' },
+                    { label: 'High',     count: highAnomalies.length,     color: 'bg-high' },
+                    { label: 'Medium',   count: anomalies.filter(a => a.severity === 'MEDIUM').length, color: 'bg-medium' },
+                    { label: 'Low',      count: anomalies.filter(a => a.severity === 'LOW').length, color: 'bg-positive' },
                   ].map((row) => {
                     const pct = anomalies.length > 0 ? Math.round((row.count / anomalies.length) * 100) : 0
                     return (
@@ -199,9 +199,9 @@ export default function AIGovernancePage() {
               ) : (
                 <div className="space-y-3">
                   {[
-                    { label: 'Low risk',    count: anomalies.filter(a => a.severity === 'LOW').length,      color: 'bg-emerald-500' },
-                    { label: 'Medium risk', count: anomalies.filter(a => a.severity === 'MEDIUM').length,   color: 'bg-amber-500' },
-                    { label: 'High risk',   count: highAnomalies.length,                                    color: 'bg-red-500'   },
+                    { label: 'Low risk',    count: anomalies.filter(a => a.severity === 'LOW').length,      color: 'bg-positive' },
+                    { label: 'Medium risk', count: anomalies.filter(a => a.severity === 'MEDIUM').length,   color: 'bg-medium' },
+                    { label: 'High risk',   count: highAnomalies.length,                                    color: 'bg-critical'   },
                   ].map((row) => {
                     const pct = anomalies.length > 0 ? Math.round((row.count / anomalies.length) * 100) : 0
                     return (
@@ -228,21 +228,21 @@ export default function AIGovernancePage() {
                 // and the simple fact that status changes are only ever
                 // written by explicit user actions — nothing in the codebase
                 // changes an anomaly's status autonomously).
-                { rule: `Anomalies at or above ${confidenceThreshold}% confidence are flagged high-confidence for priority review`, status: 'Enforced', icon: CheckCircle, color: 'text-emerald-400' },
-                { rule: 'No automated action is ever taken on an anomaly. Every status change is a manual, logged user action', status: 'Enforced', icon: CheckCircle, color: 'text-emerald-400' },
+                { rule: `Anomalies at or above ${confidenceThreshold}% confidence are flagged high-confidence for priority review`, status: 'Enforced', icon: CheckCircle, color: 'text-positive-fg' },
+                { rule: 'No automated action is ever taken on an anomaly. Every status change is a manual, logged user action', status: 'Enforced', icon: CheckCircle, color: 'text-positive-fg' },
                 // These describe a routing/notification/provenance system
                 // that does not exist yet — previously shown as "Enforced"
                 // with a green checkmark, which was inaccurate.
-                { rule: 'Critical-tier anomalies automatically routed to CISO + CFO for review', status: 'Not implemented', icon: Clock, color: 'text-amber-400' },
-                { rule: 'Per-finding AI provenance log (model, prompt, confidence)', status: 'Not implemented: findings are produced by a deterministic rule engine, not a model', icon: Clock, color: 'text-amber-400' },
-                { rule: 'Model explanations required before human approval UI', status: 'Draft', icon: Clock, color: 'text-amber-400' },
+                { rule: 'Critical-tier anomalies automatically routed to CISO + CFO for review', status: 'Not implemented', icon: Clock, color: 'text-medium-fg' },
+                { rule: 'Per-finding AI provenance log (model, prompt, confidence)', status: 'Not implemented: findings are produced by a deterministic rule engine, not a model', icon: Clock, color: 'text-medium-fg' },
+                { rule: 'Model explanations required before human approval UI', status: 'Draft', icon: Clock, color: 'text-medium-fg' },
               ].map((r, i) => {
                 const Icon = r.icon
                 return (
                   <div key={i} className="flex items-center gap-3 py-2 border-b border-border-subtle last:border-0">
                     <Icon className={`w-4 h-4 flex-shrink-0 ${r.color}`} />
                     <span className="text-sm text-text-secondary flex-1">{r.rule}</span>
-                    <span className={`text-xs font-medium ${r.status === 'Enforced' ? 'text-emerald-400' : 'text-amber-400'}`}>{r.status}</span>
+                    <span className={`text-xs font-medium ${r.status === 'Enforced' ? 'text-positive-fg' : 'text-medium-fg'}`}>{r.status}</span>
                   </div>
                 )
               })}
@@ -254,9 +254,9 @@ export default function AIGovernancePage() {
       {/* ── Model routing ── */}
       {activeTab === 'routing' && (
         <div>
-          <div className="flex items-start gap-2.5 bg-amber-500/10 border border-amber-500/30 rounded-lg px-4 py-3 mb-4">
-            <Info className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-amber-400">
+          <div className="flex items-start gap-2.5 bg-medium-bg border border-medium-line rounded-lg px-4 py-3 mb-4">
+            <Info className="w-4 h-4 text-medium-fg flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-medium-fg">
               <span className="font-medium">Policy reference, not a live routing log.</span> Anomaly detection in Ventura today runs on a deterministic rule engine (statistical outliers, duplicate matching, threshold checks). It does not call the language models listed below. This table documents the intended routing policy for a future model-backed detection layer; it does not reflect requests actually being made.
             </p>
           </div>
@@ -265,7 +265,7 @@ export default function AIGovernancePage() {
             <thead>
               <tr className="bg-surface-overlay border-b border-border">
                 {['Risk Tier', 'Model', 'Confidence threshold', 'Auto-approve?', 'Example tasks', ''].map(h => (
-                  <th key={h} className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">{h}</th>
+                  <th key={h} className="text-left px-4 py-3 text-[12.5px] font-medium text-text-muted">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -303,7 +303,7 @@ export default function AIGovernancePage() {
             <thead>
               <tr className="bg-surface-overlay border-b border-border">
                 {['Timestamp', 'Anomaly', 'Type', 'Severity', 'Confidence', 'Amount', ''].map(h => (
-                  <th key={h} className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">{h}</th>
+                  <th key={h} className="text-left px-4 py-3 text-[12.5px] font-medium text-text-muted">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -339,7 +339,7 @@ export default function AIGovernancePage() {
                     {a.amount.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })}
                   </td>
                   <td className="px-4 py-3">
-                    <a href={`/anomalies/${a.id}`} className="text-xs text-accent-400 hover:text-accent-300 flex items-center gap-0.5">
+                    <a href={`/anomalies/${a.id}`} className="text-xs text-accent-700 hover:text-accent-800 flex items-center gap-0.5">
                       View <ChevronRight className="w-3 h-3" />
                     </a>
                   </td>
@@ -360,7 +360,7 @@ export default function AIGovernancePage() {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-sm font-medium text-text-secondary">Auto-approval threshold</label>
-                  <span className="text-lg font-normal text-accent-400">{confidenceThreshold}%</span>
+                  <span className="text-lg font-medium tracking-[-0.015em] text-accent-700">{confidenceThreshold}%</span>
                 </div>
                 <input
                   type="range"
@@ -402,7 +402,7 @@ export default function AIGovernancePage() {
             <Button variant="primary" size="md" onClick={saveSettings}>Save settings</Button>
             <Button variant="secondary" size="md" onClick={resetSettings}>Reset to defaults</Button>
             {settingsSaved && (
-              <span className="text-sm text-emerald-400 font-medium flex items-center gap-1.5">
+              <span className="text-sm text-positive-fg font-medium flex items-center gap-1.5">
                 <CheckCircle className="w-4 h-4" /> Settings saved
               </span>
             )}

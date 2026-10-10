@@ -59,7 +59,7 @@ export default function OnboardingPage() {
           <div className="flex items-center gap-2">
             <span className="text-xs text-text-muted font-medium">{doneCount}/{checklist.length} complete</span>
             <div className="w-24 h-2 bg-surface-overlay rounded-full overflow-hidden">
-              <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${pctDone}%` }} />
+              <div className="h-full bg-positive rounded-full" style={{ width: `${pctDone}%` }} />
             </div>
           </div>
         }
@@ -68,11 +68,11 @@ export default function OnboardingPage() {
 
       {/* Progress banner */}
       {pctDone < 100 && (
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 mb-6 flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+        <div className="bg-medium-bg border border-medium-line rounded-lg p-4 mb-6 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-medium-fg flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-medium text-amber-300">Setup {pctDone}% complete, {checklist.length - doneCount} steps remaining</p>
-            <p className="text-xs text-amber-400/80 mt-0.5">Complete all steps to activate full anomaly detection and AI governance features.</p>
+            <p className="text-sm font-medium text-medium-fg">Setup {pctDone}% complete, {checklist.length - doneCount} steps remaining</p>
+            <p className="text-xs text-medium-fg mt-0.5">Complete all steps to activate full anomaly detection and AI governance features.</p>
           </div>
         </div>
       )}
@@ -85,7 +85,7 @@ export default function OnboardingPage() {
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
               activeTab === tab.id
-                ? 'border-accent-500 text-accent-300'
+                ? 'border-accent-500 text-accent-700'
                 : 'border-transparent text-text-muted hover:text-text-secondary'
             }`}
           >
@@ -102,16 +102,16 @@ export default function OnboardingPage() {
             <div
               key={item.id}
               className={`flex items-start gap-4 p-4 rounded-lg border transition-colors ${
-                item.done ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-surface-raised border-border'
+                item.done ? 'bg-positive-bg border-positive-line' : 'bg-surface-raised border-border'
               }`}
             >
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${item.done ? 'bg-emerald-500' : 'bg-surface-raised border-2 border-border-strong'}`}>
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${item.done ? 'bg-positive' : 'bg-surface-raised border-2 border-border-strong'}`}>
                 {item.done && <CheckCircle className="w-4 h-4 text-white" />}
                 {!item.done && <span className="text-xs font-medium text-text-muted">{i + 1}</span>}
               </div>
               <div className="flex-1">
-                <p className={`text-sm font-medium ${item.done ? 'text-emerald-300' : 'text-text-secondary'}`}>{item.title}</p>
-                <p className={`text-xs mt-0.5 ${item.done ? 'text-emerald-400' : 'text-text-muted'}`}>{item.detail}</p>
+                <p className={`text-sm font-medium ${item.done ? 'text-positive-fg' : 'text-text-secondary'}`}>{item.title}</p>
+                <p className={`text-xs mt-0.5 ${item.done ? 'text-positive-fg' : 'text-text-muted'}`}>{item.detail}</p>
               </div>
               {!item.done && (
                 <Button variant="primary" size="sm" iconRight={<ArrowRight className="w-3.5 h-3.5" />}>
@@ -135,7 +135,7 @@ export default function OnboardingPage() {
               onDragLeave={() => setDragOver(false)}
               onDrop={e => { e.preventDefault(); setDragOver(false) }}
               className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center text-center transition-colors cursor-pointer ${
-                dragOver ? 'border-emerald-400 bg-emerald-500/10' : 'border-border-strong hover:border-emerald-400 hover:bg-surface-hover'
+                dragOver ? 'border-positive bg-positive-bg' : 'border-border-strong hover:border-positive hover:bg-surface-hover'
               }`}
             >
               <Upload className="w-8 h-8 text-text-muted mb-3" />
@@ -164,7 +164,7 @@ export default function OnboardingPage() {
           <Card>
             <CardHeader title="Secure File Upload" subtitle="Invoices, receipts, and contracts" icon={<FileText className="w-4 h-4" />} />
             <CardDivider />
-            <div className="border-2 border-dashed border-border-strong hover:border-emerald-400 hover:bg-surface-hover rounded-xl p-10 flex flex-col items-center justify-center text-center transition-colors cursor-pointer">
+            <div className="border-2 border-dashed border-border-strong hover:border-positive hover:bg-surface-hover rounded-xl p-10 flex flex-col items-center justify-center text-center transition-colors cursor-pointer">
               <FileText className="w-8 h-8 text-text-muted mb-3" />
               <p className="text-sm font-medium text-text-secondary mb-1">Upload documents</p>
               <p className="text-xs text-text-muted mb-4">PDF invoices, receipts, and contracts are OCR-extracted and matched to transactions.</p>
@@ -186,7 +186,7 @@ export default function OnboardingPage() {
             <thead>
               <tr className="bg-surface-raised border-b border-border">
                 {['Source field', 'Target field', 'Sample value', 'Status', ''].map(h => (
-                  <th key={h} className="text-left px-4 py-2.5 text-xs font-medium text-text-muted uppercase tracking-wider">{h}</th>
+                  <th key={h} className="text-left px-4 py-2.5 text-[12.5px] font-medium text-text-muted">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -195,7 +195,7 @@ export default function OnboardingPage() {
                 <tr key={row.source} className="hover:bg-surface-hover">
                   <td className="px-4 py-3 text-xs font-mono text-text-secondary">{row.source}</td>
                   <td className="px-4 py-3">
-                    <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">{row.target}</span>
+                    <span className="text-xs font-mono text-positive-fg bg-positive-bg px-2 py-0.5 rounded">{row.target}</span>
                   </td>
                   <td className="px-4 py-3 text-xs text-text-muted font-mono">{row.sample}</td>
                   <td className="px-4 py-3">
@@ -229,7 +229,7 @@ export default function OnboardingPage() {
             <thead>
               <tr className="bg-surface-raised border-b border-border">
                 {['ID', 'Source', 'Date / Time', 'Records', 'Errors', 'Status'].map(h => (
-                  <th key={h} className="text-left px-4 py-3 text-xs font-medium text-text-muted uppercase tracking-wider">{h}</th>
+                  <th key={h} className="text-left px-4 py-3 text-[12.5px] font-medium text-text-muted">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -241,7 +241,7 @@ export default function OnboardingPage() {
                   <td className="px-4 py-3 text-xs text-text-muted">{row.date}</td>
                   <td className="px-4 py-3 text-sm font-medium text-text-secondary">{row.records.toLocaleString()}</td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs font-medium ${row.errors > 0 ? 'text-red-400' : 'text-text-muted'}`}>{row.errors}</span>
+                    <span className={`text-xs font-medium ${row.errors > 0 ? 'text-critical-fg' : 'text-text-muted'}`}>{row.errors}</span>
                   </td>
                   <td className="px-4 py-3">
                     {row.status === 'Success' ? <Badge variant="green">Success</Badge> : <Badge variant="red">Failed</Badge>}

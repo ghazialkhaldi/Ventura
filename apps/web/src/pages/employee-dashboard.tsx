@@ -31,7 +31,7 @@ interface WorkspaceInfo {
 const ROLE_META: Record<string, { label: string; color: string; desc: string; permissions: string[] }> = {
   viewer: {
     label: 'Viewer',
-    color: 'bg-slate-400/10 text-slate-400 border-slate-400/25',
+    color: 'bg-surface-overlay text-text-muted border-border',
     desc:  'Read-only access to workspace data.',
     permissions: [
       'View workspace dashboard',
@@ -40,7 +40,7 @@ const ROLE_META: Record<string, { label: string; color: string; desc: string; pe
   },
   analyst: {
     label: 'Analyst',
-    color: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+    color: 'bg-medium-bg text-medium-fg border-medium-line',
     desc:  'Can view and comment on anomalies and reports.',
     permissions: [
       'View workspace dashboard',
@@ -51,7 +51,7 @@ const ROLE_META: Record<string, { label: string; color: string; desc: string; pe
   },
   editor: {
     label: 'Editor',
-    color: 'bg-accent-500/10 text-accent-300 border-accent-500/30',
+    color: 'bg-accent-50 text-accent-700 border-accent-200',
     desc:  'Can approve and manage anomalies and workflows.',
     permissions: [
       'View workspace dashboard',
@@ -64,7 +64,7 @@ const ROLE_META: Record<string, { label: string; color: string; desc: string; pe
   },
   admin: {
     label: 'Admin',
-    color: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
+    color: 'bg-purple-50 text-purple-700 border-purple-200',
     desc:  'Full workspace access.',
     permissions: [
       'Full workspace access including settings and billing',
@@ -157,7 +157,7 @@ export default function EmployeeDashboard() {
     <EmployeeLayout title="Workspace">
       {/* Role-changed banner */}
       {roleChanged && (
-        <div className="mb-4 flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-4 py-3 rounded-lg text-sm">
+        <div className="mb-4 flex items-center gap-3 bg-positive-bg border border-positive-line text-positive-fg px-4 py-3 rounded-lg text-sm">
           <ArrowPathIcon className="w-4 h-4 flex-shrink-0" />
           Your permissions were updated. You now have <strong>{roleMeta.label}</strong> access.
         </div>
@@ -172,7 +172,7 @@ export default function EmployeeDashboard() {
               <BuildingOfficeIcon className="w-5 h-5 text-white" />
             </div>
             <div>
-              <p className="text-xs text-text-muted font-medium uppercase tracking-wide">Workspace</p>
+              <p className="text-[12.5px] text-text-muted font-medium">Workspace</p>
               <p className="text-base font-medium text-text-primary">{info?.company || user?.company || 'N/A'}</p>
             </div>
           </div>
@@ -191,7 +191,7 @@ export default function EmployeeDashboard() {
             </div>
             <div className="flex items-center justify-between py-1.5">
               <span className="text-text-muted text-xs">Status</span>
-              <span className="flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
+              <span className="flex items-center gap-1.5 text-xs text-positive-fg font-medium">
                 <CheckCircleIcon className="w-3.5 h-3.5" />
                 Active
               </span>
@@ -203,13 +203,13 @@ export default function EmployeeDashboard() {
         <div className="bg-surface-raised border border-border rounded-xl p-5">
           <div className="flex items-center gap-2 mb-1">
             <ShieldCheckIcon className="w-4 h-4 text-text-muted" />
-            <p className="text-xs font-medium text-text-muted uppercase tracking-wide">Your Permissions</p>
+            <p className="text-[12.5px] font-medium text-text-muted">Your Permissions</p>
           </div>
           <p className="text-xs text-text-muted mb-4">{roleMeta.desc}</p>
           <ul className="space-y-2">
             {roleMeta.permissions.map(p => (
               <li key={p} className="flex items-center gap-2 text-sm text-text-secondary">
-                <CheckCircleIcon className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                <CheckCircleIcon className="w-4 h-4 text-positive-fg flex-shrink-0" />
                 {p}
               </li>
             ))}
@@ -239,7 +239,7 @@ export default function EmployeeDashboard() {
           {[
             { icon: EyeIcon,          label: 'Access level',   value: roleMeta.label,                    color: 'text-text-secondary' },
             { icon: ChartBarIcon,     label: 'Data access',    value: info?.role === 'viewer' ? 'Read-only' : 'Read + Write', color: 'text-text-secondary' },
-            { icon: PencilSquareIcon, label: 'Can create',     value: ['editor', 'admin'].includes(info?.role ?? '') ? 'Yes' : 'No', color: ['editor', 'admin'].includes(info?.role ?? '') ? 'text-emerald-400' : 'text-text-muted' },
+            { icon: PencilSquareIcon, label: 'Can create',     value: ['editor', 'admin'].includes(info?.role ?? '') ? 'Yes' : 'No', color: ['editor', 'admin'].includes(info?.role ?? '') ? 'text-positive-fg' : 'text-text-muted' },
           ].map(item => (
             <div key={item.label} className="bg-surface-raised border border-border rounded-xl p-4 flex items-center gap-3">
               <item.icon className="w-5 h-5 text-text-muted flex-shrink-0" />
@@ -253,11 +253,11 @@ export default function EmployeeDashboard() {
       </div>
 
       {/* Notice about workspace data */}
-      <div className="mt-5 bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 flex items-start gap-3">
-        <ChartBarIcon className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+      <div className="mt-5 bg-accent-50 border border-accent-200 rounded-xl p-4 flex items-start gap-3">
+        <ChartBarIcon className="w-5 h-5 text-accent-700 mt-0.5 flex-shrink-0" />
         <div>
-          <p className="text-sm font-medium text-blue-300">Workspace data</p>
-          <p className="text-xs text-blue-400 mt-0.5 leading-relaxed">
+          <p className="text-sm font-medium text-accent-700">Workspace data</p>
+          <p className="text-xs text-accent-700 mt-0.5 leading-relaxed">
             Live anomaly and spend data will appear here once your admin connects and syncs their data source.
             Your role determines which actions you can take on that data.
           </p>

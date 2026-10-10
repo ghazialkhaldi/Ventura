@@ -59,58 +59,60 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
     return () => { document.body.style.overflow = '' }
   }, [drawerOpen])
 
+  // The header gains its hairline only once content scrolls beneath it
+  const [scrolled, setScrolled] = useState(false)
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 4)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  const close = () => setDrawerOpen(false)
+
   return (
     <>
       <Head>
-        <title>{title ? `${title} · Ventura` : 'Ventura · Financial Operations Intelligence'}</title>
+        <title>{title ? `${title} · Ventura` : 'Ventura · Spend review for month-end close'}</title>
       </Head>
-      <div className="min-h-screen flex flex-col bg-surface">
+      <div className="min-h-screen flex flex-col bg-surface-raised">
 
-        {/* Top nav */}
-        <header className="sticky top-0 z-50 bg-surface/95 backdrop-blur border-b border-border">
-          <div className="h-16 px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 flex items-center justify-between">
-            <Link href="/" className="no-underline" onClick={() => setDrawerOpen(false)}>
-              <VenturaLogo variant="light" height={28} />
+        <header className={`sticky top-0 z-50 bg-surface-raised border-b transition-colors ${scrolled ? 'border-border' : 'border-transparent'}`}>
+          <div className="max-w-page mx-auto h-16 px-5 sm:px-8 flex items-center gap-8">
+            <Link href="/" className="shrink-0 py-2" onClick={close} aria-label="Ventura home">
+              <VenturaLogo variant="dark" height={17} />
             </Link>
 
-            {/* Desktop nav */}
-            <div className="hidden sm:flex items-center gap-3">
-              <Link href="/demo" className="text-sm font-medium text-text-muted hover:text-text-primary transition-colors">
-                Demo
-              </Link>
-              {!loggedIn && (
-                <>
-                  <Link
-                    href="/employee-login"
-                    className="text-sm font-medium text-emerald-400 hover:text-emerald-300 border border-emerald-500/50 hover:border-emerald-400 hover:bg-emerald-500/10 px-4 py-2 rounded-lg transition-colors"
-                  >
-                    Employee portal
-                  </Link>
-                  <Link
-                    href="/login"
-                    className="text-sm font-medium text-text-secondary hover:text-text-primary border border-border-strong hover:border-border px-4 py-2 rounded-lg transition-colors"
-                  >
-                    Sign in
-                  </Link>
-                </>
-              )}
-              {/* Logged-in employees: show their portal link only, no sign-in links */}
+            <nav className="hidden md:flex items-center gap-1" aria-label="Main">
+              {NAV_LINKS.map(l => (
+                <Link key={l.href} href={l.href} className="px-3 py-2 rounded-md text-[14px] text-text-secondary hover:text-text-primary hover:bg-surface-overlay">
+                  {l.label}
+                </Link>
+              ))}
+            </nav>
+
+            <div className="hidden md:flex items-center gap-1 ml-auto">
               {loggedIn ? (
-                <Link href={portalHref} className="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
+                <Link href={portalHref} className="inline-flex items-center h-9 px-4 rounded-md bg-accent-600 hover:bg-accent-700 text-white text-[14px] font-medium">
                   {portalLabel}
                 </Link>
               ) : (
-                <Link href="/contact" className="bg-accent-500 hover:bg-accent-600 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
-                  Get started
-                </Link>
+                <>
+                  <Link href="/login" className="px-3 py-2 rounded-md text-[14px] text-text-secondary hover:text-text-primary hover:bg-surface-overlay">
+                    Sign in
+                  </Link>
+                  <Link href="/demo" className="ml-2 inline-flex items-center h-9 px-4 rounded-md bg-accent-600 hover:bg-accent-700 text-white text-[14px] font-medium">
+                    Walk through the demo
+                  </Link>
+                </>
               )}
             </div>
 
-            {/* Mobile hamburger */}
             <button
-              className="sm:hidden p-2 text-text-secondary hover:text-text-primary hover:bg-surface-overlay transition-colors"
+              className="md:hidden ml-auto -mr-2 p-2 rounded-md text-text-secondary hover:text-text-primary hover:bg-surface-overlay"
               onClick={() => setDrawerOpen(true)}
               aria-label="Open menu"
+              aria-expanded={drawerOpen}
             >
               <Bars3Icon className="w-6 h-6" />
             </button>
@@ -119,139 +121,69 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
 
         {/* Mobile drawer backdrop — below the drawer so it never eats taps on links */}
         {drawerOpen && (
-          <div
-            className="fixed inset-0 bg-black/40 z-[60] sm:hidden"
-            onClick={() => setDrawerOpen(false)}
-          />
+          <div className="fixed inset-0 bg-ink/30 z-[60] md:hidden" onClick={close} />
         )}
 
-        {/* Mobile drawer */}
-        <div className={`fixed top-0 right-0 h-full w-72 bg-surface-raised z-[70] flex flex-col shadow-2xl transition-transform duration-200 sm:hidden ${drawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-          {/* Drawer header */}
+        <div
+          className={`fixed top-0 right-0 h-full w-[300px] max-w-[85vw] bg-surface-raised z-[70] flex flex-col transition-[transform,visibility] duration-300 ease-out-expo md:hidden ${drawerOpen ? 'translate-x-0 shadow-pop visible' : 'translate-x-full invisible'}`}
+          aria-hidden={!drawerOpen}
+        >
           <div className="h-16 flex items-center justify-between px-5 border-b border-border">
-            <VenturaLogo variant="light" height={24} />
-            <button
-              onClick={() => setDrawerOpen(false)}
-              className="p-2 text-text-muted hover:text-text-primary hover:bg-surface-overlay transition-colors"
-              aria-label="Close menu"
-            >
+            <VenturaLogo variant="dark" height={15} />
+            <button onClick={close} className="-mr-2 p-2 rounded-md text-text-muted hover:text-text-primary hover:bg-surface-overlay" aria-label="Close menu">
               <XMarkIcon className="w-5 h-5" />
             </button>
           </div>
-
-          {/* Drawer links */}
-          <nav className="flex-1 overflow-y-auto px-5 py-6 flex flex-col gap-2">
-            <Link
-              href="/demo"
-              onClick={() => setDrawerOpen(false)}
-              className="block px-4 py-3 rounded-lg text-sm font-medium text-text-secondary hover:bg-surface-overlay hover:text-text-primary transition-colors"
-            >
-              Demo
-            </Link>
-
+          <nav className="flex-1 overflow-y-auto px-3 py-4 flex flex-col" aria-label="Mobile">
+            {NAV_LINKS.map(l => (
+              <Link key={l.href} href={l.href} onClick={close} className="px-3 py-3 rounded-md text-[15px] text-text-primary hover:bg-surface-overlay">
+                {l.label}
+              </Link>
+            ))}
             {!loggedIn && (
               <>
-                <Link
-                  href="/employee-login"
-                  onClick={() => setDrawerOpen(false)}
-                  className="block px-4 py-3 text-sm font-medium text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/30 rounded-lg transition-colors"
-                >
-                  Employee portal
-                </Link>
-                <Link
-                  href="/login"
-                  onClick={() => setDrawerOpen(false)}
-                  className="block px-4 py-3 text-sm font-medium text-text-secondary hover:bg-surface-overlay border border-border rounded-lg transition-colors"
-                >
-                  Sign in
-                </Link>
+                <div className="my-3 border-t border-border" />
+                <Link href="/login" onClick={close} className="px-3 py-3 rounded-md text-[15px] text-text-primary hover:bg-surface-overlay">Sign in</Link>
               </>
             )}
-
-            <div className="mt-2">
-              {loggedIn ? (
-                <Link
-                  href={portalHref}
-                  onClick={() => setDrawerOpen(false)}
-                  className="block px-4 py-3 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-colors text-center"
-                >
-                  {portalLabel}
-                </Link>
-              ) : (
-                <Link
-                  href="/contact"
-                  onClick={() => setDrawerOpen(false)}
-                  className="block px-4 py-3 text-sm font-medium text-white bg-accent-500 hover:bg-accent-600 rounded-lg transition-colors text-center"
-                >
-                  Get started
-                </Link>
-              )}
-            </div>
           </nav>
+          <div className="p-5 border-t border-border">
+            <Link
+              href={loggedIn ? portalHref : '/demo'}
+              onClick={close}
+              className="flex items-center justify-center h-11 rounded-md bg-accent-600 hover:bg-accent-700 text-white text-[15px] font-medium"
+            >
+              {loggedIn ? portalLabel : 'Walk through the demo'}
+            </Link>
+          </div>
         </div>
 
         <main className="flex-1">{children}</main>
 
-        {/* Footer */}
-        <footer className="bg-surface-sunken text-text-muted py-10 border-t border-border">
-          <div className="px-6 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
-            <div className="grid md:grid-cols-4 gap-8 mb-8">
-              <div>
-                <div className="mb-3">
-                  <VenturaLogo variant="light" height={20} />
-                </div>
-                <p className="text-xs text-text-muted leading-relaxed">
-                  Financial operations intelligence for enterprise finance teams.
+        <footer className="border-t border-border bg-surface-raised">
+          <div className="max-w-page mx-auto px-5 sm:px-8 pt-14 pb-10">
+            <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+              <div className="col-span-2 lg:col-span-1">
+                <VenturaLogo variant="dark" height={15} />
+                <p className="mt-4 text-[14px] text-text-muted max-w-[16rem] leading-relaxed">
+                  Spend review for month-end close. Every finding traced to its rows, and a person decides.
                 </p>
               </div>
-              <div>
-                <p className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-3">Product</p>
-                <ul className="space-y-2 text-xs">
-                  {[
-                    { label: 'Anomaly Detection',     href: '/#anomaly'    },
-                    { label: 'Workflow Intelligence', href: '/#workflow'   },
-                    { label: 'AI Governance',         href: '/#governance' },
-                    { label: 'Integrations',          href: '/demo'        },
-                  ].map(({ label, href }) => (
-                    <li key={label}><Link href={href} className="hover:text-text-primary transition-colors">{label}</Link></li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-3">Company</p>
-                <ul className="space-y-2 text-xs">
-                  {[
-                    { label: 'About',            href: '/about'    },
-                    { label: 'Security',         href: '/security' },
-                    { label: 'Privacy Policy',   href: '/privacy'  },
-                    { label: 'Terms of Service', href: '/terms'    },
-                  ].map(({ label, href }) => (
-                    <li key={label}><Link href={href} className="hover:text-text-primary transition-colors">{label}</Link></li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-text-secondary uppercase tracking-wider mb-3">Resources</p>
-                <ul className="space-y-2 text-xs">
-                  {[
-                    { label: 'Documentation', href: '/docs'     },
-                    { label: 'API Reference', href: '/docs#api' },
-                    { label: 'Status',        href: '/status'   },
-                    { label: 'Support',       href: '/contact'  },
-                  ].map(({ label, href }) => (
-                    <li key={label}><Link href={href} className="hover:text-text-primary transition-colors">{label}</Link></li>
-                  ))}
-                </ul>
-              </div>
+              {FOOTER_COLUMNS.map(col => (
+                <div key={col.heading}>
+                  <p className="text-[13px] font-medium text-text-primary">{col.heading}</p>
+                  <ul className="mt-4 space-y-3">
+                    {col.links.map(l => (
+                      <li key={l.label}>
+                        <Link href={l.href} className="text-[14px] text-text-muted hover:text-text-primary">{l.label}</Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </div>
-            <div className="border-t border-border pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-              <p className="text-xs">© 2026 Ventura Financial Intelligence, Inc. All rights reserved.</p>
-              <div className="flex items-center gap-1 text-xs">
-                <Link href="/status" className="inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 hover:border-emerald-500/50 px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                  All systems operational
-                </Link>
-              </div>
+            <div className="mt-14 pt-6 border-t border-border text-[13px] text-text-muted">
+              © 2026 Ventura Financial Intelligence, Inc.
             </div>
           </div>
         </footer>
@@ -259,3 +191,39 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
     </>
   )
 }
+
+const NAV_LINKS = [
+  { label: 'Product',  href: '/#product'  },
+  { label: 'Security', href: '/security'  },
+  { label: 'Contact',  href: '/contact'   },
+]
+
+const FOOTER_COLUMNS = [
+  {
+    heading: 'Product',
+    links: [
+      { label: 'Demo',             href: '/demo'      },
+      { label: 'What it catches',  href: '/#product'  },
+      { label: 'How it works',     href: '/#how'      },
+      { label: 'Security',         href: '/security'  },
+    ],
+  },
+  {
+    heading: 'Company',
+    links: [
+      { label: 'About',            href: '/about'    },
+      { label: 'Contact',          href: '/contact'  },
+      { label: 'Privacy policy',   href: '/privacy'  },
+      { label: 'Terms of service', href: '/terms'    },
+    ],
+  },
+  {
+    heading: 'Account',
+    links: [
+      { label: 'Sign in',          href: '/login'          },
+      { label: 'Employee portal',  href: '/employee-login' },
+      { label: 'Documentation',    href: '/docs'           },
+      { label: 'Status',           href: '/status'         },
+    ],
+  },
+]

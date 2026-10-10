@@ -213,7 +213,7 @@ export default function IntegrationsPage() {
                   className="flex flex-col items-center gap-2 p-3 rounded-lg border border-border hover:border-accent-400 hover:shadow-sm transition-all text-center group"
                 >
                   <BrandIcon brand={opt.brand} size={36} />
-                  <p className="text-xs font-medium text-text-secondary group-hover:text-accent-400 transition-colors leading-snug">{opt.name}</p>
+                  <p className="text-xs font-medium text-text-secondary group-hover:text-accent-800 transition-colors leading-snug">{opt.name}</p>
                   <p className="text-[10px] text-text-muted">{opt.desc}</p>
                 </button>
               ))}
@@ -225,8 +225,8 @@ export default function IntegrationsPage() {
       {/* Summary stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
         {[
-          { label: 'Connected sources', value: `${connectedCount} / ${INTEGRATION_CATALOG.length}`, icon: Plug,     color: 'text-emerald-400',  bg: 'bg-emerald-500/10',  border: 'border-emerald-500/30'  },
-          { label: 'Available sources',  value: INTEGRATION_CATALOG.length,                          icon: Database, color: 'text-emerald-400',   bg: 'bg-emerald-500/10',   border: 'border-emerald-500/30'   },
+          { label: 'Connected sources', value: `${connectedCount} / ${INTEGRATION_CATALOG.length}`, icon: Plug,     color: 'text-positive-fg',  bg: 'bg-positive-bg',  border: 'border-positive-line'  },
+          { label: 'Available sources',  value: INTEGRATION_CATALOG.length,                          icon: Database, color: 'text-positive-fg',   bg: 'bg-positive-bg',   border: 'border-positive-line'   },
           { label: 'File upload',        value: 'Supported',                                          icon: Database, color: 'text-text-secondary',  bg: 'bg-surface-raised',  border: 'border-border'  },
         ].map((s) => {
           const Icon = s.icon
@@ -254,8 +254,8 @@ export default function IntegrationsPage() {
             <div key={intg.id} className="bg-surface-raised border border-border rounded-lg p-5 flex flex-col min-h-[220px]">
               {processingCard === modalId ? (
                 <div className="flex flex-col items-center justify-center flex-1 gap-3 py-4">
-                  <div className="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
-                    <Loader2 className="w-5 h-5 text-emerald-400 animate-spin" />
+                  <div className="w-10 h-10 rounded-full bg-positive-bg border border-positive-line flex items-center justify-center">
+                    <Loader2 className="w-5 h-5 text-positive-fg animate-spin" />
                   </div>
                   <div className="text-center">
                     <p className="text-sm font-medium text-text-primary">Refreshing…</p>
@@ -303,7 +303,7 @@ export default function IntegrationsPage() {
                         </Button>
                         <button
                           onClick={() => handleDisconnect(modalId)}
-                          className="flex items-center gap-1 text-xs font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10 px-2.5 py-1.5 rounded-md transition-colors border border-transparent hover:border-red-500/30"
+                          className="flex items-center gap-1 text-xs font-medium text-critical-fg hover:text-critical-fg hover:bg-critical-bg px-2.5 py-1.5 rounded-md transition-colors border border-transparent hover:border-critical-line"
                         >
                           <Trash2 className="w-3 h-3" />
                           Reset

@@ -12,12 +12,12 @@ export default function EmptyState({ icon, title, description, action, className
   return (
     <div className={clsx('flex flex-col items-center justify-center py-16 text-center', className)}>
       {icon && (
-        <div className="w-12 h-12 rounded-full bg-surface-overlay flex items-center justify-center text-text-muted mb-4">
+        <div className="w-11 h-11 rounded-xl bg-surface-overlay flex items-center justify-center text-text-muted mb-4">
           {icon}
         </div>
       )}
-      <p className="text-sm font-medium text-text-secondary">{title}</p>
-      {description && <p className="text-xs text-text-muted mt-1 max-w-xs">{description}</p>}
+      <p className="text-[15px] font-medium text-text-primary">{title}</p>
+      {description && <p className="text-[13.5px] text-text-muted mt-1.5 max-w-sm leading-relaxed">{description}</p>}
       {action && <div className="mt-4">{action}</div>}
     </div>
   )

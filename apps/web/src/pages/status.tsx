@@ -1,5 +1,6 @@
 import PublicLayout from '../components/layout/PublicLayout'
-import { CheckCircleIcon } from '@heroicons/react/24/solid'
+import { CheckCircleIcon } from '@heroicons/react/20/solid'
+import { PageIntro, InlineLink } from '../components/marketing/Marketing'
 
 const systems = [
   { name: 'Web Application',       desc: 'Dashboard, anomaly investigation, workflows' },
@@ -13,39 +14,34 @@ const systems = [
 export default function StatusPage() {
   return (
     <PublicLayout title="System Status">
-      <section className="py-14 bg-surface-raised min-h-[60vh]">
-        <div className="max-w-2xl mx-auto px-6">
-          <p className="text-xs font-medium text-accent-400 uppercase tracking-widest mb-3">Status</p>
-          <h1 className="text-3xl font-normal text-text-primary">System status</h1>
-
-          {/* Overall banner */}
-          <div className="mt-8 flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/30 rounded-lg px-5 py-4">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 flex-shrink-0" />
-            <p className="text-sm font-medium text-emerald-400">All systems operational</p>
+      <PageIntro title="System status" />
+      <div className="max-w-page mx-auto px-5 sm:px-8 py-14 sm:py-20">
+        <div className="max-w-[44rem]">
+          <div className="flex items-center gap-3 rounded-lg border border-positive-line bg-positive-bg px-5 py-4">
+            <span className="status-dot w-2.5 h-2.5 bg-positive" />
+            <p className="text-[15px] font-medium text-positive-fg">All systems operational</p>
           </div>
 
-          {/* Per-system status */}
-          <div className="mt-6 bg-surface-raised border border-border rounded-lg divide-y divide-border-subtle">
+          <ul className="mt-6 rounded-lg border border-border divide-y divide-border-subtle">
             {systems.map(s => (
-              <div key={s.name} className="flex items-center justify-between px-5 py-4">
+              <li key={s.name} className="flex items-center justify-between gap-4 px-5 py-4">
                 <div>
-                  <p className="text-sm font-medium text-text-secondary">{s.name}</p>
-                  <p className="text-xs text-text-muted mt-0.5">{s.desc}</p>
+                  <p className="text-[15px] font-medium text-text-primary">{s.name}</p>
+                  <p className="mt-0.5 text-[13.5px] text-text-muted">{s.desc}</p>
                 </div>
-                <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-400 flex-shrink-0">
-                  <CheckCircleIcon className="w-4 h-4 text-emerald-400" />
+                <span className="flex shrink-0 items-center gap-1.5 text-[13px] font-medium text-positive-fg">
+                  <CheckCircleIcon className="w-4 h-4 text-positive" />
                   Operational
                 </span>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
 
-          <p className="text-xs text-text-muted mt-6">
-            Experiencing an issue not shown here?{' '}
-            <a href="/contact" className="text-accent-400 hover:text-accent-300 font-medium">Contact support</a>
+          <p className="mt-8 text-[14.5px] text-text-secondary">
+            Experiencing an issue not shown here? <InlineLink href="/contact">Contact support</InlineLink>.
           </p>
         </div>
-      </section>
+      </div>
     </PublicLayout>
   )
 }

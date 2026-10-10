@@ -482,13 +482,13 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
               {/* Instructions */}
               {config.instructions && (
                 <div className="mb-5">
-                  <p className="text-[11px] font-semibold text-text-muted uppercase tracking-wider mb-3">
+                  <p className="text-[12px] font-medium text-text-muted mb-3">
                     How to get your credentials
                   </p>
                   <ol className="space-y-2.5 mb-3">
                     {config.instructions.steps.map((s, i) => (
                       <li key={i} className="flex gap-2.5 text-xs text-text-secondary leading-relaxed">
-                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-accent-500/10 border border-accent-500/30 text-accent-400 text-[10px] font-bold flex items-center justify-center mt-0.5">
+                        <span className="flex-shrink-0 w-5 h-5 rounded-full bg-accent-50 border border-accent-200 text-accent-700 text-[10px] font-bold flex items-center justify-center mt-0.5">
                           {i + 1}
                         </span>
                         <span>{s}</span>
@@ -497,9 +497,9 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
                   </ol>
 
                   {config.instructions.note && (
-                    <div className="text-[11px] bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2 mb-3 leading-relaxed">
-                      <span className="font-medium text-amber-400">Note: </span>
-                      <span className="text-amber-300">{config.instructions.note}</span>
+                    <div className="text-[11px] bg-medium-bg border border-medium-line rounded-lg px-3 py-2 mb-3 leading-relaxed">
+                      <span className="font-medium text-medium-fg">Note: </span>
+                      <span className="text-medium-fg">{config.instructions.note}</span>
                     </div>
                   )}
 
@@ -508,7 +508,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
                       href={config.instructions.link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs text-accent-400 hover:text-accent-300 transition-colors mb-1"
+                      className="inline-flex items-center gap-1.5 text-xs text-accent-700 hover:text-accent-800 transition-colors mb-1"
                     >
                       <ExternalLink className="w-3 h-3" />
                       {config.instructions.link.label}
@@ -521,7 +521,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
 
               {/* Error */}
               {error && (
-                <div className="flex items-start gap-2.5 bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg px-3.5 py-3 text-xs mb-4">
+                <div className="flex items-start gap-2.5 bg-critical-bg border border-critical-line text-critical-fg rounded-lg px-3.5 py-3 text-xs mb-4">
                   <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                   <span>{error}</span>
                 </div>
@@ -530,7 +530,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
               <form onSubmit={handleSubmit} className="space-y-4">
                 {isFileType ? (
                   <div
-                    className={`border-2 border-dashed rounded-lg px-4 py-8 text-center transition-colors cursor-pointer ${dragOver ? 'border-emerald-400 bg-emerald-500/10' : 'border-border-strong hover:border-accent-500/50'}`}
+                    className={`border-2 border-dashed rounded-lg px-4 py-8 text-center transition-colors cursor-pointer ${dragOver ? 'border-positive bg-positive-bg' : 'border-border-strong hover:border-accent-200'}`}
                     onClick={() => fileRef.current?.click()}
                     onDragOver={e => { e.preventDefault(); setDragOver(true) }}
                     onDragLeave={() => setDragOver(false)}
@@ -545,8 +545,8 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
                     />
                     {uploadedFile ? (
                       <div className="flex flex-col items-center gap-2">
-                        <div className="w-9 h-9 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                          <FileText className="w-5 h-5 text-emerald-400" />
+                        <div className="w-9 h-9 rounded-full bg-positive-bg flex items-center justify-center">
+                          <FileText className="w-5 h-5 text-positive-fg" />
                         </div>
                         <p className="text-sm font-medium text-text-primary">{uploadedFile.name}</p>
                         <p className="text-xs text-text-muted">{fmtBytes(uploadedFile.size)} · Click to replace</p>
@@ -562,14 +562,14 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
                 ) : (
                   config.fields.map(f => (
                     <div key={f.key}>
-                      <label className="block text-xs font-medium text-text-secondary mb-1.5">
-                        {f.label}{f.required && <span className="text-red-400 ml-0.5">*</span>}
+                      <label className="block text-[13px] font-medium text-text-primary mb-1.5">
+                        {f.label}{f.required && <span className="text-critical-fg ml-0.5">*</span>}
                       </label>
                       {f.type === 'select' ? (
                         <select
                           value={values[f.key] || ''}
                           onChange={e => setValues(v => ({ ...v, [f.key]: e.target.value }))}
-                          className="w-full border border-border-strong rounded-lg px-3 py-2.5 text-sm text-text-primary bg-surface-raised focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
+                          className="w-full border border-border-strong rounded-lg px-3 py-2.5 text-sm text-text-primary bg-surface-raised focus:outline-none focus:ring-2 focus:ring-accent-500/30 focus:border-accent-500 focus-visible:ring-offset-0"
                         >
                           <option value="">Select…</option>
                           {f.options?.map(o => <option key={o} value={o}>{o}</option>)}
@@ -582,7 +582,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
                           placeholder={f.placeholder}
                           autoComplete="off"
                           spellCheck={false}
-                          className="w-full border border-border-strong rounded-lg px-3 py-2.5 text-sm text-text-primary placeholder-text-muted bg-surface-raised focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500 font-mono"
+                          className="w-full border border-border-strong rounded-lg px-3 py-2.5 text-sm text-text-primary placeholder-text-muted bg-surface-raised focus:outline-none focus:ring-2 focus:ring-accent-500/30 focus:border-accent-500 focus-visible:ring-offset-0 font-mono"
                         />
                       )}
                     </div>
@@ -592,7 +592,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
                 <div className="pt-1 flex items-center gap-3">
                   <button
                     type="submit"
-                    className="flex-1 bg-accent-500 hover:bg-accent-600 text-white font-medium py-2.5 rounded-lg transition-colors text-sm"
+                    className="flex-1 bg-accent-600 hover:bg-accent-700 text-white font-medium py-2.5 rounded-lg transition-colors text-sm"
                   >
                     {isFileType ? 'Process file' : 'Save & Connect'}
                   </button>
@@ -611,8 +611,8 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
           {/* ── Processing ── */}
           {step === 'processing' && (
             <div className="py-10 flex flex-col items-center gap-4 text-center">
-              <div className="w-14 h-14 rounded-full bg-emerald-500/10 border-2 border-emerald-500/30 flex items-center justify-center">
-                <Loader2 className="w-6 h-6 text-emerald-400 animate-spin" />
+              <div className="w-14 h-14 rounded-full bg-positive-bg border-2 border-positive-line flex items-center justify-center">
+                <Loader2 className="w-6 h-6 text-positive-fg animate-spin" />
               </div>
               <div>
                 <p className="text-sm font-medium text-text-primary">
@@ -626,8 +626,8 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
           {/* ── Connected ── */}
           {step === 'connected' && (
             <div className="py-8 flex flex-col items-center gap-4 text-center">
-              <div className="w-14 h-14 rounded-full bg-emerald-500/10 border-2 border-emerald-500/30 flex items-center justify-center">
-                <Check className="w-7 h-7 text-emerald-400" />
+              <div className="w-14 h-14 rounded-full bg-positive-bg border-2 border-positive-line flex items-center justify-center">
+                <Check className="w-7 h-7 text-positive-fg" />
               </div>
               <div>
                 <p className="text-sm font-medium text-text-primary">
@@ -643,7 +643,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
               </div>
               <button
                 onClick={() => { onClose(); window.location.href = '/dashboard' }}
-                className="mt-2 bg-accent-500 hover:bg-accent-600 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm"
+                className="mt-2 bg-accent-600 hover:bg-accent-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors text-sm"
               >
                 {isFileType ? 'View dashboard' : 'Done'}
               </button>
@@ -660,13 +660,13 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
                 <p className="text-sm font-medium text-text-primary">{config.name} coming soon</p>
                 <p className="text-xs text-text-muted mt-2 max-w-xs leading-relaxed">
                   Contact{' '}
-                  <a href="mailto:support@venturafinance.net" className="text-accent-400 hover:underline">
+                  <a href="mailto:support@venturafinance.net" className="text-accent-700 hover:underline">
                     support@venturafinance.net
                   </a>{' '}
                   to enable {config.name} access on your account.
                 </p>
               </div>
-              <button onClick={onClose} className="mt-1 bg-accent-500 hover:bg-accent-600 text-white font-medium py-2 px-6 rounded-lg transition-colors text-sm">
+              <button onClick={onClose} className="mt-1 bg-accent-600 hover:bg-accent-700 text-white font-medium py-2 px-6 rounded-lg transition-colors text-sm">
                 Close
               </button>
             </div>
@@ -675,16 +675,16 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
           {/* ── Error ── */}
           {step === 'error' && (
             <div className="py-8 flex flex-col items-center gap-4 text-center">
-              <div className="w-14 h-14 rounded-full bg-red-500/10 border-2 border-red-500/30 flex items-center justify-center">
-                <AlertCircle className="w-7 h-7 text-red-400" />
+              <div className="w-14 h-14 rounded-full bg-critical-bg border-2 border-critical-line flex items-center justify-center">
+                <AlertCircle className="w-7 h-7 text-critical-fg" />
               </div>
               <div>
                 <p className="text-sm font-medium text-text-primary">Connection failed</p>
-                <p className="text-xs text-red-400 mt-1 max-w-xs">{error}</p>
+                <p className="text-xs text-critical-fg mt-1 max-w-xs">{error}</p>
               </div>
               <button
                 onClick={() => { setStep('configure'); setError('') }}
-                className="mt-1 text-sm text-accent-400 hover:text-accent-300 underline"
+                className="mt-1 text-sm text-accent-700 hover:text-accent-800 underline"
               >
                 Try again
               </button>

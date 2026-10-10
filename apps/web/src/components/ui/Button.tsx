@@ -10,17 +10,17 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variants = {
-  primary:   'bg-accent-500 text-white hover:bg-accent-600 border border-accent-500',
-  secondary: 'bg-surface-raised text-text-secondary hover:bg-surface-hover border border-border-strong',
-  ghost:     'bg-transparent text-text-muted hover:bg-surface-overlay border border-transparent',
-  danger:    'bg-red-700 text-white hover:bg-red-800 border border-red-700',
-  outline:   'bg-transparent text-text-secondary hover:bg-surface-hover border border-border-strong',
+  primary:   'bg-accent-600 text-white hover:bg-accent-700 border border-accent-600 shadow-card',
+  secondary: 'bg-surface-raised text-text-primary hover:bg-surface-overlay border border-border-strong shadow-card',
+  ghost:     'bg-transparent text-text-secondary hover:text-text-primary hover:bg-surface-overlay border border-transparent',
+  danger:    'bg-red-600 text-white hover:bg-red-700 border border-red-600 shadow-card',
+  outline:   'bg-transparent text-text-primary hover:bg-surface-overlay border border-border-strong',
 }
 
 const sizes = {
-  sm: 'px-3 py-1.5 text-xs font-medium gap-1.5',
-  md: 'px-4 py-2 text-sm font-medium gap-2',
-  lg: 'px-5 py-2.5 text-sm font-medium gap-2',
+  sm: 'h-8 px-3 text-[13px] font-medium gap-1.5',
+  md: 'h-9 px-3.5 text-[13.5px] font-medium gap-2',
+  lg: 'h-10 px-4 text-[14px] font-medium gap-2',
 }
 
 export default function Button({
@@ -39,7 +39,7 @@ export default function Button({
       {...props}
       disabled={disabled || loading}
       className={clsx(
-        'inline-flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-1 focus-visible:ring-offset-surface disabled:opacity-40 disabled:cursor-not-allowed',
+        'inline-flex items-center justify-center rounded-md whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-raised disabled:opacity-45 disabled:cursor-not-allowed',
         variants[variant],
         sizes[size],
         className,

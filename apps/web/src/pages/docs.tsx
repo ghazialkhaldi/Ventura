@@ -1,82 +1,94 @@
-import PublicLayout from '../components/layout/PublicLayout'
 import Link from 'next/link'
+import PublicLayout from '../components/layout/PublicLayout'
+import { PageIntro, InlineLink } from '../components/marketing/Marketing'
 
 const guides = [
   {
+    id: 'getting-started',
     title: 'Getting started',
-    desc: 'Create your workspace, connect a data source or upload a file, and see your first anomaly report in minutes.',
-    steps: ['Sign up and verify your email', 'Connect an integration or upload transactions', 'Review detected anomalies on your dashboard'],
+    desc: 'Create your workspace, upload a transaction export, and review your first findings.',
+    steps: ['Sign up and verify your email', 'Upload a CSV, Excel or PDF export of transactions', 'Review the findings on your dashboard'],
   },
   {
+    id: 'integrations',
     title: 'Integrations',
-    desc: 'Connect QuickBooks, NetSuite, Stripe, Plaid, and more. Each integration syncs transactions automatically.',
-    steps: ['Open Integrations from the sidebar', 'Choose a provider and follow the connect flow', 'Data syncs and anomaly detection runs automatically'],
+    desc: 'Authorize QuickBooks, Xero, Salesforce or Gusto from Integrations; credentials are encrypted at rest. Findings currently come from uploaded files, so connected systems do not sync transactions yet.',
+    steps: ['Open Integrations from the sidebar', 'Choose a provider and complete its sign-in', 'Upload an export from that system to run detection'],
   },
   {
-    title: 'Working with anomalies',
-    desc: 'Every anomaly includes severity, confidence score, and the reasoning behind the flag. Approve, dismiss, or escalate.',
-    steps: ['Filter by severity or status on the Anomalies tab', 'Open an anomaly to see reasoning and source rows', 'Resolve or dismiss with a full audit trail'],
+    id: 'findings',
+    title: 'Working with findings',
+    desc: 'Every finding includes its severity, a confidence score and the reasoning behind the flag. Resolve it, dismiss it, or send it for review.',
+    steps: ['Filter by severity or status on the Anomalies tab', 'Open a finding to see its reasoning and source rows', 'Resolve or dismiss it; the change is logged'],
   },
   {
+    id: 'governance',
     title: 'AI governance',
-    desc: 'Set a confidence threshold that controls which findings get flagged as high-confidence for priority review.',
-    steps: ['Open AI Governance, then Settings', 'Set your confidence threshold', 'Review which rules are active versus planned'],
+    desc: 'Set the confidence threshold that decides which findings are marked high-confidence for priority review.',
+    steps: ['Open AI Governance, then Settings', 'Set your confidence threshold', 'Review which rules are active and which are planned'],
   },
   {
+    id: 'team',
     title: 'Team management',
     desc: 'Invite employees with a workspace code and control what each member can see and do.',
-    steps: ['Settings, then Users, then Invite user', 'Share the generated code or link', 'Assign viewer, analyst, or editor roles; changes apply live'],
+    steps: ['Go to Settings, then Users, then Invite user', 'Share the generated code or link', 'Assign viewer, analyst or editor roles; changes apply immediately'],
   },
   {
-    title: 'API reference',
-    desc: 'Programmatic access to anomalies, workflows, and audit events for Enterprise plans.',
-    steps: ['Generate an API key in Settings, then Security', 'Authenticate with a Bearer token', 'Full endpoint documentation is provided during Enterprise onboarding'],
+    id: 'data',
+    title: 'Where your data lives',
+    desc: 'Uploaded files are parsed in your browser and the results are stored on your device. Account, team and security-log data is stored server-side.',
+    steps: ['Read the privacy policy for the full detail', 'Clearing your browser’s site data removes uploaded results', 'Re-upload the export on another device to review it there'],
   },
 ]
 
 export default function DocsPage() {
   return (
     <PublicLayout title="Documentation">
-      <section className="bg-surface-raised border-b border-border py-20">
-        <div className="max-w-3xl mx-auto px-6 text-center">
-          <p className="text-xs font-medium text-accent-400 uppercase tracking-widest mb-3">Documentation</p>
-          <h1 className="text-3xl font-normal text-text-primary">Learn Ventura</h1>
-          <p className="text-base text-text-muted mt-3">
-            Everything you need to set up your workspace, connect data, and put AI-powered
-            financial intelligence to work.
+      <PageIntro
+        title="Documentation"
+        lead="How to set up a workspace, bring in your data and work through findings."
+      />
+
+      <div className="max-w-page mx-auto px-5 sm:px-8 py-14 sm:py-20 grid gap-12 lg:grid-cols-[14rem_1fr] lg:gap-16">
+        <nav aria-label="On this page" className="hidden lg:block">
+          <ul className="sticky top-24 space-y-1 border-l border-border">
+            {guides.map(g => (
+              <li key={g.id}>
+                <a href={`#${g.id}`} className="block -ml-px pl-4 py-1.5 border-l border-transparent text-[14px] text-text-muted hover:text-text-primary hover:border-border-strong">
+                  {g.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <div className="max-w-[44rem]">
+          {guides.map((g, gi) => (
+            <section key={g.id} id={g.id} className={`scroll-mt-24 ${gi > 0 ? 'mt-14 pt-14 border-t border-border' : ''}`}>
+              <h2 className="text-[22px] font-medium tracking-[-0.015em] text-text-primary">{g.title}</h2>
+              <p className="mt-3 text-[16px] leading-[1.7] text-text-secondary">
+                {g.desc}
+                {g.id === 'data' && <> <InlineLink href="/privacy">Privacy policy</InlineLink>.</>}
+              </p>
+              <ol className="mt-6 space-y-3">
+                {g.steps.map((s, i) => (
+                  <li key={s} className="grid grid-cols-[1.75rem_1fr] gap-3 text-[15.5px] leading-[1.6] text-text-primary">
+                    <span className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full border border-border-strong text-[12px] font-medium text-text-secondary tabular-nums">
+                      {i + 1}
+                    </span>
+                    {s}
+                  </li>
+                ))}
+              </ol>
+            </section>
+          ))}
+
+          <p className="mt-16 pt-8 border-t border-border text-[15px] text-text-secondary">
+            Can&rsquo;t find what you need? <InlineLink href="/contact">Contact support</InlineLink> or{' '}
+            <Link href="/demo" className="font-medium text-accent-700 hover:text-accent-800 underline decoration-accent-200 hover:decoration-accent-400">walk through the demo</Link>.
           </p>
         </div>
-      </section>
-
-      <section className="py-20 bg-surface-raised">
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {guides.map(g => (
-              <div key={g.title} id={g.title === 'API reference' ? 'api' : undefined} className="border border-border rounded-lg p-5 hover:border-border-strong hover:shadow-sm transition-all">
-                <h3 className="text-sm font-medium text-text-primary mb-1.5">{g.title}</h3>
-                <p className="text-xs text-text-muted leading-relaxed mb-3">{g.desc}</p>
-                <ol className="space-y-1.5">
-                  {g.steps.map((s, i) => (
-                    <li key={s} className="flex items-start gap-2 text-xs text-text-secondary">
-                      <span className="w-4 h-4 rounded-full bg-surface-overlay text-text-muted text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-px">{i + 1}</span>
-                      {s}
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-10 text-center">
-            <p className="text-sm text-text-muted">
-              Can't find what you need?{' '}
-              <Link href="/contact" className="text-accent-400 hover:text-accent-300 font-medium">Contact support</Link>
-              {' '}or{' '}
-              <Link href="/demo" className="text-accent-400 hover:text-accent-300 font-medium">explore the interactive demo</Link>.
-            </p>
-          </div>
-        </div>
-      </section>
+      </div>
     </PublicLayout>
   )
 }

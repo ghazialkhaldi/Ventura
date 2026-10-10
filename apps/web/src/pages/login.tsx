@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
-import { Eye, EyeOff, AlertCircle, ArrowRight, CheckCircle, ShieldCheck, Mail } from 'lucide-react'
+import { Eye, EyeOff, AlertCircle, ArrowRight, ArrowLeft, CheckCircle, ShieldCheck, Mail } from 'lucide-react'
 import { saveUser } from '../hooks/useCurrentUser'
 import { createClient } from '../utils/supabase/client'
 import VenturaLogo from '../components/VenturaLogo'
@@ -234,7 +234,7 @@ export default function LoginPage() {
   // ── UI helpers ────────────────────────────────────────────────────────────
 
   const mfaIsEmail = emailOtpSent && !factorId
-  const inputCls   = 'w-full border border-border-strong bg-surface-raised px-3.5 py-2.5 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500 transition-colors'
+  const inputCls   = 'w-full h-10 rounded-md border border-border-strong bg-surface-raised px-3 text-[14.5px] text-text-primary placeholder-text-muted shadow-card focus:outline-none focus:ring-2 focus:ring-accent-500/30 focus:border-accent-500 focus-visible:ring-offset-0 transition-colors'
 
   return (
     <>
@@ -243,29 +243,29 @@ export default function LoginPage() {
         <span className="absolute top-3 right-4 text-[10px] text-text-muted z-50 select-none">v1.4</span>
 
         {/* ── Left panel ── */}
-        <div className="hidden lg:flex lg:w-[420px] xl:w-[480px] bg-surface flex-col justify-between p-10 flex-shrink-0">
+        <div className="hidden lg:flex lg:w-[440px] xl:w-[500px] bg-ink text-ink-text flex-col justify-between p-10 xl:p-12 flex-shrink-0">
           <Link href="/" className="no-underline">
-            <VenturaLogo variant="light" height={28} />
+            <VenturaLogo variant="light" height={17} />
           </Link>
 
           {step === 'creds' ? (
             <div>
-              <h2 className="text-2xl font-normal text-white leading-snug mb-4">
-                Financial operations intelligence for enterprise finance teams
+              <h2 className="font-display font-medium text-[2rem] leading-[1.1] tracking-[-0.025em] text-white mb-5">
+                Find the spend that needs a second look before close.
               </h2>
-              <p className="text-sm text-text-muted leading-relaxed mb-8">
-                Connect your accounting systems, detect anomalies automatically,
-                and enforce approval workflows, all with a complete audit trail.
+              <p className="text-[15.5px] text-ink-muted leading-relaxed mb-9">
+                Every finding traced to the rows behind it, and nothing changes
+                until someone on your team decides.
               </p>
-              <ul className="space-y-3">
+              <ul className="space-y-3.5">
                 {[
-                  'Automated anomaly detection across all spend',
-                  'Approval workflow tracking with deadline alerts',
-                  'Explainable decisions with full audit trail',
-                  'Role based access control',
+                  'Ten checks, from duplicates to period cut-off',
+                  'Confidence and reasoning on every finding',
+                  'Every status change logged with who and when',
+                  'Role-based access with email verification',
                 ].map(item => (
-                  <li key={item} className="flex items-start gap-2.5 text-sm text-text-muted">
-                    <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                  <li key={item} className="flex items-start gap-2.5 text-[14.5px] text-ink-text">
+                    <CheckCircle className="w-4 h-4 text-accent-300 flex-shrink-0 mt-0.5" />
                     {item}
                   </li>
                 ))}
@@ -273,19 +273,19 @@ export default function LoginPage() {
             </div>
           ) : (
             <div>
-              <div className="w-12 h-12 bg-[#1a2d44] border border-[#2a3d5a] flex items-center justify-center mb-6">
+              <div className="w-11 h-11 rounded-xl bg-ink-raised border border-ink-line flex items-center justify-center mb-6">
                 {mfaIsEmail
-                  ? <Mail className="w-6 h-6 text-emerald-400" />
-                  : <ShieldCheck className="w-6 h-6 text-emerald-400" />
+                  ? <Mail className="w-5 h-5 text-accent-300" />
+                  : <ShieldCheck className="w-5 h-5 text-accent-300" />
                 }
               </div>
-              <h2 className="text-2xl font-normal text-white leading-snug mb-4">
+              <h2 className="font-display font-medium text-[1.75rem] leading-[1.12] tracking-[-0.025em] text-white mb-4">
                 {mfaIsEmail
                   ? 'Check your email for a verification code'
                   : 'Your workspace is protected with multi-factor authentication'
                 }
               </h2>
-              <p className="text-sm text-text-muted leading-relaxed mb-8">
+              <p className="text-[15px] text-ink-muted leading-relaxed mb-8">
                 {mfaIsEmail
                   ? `We sent a 6-digit code to ${email}. It expires in 10 minutes.`
                   : 'Ventura requires a second verification step each time you sign in, keeping your financial data secure even if your password is compromised.'
@@ -298,8 +298,8 @@ export default function LoginPage() {
                   'Each session verified independently',
                   'Role based access control',
                 ].map(item => (
-                  <li key={item} className="flex items-start gap-2.5 text-sm text-text-muted">
-                    <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                  <li key={item} className="flex items-start gap-2.5 text-[14.5px] text-ink-text">
+                    <CheckCircle className="w-4 h-4 text-accent-300 flex-shrink-0 mt-0.5" />
                     {item}
                   </li>
                 ))}
@@ -307,14 +307,14 @@ export default function LoginPage() {
             </div>
           )}
 
-          <p className="text-xs text-text-muted">© 2026 Ventura Financial Intelligence, Inc.</p>
+          <p className="text-[12.5px] text-ink-muted">© 2026 Ventura Financial Intelligence, Inc.</p>
         </div>
 
         {/* ── Right panel ── */}
         <div className="flex-1 flex flex-col bg-surface-raised">
           <header className="lg:hidden h-14 border-b border-border flex items-center px-6">
             <Link href="/" className="no-underline">
-              <VenturaLogo variant="light" height={24} />
+              <VenturaLogo variant="dark" height={15} />
             </Link>
           </header>
 
@@ -325,12 +325,12 @@ export default function LoginPage() {
               {step === 'creds' && (
                 <>
                   <div className="mb-8">
-                    <h1 className="text-2xl font-normal text-text-primary">Sign in to your workspace</h1>
-                    <p className="text-sm text-text-muted mt-1">Enter your details to continue.</p>
+                    <h1 className="font-display font-medium text-[1.75rem] leading-[1.1] tracking-[-0.025em] text-text-primary">Sign in to your workspace</h1>
+                    <p className="text-[14.5px] text-text-muted mt-2">Enter your details to continue.</p>
                   </div>
 
                   {error && (
-                    <div className="flex items-start gap-2.5 bg-red-500/10 border border-red-500/30 text-red-400 px-3.5 py-3 text-sm mb-5">
+                    <div role="alert" className="flex items-start gap-2.5 rounded-md bg-critical-bg border border-critical-line text-critical-fg px-3.5 py-3 text-[14px] mb-5">
                       <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                       <span>{error}</span>
                     </div>
@@ -338,7 +338,7 @@ export default function LoginPage() {
 
                   <form onSubmit={handleCredentials} className="space-y-4">
                     <div>
-                      <label className="block text-xs font-medium text-text-secondary mb-1.5">Work email</label>
+                      <label className="block text-[13px] font-medium text-text-primary mb-1.5">Work email</label>
                       <input
                         type="email" required value={email} onChange={e => setEmail(e.target.value)}
                         placeholder="you@company.com" autoComplete="email" className={inputCls}
@@ -347,8 +347,8 @@ export default function LoginPage() {
 
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
-                        <label className="text-xs font-medium text-text-secondary">Password</label>
-                        <Link href="/forgot-password" className="text-xs text-text-muted hover:text-text-secondary transition-colors">
+                        <label className="text-[13px] font-medium text-text-primary">Password</label>
+                        <Link href="/forgot-password" className="text-[13px] text-text-muted hover:text-accent-700">
                           Forgot password?
                         </Link>
                       </div>
@@ -368,7 +368,7 @@ export default function LoginPage() {
 
                     <button
                       type="submit" disabled={loading}
-                      className="w-full bg-accent-500 hover:bg-accent-600 text-white font-medium py-2.5 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full h-10 rounded-md bg-accent-600 hover:bg-accent-700 text-white text-[14.5px] font-medium shadow-card flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {loading ? (
                         <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
@@ -379,10 +379,16 @@ export default function LoginPage() {
                     </button>
                   </form>
 
-                  <p className="text-center text-xs text-text-muted mt-6">
+                  <p className="text-center text-[13px] text-text-muted mt-7">
                     Don&apos;t have an account?{' '}
-                    <Link href="/contact" className="text-text-muted hover:text-text-primary font-medium">
+                    <Link href="/contact" className="text-accent-700 hover:text-accent-800 font-medium">
                       Request access
+                    </Link>
+                  </p>
+                  <p className="text-center text-[13px] text-text-muted mt-2">
+                    Joining a team as an employee?{' '}
+                    <Link href="/employee-login" className="text-accent-700 hover:text-accent-800 font-medium">
+                      Use the employee portal
                     </Link>
                   </p>
                 </>
@@ -392,28 +398,28 @@ export default function LoginPage() {
               {step === 'mfa' && (
                 <>
                   <div className="mb-8">
-                    <div className="w-10 h-10 bg-surface-overlay border border-border flex items-center justify-center mb-5">
+                    <div className="w-10 h-10 rounded-xl bg-surface-overlay border border-border flex items-center justify-center mb-5">
                       {mfaIsEmail
                         ? <Mail className="w-5 h-5 text-text-secondary" />
                         : <ShieldCheck className="w-5 h-5 text-text-secondary" />
                       }
                     </div>
-                    <h1 className="text-2xl font-normal text-text-primary">
+                    <h1 className="font-display font-medium text-[1.75rem] leading-[1.1] tracking-[-0.025em] text-text-primary">
                       {mfaIsEmail ? 'Check your email' : 'Two-factor authentication'}
                     </h1>
-                    <p className="text-sm text-text-muted mt-1.5 leading-relaxed">
+                    <p className="text-[14.5px] text-text-muted mt-2 leading-relaxed">
                       {mfaIsEmail
                         ? <>We sent a 6-digit code to <span className="font-medium text-text-secondary">{email}</span>. Enter it below.</>
                         : 'Enter the 6-digit code from your authenticator app.'
                       }
                     </p>
-                    <p className="text-xs text-text-muted mt-1">
+                    <p className="text-[12.5px] text-text-muted mt-1">
                       Signing in as <span className="font-medium text-text-muted">{email}</span>
                     </p>
                   </div>
 
                   {error && (
-                    <div className="flex items-start gap-2.5 bg-red-500/10 border border-red-500/30 text-red-400 px-3.5 py-3 text-sm mb-5">
+                    <div role="alert" className="flex items-start gap-2.5 rounded-md bg-critical-bg border border-critical-line text-critical-fg px-3.5 py-3 text-[14px] mb-5">
                       <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                       <span>{error}</span>
                     </div>
@@ -421,7 +427,7 @@ export default function LoginPage() {
 
                   <form onSubmit={handleMFASubmit} className="space-y-4">
                     <div>
-                      <label className="block text-xs font-medium text-text-secondary mb-1.5">
+                      <label className="block text-[13px] font-medium text-text-primary mb-1.5">
                         Verification code
                       </label>
                       <input
@@ -433,9 +439,9 @@ export default function LoginPage() {
                         value={mfaCode}
                         onChange={e => handleMFAInput(e.target.value)}
                         placeholder="000000"
-                        className="w-full border border-border-strong bg-surface-raised px-3.5 py-3 text-xl font-mono text-center tracking-[0.5em] text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500 transition-colors"
+                        className="w-full h-12 rounded-md border border-border-strong bg-surface-raised px-3.5 text-xl font-mono text-center tracking-[0.5em] text-text-primary placeholder-text-muted shadow-card focus:outline-none focus:ring-2 focus:ring-accent-500/30 focus:border-accent-500 focus-visible:ring-offset-0 transition-colors"
                       />
-                      <p className="text-xs text-text-muted mt-1.5">
+                      <p className="text-[12.5px] text-text-muted mt-1.5">
                         {mfaIsEmail
                           ? 'Code expires in 10 minutes. Check your spam folder if you don\'t see it.'
                           : 'The code changes every 30 seconds.'
@@ -445,7 +451,7 @@ export default function LoginPage() {
 
                     <button
                       type="submit" disabled={loading || mfaCode.length < 6}
-                      className="w-full bg-accent-500 hover:bg-accent-600 text-white font-medium py-2.5 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full h-10 rounded-md bg-accent-600 hover:bg-accent-700 text-white text-[14.5px] font-medium shadow-card flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {loading ? (
                         <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
@@ -463,23 +469,23 @@ export default function LoginPage() {
                           type="button"
                           disabled={resending || resendCooldown > 0}
                           onClick={handleResend}
-                          className="text-xs text-text-muted hover:text-text-secondary transition-colors text-left disabled:opacity-40 disabled:cursor-not-allowed"
+                          className="text-[13px] text-text-muted hover:text-text-primary text-left disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                           {resending ? 'Sending…' : resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Didn\'t receive it? Resend code'}
                         </button>
                         {resentOk && (
-                          <span className="text-xs text-emerald-400 font-medium">Code sent!</span>
+                          <span className="text-xs text-positive-fg font-medium">Code sent!</span>
                         )}
                       </div>
                     )}
                     <button
                       type="button"
-                      className="text-xs text-text-muted hover:text-text-secondary transition-colors text-left"
+                      className="text-[13px] text-text-muted hover:text-text-primary text-left"
                       onClick={() => { setStep('creds'); setMfaCode(''); setError(''); setFactorId(''); setChallengeId(''); setEmailOtpSent(false) }}
                     >
-                      ← Back to sign in
+                      <span className="inline-flex items-center gap-1.5"><ArrowLeft className="w-3.5 h-3.5" /> Back to sign in</span>
                     </button>
-                    <Link href="/contact" className="text-xs text-text-muted hover:text-text-secondary transition-colors">
+                    <Link href="/contact" className="text-[13px] text-text-muted hover:text-text-primary">
                       Having trouble? Contact support
                     </Link>
                   </div>

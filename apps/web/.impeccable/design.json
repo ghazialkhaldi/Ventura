@@ -753,6 +753,21 @@
           "#74e3b2",
           "#c1ffe0"
         ]
+      },
+      "field": {
+        "name": "Ultramarine Field",
+        "hex": "#2440d6",
+        "role": "Whole regions on marketing pages: hero, page intros, logo strip, closing band. White type 7.6:1."
+      },
+      "field-muted": {
+        "name": "Field Mist",
+        "hex": "#c7d1ff",
+        "role": "Secondary text on the field (4.9:1)."
+      },
+      "field-deep": {
+        "name": "Field Deep",
+        "hex": "#1b32b8",
+        "role": "Pressed or recessed states on the field."
       }
     },
     "typographyMeta": {
@@ -1000,6 +1015,7 @@
     "northStar": "The Clean Ledger",
     "overview": "Ventura looks like a well-kept ledger on a white desk: cool paper, hairline rules, figures that line up in columns, and one blue pen used only to act. It is the category standard played straight, held to the craft bar of Linear and Mercury. The interface itself is the proof, so marketing pages lead with the real product at work on labelled example data rather than abstract charts or illustration. Nothing glows, nothing is tilted, and no surface competes with the evidence.\n\nDensity follows the reader. Marketing pages are generous and quiet: a left-aligned semi-expanded headline, a short subline, then wide product frames and hairline lists with long vertical rhythm. The signed-in app is compact and calm: a 14px base, 32px navigation rows, 36px buttons, white cards on a faintly blue-grey canvas. Colour carries meaning, never mood. Ultramarine means \"you can act here\". The severity hues mean \"this finding needs attention\". Everything else is cool neutral.\n\nThe system refuses the generic AI-startup register (gradients, glow, \"AI-powered\" sparkle) and anything playful. Depth comes from hairlines and tonal steps first, with soft ink-tinted shadows reserved for raised product frames and floating layers. Motion is one authored entrance and quick, quiet state changes.",
     "keyCharacteristics": [
+      "An ultramarine field owns whole regions on marketing pages; the home hero carries a live ledger scan as its signature.",
       "Light, cool canvas with blue-tinted neutrals running to a near-black blue ink.",
       "One ultramarine accent, reserved for actions, links, focus and selection.",
       "Archivo throughout; display sizes run semi-expanded on the font's width axis to echo the extended wordmark.",
@@ -1078,6 +1094,10 @@
         "name": "The Frosted Bar Rule",
         "body": "Sticky bars (the app top bar, the demo step rail) are 95% white with a light backdrop blur, so content passing beneath stays faintly legible without a heavy edge.",
         "section": "elevation"
+      },
+      {
+        "name": "The Field Rule",
+        "text": "The brand colour appears at scale or not at all: as the ultramarine field owning a whole region (hero, intro, closing band), or as an action. A marketing page opens on the field and closes on it; the app stays on paper."
       }
     ],
     "dos": [

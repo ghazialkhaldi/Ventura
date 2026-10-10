@@ -1,9 +1,12 @@
 import Link from 'next/link'
 import PublicLayout from '../components/layout/PublicLayout'
 import { ArrowRightIcon } from '@heroicons/react/20/solid'
+import { ArrowLongRightIcon } from '@heroicons/react/24/outline'
 import {
   FindingsFrame, Figure, VendorBaselineChart, ApprovalLimitChart, MappingPanel, AuditTrail,
 } from '../components/marketing/ProductPreview'
+import { LedgerScan, SystemsStrip } from '../components/marketing/Hero'
+import { ClosingCTA } from '../components/marketing/Marketing'
 
 const H2 = 'font-display font-medium text-[1.875rem] leading-[1.1] tracking-[-0.025em] sm:text-title'
 
@@ -25,45 +28,67 @@ export default function HomePage() {
   return (
     <PublicLayout>
 
-      {/* ── Hero ── */}
-      <section className="relative overflow-hidden">
-        <div aria-hidden className="absolute inset-x-0 bottom-0 h-[46%] bg-surface border-t border-border-subtle" />
-        <div className="relative max-w-page mx-auto px-5 sm:px-8 pt-14 sm:pt-20 pb-20 sm:pb-28">
-          <h1 className="font-display font-medium text-[2.375rem] leading-[1.06] tracking-[-0.03em] sm:text-[3.25rem] lg:text-display max-w-[21ch] text-text-primary">
-            Find the spend that needs a second look before close.
-          </h1>
-          <p className="mt-6 max-w-[36rem] text-[17px] sm:text-[18px] leading-[1.6] text-text-secondary">
-            Upload a GL, AP or bank export. Ventura returns a short, ranked list of findings,
-            each traced to the rows behind it, and nothing changes until your team decides.
-          </p>
-          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
-            <Link href="/demo" className="group inline-flex items-center gap-2 h-11 px-5 rounded-md bg-accent-600 hover:bg-accent-700 text-white text-[15px] font-medium shadow-card">
-              Walk through the demo
-              <ArrowRightIcon className="w-4 h-4 transition-transform duration-200 ease-out-expo group-hover:translate-x-0.5" />
-            </Link>
-            <Link href="/contact" className="text-[15px] font-medium text-text-primary hover:text-accent-700 underline decoration-border-strong hover:decoration-accent-400">
-              Talk to us
-            </Link>
+      {/* ── Hero: the ultramarine field, with the scan as its proof ── */}
+      <section className="bg-field text-white">
+        <div className="max-w-page mx-auto px-5 sm:px-8 pt-12 sm:pt-16 lg:pt-20 grid gap-12 lg:grid-cols-[minmax(0,1fr)_30rem] lg:gap-14 lg:items-center">
+          <div>
+            <h1 className="font-display font-medium text-[2.5rem] leading-[1.04] tracking-[-0.035em] sm:text-[3.5rem] lg:text-[4.25rem] max-w-[13ch] text-white">
+              Find the spend that needs a second look before close.
+            </h1>
+            <p className="mt-7 max-w-[32rem] text-[17px] sm:text-[18px] leading-[1.6] text-field-muted">
+              Upload a GL, AP or bank export. Ventura reads every row, returns a short ranked list of
+              findings traced to the rows behind them, and nothing changes until your team decides.
+            </p>
+            <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-3">
+              <Link href="/demo" className="group inline-flex items-center gap-2 h-12 px-5 rounded-md bg-white hover:bg-accent-50 text-accent-800 text-[15.5px] font-medium shadow-pop">
+                Walk through the demo
+                <ArrowRightIcon className="w-4 h-4 transition-transform duration-200 ease-out-expo group-hover:translate-x-0.5" />
+              </Link>
+              <Link href="/contact" className="text-[15.5px] font-medium text-white underline decoration-white/40 hover:decoration-white">
+                Talk to us
+              </Link>
+            </div>
           </div>
+          <div className="animate-frame-settle">
+            <LedgerScan />
+          </div>
+        </div>
 
-          <div className="mt-14 sm:mt-16 animate-frame-settle">
-            <FindingsFrame />
-          </div>
+        <div className="max-w-page mx-auto px-5 sm:px-8 pt-16 sm:pt-20 pb-40 sm:pb-48">
+          <SystemsStrip />
+        </div>
+      </section>
+
+      {/* ── The inbox, lifted over the field's edge ── */}
+      <section className="relative">
+        <div className="max-w-page mx-auto px-5 sm:px-8 -mt-28 sm:-mt-32">
+          <FindingsFrame />
+          <p className="mt-5 text-[14px] text-text-muted">
+            Five findings from 1,431 rows. Open one to see its rows, then decide. Example data.
+          </p>
         </div>
       </section>
 
       {/* ── What it catches ── */}
-      <section id="product" className="scroll-mt-16 py-24 sm:py-32">
+      <section id="product" className="scroll-mt-16 pt-20 sm:pt-28 pb-24 sm:pb-32">
         <div className="max-w-page mx-auto px-5 sm:px-8">
-          <div className="max-w-[40rem]">
-            <h2 className={`${H2} text-text-primary`}>
-              Fewer findings. The right ones.
-            </h2>
-            <p className="mt-5 text-[17px] leading-[1.65] text-text-secondary">
-              A list nobody trusts gets ignored. Ventura judges each payment in its own context,
-              merges findings that describe the same event, and ranks what is left by severity
-              and confidence.
-            </p>
+          <div className="grid gap-12 lg:grid-cols-[auto_minmax(0,28rem)] lg:justify-between lg:items-end">
+            {/* The promise in one line of figures: the example file, before and after */}
+            <div className="flex items-end gap-5 sm:gap-8" role="img" aria-label="1,431 rows in, 5 findings out">
+              <Figure_ value="1,431" caption="rows in the example file" muted />
+              <ArrowLongRightIcon aria-hidden className="mb-12 sm:mb-14 w-10 sm:w-14 h-10 sm:h-14 shrink-0 text-border-strong" />
+              <Figure_ value="5" caption="findings worth a person’s time" />
+            </div>
+            <div>
+              <h2 className={`${H2} text-text-primary`}>
+                Fewer findings. The right ones.
+              </h2>
+              <p className="mt-5 text-[17px] leading-[1.65] text-text-secondary">
+                A list nobody trusts gets ignored. Ventura judges each payment in its own context,
+                merges findings that describe the same event, and ranks what is left by severity
+                and confidence.
+              </p>
+            </div>
           </div>
 
           <div className="mt-20 grid gap-12 lg:gap-20 lg:grid-cols-[minmax(0,26rem)_1fr] lg:items-center">
@@ -98,7 +123,7 @@ export default function HomePage() {
       </section>
 
       {/* ── How it works ── */}
-      <section id="how" className="scroll-mt-16 py-24 sm:py-32 bg-surface border-y border-border-subtle">
+      <section id="how" className="scroll-mt-16 py-24 sm:py-32 bg-accent-50 border-y border-accent-100">
         <div className="max-w-page mx-auto px-5 sm:px-8 grid gap-14 lg:gap-20 lg:grid-cols-[minmax(0,28rem)_1fr]">
           <div>
             <h2 className={`${H2} text-text-primary`}>
@@ -183,30 +208,21 @@ export default function HomePage() {
       </section>
 
       {/* ── Close ── */}
-      <section className="pb-24 sm:pb-32">
-        <div className="max-w-page mx-auto px-5 sm:px-8">
-          <div className="rounded-2xl bg-surface border border-border px-6 py-12 sm:px-14 sm:py-16 grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
-            <div className="max-w-[36rem]">
-              <h2 className={`${H2} text-text-primary`}>
-                Walk through a review, from upload to close.
-              </h2>
-              <p className="mt-5 text-[17px] leading-[1.65] text-text-secondary">
-                The demo runs on a sample AP register: 1,431 rows, five findings, and the
-                decisions a reviewer makes on them.
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-              <Link href="/demo" className="group inline-flex items-center gap-2 h-11 px-5 rounded-md bg-accent-600 hover:bg-accent-700 text-white text-[15px] font-medium shadow-card">
-                Walk through the demo
-                <ArrowRightIcon className="w-4 h-4 transition-transform duration-200 ease-out-expo group-hover:translate-x-0.5" />
-              </Link>
-              <Link href="/contact" className="text-[15px] font-medium text-text-primary hover:text-accent-700 underline decoration-border-strong hover:decoration-accent-400">
-                Talk to us
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      <ClosingCTA
+        title="Walk through a review, from upload to close."
+        body="The demo runs on a sample AP register: 1,431 rows, five findings, and the decisions a reviewer makes on them."
+      />
     </PublicLayout>
+  )
+}
+
+function Figure_({ value, caption, muted = false }: { value: string; caption: string; muted?: boolean }) {
+  return (
+    <div>
+      <p className={`font-display font-medium leading-[0.9] tracking-[-0.045em] tabular-nums text-[4rem] sm:text-[5.5rem] lg:text-[6rem] ${muted ? 'text-text-muted/60' : 'text-field'}`}>
+        {value}
+      </p>
+      <p className="mt-3 max-w-[11rem] text-[15px] leading-snug text-text-muted">{caption}</p>
+    </div>
   )
 }

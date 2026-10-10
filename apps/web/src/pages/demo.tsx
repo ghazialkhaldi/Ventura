@@ -50,12 +50,12 @@ export default function DemoPage() {
     <PublicLayout title="Product Demo">
 
       {/* ── Intro ── */}
-      <section className="border-b border-border-subtle">
-        <div className="max-w-page mx-auto px-5 sm:px-8 pt-12 sm:pt-16 pb-10">
-          <h1 className="font-display font-medium text-[2.25rem] leading-[1.06] tracking-[-0.03em] sm:text-[3rem] text-text-primary max-w-[20ch]">
+      <section className="bg-field text-white">
+        <div className="max-w-page mx-auto px-5 sm:px-8 pt-12 sm:pt-16 pb-14 sm:pb-16">
+          <h1 className="font-display font-medium text-[2.25rem] leading-[1.06] tracking-[-0.03em] sm:text-[3.25rem] text-white max-w-[20ch]">
             A month&#8209;end review, on sample data
           </h1>
-          <p className="mt-5 max-w-[40rem] text-[17px] leading-[1.6] text-text-secondary">
+          <p className="mt-5 max-w-[40rem] text-[17px] leading-[1.6] text-field-muted">
             Five findings from a sample company&rsquo;s AP register. Work them the way your team
             would: open each one, check the rows behind it, and decide. Every figure here is an example.
           </p>

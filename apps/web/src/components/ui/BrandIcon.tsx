@@ -128,7 +128,7 @@ export default function BrandIcon({ brand, size = 32, contained = true, classNam
             textAnchor="middle"
             dominantBaseline="central"
             fill={`#${mono.hex}`}
-            fontFamily="DM Sans, system-ui, sans-serif"
+            fontFamily="inherit"
             fontSize={isSmall ? '7' : '9'}
             fontWeight="700"
             letterSpacing="-0.3"

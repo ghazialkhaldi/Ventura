@@ -34,7 +34,6 @@ export default function AboutPage() {
         <FactList items={values} />
       </Section>
 
-      <div className="pt-16 sm:pt-24" />
       <ClosingCTA
         title="See it on a sample close"
         body="Walk through the demo, or tell us how your team reviews spend today."

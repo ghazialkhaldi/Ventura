@@ -26,6 +26,9 @@ colors:
   sidebar-hover: "#eaedf2"
   sidebar-active: "#e2e7f0"
   sidebar-text: "#2f3747"
+  field: "#2440d6"
+  field-deep: "#1b32b8"
+  field-muted: "#c7d1ff"
   ink: "#0c111d"
   ink-raised: "#151b2a"
   ink-line: "#252d3f"
@@ -267,14 +270,15 @@ components:
 
 **Creative North Star: "The Clean Ledger"**
 
-Ventura looks like a well-kept ledger on a white desk: cool paper, hairline rules, figures that line up in columns, and one blue pen used only to act. It is the category standard played straight, held to the craft bar of Linear and Mercury. The interface itself is the proof, so marketing pages lead with the real product at work on labelled example data rather than abstract charts or illustration. Nothing glows, nothing is tilted, and no surface competes with the evidence.
+Ventura looks like a well-kept ledger laid on a field of ultramarine: every marketing page opens on that one saturated blue, with white type and the product lifted over its edge, and the working pages beneath stay cool paper, hairline rules and figures that line up in columns. It is the category standard with real colour conviction, held to the craft bar of Linear and Mercury. The interface itself is the proof, so marketing pages lead with the real product at work on labelled example data rather than abstract charts or illustration. Nothing glows, nothing is tilted, and no surface competes with the evidence.
 
 Density follows the reader. Marketing pages are generous and quiet: a left-aligned semi-expanded headline, a short subline, then wide product frames and hairline lists with long vertical rhythm. The signed-in app is compact and calm: a 14px base, 32px navigation rows, 36px buttons, white cards on a faintly blue-grey canvas. Colour carries meaning, never mood. Ultramarine means "you can act here". The severity hues mean "this finding needs attention". Everything else is cool neutral.
 
 The system refuses the generic AI-startup register (gradients, glow, "AI-powered" sparkle) and anything playful. Depth comes from hairlines and tonal steps first, with soft ink-tinted shadows reserved for raised product frames and floating layers. Motion is one authored entrance and quick, quiet state changes.
 
 **Key Characteristics:**
-- Light, cool canvas with blue-tinted neutrals running to a near-black blue ink.
+- An ultramarine field owns whole regions on marketing pages: the hero and page intros, the logo strip, and the closing band. Everything else is a light, cool canvas.
+- The home hero's signature is a live ledger scan: example rows stream past a scan line and flagged rows light up in their severity colour as they are caught.
 - One ultramarine accent, reserved for actions, links, focus and selection.
 - Archivo throughout; display sizes run semi-expanded on the font's width axis to echo the extended wordmark.
 - Hairline lists and ruled tables in place of grids of identical cards.
@@ -301,6 +305,10 @@ A cool, low-chroma neutral system with a single saturated ultramarine for action
 - **Ledger Ink** (#0f1524, `text-primary`): headings, body emphasis, figures (18.2:1 on white). **Graphite** (#465062, `text-secondary`): body copy and sublines (8.1:1). **Slate Note** (#636e82, `text-muted`): metadata, captions, placeholders, axis labels (5.1:1 on white, 4.8:1 on Cool Paper).
 - **Sidebar Mist** (#f4f6f9, `sidebar-bg`) with **Sidebar Graphite** (#2f3747, `sidebar-text`): the app sidebar is a half-step cooler than the canvas.
 
+### Field
+- **Ultramarine Field** (#2440d6, `field`): whole regions on marketing pages: the hero and every page intro (the header sits on it until the page scrolls), the systems logo strip, and the full-width closing band. White type on it measures 7.6:1. **Field Mist** (#c7d1ff, `field-muted`) is secondary text on the field (4.9:1). On the field, the primary action inverts: a white button with `accent-800` text.
+- **Field Deep** (#1b32b8, `field-deep`): reserved for pressed or recessed states on the field.
+
 ### Ink
 - **Deep Ink** (#0c111d, `ink`): the single dark band on marketing pages, the login brand panel, the workspace monogram tile, and the modal and drawer scrim at 30%.
 - **Raised Ink** (#151b2a, `ink-raised`) with **Ink Rule** (#252d3f, `ink-line`): panels and hairlines inside the dark band (the audit trail).
@@ -318,7 +326,9 @@ Each family has four roles: a solid mark (dots, chart marks), a dark `-fg` for t
 - **Azure** (#2a78d6, `chart-series-1`) and **Teal Green** (#0e9468, `chart-series-2`): a pair validated together against white for colour-vision separation and 3:1 contrast. Beyond two series, fold into "Other" or a table. Grid lines use the faint hairline, axes and ticks use Slate Note at 11px, context bars use the firm hairline, and tooltips are white with a hairline border, 8px radius and the pop shadow.
 
 ### Named Rules
-**The One Ultramarine Rule.** Ultramarine marks what you can act on: buttons, links, focus, selection, and the Open status (an open finding is waiting for your action). It is never a chart series, a decoration or a heading colour. Charts use Azure precisely so the accent stays unambiguous.
+**The One Ultramarine Rule.** Ultramarine marks what you can act on: buttons, links, focus, selection, and the Open status (an open finding is waiting for your action). It is never a chart series or a small decoration. Charts use Azure precisely so the accent stays unambiguous.
+
+**The Field Rule.** The brand colour appears at scale or not at all: as the ultramarine field owning a whole region (hero, intro, closing band), or as an action. Never as a tint sprinkled across components. A marketing page opens on the field and closes on it; the app stays on paper.
 
 **The Findings-Only Rule.** Red, orange, amber and slate belong to findings: severity chips and dots, flagged evidence rows, and the marks that show why a finding fired. Outcome green belongs to decisions. No other surface borrows these hues for emphasis.
 

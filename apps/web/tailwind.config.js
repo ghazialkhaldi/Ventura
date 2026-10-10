@@ -64,6 +64,12 @@ module.exports = {
           muted:     v('text-muted'),
           inverse:   v('text-inverse'),
         },
+        // The ultramarine field: the brand colour owning whole regions.
+        field: {
+          DEFAULT: v('field'),
+          deep:    v('field-deep'),
+          muted:   v('field-muted'),
+        },
         // The one deep band on marketing pages, and the app's dark surfaces.
         ink: {
           DEFAULT: v('ink'),

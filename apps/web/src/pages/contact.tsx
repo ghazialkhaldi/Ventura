@@ -59,30 +59,31 @@ export default function ContactPage() {
 
   return (
     <PublicLayout title="Contact">
-      <div className="max-w-page mx-auto px-5 sm:px-8 pt-14 sm:pt-20 pb-20 sm:pb-28 grid gap-12 lg:grid-cols-[1fr_minmax(0,34rem)] lg:gap-20">
+      <div className="bg-field text-white">
+      <div className="max-w-page mx-auto px-5 sm:px-8 pt-12 sm:pt-16 pb-20 sm:pb-28 grid gap-12 lg:grid-cols-[1fr_minmax(0,34rem)] lg:gap-20">
         <div>
-          <h1 className={H1_CLASS}>Talk to us</h1>
-          <p className="mt-6 max-w-[30rem] text-[17px] sm:text-[18px] leading-[1.6] text-text-secondary">
+          <h1 className={`${H1_CLASS} !text-white`}>Talk to us</h1>
+          <p className="mt-6 max-w-[30rem] text-[17px] sm:text-[18px] leading-[1.6] text-field-muted">
             Tell us about your finance team and how you review spend today, and we&rsquo;ll show
             you how Ventura can help.
           </p>
-          <ul className="mt-10 max-w-[30rem] border-t border-border">
+          <ul className="mt-10 max-w-[30rem] border-t border-white/20">
             {[
               'Response within one business day',
               'Role-based access control',
               'Append-only, server-side security log',
             ].map(point => (
-              <li key={point} className="flex items-center gap-3 py-4 border-b border-border text-[15.5px] text-text-primary">
-                <CheckCircleIcon className="w-5 h-5 text-accent-600 flex-shrink-0" />
+              <li key={point} className="flex items-center gap-3 py-4 border-b border-white/20 text-[15.5px] text-white">
+                <CheckCircleIcon className="w-5 h-5 text-field-muted flex-shrink-0" />
                 {point}
               </li>
             ))}
           </ul>
         </div>
 
-        <div>
+        <div className="text-text-primary">
           {submitted ? (
-            <div className="rounded-xl border border-border bg-surface-raised shadow-card-md p-10 text-center" role="status">
+            <div className="rounded-xl bg-surface-raised shadow-pop p-10 text-center" role="status">
               <span className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-positive-bg ring-1 ring-inset ring-positive-line">
                 <CheckCircleIcon className="w-6 h-6 text-positive-fg" />
               </span>
@@ -98,7 +99,7 @@ export default function ContactPage() {
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-surface-raised shadow-card-md overflow-hidden">
+            <form onSubmit={handleSubmit} className="rounded-xl bg-surface-raised shadow-pop overflow-hidden">
               <div className="p-6 sm:p-7 space-y-5">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
@@ -167,6 +168,7 @@ export default function ContactPage() {
             </form>
           )}
         </div>
+      </div>
       </div>
     </PublicLayout>
   )

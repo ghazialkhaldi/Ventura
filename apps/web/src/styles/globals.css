@@ -210,6 +210,19 @@ button, a {
 .animate-marquee { animation: marquee-left 48s linear infinite; }
 .animate-marquee:hover { animation-play-state: paused; }
 
+/* Boats crossing the hero's sea. Each sets its own path and pace with
+   --from, --to, --dur and --delay; the inner hull bobs on the swell. */
+@keyframes sail {
+  from { transform: translate3d(var(--from), 0, 0); }
+  to   { transform: translate3d(var(--to), 0, 0); }
+}
+.animate-sail { animation: sail var(--dur) linear var(--delay) infinite; }
+@keyframes bob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(1px) rotate(-0.7deg); }
+}
+.animate-bob { animation: bob 7s ease-in-out infinite; }
+
 /* Focus brackets tighten onto the flagged evidence row */
 /* Brackets settle on the inset each row asks for (set inline as --bracket-inset). */
 @keyframes bracket-in {
@@ -232,4 +245,7 @@ button, a {
     animation-delay: 0ms !important;
     transition-duration: 1ms !important;
   }
+  /* Endless loops would spin at 1ms, so they stop instead: the logos hold
+     still and the boats rest where they are drawn. */
+  .animate-marquee, .animate-sail, .animate-bob { animation: none !important; }
 }

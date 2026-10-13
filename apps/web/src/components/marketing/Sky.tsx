@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react'
 
 // ── The dawn sky ─────────────────────────────────────────────────────────────
 // Every marketing page sits on one sky. It opens at dawn and, as the visitor
@@ -116,7 +116,96 @@ function glintDashes(w: number, h: number): Dash[] {
   return out
 }
 
-/** The hero's horizon: a still sea, far headlands, and a sun that rises as the hero scrolls away. */
+// Boats on the far water, backlit by the low sun. Farther ones sit nearer the
+// horizon, smaller, hazier and slower. Each crosses on a long loop that starts
+// mid-way, and under reduced motion rests where it is drawn (`at`).
+type BoatSpec = {
+  kind:  'sloop' | 'launch'
+  at:    string    // resting position across the hero
+  water: number    // waterline, px below the horizon
+  h:     number    // drawn height in px
+  from:  string; to: string
+  dur:   number; delay: number   // seconds; a negative delay starts it mid-crossing
+  alpha: number    // distance haze
+  flip?: boolean   // drawings face left; flip to sail right
+  wake?: boolean
+}
+const BOATS: BoatSpec[] = [
+  { kind: 'sloop',  at: '12%', water: 4,  h: 22, from: '-26vw', to: '94vw',  dur: 230, delay: -60,  alpha: 0.55, flip: true },
+  { kind: 'launch', at: '34%', water: 11, h: 11, from: '-48vw', to: '72vw',  dur: 300, delay: -110, alpha: 0.5,  flip: true },
+  { kind: 'sloop',  at: '80%', water: 30, h: 46, from: '26vw',  to: '-96vw', dur: 170, delay: -48,  alpha: 0.92, wake: true },
+]
+
+// Waterline as a fraction of each drawing's height.
+const WATERLINE = { sloop: 57 / 64, launch: 18 / 22 }
+
+function BoatShape({ kind }: { kind: BoatSpec['kind'] }) {
+  if (kind === 'launch') {
+    return (
+      <svg viewBox="0 0 44 22" className="block h-full w-auto overflow-visible">
+        <path d="M21 0.5V7" stroke="#2a2258" strokeWidth="1" />
+        <path d="M13 7h14v7H13z" fill="#2e2660" />
+        <path d="M1 13h42c-1.5 4-5 8-10 8H8c-3.5 0-6-3.5-7-8z" fill="#211a4a" />
+      </svg>
+    )
+  }
+  return (
+    <svg viewBox="0 0 60 64" className="block h-full w-auto overflow-visible">
+      <defs>
+        {/* backlit sailcloth: dark at the head, warming toward the foot where the low sun shows through */}
+        <linearGradient id="sailcloth" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0"    stopColor="#2f2563" />
+          <stop offset="0.75" stopColor="#4a3a7c" />
+          <stop offset="1"    stopColor="#7a5a8e" />
+        </linearGradient>
+      </defs>
+      <rect x="27.6" y="1" width="1.2" height="52" fill="#241d50" />
+      <path d="M29 2v48h23C46 34 38 16 29 2z" fill="url(#sailcloth)" fillOpacity="0.95" />
+      <path d="M27 9v41H9c6-14 12-28 18-41z" fill="url(#sailcloth)" fillOpacity="0.9" />
+      <path d="M1 52h57c-1 4-4 8.5-10 9H12c-5.5-.5-9.5-4.5-11-9z" fill="#1f1946" />
+    </svg>
+  )
+}
+
+function Boats() {
+  return (
+    <div className="absolute inset-x-0 top-[77%] h-0">
+      {BOATS.map((b, i) => {
+        const ratio = b.kind === 'sloop' ? 60 / 64 : 44 / 22
+        const w = Math.round(b.h * ratio)
+        return (
+          <div
+            key={i}
+            className="absolute animate-sail"
+            style={{
+              left: b.at, top: b.water - b.h * WATERLINE[b.kind], width: w, height: b.h, opacity: b.alpha,
+              '--from': b.from, '--to': b.to, '--dur': `${b.dur}s`, '--delay': `${b.delay}s`,
+            } as CSSProperties}
+          >
+            <div className="h-full animate-bob" style={{ animationDelay: `${-i * 2.3}s` }}>
+              <div className="h-full" style={{ transform: b.flip ? 'scaleX(-1)' : undefined }}>
+                <BoatShape kind={b.kind} />
+              </div>
+            </div>
+            {/* its reflection, broken and fading into the water */}
+            <div className="absolute left-0 right-0 overflow-hidden"
+              style={{ top: b.h * WATERLINE[b.kind], height: b.h * 0.6, maskImage: 'linear-gradient(to bottom, black, transparent)', WebkitMaskImage: 'linear-gradient(to bottom, black, transparent)' }}>
+              <div className="h-full origin-top opacity-30 blur-[1.2px]" style={{ transform: `scaleY(-1)${b.flip ? ' scaleX(-1)' : ''}`, height: b.h }}>
+                <BoatShape kind={b.kind} />
+              </div>
+            </div>
+            {b.wake && (
+              <span aria-hidden className="absolute h-[1.5px] rounded-full blur-[0.5px]"
+                style={{ top: b.h * WATERLINE[b.kind] + 1, left: w * 0.8, width: w * 2.4, background: 'linear-gradient(to right, rgb(255 236 204 / 0.55), transparent)' }} />
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+/** The hero's horizon: a still sea, far headlands, boats, and a sun that rises as the hero scrolls away. */
 export function HeroHorizon() {
   const wrap  = useRef<HTMLDivElement>(null)
   const sun   = useRef<HTMLDivElement>(null)
@@ -188,6 +277,7 @@ export function HeroHorizon() {
           maskImage: fade, WebkitMaskImage: fade,
         }} />
       <canvas ref={glint} className="absolute inset-x-0 top-[77%] w-full blur-[0.6px]" style={{ height: '23%' }} />
+      <Boats />
     </div>
   )
 }

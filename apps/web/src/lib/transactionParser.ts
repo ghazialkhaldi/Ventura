@@ -80,39 +80,94 @@ export function detectColumns(headers: string[]): ColumnMapping {
 
 // ─── Value parsers ────────────────────────────────────────────────────────────
 
-function parseAmount(raw: string): number {
+/**
+ * A signed amount from an export cell.
+ *
+ * Handles currency symbols, thousands separators, "(1,000)" and "1,000-" for
+ * negatives, a Unicode minus, "CR"/"DR" markers, and European formats such as
+ * "1.234,56" or "1 234,56", where the comma is the decimal point. Reading
+ * those as US figures turns 1.234,56 into 1.23456.
+ */
+export function parseAmount(raw: string): number {
   if (!raw || !raw.trim()) return 0
-  // Remove currency symbols, commas, spaces, quotes
-  let s = raw.replace(/['"$£€¥₹,\s]/g, '')
-  // Handle parentheses as negative: (1000) = -1000
-  const negative = s.startsWith('(') && s.endsWith(')')
-  s = s.replace(/[()]/g, '')
+  let s = raw.trim().replace(/[\u2212\u2013]/g, '-')
+  let negative = false
+  const cr = /(?<=[\d\s).]|^)(cr|credit)\.?$/i.test(s)
+  s = s.replace(/\s*(?<=[\d\s).]|^)(cr|dr|credit|debit)\.?$/i, '').trim()
+  if (/^\(.*\)$/.test(s)) { negative = true; s = s.slice(1, -1) }
+  if (/-\s*$/.test(s)) { negative = true; s = s.replace(/-\s*$/, '') }
+  s = s.replace(/['"$£€¥₹\s]|[A-Z]{3}$|^[A-Z]{3}/g, '')
+  if (s.startsWith('-')) { negative = !negative; s = s.slice(1) }
+  if (s.startsWith('+')) s = s.slice(1)
+  // Decimal comma: "1.234,56", "1234,56", "12,5" (but not "1,234" or "1,234,567").
+  if (/^\d{1,3}(\.\d{3})+,\d{1,2}$/.test(s) || /^\d+,\d{1,2}$/.test(s)) s = s.replace(/\./g, '').replace(',', '.')
+  else s = s.replace(/,/g, '')
+  if (!/^\d*\.?\d+$/.test(s)) return 0
   const v = parseFloat(s)
-  if (isNaN(v)) return 0
-  return negative ? -v : v
+  if (!Number.isFinite(v)) return 0
+  return (negative || cr) ? -v : v
 }
 
-function parseDate(raw: string): string {
-  if (!raw || !raw.trim()) return ''
-  const s = raw.trim()
+const MONTHS: Record<string, number> = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, sept: 9, oct: 10, nov: 11, dec: 12 }
 
-  // Try native Date parsing first (handles ISO, most US formats)
-  const d = new Date(s)
-  if (!isNaN(d.getTime())) {
-    return d.toISOString().split('T')[0]
+function isoParts(y: number, m: number, d: number): string {
+  if (y < 100) y += 2000
+  const dt = new Date(Date.UTC(y, m - 1, d))
+  if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== m - 1 || dt.getUTCDate() !== d) return ''
+  return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+}
+
+/** Day-first or month-first, decided once per column from values that only fit one reading. */
+export type DateOrder = 'dmy' | 'mdy'
+
+export function inferDateOrder(values: string[]): DateOrder {
+  let dmy = 0, mdy = 0
+  for (const v of values) {
+    const m = /^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/.exec(v.trim())
+    if (!m) continue
+    if (Number(m[1]) > 12) dmy++
+    else if (Number(m[2]) > 12) mdy++
   }
+  return dmy > mdy ? 'dmy' : 'mdy'
+}
 
-  // DD/MM/YYYY or DD-MM-YYYY
-  const dmy = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})$/)
-  if (dmy) {
-    const day = dmy[1].padStart(2, '0')
-    const mon = dmy[2].padStart(2, '0')
-    const yr  = dmy[3].length === 2 ? '20' + dmy[3] : dmy[3]
-    const attempt = new Date(`${yr}-${mon}-${day}`)
-    if (!isNaN(attempt.getTime())) return attempt.toISOString().split('T')[0]
+/**
+ * A YYYY-MM-DD date, or '' when the value is not a date.
+ *
+ * Parsed from its parts, never through the Date constructor's local-time
+ * rules: "Jan 4, 2026" read as local midnight and printed as UTC is 3 January
+ * anywhere east of Greenwich.
+ */
+export function parseDate(raw: string, order: DateOrder = 'mdy'): string {
+  const s = (raw || '').trim()
+  if (!s) return ''
+  let m = /^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})(?:$|[T\s])/.exec(s)
+  if (m) return isoParts(+m[1], +m[2], +m[3])
+  m = /^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2}|\d{4})(?:$|[T\s])/.exec(s)
+  if (m) {
+    const [a, b] = [+m[1], +m[2]]
+    // A value that only fits one reading wins over the column's habit.
+    const dayFirst = a > 12 ? true : b > 12 ? false : order === 'dmy'
+    return dayFirst ? isoParts(+m[3], b, a) : isoParts(+m[3], a, b)
   }
+  // "4 Jan 2026", "04-Jan-26", "4 January, 2026"
+  m = /^(\d{1,2})[\s\-/.]+([a-z]{3,9})\.?,?[\s\-/.]+(\d{2}|\d{4})$/i.exec(s)
+  if (m && MONTHS[m[2].slice(0, 3).toLowerCase()]) return isoParts(+m[3], MONTHS[m[2].slice(0, 3).toLowerCase()], +m[1])
+  // "Jan 4, 2026", "January 4 2026"
+  m = /^([a-z]{3,9})\.?[\s\-/.]+(\d{1,2})(?:st|nd|rd|th)?,?[\s\-/.]+(\d{2}|\d{4})$/i.exec(s)
+  if (m && MONTHS[m[1].slice(0, 3).toLowerCase()]) return isoParts(+m[3], MONTHS[m[1].slice(0, 3).toLowerCase()], +m[2])
+  return ''
+}
 
-  return s // return raw if we can't parse
+/** An Excel date serial as YYYY-MM-DD, by arithmetic alone so no time zone can move it. */
+export function excelSerialToISO(serial: number): string {
+  if (!Number.isFinite(serial) || serial < 1) return ''
+  return new Date(Math.round((serial - 25569) * 86_400_000)).toISOString().slice(0, 10)
+}
+
+/** Subtotal and total lines that report exports put between and after the transactions. */
+function isTotalRow(...cells: string[]): boolean {
+  return cells.some(c => /^\s*(grand\s+|sub-?)?totals?\b/i.test(c || ''))
 }
 
 // ─── Row → Transaction ────────────────────────────────────────────────────────
@@ -126,52 +181,61 @@ export function rowsToTransactions(
   mapping: ColumnMapping,
 ): StoredTransaction[] {
   const txs: StoredTransaction[] = []
+  const order = mapping.date ? inferDateOrder(rows.slice(0, 500).map(r => r[mapping.date!] ?? '')) : 'mdy'
+
+  // A single signed Amount column follows one of two conventions. AP and GL
+  // exports show spend as positive and credit notes as negative; bank exports
+  // show money out as negative and deposits as positive. Whichever sign most
+  // rows carry is spend; the other is a credit, and is never counted as spend
+  // or fed to the checks (a refund beside its charge is not a duplicate).
+  let spendSign = 1
+  if (mapping.amount) {
+    let neg = 0, pos = 0
+    for (const r of rows) { const v = parseAmount(r[mapping.amount] ?? ''); if (v < 0) neg++; else if (v > 0) pos++ }
+    if (neg > pos) spendSign = -1
+  }
 
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i]
+    const cell = (col: string | null | undefined) => (col ? (row[col] ?? '') : '').trim()
 
-    // Amount: try combined amount, then debit/credit columns.
-    // A combined "Amount" column is always treated as spend (direction: debit) —
-    // that's the dominant convention for AP/invoice/vendor-payment exports.
-    // Separate Debit/Credit columns have unambiguous semantics: Debit = money
-    // paid out (spend), Credit = money received (refund/rebate/reversal). These
-    // must NOT be merged — a credit is not vendor spend and must never be
-    // counted toward spend totals or fed into spend-anomaly detection.
     let amount = 0
     let direction: 'debit' | 'credit' = 'debit'
-    if (mapping.amount && row[mapping.amount]) {
-      amount = Math.abs(parseAmount(row[mapping.amount]))
+    if (mapping.amount && cell(mapping.amount)) {
+      const v = parseAmount(cell(mapping.amount))
+      amount = Math.abs(v)
+      direction = Math.sign(v) === spendSign ? 'debit' : 'credit'
     } else {
-      const debit  = mapping.debit  && row[mapping.debit]  ? parseAmount(row[mapping.debit])  : 0
-      const credit = mapping.credit && row[mapping.credit] ? parseAmount(row[mapping.credit]) : 0
-      if (Math.abs(debit) > 0) {
-        amount = Math.abs(debit)
-        direction = 'debit'
-      } else if (Math.abs(credit) > 0) {
-        amount = Math.abs(credit)
-        direction = 'credit'
-      }
+      // Separate Debit/Credit columns: debit is money out, credit is money back.
+      // A negative debit is a reversal, so it is a credit too.
+      const debit  = parseAmount(cell(mapping.debit))
+      const credit = parseAmount(cell(mapping.credit))
+      if (debit !== 0) { amount = Math.abs(debit); direction = debit > 0 ? 'debit' : 'credit' }
+      else if (credit !== 0) { amount = Math.abs(credit); direction = credit > 0 ? 'credit' : 'debit' }
     }
-
-    // Skip rows with no meaningful amount
     if (amount === 0) continue
 
-    const vendor = (mapping.vendor ? row[mapping.vendor] : '') || ''
-    // Skip completely empty vendor rows
-    if (!vendor.trim()) continue
+    const vendor  = cell(mapping.vendor)
+    const rawDate = cell(mapping.date)
+    const desc    = cell(mapping.description)
+    if (isTotalRow(vendor, rawDate, desc)) continue
 
-    const date     = mapping.date        ? parseDate(row[mapping.date] || '') : ''
-    const desc     = mapping.description ? (row[mapping.description] || '').trim() : vendor.trim()
-    const category = mapping.category    ? (row[mapping.category]    || '').trim() : ''
-    const account  = mapping.account     ? (row[mapping.account]     || '').trim() : ''
-    const period   = mapping.period      ? (row[mapping.period]      || '').trim() : ''
+    const date = rawDate ? parseDate(rawDate, order) : ''
+    // A payment with no payee is kept, so it can be reported, but only when it
+    // is clearly a transaction (it has a date); otherwise it is a report's
+    // subtotal or a stray line, and counting it would double the spend.
+    if (!vendor && !date) continue
+
+    const category = cell(mapping.category)
+    const account  = cell(mapping.account)
+    const period   = cell(mapping.period)
 
     txs.push({
       id:          `TX-${i}`,
-      date:        date || new Date().toISOString().split('T')[0],
-      vendor:      vendor.trim(),
-      amount:      Math.abs(amount),
-      description: desc,
+      date,
+      vendor,
+      amount,
+      description: desc || vendor,
       category,
       account,
       rowIndex:    i,
@@ -253,7 +317,7 @@ function buildRows(matrix: unknown[][], headerIdx: number): { rows: RawRow[]; he
       if (!h) return
       const cell = cells[ci]
       row[h] = cell instanceof Date
-        ? cell.toISOString().split('T')[0]
+        ? `${cell.getFullYear()}-${String(cell.getMonth() + 1).padStart(2, '0')}-${String(cell.getDate()).padStart(2, '0')}`
         : String(cell ?? '').trim()
     })
     if (Object.values(row).some(v => v !== '')) rows.push(row)
@@ -403,7 +467,10 @@ export async function parseCSV(file: File): Promise<{ rows: RawRow[]; headers: s
 export async function parseExcel(file: File): Promise<{ rows: RawRow[]; headers: string[] }> {
   const XLSX = await import('xlsx')
   const buffer = await file.arrayBuffer()
-  const wb = XLSX.read(buffer, { type: 'array', cellDates: true })
+  // Dates are read as serial numbers with their number format, then converted
+  // by arithmetic. SheetJS's own Date objects carry the local zone's historical
+  // offset and land on the previous day east of Greenwich.
+  const wb = XLSX.read(buffer, { type: 'array', cellDates: false, cellNF: true })
 
   // Walk every sheet, not just the first. Workbooks frequently lead with a
   // cover, summary or notes tab and keep the ledger on a later one. Return the
@@ -415,11 +482,20 @@ export async function parseExcel(file: File): Promise<{ rows: RawRow[]; headers:
     const ws = wb.Sheets[sheetName]
     if (!ws) continue
 
-    const matrix = (XLSX.utils.sheet_to_json(ws, {
-      header: 1,
-      defval: '',
-      blankrows: false,
-    }) as unknown) as unknown[][]
+    const matrix: unknown[][] = []
+    if (!ws['!ref']) continue
+    const range = XLSX.utils.decode_range(ws['!ref'])
+    for (let r = range.s.r; r <= range.e.r; r++) {
+      const line: unknown[] = []
+      for (let c = range.s.c; c <= range.e.c; c++) {
+        const cell = ws[XLSX.utils.encode_cell({ r, c })]
+        if (!cell || cell.v === undefined || cell.v === null) line.push('')
+        else if (cell.t === 'n' && cell.z && XLSX.SSF.is_date(String(cell.z))) line.push(excelSerialToISO(Number(cell.v)))
+        else if (cell.t === 'd' && cell.v instanceof Date) line.push(cell.v.toISOString().slice(0, 10))
+        else line.push(cell.v)
+      }
+      if (line.some(v => v !== '')) matrix.push(line)
+    }
 
     if (matrix.length < 2) continue
 

@@ -174,6 +174,19 @@ export default function AnomalyDetailPage() {
             <div className="p-5 space-y-3 max-w-[70ch]">
               <p className="text-[14.5px] text-text-primary leading-relaxed">{anomaly.description}</p>
               <p className="text-[14px] text-text-secondary leading-relaxed">{anomaly.reasoning}</p>
+              {anomaly.alsoMatched && anomaly.alsoMatched.length > 0 && (
+                <div className="pt-2">
+                  <p className="text-[13px] font-medium text-text-primary">Other checks that flagged this payment</p>
+                  <ul className="mt-2 divide-y divide-border-subtle border-y border-border-subtle">
+                    {anomaly.alsoMatched.map(m => (
+                      <li key={m.type} className="py-2.5">
+                        <p className="text-[13.5px] font-medium text-text-primary">{m.title}</p>
+                        <p className="mt-0.5 text-[13px] text-text-secondary leading-relaxed">{m.detail}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
 

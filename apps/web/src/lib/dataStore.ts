@@ -58,6 +58,9 @@ export interface DetectedAnomaly {
   reasoning: string
   rowRefs: string[]         // transaction IDs involved
   category: string
+  // Other rules that fired on the same rows, merged into this finding so the
+  // reviewer sees one finding per event with every signal behind it.
+  alsoMatched?: { type: AnomalyType; title: string; detail: string }[]
   // Data architecture metadata (optional — populated when tier engine runs)
   dataTier?: 'hot' | 'warm' | 'cold'
   normalizationConfidence?: number
@@ -110,6 +113,7 @@ export interface UploadedFile {
 }
 
 export interface MonthlyEntry {
+  key?: string    // "2026-01", for ordering; absent on data saved before it existed
   month: string   // e.g. "Jan 2026"
   spend: number
   count: number
@@ -157,6 +161,14 @@ const READY_KEY   = 'sf_data_ready'
 const SOURCES_KEY = 'sf_source_datasets'
 
 // ── Per-source storage ────────────────────────────────────────────────────────
+
+/** Sort key for a month entry: its "YYYY-MM" key, or one read from a "Sep 2026" label on older data. */
+function monthOrder(m: MonthlyEntry): string {
+  if (m.key) return m.key
+  const [mon, y] = m.month.split(' ')
+  const i = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].indexOf(mon.slice(0, 3))
+  return i >= 0 && y ? `${y}-${String(i + 1).padStart(2, '0')}` : m.month
+}
 
 function mergeSourceDatasets(sources: Dataset[]): Dataset {
   if (sources.length === 0) {
@@ -218,7 +230,7 @@ function mergeSourceDatasets(sources: Dataset[]): Dataset {
     dateRange:          { from: allDates[0] ?? '', to: allDates[allDates.length - 1] ?? '' },
     topVendors:         [...vendorMap.values()].sort((a, b) => b.total - a.total).slice(0, 20),
     categoryBreakdown:  [...catMap.values()].sort((a, b) => b.total - a.total),
-    monthlyBreakdown:   [...monthMap.values()],
+    monthlyBreakdown:   [...monthMap.values()].sort((a, b) => monthOrder(a).localeCompare(monthOrder(b))),
     anomalies:          sources.flatMap(s => s.anomalies),
     auditLog:           sources.flatMap(s => s.auditLog).sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 500),
     sampleTransactions: keepEvidenceRows(sources.flatMap(s => s.sampleTransactions), sources.flatMap(s => s.anomalies)),

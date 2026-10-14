@@ -8,7 +8,8 @@ import Segmented from '../../components/ui/Segmented'
 import DataEmptyState from '../../components/ui/DataEmptyState'
 import { useDataReady } from '../../hooks/useDataReady'
 import { loadDataset, isUndecided } from '../../lib/dataStore'
-import type { DetectedAnomaly, Severity, AnomalyStatus } from '../../lib/dataStore'
+import type { DetectedAnomaly, Severity, AnomalyStatus, StoredTransaction } from '../../lib/dataStore'
+import { computeRiskExposure } from '../../lib/anomalyEngine'
 import { MagnifyingGlassIcon, DownloadIcon, CaretUpIcon, CaretDownIcon } from '@radix-ui/react-icons'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -32,6 +33,7 @@ export default function AnomaliesPage() {
   const router = useRouter()
   const { isReady, mounted } = useDataReady()
   const [anomalies, setAnomalies] = useState<DetectedAnomaly[]>([])
+  const [rows,      setRows]      = useState<StoredTransaction[]>([])
   const [search,    setSearch]    = useState('')
   const [sevFilter, setSev]       = useState<Severity | 'All'>('All')
   const [view,      setView]      = useState<View>('decide')
@@ -41,6 +43,7 @@ export default function AnomaliesPage() {
     if (isReady) {
       const ds = loadDataset()
       setAnomalies(ds?.anomalies ?? [])
+      setRows(ds?.sampleTransactions ?? [])
     }
   }, [isReady])
 
@@ -53,9 +56,9 @@ export default function AnomaliesPage() {
       review:    count('Under Review'),
       resolved:  count('Resolved'),
       dismissed: count('Dismissed'),
-      exposure:  open.reduce((s, a) => s + a.amount, 0),
+      exposure:  computeRiskExposure(open, rows).exposure,
     }
-  }, [anomalies])
+  }, [anomalies, rows])
 
   const filtered = useMemo(() => {
     const q   = search.toLowerCase()

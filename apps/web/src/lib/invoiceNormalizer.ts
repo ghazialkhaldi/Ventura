@@ -1,5 +1,6 @@
 import type { StoredTransaction, ColumnMapping } from './dataStore'
 import { getTierForDate, type StorageTier } from './dataLayers'
+import { vendorKey } from './anomalyEngine'
 
 export type InvoiceApprovalStatus = 'approved' | 'pending' | 'rejected' | 'unknown'
 export type InvoicePaymentStatus  = 'paid' | 'unpaid' | 'overdue' | 'partial' | 'unknown'
@@ -105,12 +106,13 @@ function computeConfidence(inv: NormalizedInvoice): number {
 // ─── Due date inference ───────────────────────────────────────────────────────
 
 function inferDueDate(invoiceDate: string, terms: string): string {
-  if (!invoiceDate) return ''
-  const d = new Date(invoiceDate)
-  if (isNaN(d.getTime())) return ''
+  // Day arithmetic in UTC throughout: mixing a UTC parse with local setDate
+  // moves the date a day in time zones west of Greenwich.
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(invoiceDate || '')
+  if (!m) return ''
   const match = terms.toLowerCase().match(/net\s*(\d+)/)
-  d.setDate(d.getDate() + (match ? parseInt(match[1]) : 30))
-  return d.toISOString().split('T')[0]
+  const due = Date.UTC(+m[1], +m[2] - 1, +m[3]) + (match ? parseInt(match[1]) : 30) * 86_400_000
+  return new Date(due).toISOString().slice(0, 10)
 }
 
 // ─── Normalization ────────────────────────────────────────────────────────────
@@ -155,8 +157,8 @@ export function normalizeTransaction(
     { canonical: 'tax_amount',    raw_column: null, sample_value: '0',          mapped: false, confidence: 0,   warning: 'No tax column detected' },
   ]
 
-  const d   = tx.date ? new Date(tx.date) : new Date()
-  const fy  = isNaN(d.getTime()) ? new Date().getFullYear() : d.getFullYear()
+  // Read the year from the date itself: new Date('2026-01-01') is still 2025 in the Americas.
+  const fy  = /^\d{4}/.test(tx.date || '') ? Number(tx.date.slice(0, 4)) : new Date().getFullYear()
   const inv: NormalizedInvoice = {
     id:                       `INV-${batchId}-${tx.id}`,
     import_batch:             batchId,
@@ -206,13 +208,17 @@ export function normalizeTransactions(
   source = 'csv',
 ): NormalizedInvoice[] {
   const invoices = txs.map(tx => normalizeTransaction(tx, mapping, batchId, source))
-  return detectInvoiceDuplicates(invoices)
+  const credits  = new Set(txs.filter(t => t.direction === 'credit').map(t => `INV-${batchId}-${t.id}`))
+  return detectInvoiceDuplicates(invoices, credits)
 }
 
-export function detectInvoiceDuplicates(invoices: NormalizedInvoice[]): NormalizedInvoice[] {
+export function detectInvoiceDuplicates(invoices: NormalizedInvoice[], credits: Set<string> = new Set()): NormalizedInvoice[] {
   const seen = new Map<string, string>()
   return invoices.map(inv => {
-    const key = `${inv.vendor_name.toLowerCase()}|${inv.invoice_total.toFixed(2)}|${inv.invoice_date}`
+    // Same vendor (however it is spelled), amount and date. A credit is never
+    // a duplicate of the charge it reverses, and undated rows cannot be paired.
+    if (!inv.invoice_date || credits.has(inv.id)) return inv
+    const key = `${vendorKey(inv.vendor_name)}|${inv.invoice_total.toFixed(2)}|${inv.invoice_date}`
     if (seen.has(key)) {
       const firstId = seen.get(key)!
       return {

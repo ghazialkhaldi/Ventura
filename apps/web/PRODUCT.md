@@ -19,7 +19,7 @@ Ventura reads a company's spend records and surfaces the specific transactions a
 ## Positioning
 
 - **Explainable and human-in-the-loop.** Every finding cites the rule, the reasoning, a confidence score (0–100) and the exact transaction rows behind it. Nothing changes status without a logged action by a person, and nothing acts autonomously.
-- **Fewer false positives.** Amounts are scored against each category's and each vendor's own baseline (median/MAD, vendor sigma, self-calibrating velocity), not one register-wide threshold, so routine large payments such as payroll don't bury the reviewer. Findings that describe the same event are merged.
+- **Fewer false positives.** Each payment is judged against the most specific evidence available: its invoice reference, its vendor's own payments and rhythm (median and spread, recurring cadence, payment rate), its category's top range, and the file's own period calendar, not one register-wide threshold. Routine spend such as rent, subscriptions and payroll does not bury the reviewer. Findings that describe the same event are merged into one, listing every check that fired. Precision and recall are measured against scored test registers (`npm run eval:engine`).
 - **Catches control evasion, not just errors.** Detects payments clustered just under an approval limit (invoice splitting), period cut-off mismatches, vendors booked outside their usual GL category, and first-time vendors that combine several weak risk signals.
 - **Works from a file upload.** A CSV, Excel or PDF export gives findings in minutes, with no integration project.
 

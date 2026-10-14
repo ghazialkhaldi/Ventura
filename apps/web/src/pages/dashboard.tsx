@@ -7,6 +7,7 @@ import DataUploadWidget from '../components/ui/DataUploadWidget'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import { useDataReady } from '../hooks/useDataReady'
 import { loadDataset, isUndecided } from '../lib/dataStore'
+import { computeRiskExposure } from '../lib/anomalyEngine'
 import type { Dataset } from '../lib/dataStore'
 import { computeTierSummary, loadTierConfig, tierLabel, tierColor, tierDot } from '../lib/dataLayers'
 import type { TierSummary } from '../lib/dataLayers'
@@ -233,7 +234,8 @@ export default function DashboardPage() {
 
   // ── Data derivations ───────────────────────────────────────────────────────
   const openAnomalies      = dataset.anomalies.filter(isUndecided)
-  const totalExposure      = openAnomalies.reduce((s, a) => s + a.amount, 0)
+  // Each flagged payment once, only findings that put money in question, above the confidence floor.
+  const totalExposure      = computeRiskExposure(openAnomalies, dataset.sampleTransactions).exposure
   const topAnomaly         = openAnomalies[0] ?? null
   const duplicates         = openAnomalies.filter(a => a.type === 'duplicate')
   const duplicateSavings   = duplicates.reduce((s, a) => s + a.amount, 0)
@@ -407,7 +409,7 @@ export default function DashboardPage() {
             <div className="px-5 py-3.5 border-b border-border-subtle flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-text-primary">Exposure by finding type</p>
-                <p className="text-xs text-text-muted">Amount at risk in open findings, and how much is recoverable</p>
+                <p className="text-xs text-text-muted">Amount in open findings by type, and how much is recoverable</p>
               </div>
               <div className="hidden sm:flex items-center gap-5 text-xs text-text-muted">
                 <span className="flex items-center gap-1.5 font-medium">

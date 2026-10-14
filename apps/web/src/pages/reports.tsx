@@ -4,6 +4,7 @@ import DataEmptyState from '../components/ui/DataEmptyState'
 import { useDataReady } from '../hooks/useDataReady'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import { loadDataset, isUndecided } from '../lib/dataStore'
+import { computeRiskExposure } from '../lib/anomalyEngine'
 import type { Dataset } from '../lib/dataStore'
 import {
   FileText, Download, Building2, AlertTriangle,
@@ -114,7 +115,7 @@ async function generateAndDownload(dataset: Dataset, company: string, includeAud
   const high      = open.filter(a => a.severity === 'HIGH')
   const medium    = open.filter(a => a.severity === 'MEDIUM')
   const low       = open.filter(a => a.severity === 'LOW')
-  const exposure  = open.reduce((s,a) => s + a.amount, 0)
+  const exposure  = computeRiskExposure(open, dataset.sampleTransactions).exposure
   const dups      = open.filter(a => a.type === 'duplicate')
   const savings   = dups.reduce((s,a) => s + a.amount, 0)
   const dateRange = dataset.dateRange.from
@@ -615,7 +616,7 @@ export default function ReportsPage() {
   const open       = dataset.anomalies.filter(isUndecided)
   const critical   = open.filter(a => a.severity === 'CRITICAL')
   const high       = open.filter(a => a.severity === 'HIGH')
-  const exposure   = open.reduce((s,a) => s + a.amount, 0)
+  const exposure   = computeRiskExposure(open, dataset.sampleTransactions).exposure
   const duplicates = open.filter(a => a.type === 'duplicate')
   const savings    = duplicates.reduce((s,a) => s + a.amount, 0)
   const dateRange  = dataset.dateRange.from

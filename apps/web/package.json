@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev -p 3000",
     "build": "next build",
-    "start": "next start -p 3000"
+    "start": "next start -p 3000",
+    "test:engine": "tsc -p tsconfig.test.json && for tz in UTC Asia/Dubai America/Los_Angeles; do TZ=$tz node --test '.test-build/test/engine/*.test.js' || exit 1; done",
+    "eval:engine": "tsc -p tsconfig.test.json && node .test-build/test/engine/eval.js && node .test-build/test/engine/eval.js random 40"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",

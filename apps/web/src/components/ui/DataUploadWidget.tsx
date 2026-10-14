@@ -4,7 +4,8 @@ import { Upload, FileText, X, CheckCircle, AlertCircle, Plug } from 'lucide-reac
 import { parseFile } from '../../lib/transactionParser'
 import { runAnomalyDetection } from '../../lib/anomalyEngine'
 import { saveDataset, keepEvidenceRows } from '../../lib/dataStore'
-import type { StoredTransaction, AuditEntry, Dataset, VendorStat, CategoryStat, MonthlyEntry } from '../../lib/dataStore'
+import { summarizeTransactions, combineFiles } from '../../lib/datasetStats'
+import type { StoredTransaction, AuditEntry, Dataset } from '../../lib/dataStore'
 
 interface FileEntry {
   file: File
@@ -79,7 +80,7 @@ export default function DataUploadWidget({ onReady }: Props) {
     setProgress(0)
     setStepIdx(0)
 
-    const allTransactions: StoredTransaction[] = []
+    const parsedFiles: StoredTransaction[][] = []
     const updatedEntries = [...entries]
     const auditLog: AuditEntry[] = []
 
@@ -115,7 +116,7 @@ export default function DataUploadWidget({ onReady }: Props) {
         rowCount: result.rowCount,
       }
       setEntries([...updatedEntries])
-      allTransactions.push(...result.transactions)
+      parsedFiles.push(result.transactions)
 
       auditLog.push({
         id: `AUD-${Date.now()}-${fi}`,
@@ -125,6 +126,21 @@ export default function DataUploadWidget({ onReady }: Props) {
         detail: `${entry.file.name}: ${result.rowCount.toLocaleString()} rows, ${result.transactions.length.toLocaleString()} transactions extracted`,
         severity: 'info',
         resource: entry.file.name,
+      })
+    }
+
+    // One register: row ids made unique per file, and payments that an
+    // overlapping export repeats counted once.
+    const { transactions: allTransactions, overlap } = combineFiles(parsedFiles)
+    if (overlap > 0) {
+      auditLog.push({
+        id: `AUD-${Date.now()}-overlap`,
+        ts: new Date().toISOString(),
+        actor: 'Ventura',
+        event: 'Overlapping Exports Merged',
+        detail: `${overlap.toLocaleString()} row(s) appeared in more than one file with the same date, payee, amount and direction, and were counted once.`,
+        severity: 'info',
+        resource: 'Upload',
       })
     }
 
@@ -162,7 +178,7 @@ export default function DataUploadWidget({ onReady }: Props) {
         ts: new Date().toISOString(),
         actor: 'Ventura',
         event: 'Credits Excluded From Spend',
-        detail: `${creditTransactions.length.toLocaleString()} credit/refund row(s) totaling ${creditTransactions.reduce((s, t) => s + t.amount, 0).toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })} were identified via the Credit column and excluded from spend totals and anomaly detection.`,
+        detail: `${creditTransactions.length.toLocaleString()} credit/refund row(s) totaling ${creditTransactions.reduce((s, t) => s + t.amount, 0).toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })} were identified as credits (a Credit column, or the opposite sign to spend in an Amount column) and excluded from spend totals and anomaly detection.`,
         severity: 'info',
         resource: 'Anomaly Engine',
       })
@@ -173,58 +189,7 @@ export default function DataUploadWidget({ onReady }: Props) {
     setProgress(75)
     await new Promise(r => setTimeout(r, 150))
 
-    const totalSpend   = spendTransactions.reduce((s, t) => s + t.amount, 0)
-    const totalCredits = creditTransactions.reduce((s, t) => s + t.amount, 0)
-
-    // Top vendors (spend only)
-    const vendorMap = new Map<string, { total: number; count: number; category: string }>()
-    for (const tx of spendTransactions) {
-      const k = tx.vendor
-      const v = vendorMap.get(k) ?? { total: 0, count: 0, category: tx.category }
-      v.total += tx.amount
-      v.count++
-      vendorMap.set(k, v)
-    }
-    const topVendors: VendorStat[] = [...vendorMap.entries()]
-      .map(([vendor, v]) => ({ vendor, total: v.total, count: v.count, avgAmount: v.total / v.count, category: v.category }))
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 20)
-
-    // Category breakdown (spend only)
-    const catMap = new Map<string, { total: number; count: number }>()
-    for (const tx of spendTransactions) {
-      const k = tx.category || 'Uncategorized'
-      const v = catMap.get(k) ?? { total: 0, count: 0 }
-      v.total += tx.amount
-      v.count++
-      catMap.set(k, v)
-    }
-    const categoryBreakdown: CategoryStat[] = [...catMap.entries()]
-      .map(([category, v]) => ({ category, total: v.total, count: v.count }))
-      .sort((a, b) => b.total - a.total)
-
-    // Monthly breakdown (spend only)
-    const monthMap = new Map<string, MonthlyEntry>()
-    for (const tx of spendTransactions) {
-      if (!tx.date) continue
-      const d = new Date(tx.date)
-      if (isNaN(d.getTime())) continue
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-      const label = d.toLocaleString('default', { month: 'short', year: 'numeric' })
-      const prev = monthMap.get(key) ?? { month: label, spend: 0, count: 0 }
-      prev.spend += tx.amount
-      prev.count++
-      monthMap.set(key, prev)
-    }
-    const monthlyBreakdown: MonthlyEntry[] = [...monthMap.entries()]
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([, v]) => v)
-
-    // Date range (all ingested rows, spend and credit)
-    const dates = allTransactions.map(t => t.date).filter(Boolean).sort()
-    const dateRange = { from: dates[0] ?? '', to: dates[dates.length - 1] ?? '' }
-
-    const uniqueVendors = vendorMap.size
+    const stats = summarizeTransactions(allTransactions)
 
     // Step 5: save
     setStepIdx(5)
@@ -254,15 +219,7 @@ export default function DataUploadWidget({ onReady }: Props) {
         parsedAt: new Date().toISOString(),
       })),
       columnMapping,
-      totalTransactions: allTransactions.length,
-      totalSpend,
-      totalCredits,
-      creditCount: creditTransactions.length,
-      uniqueVendors,
-      dateRange,
-      topVendors,
-      categoryBreakdown,
-      monthlyBreakdown,
+      ...stats,
       anomalies,
       auditLog,
       sampleTransactions: keepEvidenceRows(allTransactions, anomalies),

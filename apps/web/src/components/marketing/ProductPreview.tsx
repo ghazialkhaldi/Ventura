@@ -37,17 +37,17 @@ export const FINDINGS: Finding[] = [
     amount: '$18,420.00',
     sev: 'critical',
     confidence: 96,
-    rule: 'Same vendor and amount within 30 days',
-    reasoning: 'Paid twice, 14 days apart, for the same amount and description. The earlier payment is treated as the original and kept as evidence; only the later one is flagged.',
+    rule: 'The same invoice paid twice',
+    reasoning: 'Both payments carry invoice INV-77812 for the same amount, 14 days apart. The earlier payment is treated as the original and kept as evidence; only the later one is flagged.',
     facts: [
+      { label: 'Invoice',    value: 'INV-77812' },
       { label: 'Days apart', value: '14' },
-      { label: 'Window',     value: '30 days' },
       { label: 'At risk',    value: '$18,420.00' },
     ],
     cols: ['Row', 'Date', 'Description', 'Amount'],
     rows: [
-      { cells: ['1,284', '2026-09-04', 'Linehaul, Aug wk 4', '$18,420.00'], note: 'Original' },
-      { cells: ['1,302', '2026-09-18', 'Linehaul, Aug wk 4', '$18,420.00'], flagged: true, note: 'Flagged' },
+      { cells: ['1,284', '2026-09-04', 'INV-77812 Linehaul', '$18,420.00'], note: 'Original' },
+      { cells: ['1,302', '2026-09-18', 'INV-77812 Linehaul', '$18,420.00'], flagged: true, note: 'Flagged' },
     ],
   },
   {

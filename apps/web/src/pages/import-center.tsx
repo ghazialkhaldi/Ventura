@@ -8,6 +8,7 @@ import BrandIcon, { type BrandKey } from '../components/ui/BrandIcon'
 import { parseFile } from '../lib/transactionParser'
 import { runAnomalyDetection } from '../lib/anomalyEngine'
 import { saveDataset, loadDataset } from '../lib/dataStore'
+import { namespaceRows } from '../lib/datasetStats'
 import {
   normalizeTransactions,
   detectInvoiceDuplicates,
@@ -170,7 +171,11 @@ export default function ImportCenterPage() {
       // Stage 7: anomaly engine
       setStageStatus('engine', 'running', 'Running anomaly detection…')
       await new Promise(r => setTimeout(r, 150))
-      const anomalies = runAnomalyDetection(parsed.transactions)
+      // Row and finding ids carry the batch, so this import's findings and
+      // evidence never collide with what is already in the workspace.
+      const batchTag  = batchId.replace(/[^a-z0-9]/gi, '').slice(-6).toUpperCase()
+      const batchRows = namespaceRows(parsed.transactions, batchTag)
+      const anomalies = runAnomalyDetection(batchRows, {}, { idPrefix: batchTag })
       setStageStatus('engine', 'done', `${anomalies.length} anomalies detected`)
 
       // Save to localStorage
@@ -196,9 +201,12 @@ export default function ImportCenterPage() {
       const existing = loadDataset()
       if (existing) {
         const updatedAnomalies = [...anomalies, ...existing.anomalies]
+        const cited = new Set(anomalies.flatMap(a => a.rowRefs))
         const updatedDataset = {
           ...existing,
           anomalies: updatedAnomalies,
+          // Keep this import's evidence rows so its findings can show them.
+          sampleTransactions: [...existing.sampleTransactions, ...batchRows.filter(t => cited.has(t.id))],
           pendingReviewCount: reviewCount,
           lastScanTime: new Date().toISOString(),
         }

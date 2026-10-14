@@ -3,8 +3,9 @@ import { X, Check, Loader2, Upload, AlertCircle, FileText, Clock, ExternalLink }
 import BrandIcon, { BrandKey } from './BrandIcon'
 import { parseFile } from '../../lib/transactionParser'
 import { runAnomalyDetection } from '../../lib/anomalyEngine'
-import { saveSourceDataset } from '../../lib/dataStore'
-import type { StoredTransaction, AuditEntry, Dataset, VendorStat, CategoryStat, MonthlyEntry } from '../../lib/dataStore'
+import { saveSourceDataset, keepEvidenceRows } from '../../lib/dataStore'
+import { summarizeTransactions, namespaceRows } from '../../lib/datasetStats'
+import type { StoredTransaction, AuditEntry, Dataset } from '../../lib/dataStore'
 
 export interface IntegrationConfig {
   id: string
@@ -298,51 +299,14 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
     setStatusMsg(`Parsed ${parsed.rowCount.toLocaleString()} rows, detecting anomalies…`)
     await new Promise(r => setTimeout(r, 150))
 
-    const anomalies = runAnomalyDetection(parsed.transactions)
+    // Row and finding ids carry the source, so merged sources never collide.
+    const txs: StoredTransaction[] = namespaceRows(parsed.transactions, integrationId)
+    const anomalies = runAnomalyDetection(txs, {}, { idPrefix: integrationId.replace(/[^a-z0-9]/gi, '').slice(0, 6).toUpperCase() })
 
     setStatusMsg('Computing statistics…')
     await new Promise(r => setTimeout(r, 100))
 
-    const txs: StoredTransaction[] = parsed.transactions
-    const totalSpend = txs.reduce((s, t) => s + t.amount, 0)
-
-    const vendorMap = new Map<string, { total: number; count: number; category: string }>()
-    for (const tx of txs) {
-      const v = vendorMap.get(tx.vendor) ?? { total: 0, count: 0, category: tx.category }
-      v.total += tx.amount; v.count++
-      vendorMap.set(tx.vendor, v)
-    }
-    const topVendors: VendorStat[] = [...vendorMap.entries()]
-      .map(([vendor, v]) => ({ vendor, total: v.total, count: v.count, avgAmount: v.total / v.count, category: v.category }))
-      .sort((a, b) => b.total - a.total).slice(0, 20)
-
-    const catMap = new Map<string, { total: number; count: number }>()
-    for (const tx of txs) {
-      const k = tx.category || 'Uncategorized'
-      const v = catMap.get(k) ?? { total: 0, count: 0 }
-      v.total += tx.amount; v.count++
-      catMap.set(k, v)
-    }
-    const categoryBreakdown: CategoryStat[] = [...catMap.entries()]
-      .map(([category, v]) => ({ category, total: v.total, count: v.count }))
-      .sort((a, b) => b.total - a.total)
-
-    const monthMap = new Map<string, MonthlyEntry>()
-    for (const tx of txs) {
-      if (!tx.date) continue
-      const d = new Date(tx.date)
-      if (isNaN(d.getTime())) continue
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-      const label = d.toLocaleString('default', { month: 'short', year: 'numeric' })
-      const prev = monthMap.get(key) ?? { month: label, spend: 0, count: 0 }
-      prev.spend += tx.amount; prev.count++
-      monthMap.set(key, prev)
-    }
-    const monthlyBreakdown: MonthlyEntry[] = [...monthMap.entries()]
-      .sort(([a], [b]) => a.localeCompare(b)).map(([, v]) => v)
-
-    const dates = txs.map(t => t.date).filter(Boolean).sort()
-    const dateRange = { from: dates[0] ?? '', to: dates[dates.length - 1] ?? '' }
+    const stats = summarizeTransactions(txs)
 
     const auditLog: AuditEntry[] = [
       {
@@ -369,16 +333,10 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
       uploadedAt: new Date().toISOString(),
       files: [{ name: file.name, size: file.size, rowCount: parsed.rowCount, parsedAt: new Date().toISOString() }],
       columnMapping: parsed.mapping,
-      totalTransactions: txs.length,
-      totalSpend,
-      uniqueVendors: vendorMap.size,
-      dateRange,
-      topVendors,
-      categoryBreakdown,
-      monthlyBreakdown,
+      ...stats,
       anomalies,
       auditLog,
-      sampleTransactions: txs.slice(0, 100),
+      sampleTransactions: keepEvidenceRows(txs, anomalies),
     }
 
     setStatusMsg('Saving…')

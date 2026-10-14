@@ -4,68 +4,107 @@
  * Every threshold the engine uses lives here. Nothing is tuned to a particular
  * register: the values are chosen from the statistical or control rationale
  * noted against each one, so the same settings hold on a different file with
- * different vendors, amounts and dates.
+ * different vendors, amounts and dates. The scenarios in test/engine measure
+ * them against routine spend and planted problems.
  */
 export interface DetectionConfig {
-  // ── Category-relative amount baseline ──────────────────────────────────────
+  // ── Materiality ────────────────────────────────────────────────────────────
   /**
-   * Modified z-score cutoff, computed from the median and median absolute
-   * deviation of amounts *within a category*. 3.5 is the common convention
-   * (Iglewicz and Hoaglin); 5 is deliberately more conservative because an
-   * expense register is heavy-tailed by nature and we would rather miss a
-   * marginal case than bury a reviewer. Amount alone is weak evidence.
+   * The smallest excess over a baseline worth a reviewer's time. Amount rules
+   * only fire when the payment is this much above what was expected, so a
+   * $40 coffee order four times its usual size never reaches the queue.
    */
-  categoryMadZ: number
+  minExcess: number
+
+  // ── Duplicate payments ─────────────────────────────────────────────────────
+  /** Same vendor and amount further apart than this is never a duplicate. */
+  duplicateWindowDays: number
   /**
-   * Minimum rows before a category's median/MAD is trusted. Below this the
-   * median is unstable and a handful of rows can define their own baseline.
-   * Rows in smaller categories are still covered by the vendor-level outlier,
-   * duplicate, approval-proximity and new-vendor rules.
+   * An extra same-amount payment inside a recurring series is a duplicate when
+   * it lands sooner than this share of the series' cadence (a second rent
+   * payment eight days after the first, against a 30-day rhythm).
    */
-  categoryMinRows: number
+  recurringExtraShare: number
+  /** Same-amount payments needed before a cadence is trusted as recurring. */
+  recurringMinCount: number
 
   // ── Vendor-relative amount baseline ────────────────────────────────────────
-  /** Sigma above a vendor's own mean. Retained from the previous engine. */
-  vendorSigma: number
-  /** Minimum payments before a vendor's own mean/sd is meaningful. */
+  /** Other payments from the vendor needed before its own baseline is trusted. */
   vendorMinHistory: number
+  /** How many times the vendor's median a payment must reach. */
+  vendorRatio: number
+  /** Robust z (against the vendor's other payments) a payment must also reach. */
+  vendorRobustZ: number
+
+  // ── Category-relative amount baseline ──────────────────────────────────────
+  /** Rows from other vendors in a category before its range is trusted. */
+  categoryMinRows: number
+  /** Distinct other vendors in a category before its range is trusted. */
+  categoryMinVendors: number
+  /**
+   * Multiple of the category's 95th percentile (other vendors' payments) a
+   * payment from a vendor with no history of its own must exceed. Judged
+   * against the category's top range, not its median, so a category that
+   * legitimately holds both a $50 tool and a $40,000 cloud bill is left alone.
+   */
+  categoryHighMultiple: number
 
   // ── Approval control proximity ─────────────────────────────────────────────
   /** The dual-approval limit the organisation enforces. */
   approvalLimit: number
   /** Lower edge of the "just under the limit" band, as a fraction of it. */
   approvalBandLow: number
-  /** Upper edge. 1.0 means the band stops at the limit itself. */
-  approvalBandHigh: number
-  /** Rolling window in which clustered near-limit payments are counted. */
+  /** Window in which near-limit payments to one vendor form a cluster. */
   approvalWindowDays: number
-  /** How many near-limit payments to one vendor constitute a cluster. */
-  approvalMinCluster: number
+  /** Two near-limit payments only form a cluster when this close together. */
+  approvalPairMaxDays: number
 
   // ── Velocity ───────────────────────────────────────────────────────────────
   /** Window over which payment bursts are measured. */
   velocityWindowDays: number
-  /** Payments inside the window from a vendor with no prior history. */
+  /** Payments in a new vendor's first window that make a burst. */
   velocityNewVendorMinCount: number
   /**
-   * For a vendor with history, how many times its own busiest historical
-   * window the current window must exceed. Self-calibrating, so a vendor with
-   * a genuinely dense routine cadence never trips on that cadence.
+   * How many times the vendor's busiest *other* week a burst must reach.
+   * Self-calibrating: a courier paid most days needs a far denser week to
+   * stand out than a supplier paid like clockwork once a week.
    */
   velocityBurstMultiple: number
+  /** An established burst must also exceed that busiest other week by this many payments. */
+  velocityMinExcessCount: number
 
-  // ── Vendor to category consistency ─────────────────────────────────────────
-  /** Prior transactions before a vendor's modal category is trusted. */
-  categoryConsistencyMinHistory: number
-
-  // ── Round numbers ──────────────────────────────────────────────────────────
-  roundNumberMin: number
-
-  // ── New vendor composite ───────────────────────────────────────────────────
-  /** Combined score at which a new/unfamiliar vendor is worth raising. */
+  // ── New vendors ────────────────────────────────────────────────────────────
+  /**
+   * A vendor only counts as new when it first appears this many days after
+   * the register begins. Before that, its history may simply sit before the
+   * export, and a one-month file would otherwise make every vendor "new".
+   */
+  newVendorGraceDays: number
+  /** Combined score at which a new vendor's payment is worth raising. */
   newVendorScoreThreshold: number
   /** Score at which it is raised as HIGH rather than MEDIUM. */
   newVendorHighScore: number
+
+  // ── Vendor to category consistency ─────────────────────────────────────────
+  /** Payments in the vendor's usual category before the pattern is trusted. */
+  categoryConsistencyMinHistory: number
+  /** Share of the vendor's payments its usual category must hold. */
+  categoryConsistencyShare: number
+
+  // ── Period integrity ───────────────────────────────────────────────────────
+  /**
+   * Share of rows that must agree on one period-to-date offset before the
+   * labels are trusted. That offset becomes the file's own calendar, so a
+   * fiscal year starting in July is learned rather than flagged on every row.
+   */
+  periodConsistencyShare: number
+  /** Past this many mismatched rows, they are reported as one finding. */
+  periodGroupAbove: number
+
+  // ── Round numbers ──────────────────────────────────────────────────────────
+  roundNumberMin: number
+  /** Share of a vendor's other payments that must be non-round for a round one to stand out. */
+  roundOthersIrregularShare: number
 
   // ── Reporting ──────────────────────────────────────────────────────────────
   /**
@@ -77,28 +116,42 @@ export interface DetectionConfig {
 }
 
 export const DEFAULT_DETECTION_CONFIG: DetectionConfig = {
-  categoryMadZ:                  5,
-  categoryMinRows:               8,
+  minExcess:                     1_000,
 
-  vendorSigma:                   2.5,
-  vendorMinHistory:              3,
+  duplicateWindowDays:           30,
+  recurringExtraShare:           0.6,
+  recurringMinCount:             3,
+
+  vendorMinHistory:              4,
+  vendorRatio:                   4,
+  vendorRobustZ:                 6,
+
+  categoryMinRows:               8,
+  categoryMinVendors:            3,
+  categoryHighMultiple:          4,
 
   approvalLimit:                 10_000,
   approvalBandLow:               0.90,
-  approvalBandHigh:              1.00,
   approvalWindowDays:            7,
-  approvalMinCluster:            2,
+  approvalPairMaxDays:           3,
 
   velocityWindowDays:            7,
   velocityNewVendorMinCount:     3,
   velocityBurstMultiple:         2,
+  velocityMinExcessCount:        4,
 
-  categoryConsistencyMinHistory: 5,
-
-  roundNumberMin:                5_000,
-
+  newVendorGraceDays:            30,
   newVendorScoreThreshold:       6,
   newVendorHighScore:            8,
+
+  categoryConsistencyMinHistory: 5,
+  categoryConsistencyShare:      0.85,
+
+  periodConsistencyShare:        0.6,
+  periodGroupAbove:              12,
+
+  roundNumberMin:                5_000,
+  roundOthersIrregularShare:     0.75,
 
   exposureConfidenceFloor:       70,
 }

@@ -3,6 +3,7 @@ import Head from 'next/head'
 import Link from 'next/link'
 import VenturaLogo from '../VenturaLogo'
 import { SkyBackdrop } from '../marketing/Sky'
+import { MorningLandscape } from '../marketing/Morning'
 import { createClient } from '../../utils/supabase/client'
 import { HamburgerMenuIcon as Bars3Icon, Cross2Icon as XMarkIcon } from '@radix-ui/react-icons'
 
@@ -176,32 +177,36 @@ export default function PublicLayout({ children, title }: PublicLayoutProps) {
           </div>
         </div>
 
-        <main className="relative flex-1">{children}</main>
+        <main className="relative z-10 flex-1">{children}</main>
 
-        {/* The footer sits on the day sky the page has scrolled into, not on a slab of paper. */}
-        <footer className="relative border-t border-sky-night/10">
+        {/* Every page ends in the morning: hills, a meadow, two chairs facing the sun.
+            It slides up under the page's last words, so its open sky is theirs. */}
+        <MorningLandscape className="-mt-28 sm:-mt-44 lg:-mt-60" />
+
+        {/* The footer stands on the meadow's own ground. */}
+        <footer className="relative bg-[#2c6535] bg-gradient-to-b from-[#2c6535] to-[#1f4a27]">
           <div className="max-w-page mx-auto px-5 sm:px-8 pt-14 pb-10">
             <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
               <div className="col-span-2 lg:col-span-1">
-                <VenturaLogo variant="dark" height={15} />
-                <p className="mt-4 text-[14px] text-sky-indigo max-w-[16rem] leading-relaxed">
+                <VenturaLogo variant="light" height={15} />
+                <p className="mt-4 text-[14px] text-white/75 max-w-[16rem] leading-relaxed">
                   Spend review for month-end close. Every finding traced to its rows, and a person decides.
                 </p>
               </div>
               {FOOTER_COLUMNS.map(col => (
                 <div key={col.heading}>
-                  <p className="text-[13px] font-medium text-sky-night">{col.heading}</p>
+                  <p className="text-[13px] font-medium text-white">{col.heading}</p>
                   <ul className="mt-4 space-y-3">
                     {col.links.map(l => (
                       <li key={l.label}>
-                        <Link href={l.href} className="text-[14px] text-sky-indigo hover:text-sky-night hover:underline underline-offset-4">{l.label}</Link>
+                        <Link href={l.href} className="text-[14px] text-white/75 hover:text-white hover:underline underline-offset-4">{l.label}</Link>
                       </li>
                     ))}
                   </ul>
                 </div>
               ))}
             </div>
-            <div className="mt-14 pt-6 border-t border-sky-night/10 text-[13px] text-sky-indigo">
+            <div className="mt-14 pt-6 border-t border-white/15 text-[13px] text-white/70">
               © 2026 Ventura Financial Intelligence, Inc.
             </div>
           </div>

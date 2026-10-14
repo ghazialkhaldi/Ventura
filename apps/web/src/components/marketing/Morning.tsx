@@ -1,10 +1,11 @@
 import { useMemo } from 'react'
 
 // ── The morning after the close ──────────────────────────────────────────────
-// Every page ends here: the dawn has become a clear morning over green hills,
-// and two chairs face the sun with the coffee still warm. The close is done.
-// Drawn in code; the scene anchors bottom-right so the chairs and the sun stay
-// in view however the card is cropped.
+// Every marketing page ends here, edge to edge under the page's own daylight
+// sky: green hills, a meadow, and two chairs facing the sun with the coffee
+// still warm. The close is done. The landscape has no sky of its own, so it
+// sits in whatever hour the page has scrolled to, and it anchors bottom-right
+// so the chairs and the sun stay in view however narrow the screen.
 
 type Pt = [number, number]
 type Seg = [Pt, Pt, Pt, Pt]
@@ -107,28 +108,26 @@ function CoffeeTable({ x, y }: { x: number; y: number }) {
 }
 
 const BIRDS: { x: number; y: number; s: number; d: number }[] = [
-  { x: 742, y: 196, s: 1,    d: 0 },
-  { x: 776, y: 172, s: 0.82, d: -0.5 },
-  { x: 812, y: 204, s: 0.9,  d: -1.1 },
-  { x: 704, y: 222, s: 0.7,  d: -0.8 },
-  { x: 846, y: 168, s: 0.62, d: -1.4 },
+  { x: 742, y: 246, s: 1,    d: 0 },
+  { x: 776, y: 222, s: 0.82, d: -0.5 },
+  { x: 812, y: 254, s: 0.9,  d: -1.1 },
+  { x: 704, y: 272, s: 0.7,  d: -0.8 },
+  { x: 846, y: 218, s: 0.62, d: -1.4 },
 ]
 
-export function MorningScene() {
+// The visible slice of the drawing: everything below the open sky.
+const VIEW_TOP = 120
+
+export function MorningLandscape({ className = '' }: { className?: string }) {
   const hill  = useMemo(() => meadow(RIGHT_HILL, 11, 0.016, 5), [])
   const front = useMemo(() => meadow(FOREGROUND, 29, 0.006, 22), [])
   const greens = ['#4f9a52', '#6cb466', '#2f6e38']
 
   return (
-    <svg aria-hidden viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMaxYMax slice" className="absolute inset-0 h-full w-full">
+    <div aria-hidden className={`pointer-events-none relative w-full min-h-[340px] ${className}`} style={{ aspectRatio: `${W} / ${H - VIEW_TOP}` }}>
+    <svg viewBox={`0 ${VIEW_TOP} ${W} ${H - VIEW_TOP}`} preserveAspectRatio="xMaxYMax slice" className="absolute inset-0 h-full w-full">
       <defs>
-        <linearGradient id="m-sky" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0"    stopColor="#5b92e0" />
-          <stop offset="0.42" stopColor="#94c1f0" />
-          <stop offset="0.66" stopColor="#cfe5f8" />
-          <stop offset="0.8"  stopColor="#f6efdf" />
-        </linearGradient>
-        <radialGradient id="m-sun" cx="1090" cy="150" r="380" gradientUnits="userSpaceOnUse">
+        <radialGradient id="m-sun" cx="1080" cy="238" r="360" gradientUnits="userSpaceOnUse">
           <stop offset="0"    stopColor="#fffdf2" />
           <stop offset="0.07" stopColor="#fffaf0" stopOpacity="0.95" />
           <stop offset="0.2"  stopColor="#fff1cc" stopOpacity="0.5" />
@@ -158,10 +157,9 @@ export function MorningScene() {
         <filter id="m-soft" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="5" /></filter>
       </defs>
 
-      {/* sky and sun */}
-      <rect width={W} height={H} fill="url(#m-sky)" />
-      <rect width={W} height={H} fill="url(#m-sun)" />
-      <circle cx="1090" cy="150" r="34" fill="#fffdf4" />
+      {/* the sun, high in the morning sky */}
+      <rect y={VIEW_TOP} width={W} height={H - VIEW_TOP} fill="url(#m-sun)" />
+      <circle cx="1080" cy="238" r="32" fill="#fffdf4" />
 
       {/* clouds: white tops, a cool shade underneath */}
       <g filter="url(#m-soft)" opacity="0.92">
@@ -225,5 +223,6 @@ export function MorningScene() {
       </g>
       {front.flowers.map((f, i) => <circle key={i} cx={f.x} cy={f.y} r={f.r} fill={f.c} />)}
     </svg>
+    </div>
   )
 }

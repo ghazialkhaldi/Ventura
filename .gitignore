@@ -18,3 +18,6 @@ data.json
 apps/web/.impeccable/review/
 apps/web/.impeccable/questions/
 apps/web/.impeccable/config.local.json
+
+# Engine test build output
+apps/web/.test-build/

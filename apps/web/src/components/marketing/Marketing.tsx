@@ -2,6 +2,7 @@ import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { ArrowRightIcon } from '@radix-ui/react-icons'
 import { Sheet } from './Sky'
+import { MorningScene } from './Morning'
 
 // Building blocks shared by the public marketing pages, so every page sets
 // type, rhythm and actions the same way the home page does.
@@ -71,7 +72,8 @@ export function InlineLink({ href, children }: { href: string; children: ReactNo
   )
 }
 
-/** The page's close: by the bottom of any page the sky is daylight, so it closes in ink on the morning sky. */
+/** The page's close: a morning card. The dawn the page opened on is now a clear
+ *  morning over green hills, two chairs facing the sun; the close is done. */
 export function ClosingCTA({ title, body, primary = { href: '/demo', label: 'Walk through the demo' }, secondary = { href: '/contact', label: 'Talk to us' } }: {
   title: string
   body?: ReactNode
@@ -79,15 +81,18 @@ export function ClosingCTA({ title, body, primary = { href: '/demo', label: 'Wal
   secondary?: { href: string; label: string } | null
 }) {
   return (
-    <section className="relative">
-      <div className="max-w-page mx-auto px-5 sm:px-8 pt-16 sm:pt-24 pb-24 sm:pb-32 grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end">
-        <div className="max-w-[38rem]">
-          <h2 className="font-display font-medium text-[2.25rem] leading-[1.04] tracking-[-0.035em] sm:text-[3.5rem] text-sky-night">{title}</h2>
-          {body && <p className="mt-5 text-[17px] leading-[1.65] text-sky-indigo">{body}</p>}
-        </div>
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-          <PrimaryLink href={primary.href}>{primary.label}</PrimaryLink>
-          {secondary && <TextLink href={secondary.href}>{secondary.label}</TextLink>}
+    <section className="relative mx-auto max-w-sheet px-3 sm:px-5 pt-6 sm:pt-10 mb-10 sm:mb-14">
+      <div className="relative isolate overflow-hidden rounded-[22px] sm:rounded-[28px] shadow-sheet min-h-[46rem] sm:min-h-[44rem] lg:min-h-[42rem]">
+        <MorningScene />
+        <div className="relative max-w-page mx-auto px-6 sm:px-12 lg:px-16 pt-14 sm:pt-20">
+          <div className="max-w-[36rem]">
+            <h2 className="font-display font-medium text-[2.5rem] leading-[1.02] tracking-[-0.035em] sm:text-[3.5rem] lg:text-[4rem] text-sky-night">{title}</h2>
+            {body && <p className="mt-5 max-w-[32rem] text-[17px] leading-[1.6] text-sky-indigo">{body}</p>}
+            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+              <PrimaryLink href={primary.href}>{primary.label}</PrimaryLink>
+              {secondary && <TextLink href={secondary.href}>{secondary.label}</TextLink>}
+            </div>
+          </div>
         </div>
       </div>
     </section>

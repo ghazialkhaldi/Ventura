@@ -223,6 +223,24 @@ button, a {
 }
 .animate-bob { animation: bob 7s ease-in-out infinite; }
 
+/* The morning card: birds drift and beat their wings, steam lifts off the coffee. */
+@keyframes birds-drift {
+  from { transform: translate(0, 0); }
+  to   { transform: translate(70px, -14px); }
+}
+.animate-birds { animation: birds-drift 26s ease-in-out infinite alternate; }
+@keyframes flap {
+  0%, 100% { transform: scaleY(1); }
+  50%      { transform: scaleY(0.35); }
+}
+.animate-flap { transform-box: fill-box; transform-origin: center; animation: flap 1.5s ease-in-out infinite; }
+@keyframes steam {
+  0%   { transform: translateY(2px); opacity: 0; }
+  30%  { opacity: 0.7; }
+  100% { transform: translateY(-6px); opacity: 0; }
+}
+.animate-steam { transform-box: fill-box; animation: steam 3.2s ease-out infinite; }
+
 /* Focus brackets tighten onto the flagged evidence row */
 /* Brackets settle on the inset each row asks for (set inline as --bracket-inset). */
 @keyframes bracket-in {
@@ -247,5 +265,6 @@ button, a {
   }
   /* Endless loops would spin at 1ms, so they stop instead: the logos hold
      still and the boats rest where they are drawn. */
-  .animate-marquee, .animate-sail, .animate-bob { animation: none !important; }
+  .animate-marquee, .animate-sail, .animate-bob,
+  .animate-birds, .animate-flap, .animate-steam { animation: none !important; }
 }

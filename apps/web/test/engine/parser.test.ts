@@ -55,15 +55,22 @@ test('Excel serials convert without a time zone', () => {
 
 // ── Rows to transactions ─────────────────────────────────────────────────────
 
-test('a signed AP column: positives are spend, negatives are credits', () => {
-  const rows: RawRow[] = [
-    { Date: '2026-03-01', Vendor: 'Staples', Amount: '1,240.00' },
-    { Date: '2026-03-02', Vendor: 'Delta', Amount: '880.00' },
-    { Date: '2026-03-03', Vendor: 'Staples', Amount: '-1,240.00' },
-  ]
+test('a signed AP column: positives are spend, the rare negative is a credit note', () => {
+  const rows: RawRow[] = Array.from({ length: 20 }, (_, i) => ({ Date: `2026-03-${String(i + 1).padStart(2, '0')}`, Vendor: `V${i}`, Amount: `${100 + i}.00` }))
+  rows.push({ Date: '2026-03-25', Vendor: 'V3', Amount: '-103.00' })
   const t = rowsToTransactions(rows, map({ date: 'Date', vendor: 'Vendor', amount: 'Amount' }))
-  assert.deepEqual(t.map(x => x.direction), ['debit', 'debit', 'credit'])
+  assert.equal(t.filter(x => x.direction === 'credit').length, 1)
+  assert.equal(t[t.length - 1].direction, 'credit')
   assert.ok(t.every(x => x.amount > 0))
+})
+
+test('a bank feed with more deposits than payments still reads negatives as spend', () => {
+  const rows: RawRow[] = [
+    ...Array.from({ length: 6 }, (_, i) => ({ Date: `2026-03-0${i + 1}`, Payee: 'Shopify Payments', Amount: '12,000.00' })),
+    ...Array.from({ length: 4 }, (_, i) => ({ Date: `2026-03-0${i + 1}`, Payee: 'Meta Ads', Amount: '-2,400.00' })),
+  ]
+  const t = rowsToTransactions(rows, map({ date: 'Date', vendor: 'Payee', amount: 'Amount' }))
+  assert.deepEqual(t.filter(x => x.direction === 'debit').map(x => x.vendor), ['Meta Ads', 'Meta Ads', 'Meta Ads', 'Meta Ads'])
 })
 
 test('a bank export: money out is negative, so negatives are spend', () => {

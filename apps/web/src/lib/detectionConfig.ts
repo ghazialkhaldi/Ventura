@@ -33,8 +33,18 @@ export interface DetectionConfig {
   vendorMinHistory: number
   /** How many times the vendor's median a payment must reach. */
   vendorRatio: number
-  /** Robust z (against the vendor's other payments) a payment must also reach. */
-  vendorRobustZ: number
+  /**
+   * How far above the vendor's other payments, in units of their own spread on
+   * a log scale, a payment must sit. Spend varies by multiples, so a vendor that
+   * routinely ranges widely needs a far larger jump than a steady one.
+   */
+  vendorLogZ: number
+  /**
+   * With at least `vendorMaxMarginHistory` other payments, a payment this many
+   * times the vendor's previous largest is raised even if the vendor is volatile.
+   */
+  vendorMaxMargin: number
+  vendorMaxMarginHistory: number
 
   // ── Category-relative amount baseline ──────────────────────────────────────
   /** Rows from other vendors in a category before its range is trusted. */
@@ -80,10 +90,15 @@ export interface DetectionConfig {
    * export, and a one-month file would otherwise make every vendor "new".
    */
   newVendorGraceDays: number
-  /** Combined score at which a new vendor's payment is worth raising. */
-  newVendorScoreThreshold: number
-  /** Score at which it is raised as HIGH rather than MEDIUM. */
-  newVendorHighScore: number
+  /**
+   * Combined surprise at which a new vendor's payment is raised. Each feature
+   * scores -log10 of how often it occurs in this company (leaving the payment
+   * itself out), so 3.5 is roughly one in three thousand were the features
+   * independent.
+   */
+  newVendorSurprise: number
+  /** Surprise at which it is raised as HIGH rather than MEDIUM. */
+  newVendorSurpriseHigh: number
 
   // ── Vendor to category consistency ─────────────────────────────────────────
   /** Payments in the vendor's usual category before the pattern is trusted. */
@@ -124,7 +139,9 @@ export const DEFAULT_DETECTION_CONFIG: DetectionConfig = {
 
   vendorMinHistory:              4,
   vendorRatio:                   4,
-  vendorRobustZ:                 6,
+  vendorLogZ:                    3.5,
+  vendorMaxMargin:               3,
+  vendorMaxMarginHistory:        10,
 
   categoryMinRows:               8,
   categoryMinVendors:            3,
@@ -141,8 +158,8 @@ export const DEFAULT_DETECTION_CONFIG: DetectionConfig = {
   velocityMinExcessCount:        4,
 
   newVendorGraceDays:            30,
-  newVendorScoreThreshold:       6,
-  newVendorHighScore:            8,
+  newVendorSurprise:             3.5,
+  newVendorSurpriseHigh:         5,
 
   categoryConsistencyMinHistory: 5,
   categoryConsistencyShare:      0.85,

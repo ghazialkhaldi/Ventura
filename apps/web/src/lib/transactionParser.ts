@@ -183,16 +183,19 @@ export function rowsToTransactions(
   const txs: StoredTransaction[] = []
   const order = mapping.date ? inferDateOrder(rows.slice(0, 500).map(r => r[mapping.date!] ?? '')) : 'mdy'
 
-  // A single signed Amount column follows one of two conventions. AP and GL
-  // exports show spend as positive and credit notes as negative; bank exports
-  // show money out as negative and deposits as positive. Whichever sign most
-  // rows carry is spend; the other is a credit, and is never counted as spend
-  // or fed to the checks (a refund beside its charge is not a duplicate).
+  // A single signed Amount column follows one of two conventions. AP, GL and
+  // card exports show spend as positive and the odd credit note or refund as
+  // negative; bank exports show money out as negative and deposits as
+  // positive. Credit notes are rare, so a column where negatives are rare is
+  // the first kind. Where both signs are common it is a bank statement, and
+  // negative is spend even when deposits outnumber payments (an online shop
+  // paid out daily). The other sign is a credit, never counted as spend or fed
+  // to the checks.
   let spendSign = 1
   if (mapping.amount) {
     let neg = 0, pos = 0
     for (const r of rows) { const v = parseAmount(r[mapping.amount] ?? ''); if (v < 0) neg++; else if (v > 0) pos++ }
-    if (neg > pos) spendSign = -1
+    if (neg / Math.max(1, neg + pos) >= 0.1) spendSign = -1
   }
 
   for (let i = 0; i < rows.length; i++) {

@@ -47,8 +47,13 @@ class Register {
   private inv = 40000
   constructor(private period: (d: Date) => string = calendarPeriod) {}
 
-  add(date: Date, vendor: string, amount: number, category: string, opts: { invoice?: string; desc?: string; period?: string; direction?: 'debit' | 'credit' } = {}): string {
+  add(date: Date, vendor: string, amount: number, category: string, opts: { invoice?: string; desc?: string; period?: string; direction?: 'debit' | 'credit'; weekend?: boolean } = {}): string {
     const id = `TX-${this.txs.length}`
+    // Invoice payments run on business days; card-sized spend can land any day.
+    if (amount >= 1000 && !opts.weekend) {
+      if (date.getDay() === 6) date = addDays(date, 2)
+      else if (date.getDay() === 0) date = addDays(date, 1)
+    }
     const invoice = opts.invoice ?? `INV-${++this.inv}`
     this.txs.push({
       id,
@@ -179,7 +184,7 @@ export function sixMonthRegister(period?: (d: Date) => string): Scenario {
   // I. Dated October, labelled September.
   planted.push({ key: 'I posted outside its period', types: ['period_mismatch'], rows: [R.add(at(2026, 10, 2), 'Halden Software', 42000, 'Software', { period: (period ?? calendarPeriod)(at(2026, 9, 15)) })] })
   // J. A first-time vendor: one round, material payment on a Saturday, late in the register.
-  planted.push({ key: 'J new vendor, several signals', types: ['new_vendor_risk'], rows: [R.add(at(2026, 9, 26), 'Keystone Advisory LLC', 15000, 'Consulting')] })
+  planted.push({ key: 'J new vendor, several signals', types: ['new_vendor_risk'], rows: [R.add(at(2026, 9, 26), 'Keystone Advisory LLC', 15000, 'Consulting', { weekend: true })] })
   // K. A vendor that appears mid-register and is paid four times in five days.
   const quick = ([[14, 1240.18], [15, 980.55], [17, 1410.2], [18, 1105.32]] as const).map(([d, a]) => R.add(at(2026, 7, d), 'Quickline Supplies', a, 'Office Supplies'))
   planted.push({ key: 'K new vendor burst', types: ['high_frequency'], rows: quick })

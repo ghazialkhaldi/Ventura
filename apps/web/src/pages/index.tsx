@@ -13,13 +13,13 @@ const H2 = 'font-display font-medium text-[1.875rem] leading-[1.1] tracking-[-0.
 // ── The ten checks the engine runs ───────────────────────────────────────────
 const CHECKS = [
   { name: 'Duplicate payment',         body: 'The same amount paid twice, judged on evidence: a shared invoice number, the same day, or a second payment inside a monthly cycle. Rent on the 1st is a rhythm, not a duplicate.' },
-  { name: 'Split under approval limit', body: 'Three or more payments to one vendor just under the approval limit within a week, or two within a few days.' },
+  { name: 'Split under approval limit', body: 'Payments to one vendor clustered just under an approval limit, including limits Ventura finds from how your payments bunch.' },
   { name: 'Period cut-off',            body: "A transaction dated outside the period it is labelled with, after learning the file's own fiscal calendar." },
   { name: 'Unusual for the vendor',    body: "Several times the vendor's usual payment, judged against its other payments once there are enough to trust." },
   { name: 'Unusual for the category',  body: 'From a vendor with no history of its own, far above the top of what that category usually costs.' },
   { name: 'Coding change',             body: 'A vendor coded one way almost every time, suddenly booked to a different category.' },
   { name: 'Payment burst',             body: "More payments in a week than the vendor's own rate explains, or a new vendor paid several times at once." },
-  { name: 'New-vendor risk',           body: 'A vendor first seen mid-register whose payment is round, material or posted on a weekend, scored together as one finding.' },
+  { name: 'New-vendor risk',           body: 'A vendor first seen mid-register whose payment is round, large or posted on a weekend, each scored by how unusual it is in your own spend.' },
   { name: 'Round amounts',             body: 'A round figure from a vendor that otherwise bills irregular amounts, for invoice support.' },
   { name: 'Missing payee',             body: 'Payments with a blank or unknown vendor, so nothing posts without a counterparty.' },
 ]

@@ -8,12 +8,12 @@ const AMOUNT_SYN      = ['amount','value','total','net amount','transaction amou
 const DEBIT_SYN       = ['debit','debit amount','withdrawal','outflow','expense','charge','dr','dr amount']
 const CREDIT_SYN      = ['credit','credit amount','deposit','inflow','income','payment received','cr','cr amount','refund']
 const DESCRIPTION_SYN = ['description','memo','notes','details','reference','narrative','particulars','remark','line description','note','memo line']
-const CATEGORY_SYN    = ['category','type','account type','expense type','classification','class','cost center','department','budget code','gl category','subcategory','sub-category']
+const CATEGORY_SYN    = ['category','type','account type','expense type','expenditure category','classification','class','cost center','cost centre','department','budget code','gl category','subcategory','sub-category']
 const PERIOD_SYN      = ['period','fiscal period','posting period','accounting period','gl period','period name','fiscal month','acct period']
-const INVOICE_SYN     = ['invoice no','invoice number','invoice #','invoice','inv no','inv number','invoice id','vendor invoice','bill no','bill number','document number','doc no']
+const INVOICE_SYN     = ['invoice no','invoice number','invoice #','invoice','inv no','inv number','invoice id','vendor invoice','bill no','bill number','document number','doc no','voucher','voucher no','voucher number']
 const SOURCE_SYN      = ['source','source code','journal source','source type','transaction type','txn type','document type','doc type','journal type','entry type','module']
 const ENTITY_SYN      = ['entity','legal entity','entity code','company code','company','subsidiary','business unit','operating unit','branch']
-const UNIT_SYN        = ['cost center','department','dept','location','class','store','site','property','division']
+const UNIT_SYN        = ['cost center','cost centre','service area','department','dept','location','class','store','site','property','division','directorate']
 const ACCOUNT_SYN     = ['account','account name','account number','gl account','ledger account','account code','cost account','chart of accounts','gl code','account id']
 
 // ─── Column detection ─────────────────────────────────────────────────────────
@@ -69,7 +69,7 @@ function matchCol(headers: string[], synonyms: string[]): string | null {
 }
 
 /** A header naming an identifier: "Vendor No.", "Supplier ID", "Payee #". */
-const ID_HEADER = /\b(no|nbr|num|number|id|code|ref|acct)\b|#/i
+const ID_HEADER = /(^|[\s_.-])(no|nbr|num|number|id|code|ref|acct)($|[\s_.-])|#/i
 
 export function detectColumns(headers: string[]): ColumnMapping {
   return {
@@ -223,9 +223,16 @@ export function rowsToTransactions(
   // to the checks.
   let spendSign = 1
   if (mapping.amount) {
-    let neg = 0, pos = 0
-    for (const r of rows) { const v = parseAmount(r[mapping.amount] ?? ''); if (v < 0) neg++; else if (v > 0) pos++ }
-    if (neg / Math.max(1, neg + pos) >= 0.1) spendSign = -1
+    let neg = 0, pos = 0, negValue = 0, posValue = 0
+    for (const r of rows) {
+      const v = parseAmount(r[mapping.amount] ?? '')
+      if (v < 0) { neg++; negValue -= v } else if (v > 0) { pos++; posValue += v }
+    }
+    // Counting lines is not enough: a council's month of payments can be 12%
+    // negative lines (corrections, recharges) and still only 7% of the value. A
+    // bank statement has real money flowing both ways.
+    const negShare = neg / Math.max(1, neg + pos)
+    if (negShare >= 0.2 || (negShare >= 0.1 && negValue / Math.max(1, posValue) >= 0.25)) spendSign = -1
   }
 
   for (let i = 0; i < rows.length; i++) {
@@ -465,9 +472,18 @@ function moneyColumn(rows: RawRow[], col: string, mayBeEmpty = false): boolean {
   return vals.filter(looksNumeric).length / vals.length >= 0.9
 }
 
+const MONEY_HEADER = /amount|paid|payment|spend|expenditure|cost|charge|price|value|total|\bnet\b|gross/i
+
+/** Long whole numbers, or numbers padded with zeros: a voucher or PO number, not money. */
+function idValues(rows: RawRow[], col: string): boolean {
+  const vals = sample(rows, col).filter(looksNumeric)
+  if (vals.length === 0) return false
+  return vals.every(v => /^\d+$/.test(v) && (v.length >= 7 || v.startsWith('0')))
+}
+
 /** Looks like an identifier or a year rather than money. */
 function looksLikeIdOrYear(header: string, rows: RawRow[], col: string): boolean {
-  if (/\b(id|no|num|number|code|ref|reference|qty|quantity|count|year|fy)\b/.test(header.toLowerCase())) return true
+  if (/\b(id|no|num|number|code|ref|reference|qty|quantity|count|year|fy)\b/.test(header.toLowerCase().replace(/_/g, ' '))) return true
   const vals = sample(rows, col).filter(looksNumeric).map(v => Math.abs(parseAmount(v)))
   if (vals.length === 0) return false
   const allWholeSmall = vals.every(v => Number.isInteger(v) && v > 1900 && v < 2200)
@@ -522,6 +538,19 @@ function validateMapping(rows: RawRow[], headers: string[], mapping: ColumnMappi
   // With no category column, the account name is the next best thing.
   if (!m.category && m.account && numericRatio(rows, m.account) < 0.5) m.category = m.account
 
+  // A "description" drawn from a short list is a classification in all but name.
+  if (!m.category && m.description) {
+    const vals = rows.map(r => (r[m.description!] ?? '').trim()).filter(Boolean)
+    const distinct = new Set(vals.map(v => v.toLowerCase())).size
+    if (vals.length >= 200 && distinct >= 5 && distinct / vals.length <= 0.05) m.category = m.description
+  }
+
+  // The unit a payment was for keeps identical amounts for two services apart.
+  if (!m.account || m.account === m.category) {
+    const unit = matchCol(headers.filter(h => h !== m.category && h !== m.vendor && h !== m.source), UNIT_SYN)
+    if (unit) m.account = unit
+  }
+
   // A category is what the money was spent on. Where the file has an account
   // name, that is a better answer than who spent it, and the checks compare
   // like with like only when it is used.
@@ -547,15 +576,16 @@ function validateMapping(rows: RawRow[], headers: string[], mapping: ColumnMappi
     const numeric = headers
       .filter(h => h !== m.vendor && h !== m.date)
       .filter(h => numericRatio(rows, h) >= 0.6)
-      .filter(h => !looksLikeIdOrYear(h, rows, h))
-    // Money columns tend to carry the larger magnitudes.
+      .filter(h => !looksLikeIdOrYear(h, rows, h) && !idValues(rows, h))
+    // A header that names money wins outright: identifiers can be far larger
+    // than any payment. Failing that, money columns carry the larger magnitudes.
     const best = numeric
       .map(h => {
         const vals = sample(rows, h).filter(looksNumeric).map(v => Math.abs(parseAmount(v)))
         const mean = vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : 0
-        return { h, mean }
+        return { h, mean, money: MONEY_HEADER.test(h) }
       })
-      .sort((a, b) => b.mean - a.mean)[0]
+      .sort((a, b) => Number(b.money) - Number(a.money) || b.mean - a.mean)[0]
     if (best) m.amount = best.h
   }
 
@@ -751,9 +781,36 @@ const CSV_EXTS   = ['.csv', '.tsv', '.txt']
 const PDF_EXTS   = ['.pdf']
 const OFX_EXTS   = ['.ofx', '.qfx', '.qbo']
 
+const CURRENCY_CODES = ['USD', 'GBP', 'EUR', 'CAD', 'AUD']
+const CURRENCY_MARKS: [RegExp, string][] = [[/£/, 'GBP'], [/€/, 'EUR']]
+
+/**
+ * The currency a file states, if it states one: in the money column's header,
+ * in its cells, or in a currency column that holds a single value. Most exports
+ * do not say, and a dollar sign alone is too ambiguous to count.
+ */
+export function detectCurrency(rows: RawRow[], headers: string[], mapping: ColumnMapping): string | undefined {
+  const money = mapping.amount ?? mapping.debit
+  if (money) {
+    const code = CURRENCY_CODES.find(c => new RegExp(`\\b${c}\\b`, 'i').test(money))
+    if (code) return code
+    const mark = CURRENCY_MARKS.find(([re]) => re.test(money))
+    if (mark) return mark[1]
+    const cells = sample(rows, money, 200)
+    for (const [re, c] of CURRENCY_MARKS) if (cells.length && cells.filter(v => re.test(v)).length / cells.length >= 0.5) return c
+  }
+  const col = headers.find(h => /^(curr|currency|ccy)(\s*code)?$/i.test(h.trim()))
+  if (col) {
+    const vals = sample(rows, col, 500).map(v => v.toUpperCase())
+    const top = CURRENCY_CODES.find(c => vals.length && vals.filter(v => v === c).length / vals.length >= 0.95)
+    if (top) return top
+  }
+  return undefined
+}
+
 export async function parseFile(
   file: File,
-): Promise<{ transactions: StoredTransaction[]; mapping: ColumnMapping; rowCount: number } | { error: string }> {
+): Promise<{ transactions: StoredTransaction[]; mapping: ColumnMapping; rowCount: number; currency?: string } | { error: string }> {
   const ext = '.' + (file.name.split('.').pop() ?? '').toLowerCase()
 
   let rows: RawRow[] = []
@@ -799,5 +856,5 @@ export async function parseFile(
     return { error: `Could not extract any transactions from ${file.name}. Check that columns include vendor/payee and amount.` }
   }
 
-  return { transactions, mapping, rowCount: rows.length }
+  return { transactions, mapping, rowCount: rows.length, currency: detectCurrency(rows, headers, mapping) }
 }

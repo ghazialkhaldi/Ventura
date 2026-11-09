@@ -1,3 +1,4 @@
+import { adoptFileCurrency } from '../../lib/workspaceSettings'
 ﻿import { useState, useRef } from 'react'
 import Link from 'next/link'
 import { Upload, FileText, X, CheckCircle, AlertCircle, Plug } from 'lucide-react'
@@ -93,6 +94,7 @@ export default function DataUploadWidget({ onReady }: Props) {
       setEntries([...updatedEntries])
 
       const result = await parseFile(entry.file)
+      if (!('error' in result)) adoptFileCurrency(result.currency)
 
       if ('error' in result) {
         updatedEntries[fi] = { ...entry, status: 'error', error: result.error }

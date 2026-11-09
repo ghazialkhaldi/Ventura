@@ -1,3 +1,4 @@
+import { moneyShort } from '../lib/money'
 import React, { useState, useEffect, useMemo } from 'react'
 import AppLayout from '../components/layout/AppLayout'
 import PageHeader from '../components/ui/PageHeader'
@@ -13,11 +14,7 @@ import {
   ChevronRight, Users, ArrowRight,
 } from 'lucide-react'
 
-function fmtCurrency(n: number): string {
-  if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(1) + 'M'
-  if (n >= 1_000)     return '$' + (n / 1_000).toFixed(0) + 'K'
-  return '$' + n.toFixed(0)
-}
+const fmtCurrency = moneyShort
 
 // Maps each anomaly type to a human-readable workflow
 const TYPE_META: Record<AnomalyType, {

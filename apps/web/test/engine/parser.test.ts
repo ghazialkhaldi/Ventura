@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import * as XLSX from 'xlsx'
-import { parseAmount, parseDate, inferDateOrder, excelSerialToISO, rowsToTransactions, parseFile, detectColumns, type RawRow } from '../../src/lib/transactionParser'
+import { parseAmount, parseDate, inferDateOrder, excelSerialToISO, rowsToTransactions, parseFile, detectColumns, detectCurrency, type RawRow } from '../../src/lib/transactionParser'
 import type { ColumnMapping } from '../../src/lib/dataStore'
 
 const map = (m: Partial<ColumnMapping>): ColumnMapping => ({ date: null, vendor: null, amount: null, debit: null, credit: null, description: null, category: null, account: null, period: null, ...m })
@@ -237,4 +237,56 @@ test('dotted dates are day-first even in a column of month-first dates', () => {
   assert.equal(parseDate('01.07.2025', 'mdy'), '2025-07-01')
   assert.equal(parseDate('12.03.2026', 'mdy'), '2026-03-12')
   assert.equal(parseDate('01/07/2025', 'mdy'), '2025-01-07')
+})
+
+// ── Published public-sector files ────────────────────────────────────────────
+
+test('corrections that are many lines but little money do not make a ledger a bank statement', () => {
+  const rows: RawRow[] = [
+    ...Array.from({ length: 88 }, (_, i) => ({ Date: '2026-02-10', Vendor: `V${i}`, Amount: '6,000.00' })),
+    ...Array.from({ length: 12 }, (_, i) => ({ Date: '2026-02-11', Vendor: `V${i}`, Amount: '-3,000.00' })),
+  ]
+  const t = rowsToTransactions(rows, map({ date: 'Date', vendor: 'Vendor', amount: 'Amount' }))
+  assert.equal(t.filter(x => x.direction === 'credit').length, 12)
+})
+
+test('money flowing both ways in real amounts is still a bank statement', () => {
+  const rows: RawRow[] = [
+    ...Array.from({ length: 85 }, (_, i) => ({ Date: '2026-02-10', Payee: 'Till deposit', Amount: '100.00' })),
+    ...Array.from({ length: 15 }, (_, i) => ({ Date: '2026-02-11', Payee: `Supplier ${i}`, Amount: '-300.00' })),
+  ]
+  const t = rowsToTransactions(rows, map({ date: 'Date', vendor: 'Payee', amount: 'Amount' }))
+  assert.equal(t.filter(x => x.direction === 'debit').length, 15)
+})
+
+test('an open-data export: the money column is found and identifiers are not', async () => {
+  const r = await parseFile(workbook({ S: [
+    ['fiscal_year', 'vendor', 'purchase_order', 'voucher', 'vouchers_paid', 'vouchers_pending', 'contract_number', 'department', 'data_as_of'],
+    ['2025', 'Acme', '000087004201', '0330508501', '3200.54', '0', '1000008932', 'Health', '2025-02-10'],
+    ['2025', 'Bolt', '000087004401', '0329082301', '19229.67', '0', '1000008933', 'Health', '2025-02-03'],
+  ] }))
+  if ('error' in r) return assert.fail(r.error)
+  assert.equal(r.mapping.amount, 'vouchers_paid')
+  assert.equal(r.transactions[1].amount, 19229.67)
+  assert.equal(r.mapping.invoice, 'voucher')
+})
+
+test('a UK ledger: the service area is the unit, and a short list of descriptions is the category', async () => {
+  const uk = await parseFile(workbook({ S: [['Service Area', 'Expenditure Category', 'Supplier Name', 'Pay Date', 'Amount'], ['Parks', 'Grounds', 'Acme', '2026-01-05', 900]] }))
+  if ('error' in uk) return assert.fail(uk.error)
+  assert.equal(uk.mapping.account, 'Service Area')
+  const kinds = ['Care', 'Fuel', 'Rent', 'Legal', 'Pensions', 'Travel']
+  const rows = Array.from({ length: 300 }, (_, i) => ['2026-01-05', `V${i}`, 100 + i, kinds[i % 6]])
+  const b = await parseFile(workbook({ S: [['Pay Date', 'Name', 'amount', 'Description 1'], ...rows] }))
+  if ('error' in b) return assert.fail(b.error)
+  assert.equal(b.mapping.category, 'Description 1')
+})
+
+test('currency comes from what the file states, and silence stays silent', () => {
+  const m = (amount: string) => map({ amount })
+  assert.equal(detectCurrency([{ 'Amount (GBP)': '10' }], ['Amount (GBP)'], m('Amount (GBP)')), 'GBP')
+  assert.equal(detectCurrency([{ Amount: '£1,200.00' }, { Amount: '£5.00' }], ['Amount'], m('Amount')), 'GBP')
+  assert.equal(detectCurrency([{ Amount: '10', Curr: 'EUR' }], ['Amount', 'Curr'], m('Amount')), 'EUR')
+  assert.equal(detectCurrency([{ Amount: '10', Curr: 'EUR' }, { Amount: '10', Curr: 'USD' }], ['Amount', 'Curr'], m('Amount')), undefined)
+  assert.equal(detectCurrency([{ Amount: '$10.00' }], ['Amount'], m('Amount')), undefined)
 })

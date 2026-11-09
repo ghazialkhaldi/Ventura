@@ -70,6 +70,8 @@ export interface DetectedAnomaly {
   description: string
   reasoning: string
   rowRefs: string[]         // transaction IDs involved
+  // For a duplicate: how many leading rowRefs are the repeats. The rest are their originals.
+  flaggedCount?: number
   category: string
   // Other rules that fired on the same rows, merged into this finding so the
   // reviewer sees one finding per event with every signal behind it.

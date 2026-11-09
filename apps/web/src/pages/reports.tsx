@@ -1,3 +1,4 @@
+import { moneyFull } from '../lib/money'
 import { useState, useEffect } from 'react'
 import AppLayout from '../components/layout/AppLayout'
 import DataEmptyState from '../components/ui/DataEmptyState'
@@ -14,7 +15,7 @@ import {
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 function fmtFull(n: number) {
-  return n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
+  return moneyFull(n)
 }
 
 function fmtShort(iso: string) {
@@ -39,6 +40,7 @@ function safe(s: string): string {
     .replace(/⚠/g, '(!)')  // ⚠ -> (!)
     .replace(/–/g, '-')   // en dash -> hyphen
     .replace(/—/g, '--')  // em dash -> --
+    .replace(/€/g, 'EUR ')  // the euro sign is outside latin-1
     .replace(/[Ā-￿]/g, '?') // anything above latin-1 -> ?
 }
 
@@ -202,7 +204,7 @@ async function generateAndDownload(dataset: Dataset, company: string, includeAud
   doc.text('RISK SUMMARY', ML+8, calloutY+7)
   doc.setFont('helvetica','normal'); doc.setFontSize(9); tc(SLATE800)
   doc.text(
-    safe(`${open.length} open anomalies detected  |  $${fmtFull(exposure).replace('$','')} total exposure  |  ${critical.length} Critical  |  ${high.length} High  |  ${medium.length} Medium`),
+    safe(`${open.length} open anomalies detected  |  ${fmtFull(exposure)} total exposure  |  ${critical.length} Critical  |  ${high.length} High  |  ${medium.length} Medium`),
     ML+8, calloutY+15
   )
 

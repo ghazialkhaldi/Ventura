@@ -14,6 +14,16 @@ export function setDetectionConfig(cfg: Partial<DetectionConfig>) {
   try { localStorage.setItem(KEY, JSON.stringify(cfg)) } catch { /* private mode: settings last for this page */ }
 }
 
+/**
+ * A file that states its currency sets the workspace's, unless someone has
+ * already chosen one: a person's choice is never overridden by a file.
+ */
+export function adoptFileCurrency(code: string | undefined) {
+  if (!code) return
+  const cfg = getDetectionConfig()
+  if (!cfg.currency) setDetectionConfig({ ...cfg, currency: code })
+}
+
 /** Load the workspace's settings from the server, when it keeps them, into the local copy. */
 export async function refreshDetectionConfig(): Promise<Partial<DetectionConfig>> {
   try {

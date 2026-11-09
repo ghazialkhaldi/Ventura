@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { runAnomalyDetection, computeRiskExposure, vendorKey, parsePeriodLabel, flaggedRows, isMissingVendor } from '../../src/lib/anomalyEngine'
+import { runAnomalyDetection, computeRiskExposure, vendorKey, parsePeriodLabel, flaggedRows, isMissingVendor, isRedactedPayee } from '../../src/lib/anomalyEngine'
 import type { StoredTransaction } from '../../src/lib/dataStore'
 import { SCENARIOS } from './fixtures'
 import { randomRegister } from './random'
@@ -314,4 +314,70 @@ test('placeholder payees are missing payees', () => {
 
 test('leading zeros on an invoice number are padding', () => {
   assert.deepEqual(dupes([...history('Ostrom Structural', 20000), L(1, '2025-09-02', 'Ostrom Structural', 24601.2, { invoice: '4417' }), L(2, '2025-09-20', 'Ostrom Structural', 24601.2, { invoice: '0004417' })]).flatMap(flaggedRows), ['TX-2'])
+})
+
+// ── Published public-sector files ────────────────────────────────────────────
+
+test('same day and amount with no invoice number is a question, not a Critical', () => {
+  const f = dupes([...history('Peep Learning', 9000), L(1, '2025-06-18', 'Peep Learning', 12340.5, { description: '' }), L(2, '2025-06-18', 'Peep Learning', 12340.5, { description: '' })])
+  assert.equal(f.length, 1)
+  assert.notEqual(f[0].severity, 'CRITICAL')
+})
+
+test('many repeats from one vendor with no invoice numbers are one pattern, every row kept', () => {
+  // Two same-day repeats and two a few days apart: too few of either to read as a habit.
+  const pair = (k: number, d1: string, d2: string) => [L(k * 10, d1, 'Foster Care Co', 3000 + k * 211.3, { description: '' }), L(k * 10 + 1, d2, 'Foster Care Co', 3000 + k * 211.3, { description: '' })]
+  const pairs = [...pair(1, '2025-02-15', '2025-02-15'), ...pair(2, '2025-04-15', '2025-04-15'), ...pair(3, '2025-06-05', '2025-06-11'), ...pair(4, '2025-08-05', '2025-08-12')]
+  const f = dupes([...history('Foster Care Co', 900), ...pairs])
+  assert.equal(f.length, 1)
+  assert.equal(flaggedRows(f[0]).length, 4)
+  assert.ok(f[0].confidence < 70, 'kept out of exposure until confirmed')
+})
+
+test('a posting reversed within the month is not raised as an unusual amount', () => {
+  const big = L(1, '2025-12-31', 'Cleardata', 34537601, { description: 'Office' })
+  const undo = L(2, '2025-12-31', 'Cleardata', 34531724.13, { description: 'Office', direction: 'credit' })
+  const count = (txs: StoredTransaction[]) => runAnomalyDetection(txs).filter(x => x.type === 'outlier').length
+  assert.equal(count([...history('Cleardata', 900), big]), 1)
+  assert.equal(count([...history('Cleardata', 900), big, undo]), 0)
+})
+
+test('an unusual amount alone is never Critical', () => {
+  const f = runAnomalyDetection([...history('Access UK', 2300), L(1, '2025-07-15', 'Access UK', 36000.4)]).filter(x => x.type === 'outlier')
+  assert.equal(f.length, 1)
+  assert.notEqual(f[0].severity, 'CRITICAL')
+})
+
+test('a stray early row does not make every vendor new', () => {
+  const stray = L(1, '2023-12-28', 'Old Ledger Item', 500)
+  const month = Array.from({ length: 600 }, (_, i) => L(10 + i, `2024-04-${String(1 + (i % 28)).padStart(2, '0')}`, `Vendor ${i % 40}`, 300 + i * 3.1))
+  const burst = [1, 2, 3, 4].map(k => L(900 + k, `2024-04-0${k}`, 'Yunex Limited', 9000 + k * 13.7))
+  assert.equal(runAnomalyDetection([stray, ...month, ...burst]).filter(x => /first week/.test(x.title)).length, 0)
+})
+
+test('a stack of lines on one or two days is a payment run, not a burst', () => {
+  const base = Array.from({ length: 14 }, (_, i) => L(i, `2025-${String(1 + (i % 12)).padStart(2, '0')}-1${i % 8}`, 'Liquidlogic', 1000 + i * 37.1))
+  const run = Array.from({ length: 12 }, (_, i) => L(50 + i, '2025-06-03', 'Liquidlogic', 900 + i * 13.3))
+  assert.equal(runAnomalyDetection([...base, ...run]).filter(x => x.type === 'high_frequency').length, 0)
+})
+
+test('a redacted payee is neither a vendor nor a missing payee', () => {
+  assert.equal(isRedactedPayee('REDACTED - Personal Information'), true)
+  const f = runAnomalyDetection([0, 1, 2, 3].map(k => L(k, '2025-07-15', 'REDACTED - Personal Information', 233)))
+  assert.equal(f.length, 0)
+})
+
+test('a vendor repeatedly just under a limit is one standing pattern', () => {
+  const clusters = [1, 3, 5, 7].flatMap(m => [0, 1, 2].map(k => L(m * 10 + k, `2025-0${m}-0${2 + k}`, 'Ashcroft Services', 9700 + k * 41.3 + m)))
+  const f = runAnomalyDetection([...history('Ashcroft Services', 4000), ...clusters]).filter(x => x.type === 'approval_avoidance')
+  assert.equal(f.length, 1)
+  assert.match(f[0].title, /Repeatedly/)
+  assert.equal(f[0].rowRefs.length, 12)
+})
+
+test('findings are written in the workspace currency', () => {
+  const f = runAnomalyDetection([...history('Access UK', 2300), L(1, '2025-07-15', 'Access UK', 36000.4)], { currency: 'GBP' }).filter(x => x.type === 'outlier')
+  assert.match(f[0].description, /^£36\.0K/)
+  const usd = runAnomalyDetection([...history('Access UK', 2300), L(1, '2025-07-15', 'Access UK', 36000.4)]).filter(x => x.type === 'outlier')
+  assert.match(usd[0].description, /^\$36\.0K/)
 })

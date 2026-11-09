@@ -13,6 +13,7 @@ import { computeTierSummary, loadTierConfig, tierLabel, tierColor, tierDot } fro
 import type { TierSummary } from '../lib/dataLayers'
 import { getTestingMode } from '../lib/dataMasking'
 import { HIGH_CONFIDENCE_THRESHOLD } from '../lib/governance'
+import { moneyShort, moneyFull } from '../lib/money'
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts'
@@ -29,15 +30,9 @@ import { Copy, RefreshCw, Trash2, UserPlus, Check, Shield } from 'lucide-react'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function fmtC(n: number): string {
-  if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(1) + 'M'
-  if (n >= 1_000)     return '$' + (n / 1_000).toFixed(0) + 'K'
-  return '$' + n.toFixed(0)
-}
+const fmtC = moneyShort
 
-function fmtFull(n: number): string {
-  return n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
-}
+const fmtFull = moneyFull
 
 function fmtDate(iso: string): string {
   if (!iso) return 'N/A'

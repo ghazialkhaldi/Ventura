@@ -1,3 +1,4 @@
+import { moneyFull } from '../../lib/money'
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -13,7 +14,7 @@ import { ChevronLeftIcon as ChevronLeft, ChevronRightIcon as ChevronRight } from
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function fmtFull(n: number): string {
-  return n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
+  return moneyFull(n)
 }
 
 function fmtDate(iso: string): string {

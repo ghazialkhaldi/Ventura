@@ -1,3 +1,4 @@
+import { adoptFileCurrency } from '../../lib/workspaceSettings'
 import { useState, useEffect, useRef } from 'react'
 import { Cross2Icon, UploadIcon, FileTextIcon, CheckCircledIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons'
 import { parseFile } from '../../lib/transactionParser'
@@ -48,6 +49,7 @@ export default function ConnectModal({ integrationId, onClose, onConnected }: Pr
       setStatus('Reading the file…')
       const parsed = await parseFile(file)
       if ('error' in parsed) throw new Error(parsed.error)
+      adoptFileCurrency(parsed.currency)
       setStatus(`Checking ${parsed.transactions.length.toLocaleString()} transactions…`)
       await new Promise(r => setTimeout(r, 30)) // let the status paint before the checks run
       const r = ingest({

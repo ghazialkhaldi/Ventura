@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { DEFAULT_DETECTION_CONFIG } from '../../lib/detectionConfig'
+import { DEFAULT_DETECTION_CONFIG, CURRENCY_SYMBOLS } from '../../lib/detectionConfig'
 import { getDetectionConfig, setDetectionConfig, refreshDetectionConfig } from '../../lib/workspaceSettings'
 
 // The few detection settings that differ between companies. Everything else
@@ -13,15 +13,17 @@ const FIELDS = [
 export default function DetectionSettings({ isAdmin }: { isAdmin: boolean }) {
   const [values, setValues] = useState<Record<string, string>>({})
   const [state, setState] = useState<'idle' | 'saving' | 'saved' | 'local' | 'error'>('idle')
+  const [currency, setCurrency] = useState(DEFAULT_DETECTION_CONFIG.currency)
 
   useEffect(() => {
     const fill = (cfg: Record<string, unknown>) => setValues(Object.fromEntries(FIELDS.map(f => [f.key, String(cfg[f.key] ?? DEFAULT_DETECTION_CONFIG[f.key])])))
-    fill(getDetectionConfig())
-    void refreshDetectionConfig().then(fill)
+    const load = (cfg: Record<string, unknown>) => { fill(cfg); if (typeof cfg.currency === 'string') setCurrency(cfg.currency) }
+    load(getDetectionConfig())
+    void refreshDetectionConfig().then(load)
   }, [])
 
   async function save() {
-    const cfg: Record<string, number> = {}
+    const cfg: Record<string, number | string> = { currency }
     for (const f of FIELDS) {
       const v = Number(String(values[f.key] ?? '').replace(/[$,\s]/g, ''))
       if (Number.isFinite(v) && v > 0) cfg[f.key] = v
@@ -40,11 +42,22 @@ export default function DetectionSettings({ isAdmin }: { isAdmin: boolean }) {
       <h2 className="text-[15px] font-medium text-text-primary">Detection</h2>
       <p className="mt-1 text-[13.5px] text-text-muted">Changes apply to the next upload or sync.</p>
       <div className="mt-5 space-y-5">
+        <label className="block">
+          <span className="text-[13px] font-medium text-text-primary">Currency</span>
+          <select
+            disabled={!isAdmin} value={currency}
+            onChange={e => { setCurrency(e.target.value); setState('idle') }}
+            className="mt-1.5 block h-10 w-40 rounded-md border border-border-strong bg-surface-raised px-3 text-[14.5px] text-text-primary"
+          >
+            {Object.keys(CURRENCY_SYMBOLS).map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+          <span className="mt-1.5 block text-[12.5px] leading-relaxed text-text-muted">Most exports do not say what currency they are in. Amounts and approval limits are shown in this one.</span>
+        </label>
         {FIELDS.map(f => (
           <label key={f.key} className="block">
             <span className="text-[13px] font-medium text-text-primary">{f.label}</span>
             <div className="mt-1.5 flex items-center gap-2">
-              <span className="text-[14px] text-text-muted">$</span>
+              <span className="text-[14px] text-text-muted">{CURRENCY_SYMBOLS[currency] ?? '$'}</span>
               <input
                 inputMode="decimal" disabled={!isAdmin}
                 value={values[f.key] ?? ''}

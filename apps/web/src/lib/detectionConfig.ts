@@ -7,7 +7,13 @@
  * different vendors, amounts and dates. The scenarios in test/engine measure
  * them against routine spend and planted problems.
  */
+/** Symbols for the currencies a workspace can report in. */
+export const CURRENCY_SYMBOLS: Record<string, string> = { USD: '$', GBP: '£', EUR: '€', CAD: 'C$', AUD: 'A$' }
+
 export interface DetectionConfig {
+  /** The currency findings are written in. */
+  currency: string
+
   // ── Materiality ────────────────────────────────────────────────────────────
   /**
    * The smallest excess over a baseline worth a reviewer's time. Amount rules
@@ -91,6 +97,8 @@ export interface DetectionConfig {
   velocityBurstMultiple: number
   /** An established burst must also exceed that busiest other week by this many payments. */
   velocityMinExcessCount: number
+  /** Separate days a burst must span: payment runs post many lines on one day. */
+  velocityMinDays: number
 
   // ── New vendors ────────────────────────────────────────────────────────────
   /**
@@ -130,6 +138,14 @@ export interface DetectionConfig {
   /** Share of a vendor's other payments that must be non-round for a round one to stand out. */
   roundOthersIrregularShare: number
 
+  // ── Coding ──
+  /** A miscoding below this does not move a line of the accounts, so it is raised at low priority. */
+  categoryMismatchMin: number
+
+  // ── Duplicate payments, continued ──
+  /** Repeats with no invoice evidence, from one vendor, at or above which they are one pattern to review. */
+  weakRepeatGroupAt: number
+
   // ── Missing payee ──
   /** Up to this many payments with no payee are each their own finding; beyond it, one finding about the export. */
   missingPayeeGroupAbove: number
@@ -144,6 +160,8 @@ export interface DetectionConfig {
 }
 
 export const DEFAULT_DETECTION_CONFIG: DetectionConfig = {
+  currency:                      'USD',
+
   minExcess:                     1_000,
 
   duplicateWindowDays:           30,
@@ -172,6 +190,7 @@ export const DEFAULT_DETECTION_CONFIG: DetectionConfig = {
   velocityNewVendorMinCount:     3,
   velocityBurstMultiple:         2,
   velocityMinExcessCount:        4,
+  velocityMinDays:               3,
 
   newVendorGraceDays:            30,
   newVendorSurprise:             3.5,
@@ -186,6 +205,8 @@ export const DEFAULT_DETECTION_CONFIG: DetectionConfig = {
   roundNumberMin:                5_000,
   roundOthersIrregularShare:     0.75,
 
+  categoryMismatchMin:           500,
+  weakRepeatGroupAt:             3,
   missingPayeeGroupAbove:        12,
 
   exposureConfidenceFloor:       70,

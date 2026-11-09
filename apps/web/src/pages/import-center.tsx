@@ -1,3 +1,4 @@
+import { moneyShort } from '../lib/money'
 import { useState, useEffect, useRef } from 'react'
 import AppLayout from '../components/layout/AppLayout'
 import PageHeader from '../components/ui/PageHeader'
@@ -9,7 +10,7 @@ import { parseFile } from '../lib/transactionParser'
 import { runAnomalyDetection } from '../lib/anomalyEngine'
 import { saveDataset, loadDataset } from '../lib/dataStore'
 import { namespaceRows } from '../lib/datasetStats'
-import { getDetectionConfig } from '../lib/workspaceSettings'
+import { getDetectionConfig, adoptFileCurrency } from '../lib/workspaceSettings'
 import {
   normalizeTransactions,
   detectInvoiceDuplicates,
@@ -70,11 +71,7 @@ function fmtBytes(b: number): string {
   return (b / 1024).toFixed(0) + ' KB'
 }
 
-function fmtCurrency(n: number): string {
-  if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(1) + 'M'
-  if (n >= 1_000)     return '$' + (n / 1_000).toFixed(0) + 'K'
-  return '$' + n.toFixed(0)
-}
+const fmtCurrency = moneyShort
 
 function confidenceColor(c: number): string {
   if (c >= 80) return 'text-positive-fg'
@@ -137,6 +134,7 @@ export default function ImportCenterPage() {
       setStageStatus('extract', 'running', 'Parsing file…')
       const parsed = await parseFile(file)
       if ('error' in parsed) throw new Error(parsed.error)
+      adoptFileCurrency(parsed.currency)
       setStageStatus('extract', 'done', `${parsed.rowCount.toLocaleString()} rows extracted`)
 
       // Stage 3: column detection

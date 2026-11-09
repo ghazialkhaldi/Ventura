@@ -837,7 +837,18 @@ const MONTHS: Record<string, number> = {
   jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
 }
 
-/** Parse period labels such as "Jan-26", "January 2026", "2026-01", "01/2026". */
+/** A fiscal period number as a month slot. Above 12 is an adjustment period, which has no month. */
+const fiscalSlot = (year: number, period: number) => (period >= 1 && period <= 12 ? { year, month: period - 1 } : null)
+const fullYear = (y: string) => (y.length === 2 ? 2000 + Number(y) : Number(y))
+
+/**
+ * Parse period labels: "Jan-26", "January 2026", "2026-01", "01/2026", and the
+ * fiscal forms ERPs use ("FY26-P01", "P01 FY26", "2026-P03", "Period 3 2026",
+ * SAP's "003/2026"). A fiscal period is returned as if it were that month of
+ * that year; the file's own calendar offset is learned from the data, so P01
+ * of a year starting in July lines up without being told. Adjustment periods
+ * such as P13 return null: they are not a month, and must not look like errors.
+ */
 export function parsePeriodLabel(label: string): { year: number; month: number } | null {
   const s = label.trim().toLowerCase()
   if (!s) return null
@@ -851,6 +862,17 @@ export function parsePeriodLabel(label: string): { year: number; month: number }
   if (m && Number(m[2]) >= 1 && Number(m[2]) <= 12) return { year: Number(m[1]), month: Number(m[2]) - 1 }
   m = /^(\d{1,2})[\s\-/.](\d{4})$/.exec(s)
   if (m && Number(m[1]) >= 1 && Number(m[1]) <= 12) return { year: Number(m[2]), month: Number(m[1]) - 1 }
+
+  m = /^fy\s*-?(\d{2}|\d{4})[\s\-/.]*p(?:eriod|er)?\s*-?(\d{1,3})$/.exec(s)   // FY26-P01, FY2026 Period 1
+  if (m) return fiscalSlot(fullYear(m[1]), Number(m[2]))
+  m = /^p(?:eriod|er)?\s*-?(\d{1,3})[\s\-/.]+(?:fy\s*-?)?(\d{2}|\d{4})$/.exec(s)  // P01 FY26, Period 3 2026
+  if (m) return fiscalSlot(fullYear(m[2]), Number(m[1]))
+  m = /^(\d{4})[\s\-/.]*p(?:eriod|er)?\s*-?(\d{1,3})$/.exec(s)                 // 2026-P03
+  if (m) return fiscalSlot(Number(m[1]), Number(m[2]))
+  m = /^0(\d{2})[\s\-/.](\d{4})$/.exec(s)                                       // 003/2026
+  if (m) return fiscalSlot(Number(m[2]), Number(m[1]))
+  m = /^(\d{4})[\s\-/.]0(\d{2})$/.exec(s)                                       // 2026/003
+  if (m) return fiscalSlot(Number(m[1]), Number(m[2]))
   return null
 }
 

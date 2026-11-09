@@ -1,6 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { parseAmount, parseDate, inferDateOrder, excelSerialToISO, rowsToTransactions, type RawRow } from '../../src/lib/transactionParser'
+import * as XLSX from 'xlsx'
+import { parseAmount, parseDate, inferDateOrder, excelSerialToISO, rowsToTransactions, parseFile, detectColumns, type RawRow } from '../../src/lib/transactionParser'
 import type { ColumnMapping } from '../../src/lib/dataStore'
 
 const map = (m: Partial<ColumnMapping>): ColumnMapping => ({ date: null, vendor: null, amount: null, debit: null, credit: null, description: null, category: null, account: null, period: null, ...m })
@@ -117,4 +118,75 @@ test('a dated payment with no payee is kept so it can be reported; an undated bl
 test('an unreadable date stays empty instead of becoming today', () => {
   const t = rowsToTransactions([{ Date: 'TBD', Vendor: 'X', Amount: '10' }], map({ date: 'Date', vendor: 'Vendor', amount: 'Amount' }))
   assert.equal(t[0].date, '')
+})
+
+// ── Real close packages ──────────────────────────────────────────────────────
+
+function workbook(sheets: Record<string, unknown[][]>): File {
+  const wb = XLSX.utils.book_new()
+  for (const [name, aoa] of Object.entries(sheets)) XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), name)
+  return new File([XLSX.write(wb, { type: 'array', bookType: 'xlsx' })], 'close.xlsx')
+}
+
+const LEDGER = [
+  ['Company', 'General Ledger Detail'],
+  ['Line ID', 'Posting Date', 'Fiscal Period', 'Account Name', 'Cost Center', 'Vendor No.', 'Vendor Name', 'Description', 'Txn Amount (Local)', 'Debit (USD)', 'Credit (USD)'],
+  ['L1', '2026-01-05', 'FY26-P07', 'Marine Components', 110, 'V-1', 'Ballard Propulsion', 'Parts', '10.000,00', 11000, ''],
+  ['L2', '06.01.2026', 'FY26-P07', 'Freight In', 210, 'V-2', 'Puget Freight', 'Haul', '2.000,00', 2200, ''],
+  ['L3', '07.01.2026', 'FY26-P07', 'Freight In', 210, 'V-2', 'Puget Freight', 'Credit', '-100,00', '', 110],
+  ['Total', '', '', '', '', '', '', '', '', 13200, 110],
+]
+
+test('a trial balance line is data, not a header, and the ledger tab wins', async () => {
+  const r = await parseFile(workbook({
+    'Trial Balance': [['Acct', 'Account', 'Total'], [4900, 'Intercompany fee income', -6478733.9], [5010, 'Raw Materials', 10419164.7]],
+    'AP Aging': [['Vendor Name', 'Current', 'Total Due'], ...Array.from({ length: 30 }, (_, i) => [`Vendor ${i}`, 100, 100])],
+    'GL Detail': LEDGER,
+  }))
+  assert.ok(!('error' in r), JSON.stringify(r))
+  if ('error' in r) return
+  assert.equal(r.transactions.length, 3)
+  assert.equal(r.transactions[0].vendor, 'Ballard Propulsion')
+})
+
+test('the vendor is its name, and a number is used only when there is no name', () => {
+  assert.equal(detectColumns(['Vendor No.', 'Vendor Name', 'Amount']).vendor, 'Vendor Name')
+  assert.equal(detectColumns(['Supplier ID', 'Supplier', 'Amount']).vendor, 'Supplier')
+  assert.equal(detectColumns(['Vendor No.', 'Amount']).vendor, 'Vendor No.')
+})
+
+test('debit and credit in the reporting currency beat a mixed-currency amount', async () => {
+  const r = await parseFile(workbook({ 'GL Detail': LEDGER }))
+  if ('error' in r) return assert.fail(r.error)
+  assert.equal(r.mapping.amount, null)
+  assert.deepEqual(r.transactions.map(t => [t.amount, t.direction]), [[11000, 'debit'], [2200, 'debit'], [110, 'credit']])
+})
+
+test('column headings repeated through a paginated report are not data', async () => {
+  const [title, head, ...data] = LEDGER
+  const r = await parseFile(workbook({ 'GL Detail': [title, head, data[0], ['Entity 400'], head, data[1], head, data[2], head, data[3]] }))
+  if ('error' in r) return assert.fail(r.error)
+  assert.equal(r.rowCount, 5)
+  assert.equal(r.mapping.amount, null, 'a sparse credit column broken up by headings is still money')
+  assert.equal(r.transactions.length, 3)
+})
+
+test('an amount column stays when "debit" and "credit" are not money', async () => {
+  const r = await parseFile(workbook({ S: [['Date', 'Vendor', 'Amount', 'Debit Account', 'Credit Account'], ['2026-01-05', 'Acme', 900, 6010, 2000], ['2026-01-06', 'Bolt', 450, 6010, 2000]] }))
+  if ('error' in r) return assert.fail(r.error)
+  assert.equal(r.mapping.amount, 'Amount')
+  assert.equal(r.transactions[0].amount, 900)
+})
+
+test('the account name is the category when the alternative is a cost center', async () => {
+  const r = await parseFile(workbook({ 'GL Detail': LEDGER }))
+  if ('error' in r) return assert.fail(r.error)
+  assert.equal(r.mapping.category, 'Account Name')
+  assert.equal(r.transactions[1].category, 'Freight In')
+})
+
+test('dotted dates are day-first even in a column of month-first dates', () => {
+  assert.equal(parseDate('01.07.2025', 'mdy'), '2025-07-01')
+  assert.equal(parseDate('12.03.2026', 'mdy'), '2026-03-12')
+  assert.equal(parseDate('01/07/2025', 'mdy'), '2025-01-07')
 })

@@ -179,3 +179,20 @@ test('period labels parse in their common forms', () => {
   assert.deepEqual(parsePeriodLabel('09/2026'), { year: 2026, month: 8 })
   assert.equal(parsePeriodLabel('2026-13'), null)
 })
+
+test('fiscal period labels parse, and adjustment periods have no month', () => {
+  for (const l of ['FY26-P03', 'FY2026 P03', 'fy26 period 3', 'P03 FY26', 'Period 3 2026', '2026-P03', '003/2026', '2026/003']) {
+    assert.deepEqual(parsePeriodLabel(l), { year: 2026, month: 2 }, l)
+  }
+  for (const l of ['FY26-P13', 'P13 FY26', '2026-P14', '013/2026', 'FY26-P00']) assert.equal(parsePeriodLabel(l), null, l)
+})
+
+test('a fiscal calendar is learned, one row outside it is reported, and period 13 is not', () => {
+  const tx = (id: number, date: string, period: string): StoredTransaction => ({ id: `TX-${id}`, date, vendor: `Vendor ${id}`, amount: 1200 + id * 13.17, description: 'x', category: 'c', account: 'a', rowIndex: id, direction: 'debit', period })
+  const txs: StoredTransaction[] = []
+  for (let i = 0; i < 40; i++) txs.push(tx(i, `2026-0${1 + (i % 6)}-1${i % 9}`, `FY26-P${String(7 + (i % 6)).padStart(2, '0')}`))
+  txs.push(tx(100, '2026-03-05', 'FY26-P06'))
+  txs.push(tx(101, '2026-06-30', 'FY26-P13'))
+  const flagged = runAnomalyDetection(txs).filter(f => f.type === 'period_mismatch')
+  assert.deepEqual(flagged.flatMap(f => flaggedRows(f)), ['TX-100'])
+})

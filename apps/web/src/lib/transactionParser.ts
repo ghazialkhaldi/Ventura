@@ -64,10 +64,15 @@ function matchCol(headers: string[], synonyms: string[]): string | null {
   return null
 }
 
+/** A header naming an identifier: "Vendor No.", "Supplier ID", "Payee #". */
+const ID_HEADER = /\b(no|nbr|num|number|id|code|ref|acct)\b|#/i
+
 export function detectColumns(headers: string[]): ColumnMapping {
   return {
     date:        matchCol(headers, DATE_SYN),
-    vendor:      matchCol(headers, VENDOR_SYN),
+    // ERP exports list the vendor's number before its name. Take the name, and
+    // settle for the number only when the file has nothing else.
+    vendor:      matchCol(headers.filter(h => !ID_HEADER.test(h)), VENDOR_SYN) ?? matchCol(headers, VENDOR_SYN),
     amount:      matchCol(headers, AMOUNT_SYN),
     debit:       matchCol(headers, DEBIT_SYN),
     credit:      matchCol(headers, CREDIT_SYN),
@@ -146,8 +151,10 @@ export function parseDate(raw: string, order: DateOrder = 'mdy'): string {
   m = /^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2}|\d{4})(?:$|[T\s])/.exec(s)
   if (m) {
     const [a, b] = [+m[1], +m[2]]
-    // A value that only fits one reading wins over the column's habit.
-    const dayFirst = a > 12 ? true : b > 12 ? false : order === 'dmy'
+    // A value that only fits one reading wins over the column's habit. Dots
+    // mean day-first (01.07.2025 is 1 July) whatever the rest of the column
+    // does: consolidated exports mix regional formats in a single column.
+    const dayFirst = a > 12 ? true : b > 12 ? false : s.includes('.') || order === 'dmy'
     return dayFirst ? isoParts(+m[3], b, a) : isoParts(+m[3], a, b)
   }
   // "4 Jan 2026", "04-Jan-26", "4 January, 2026"
@@ -266,6 +273,12 @@ function scoreHeaderRow(cells: unknown[]): number {
   const headers = cells.map(c => String(c ?? '').trim()).filter(Boolean)
   if (headers.length < 2) return -1
 
+  // Figures and dates are data. Without this, a trial balance line such as
+  // "4900 | Intercompany fee income | -6478733.90" passes for a header, because
+  // its one text cell happens to contain both "company" and "income".
+  const dataCells = headers.filter(h => looksNumeric(h) || /^\d{4}-\d{2}-\d{2}/.test(h)).length
+  if (dataCells / headers.length > 1 / 3) return -1
+
   const m = detectColumns(headers)
   let score = 0
   if (m.vendor)                            score += 3
@@ -312,9 +325,13 @@ function buildRows(matrix: unknown[][], headerIdx: number): { rows: RawRow[]; he
 
   const headers = rawHeaders.filter(Boolean)
   const rows: RawRow[] = []
+  const headerText = (matrix[headerIdx] ?? []).map(h => String(h ?? '').trim())
 
   for (let r = headerIdx + 1; r < matrix.length; r++) {
     const cells = matrix[r] ?? []
+    // Paginated reports repeat their column headings throughout the data.
+    const repeats = headerText.filter((h, ci) => h && String(cells[ci] ?? '').trim() === h).length
+    if (headers.length > 0 && repeats / headers.length >= 0.5) continue
     const row: RawRow = {}
     rawHeaders.forEach((h, ci) => {
       if (!h) return
@@ -327,6 +344,15 @@ function buildRows(matrix: unknown[][], headerIdx: number): { rows: RawRow[]; he
   }
 
   return { rows, headers }
+}
+
+/**
+ * How much a sheet looks like a ledger: its dated payments to a named party
+ * first, so a long undated summary never beats a real register.
+ */
+function ledgerScore(rows: RawRow[], headers: string[]): number {
+  const txs = rowsToTransactions(rows, validateMapping(rows, headers, detectColumns(headers)))
+  return txs.filter(t => t.date && t.vendor).length * 1_000_000 + txs.length
 }
 
 /** True when a header set gives us enough to build transactions. */
@@ -379,6 +405,14 @@ function dateRatio(rows: RawRow[], col: string): number {
   return vals.filter(looksLikeDate).length / vals.length
 }
 
+/** A column of money, judged on every value and not on what its header says. */
+function moneyColumn(rows: RawRow[], col: string, mayBeEmpty = false): boolean {
+  if (/\b(account|acct)\b/i.test(col)) return false // "Debit Account" holds account codes
+  const vals = rows.map(r => (r[col] ?? '').trim()).filter(Boolean)
+  if (vals.length === 0) return mayBeEmpty
+  return vals.filter(looksNumeric).length / vals.length >= 0.9
+}
+
 /** Looks like an identifier or a year rather than money. */
 function looksLikeIdOrYear(header: string, rows: RawRow[], col: string): boolean {
   if (/\b(id|no|num|number|code|ref|reference|qty|quantity|count|year|fy)\b/.test(header.toLowerCase())) return true
@@ -420,6 +454,20 @@ function validateMapping(rows: RawRow[], headers: string[], mapping: ColumnMappi
       .map(h => ({ h, distinct: new Set(sample(rows, h).map(v => v.toLowerCase())).size }))
       .sort((a, b) => b.distinct - a.distinct)[0]
     m.vendor = best?.h ?? null
+  }
+
+  // A category is what the money was spent on. Where the file has an account
+  // name, that is a better answer than who spent it, and the checks compare
+  // like with like only when it is used.
+  if (m.category && m.account && /cost\s*cent|department|dept|division/i.test(m.category) && numericRatio(rows, m.account) < 0.5) {
+    m.category = m.account
+  }
+
+  // With separate debit and credit columns the direction of each row is
+  // explicit, and a consolidated export's "Txn Amount" beside them is in each
+  // entity's own currency, so summing it adds dollars to euros.
+  if (m.amount && m.debit && m.credit && m.debit !== m.credit && moneyColumn(rows, m.debit) && moneyColumn(rows, m.credit, true)) {
+    m.amount = null
   }
 
   // An amount column should hold figures, and not be an id, count or year.
@@ -475,11 +523,13 @@ export async function parseExcel(file: File): Promise<{ rows: RawRow[]; headers:
   // offset and land on the previous day east of Greenwich.
   const wb = XLSX.read(buffer, { type: 'array', cellDates: false, cellNF: true })
 
-  // Walk every sheet, not just the first. Workbooks frequently lead with a
-  // cover, summary or notes tab and keep the ledger on a later one. Return the
-  // first sheet that yields a usable vendor + amount mapping; otherwise keep
-  // the richest sheet seen so the caller can still surface its columns.
+  // Walk every sheet. Workbooks lead with covers, summaries and agings, and an
+  // AP aging has a vendor and a total just as a ledger does, so the first tab
+  // that looks usable is often the wrong one. Keep the tab that yields the most
+  // real transactions; if none is usable, keep the richest sheet seen so the
+  // caller can still surface its columns.
   let fallback: { rows: RawRow[]; headers: string[] } = { rows: [], headers: [] }
+  let best: { rows: RawRow[]; headers: string[]; score: number } | null = null
 
   for (const sheetName of wb.SheetNames) {
     const ws = wb.Sheets[sheetName]
@@ -505,11 +555,15 @@ export async function parseExcel(file: File): Promise<{ rows: RawRow[]; headers:
     const { rows, headers } = buildRows(matrix, pickHeaderRow(matrix))
     if (headers.length === 0 || rows.length === 0) continue
 
-    if (isUsable(headers)) return { rows, headers }
-    if (rows.length > fallback.rows.length) fallback = { rows, headers }
+    if (isUsable(headers)) {
+      const score = ledgerScore(rows, headers)
+      if (!best || score > best.score) best = { rows, headers, score }
+    } else if (rows.length > fallback.rows.length) {
+      fallback = { rows, headers }
+    }
   }
 
-  return fallback
+  return best ? { rows: best.rows, headers: best.headers } : fallback
 }
 
 // ─── PDF parser (pdfjs-dist) ──────────────────────────────────────────────────

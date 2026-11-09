@@ -247,7 +247,6 @@ const FOOTER_COLUMNS = [
       { label: 'Sign in',          href: '/login'          },
       { label: 'Employee portal',  href: '/employee-login' },
       { label: 'Documentation',    href: '/docs'           },
-      { label: 'Status',           href: '/status'         },
     ],
   },
 ]

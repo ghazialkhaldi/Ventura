@@ -20,7 +20,6 @@ const checklist = [
   { id: 'c6',  title: 'Set spending categories',      done: false, detail: 'Map GL codes to spending categories' },
   { id: 'c7',  title: 'Import vendor master',         done: false, detail: 'Upload vendor list CSV for vendor matching' },
   { id: 'c8',  title: 'Configure approval workflows', done: false, detail: 'Set up approval workflows with deadline targets' },
-  { id: 'c9',  title: 'Configure AI governance rules',done: false, detail: 'Set confidence thresholds and human-approval triggers' },
   { id: 'c10', title: 'Invite finance team members',  done: false, detail: 'Add team members and assign roles' },
 ]
 
@@ -72,7 +71,7 @@ export default function OnboardingPage() {
           <AlertCircle className="w-5 h-5 text-medium-fg flex-shrink-0 mt-0.5" />
           <div>
             <p className="text-sm font-medium text-medium-fg">Setup {pctDone}% complete, {checklist.length - doneCount} steps remaining</p>
-            <p className="text-xs text-medium-fg mt-0.5">Complete all steps to activate full anomaly detection and AI governance features.</p>
+            <p className="text-xs text-medium-fg mt-0.5">Complete all steps to get the most from anomaly detection.</p>
           </div>
         </div>
       )}

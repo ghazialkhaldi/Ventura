@@ -6,7 +6,7 @@ import VenturaLogo from '../VenturaLogo'
 import { useCurrentUser, clearUser, initials } from '../../hooks/useCurrentUser'
 import { loadDataset, isUndecided } from '../../lib/dataStore'
 import { createClient } from '../../utils/supabase/client'
-import { Cross2Icon as XMarkIcon, DashboardIcon as Squares2X2Icon, ExclamationTriangleIcon, LoopIcon as ArrowsRightLeftIcon, LightningBoltIcon as BoltIcon, MixerHorizontalIcon as ScaleIcon, FileTextIcon as DocumentTextIcon, GearIcon as Cog6ToothIcon, ExitIcon as ArrowRightOnRectangleIcon, HomeIcon as BuildingOfficeIcon, EnvelopeClosedIcon as EnvelopeIcon, DownloadIcon as DocumentArrowDownIcon } from '@radix-ui/react-icons'
+import { Cross2Icon as XMarkIcon, DashboardIcon as Squares2X2Icon, ExclamationTriangleIcon, LoopIcon as ArrowsRightLeftIcon, LightningBoltIcon as BoltIcon, FileTextIcon as DocumentTextIcon, GearIcon as Cog6ToothIcon, ExitIcon as ArrowRightOnRectangleIcon, HomeIcon as BuildingOfficeIcon, EnvelopeClosedIcon as EnvelopeIcon, DownloadIcon as DocumentArrowDownIcon } from '@radix-ui/react-icons'
 
 interface SidebarProps {
   isOpen?: boolean
@@ -98,7 +98,6 @@ export default function Sidebar({ isOpen = false, onClose }: SidebarProps) {
     {
       label: 'Governance',
       items: [
-        { href: '/ai-governance', icon: ScaleIcon,             label: 'AI Governance' },
         { href: '/audit-logs',    icon: DocumentTextIcon,      label: 'Audit Logs'    },
         { href: '/reports',       icon: DocumentArrowDownIcon, label: 'Reports'       },
       ],

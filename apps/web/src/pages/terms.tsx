@@ -9,7 +9,7 @@ const sections = [
   },
   {
     title: '2. Description of Service',
-    body: 'Ventura provides financial operations intelligence software, including anomaly detection, workflow management, AI governance tooling, and related analytics. The Service is provided on a subscription basis according to the plan selected by your organization.',
+    body: 'Ventura provides financial operations intelligence software, including anomaly detection, workflow management, and related analytics. The Service is provided on a subscription basis according to the plan selected by your organization.',
   },
   {
     title: '3. Accounts and Access',

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import Sidebar from './Sidebar'
+import { hydrateFromServer } from '../../lib/workspaceSync'
+import { refreshDetectionConfig } from '../../lib/workspaceSettings'
 import { useCurrentUser, initials } from '../../hooks/useCurrentUser'
 import { MagnifyingGlassIcon, ArrowLeftIcon, HamburgerMenuIcon as Bars3Icon, EyeOpenIcon as EyeIcon, Pencil2Icon as PencilSquareIcon } from '@radix-ui/react-icons'
 
@@ -11,7 +13,7 @@ interface AppLayoutProps {
 }
 
 // Pages that are top-level nav destinations — no back button needed
-const TOP_LEVEL = ['/dashboard', '/anomalies', '/workflows', '/integrations', '/ai-governance', '/audit-logs', '/settings', '/onboarding']
+const TOP_LEVEL = ['/dashboard', '/anomalies', '/workflows', '/integrations', '/audit-logs', '/settings', '/onboarding']
 
 export default function AppLayout({ children, title }: AppLayoutProps) {
   const router = useRouter()
@@ -45,6 +47,22 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
   const displayRole  = isEmployee
     ? `Employee${wsRole ? ` · ${wsRole.charAt(0).toUpperCase() + wsRole.slice(1)}` : ''}`
     : (user?.role || 'Admin')
+
+  // Load the workspace from the server (when it keeps one) and the team's
+  // detection settings. If the server's copy differs from this browser's,
+  // the page remounts so everything on it reads the fresh data.
+  const [dataVersion, setDataVersion] = useState(0)
+  useEffect(() => {
+    let last = 0
+    try { last = Number(sessionStorage.getItem('sf_hydrated_at') || 0) } catch { /* ignore */ }
+    if (Date.now() - last < 60_000) return
+    try { sessionStorage.setItem('sf_hydrated_at', String(Date.now())) } catch { /* ignore */ }
+    void (async () => {
+      const before = localStorage.getItem('sf_dataset')
+      const [from] = await Promise.all([hydrateFromServer(), refreshDetectionConfig()])
+      if (from === 'server' && localStorage.getItem('sf_dataset') !== before) setDataVersion(v => v + 1)
+    })()
+  }, [])
 
   const showBack = !TOP_LEVEL.some(p => router.pathname === p)
 
@@ -123,7 +141,7 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
           )}
 
           <main className="flex-1 p-4 sm:p-6 xl:p-8 2xl:p-10 overflow-auto">
-            {children}
+            <div key={dataVersion} className="contents">{children}</div>
           </main>
         </div>
       </div>

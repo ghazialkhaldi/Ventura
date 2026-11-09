@@ -8,11 +8,11 @@ const practices = [
   },
   {
     title: 'Multifactor authentication',
-    body: 'Email based verification codes protect every sign in, for admins and employees alike. Session cookies are HttpOnly and SameSite.',
+    body: 'Every sign in needs a verification code sent to your email, for admins and employees alike. The server records that a session passed the code, and refuses every workspace page and data request from one that has not, so a password alone is not enough. Session cookies are SameSite and sent only over HTTPS.',
   },
   {
     title: 'Workspace roles',
-    body: 'Viewer, analyst, editor, and admin roles determine what each team member can see and change in the app, checked at sign in and enforced in the interface.',
+    body: 'Viewer, analyst, editor, and admin roles decide what each team member can do. Recording decisions on findings, adding data, changing settings, connecting systems and managing the team are checked on the server, not just hidden in the interface.',
   },
   {
     title: 'Append only security log',
@@ -20,7 +20,7 @@ const practices = [
   },
   {
     title: 'Hardened infrastructure',
-    body: 'Strict Content Security Policy, HSTS, clickjacking protection, and security headers on every response.',
+    body: 'A Content Security Policy, HSTS, clickjacking protection, and security headers on every response.',
   },
   {
     title: 'Explainable, not autonomous',

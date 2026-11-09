@@ -23,12 +23,6 @@ const guides = [
     steps: ['Filter by severity or status on the Anomalies tab', 'Open a finding to see its reasoning and source rows', 'Resolve or dismiss it; the change is logged'],
   },
   {
-    id: 'governance',
-    title: 'AI governance',
-    desc: 'Set the confidence threshold that decides which findings are marked high-confidence for priority review.',
-    steps: ['Open AI Governance, then Settings', 'Set your confidence threshold', 'Review which rules are active and which are planned'],
-  },
-  {
     id: 'team',
     title: 'Team management',
     desc: 'Invite employees with a workspace code and control what each member can see and do.',

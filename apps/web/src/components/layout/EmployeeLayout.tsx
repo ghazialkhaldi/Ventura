@@ -6,7 +6,7 @@ import clsx from 'clsx'
 import VenturaLogo from '../VenturaLogo'
 import { useCurrentUser, clearUser, initials } from '../../hooks/useCurrentUser'
 import { createClient } from '../../utils/supabase/client'
-import { DashboardIcon as Squares2X2Icon, LightningBoltIcon as BoltIcon, HamburgerMenuIcon as Bars3Icon, Cross2Icon as XMarkIcon, HomeIcon as BuildingOfficeIcon, ExitIcon as ArrowRightOnRectangleIcon, BarChartIcon as ChartBarIcon, ExclamationTriangleIcon, LoopIcon as ArrowsRightLeftIcon, MixerHorizontalIcon as ScaleIcon, FileTextIcon as DocumentTextIcon, DownloadIcon as DocumentArrowDownIcon, LockClosedIcon } from '@radix-ui/react-icons'
+import { DashboardIcon as Squares2X2Icon, LightningBoltIcon as BoltIcon, HamburgerMenuIcon as Bars3Icon, Cross2Icon as XMarkIcon, HomeIcon as BuildingOfficeIcon, ExitIcon as ArrowRightOnRectangleIcon, BarChartIcon as ChartBarIcon, ExclamationTriangleIcon, LoopIcon as ArrowsRightLeftIcon, DownloadIcon as DocumentArrowDownIcon, LockClosedIcon } from '@radix-ui/react-icons'
 
 interface EmployeeLayoutProps {
   children: React.ReactNode
@@ -65,8 +65,6 @@ export default function EmployeeLayout({ children, title }: EmployeeLayoutProps)
     { href: '/anomalies',          icon: ExclamationTriangleIcon, label: 'Anomalies'     },
     { href: '/workflows',          icon: ArrowsRightLeftIcon,     label: 'Workflows'     },
     { href: '/integrations',       icon: BoltIcon,                label: 'Integrations'  },
-    { href: '/ai-governance',      icon: ScaleIcon,               label: 'AI Governance' },
-    { href: '/audit-logs',         icon: DocumentTextIcon,        label: 'Audit Logs'    },
     { href: '/reports',            icon: DocumentArrowDownIcon,   label: 'Reports'       },
   ]
 

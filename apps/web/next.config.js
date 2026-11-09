@@ -6,7 +6,19 @@ module.exports = {
     ignoreDuringBuilds: true,
   },
 
-  // HTTP security headers applied to every page response
+  // Pages that were removed. Old links and bookmarks land somewhere useful
+  // instead of on a 404.
+  async redirects() {
+    return [
+      { source: '/status',              destination: '/',          permanent: false },
+      { source: '/ai-governance',       destination: '/dashboard', permanent: false },
+      { source: '/admin/ai-governance', destination: '/dashboard', permanent: false },
+    ]
+  },
+
+  // HTTP security headers applied to every response. The Content-Security-Policy
+  // is NOT set here: src/middleware.ts owns it (it knows about Plaid and about
+  // development), and a second policy here would be enforced alongside it.
   async headers() {
     return [
       {
@@ -20,21 +32,6 @@ module.exports = {
           {
             key:   'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=()',
-          },
-          {
-            key: 'Content-Security-Policy',
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-              "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob:",
-              "font-src 'self'",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.resend.com",
-              "frame-ancestors 'none'",
-              "object-src 'none'",
-              "base-uri 'self'",
-              "form-action 'self'",
-            ].join('; '),
           },
         ],
       },

@@ -12,7 +12,7 @@ import type { Dataset } from '../lib/dataStore'
 import { computeTierSummary, loadTierConfig, tierLabel, tierColor, tierDot } from '../lib/dataLayers'
 import type { TierSummary } from '../lib/dataLayers'
 import { getTestingMode } from '../lib/dataMasking'
-import { getConfidenceThreshold } from '../lib/governance'
+import { HIGH_CONFIDENCE_THRESHOLD } from '../lib/governance'
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts'
@@ -239,7 +239,7 @@ export default function DashboardPage() {
   const topAnomaly         = openAnomalies[0] ?? null
   const duplicates         = openAnomalies.filter(a => a.type === 'duplicate')
   const duplicateSavings   = duplicates.reduce((s, a) => s + a.amount, 0)
-  const highConf           = openAnomalies.filter(a => a.confidence >= getConfidenceThreshold())
+  const highConf           = openAnomalies.filter(a => a.confidence >= HIGH_CONFIDENCE_THRESHOLD)
   const topVendors         = dataset.topVendors.slice(0, 8)
   const categories         = dataset.categoryBreakdown.slice(0, 8)
   const maxCat             = categories[0]?.total ?? 1

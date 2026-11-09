@@ -2,10 +2,9 @@
 import Link from 'next/link'
 import { Upload, FileText, X, CheckCircle, AlertCircle, Plug } from 'lucide-react'
 import { parseFile } from '../../lib/transactionParser'
-import { runAnomalyDetection } from '../../lib/anomalyEngine'
-import { saveDataset, keepEvidenceRows } from '../../lib/dataStore'
-import { summarizeTransactions, combineFiles } from '../../lib/datasetStats'
-import type { StoredTransaction, AuditEntry, Dataset } from '../../lib/dataStore'
+import { combineFiles } from '../../lib/datasetStats'
+import { ingest } from '../../lib/ingest'
+import type { StoredTransaction, AuditEntry } from '../../lib/dataStore'
 
 interface FileEntry {
   file: File
@@ -150,84 +149,24 @@ export default function DataUploadWidget({ onReady }: Props) {
       return
     }
 
-    // Split spend (debit) from credits (refunds/rebates/reversals) before any
-    // aggregation — credits are not vendor spend and must not feed spend
-    // totals, vendor/category/monthly stats, or spend-anomaly detection.
-    const spendTransactions = allTransactions.filter(t => t.direction !== 'credit')
-    const creditTransactions = allTransactions.filter(t => t.direction === 'credit')
-
-    // Step 3: anomaly detection
+    // One pipeline for every source: the workspace's detection settings,
+    // findings that keep their identity and decisions across uploads, and a
+    // copy saved for the team once the workspace database exists.
     setStepIdx(3)
-    setProgress(55)
-    await new Promise(r => setTimeout(r, 200))
-    const anomalies = runAnomalyDetection(spendTransactions)
-
-    auditLog.unshift({
-      id: `AUD-${Date.now()}-detect`,
-      ts: new Date().toISOString(),
-      actor: 'Ventura AI',
-      event: 'Anomaly Detection Complete',
-      detail: `Analyzed ${spendTransactions.length.toLocaleString()} transactions: ${anomalies.length} anomalies detected (${anomalies.filter(a => a.severity === 'CRITICAL').length} critical, ${anomalies.filter(a => a.severity === 'HIGH').length} high)`,
-      severity: anomalies.some(a => a.severity === 'CRITICAL') ? 'critical' : anomalies.length > 0 ? 'warning' : 'info',
-      resource: 'Anomaly Engine',
+    setProgress(60)
+    await new Promise(r => setTimeout(r, 50))
+    const done = updatedEntries.filter(e => e.status === 'done')
+    const label = done.map(e => e.file.name).join(', ')
+    const result = ingest({
+      sourceId: `upload:${label}`,
+      label,
+      transactions: allTransactions,
+      file: { name: label, size: done.reduce((n, e) => n + e.file.size, 0), rowCount: done.reduce((n, e) => n + (e.rowCount ?? 0), 0) },
+      extraAudit: auditLog,
     })
-
-    if (creditTransactions.length > 0) {
-      auditLog.push({
-        id: `AUD-${Date.now()}-credits`,
-        ts: new Date().toISOString(),
-        actor: 'Ventura',
-        event: 'Credits Excluded From Spend',
-        detail: `${creditTransactions.length.toLocaleString()} credit/refund row(s) totaling ${creditTransactions.reduce((s, t) => s + t.amount, 0).toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })} were identified as credits (a Credit column, or the opposite sign to spend in an Amount column) and excluded from spend totals and anomaly detection.`,
-        severity: 'info',
-        resource: 'Anomaly Engine',
-      })
-    }
-
-    // Step 4: statistics
-    setStepIdx(4)
-    setProgress(75)
-    await new Promise(r => setTimeout(r, 150))
-
-    const stats = summarizeTransactions(allTransactions)
-
-    // Step 5: save
     setStepIdx(5)
-    setProgress(90)
-
-    const allFilesResult = updatedEntries.filter(e => e.status === 'done')
-    const columnMapping = allTransactions.length > 0
-      ? { date: 'auto', vendor: 'auto', amount: 'auto', debit: null, credit: null, description: null, category: null, account: null }
-      : { date: null, vendor: null, amount: null, debit: null, credit: null, description: null, category: null, account: null }
-
-    auditLog.unshift({
-      id: `AUD-${Date.now()}-upload`,
-      ts: new Date().toISOString(),
-      actor: 'User',
-      event: 'Data Uploaded',
-      detail: `${allFilesResult.length} file(s) uploaded: ${allTransactions.length.toLocaleString()} total transactions, ${fmtBytes(entries.reduce((s, e) => s + e.file.size, 0))} total`,
-      severity: 'info',
-      resource: allFilesResult.map(e => e.file.name).join(', '),
-    })
-
-    const dataset: Dataset = {
-      uploadedAt: new Date().toISOString(),
-      files: allFilesResult.map(e => ({
-        name:     e.file.name,
-        size:     e.file.size,
-        rowCount: e.rowCount ?? 0,
-        parsedAt: new Date().toISOString(),
-      })),
-      columnMapping,
-      ...stats,
-      anomalies,
-      auditLog,
-      sampleTransactions: keepEvidenceRows(allTransactions, anomalies),
-    }
-
-    saveDataset(dataset)
     setProgress(100)
-    setSummary({ txCount: spendTransactions.length, anomalyCount: anomalies.length })
+    setSummary({ txCount: result.txCount, anomalyCount: result.anomalyCount })
     setStage('done')
 
     setTimeout(() => onReady(), 1200)

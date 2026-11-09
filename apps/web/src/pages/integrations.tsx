@@ -1,346 +1,230 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import AppLayout from '../components/layout/AppLayout'
 import PageHeader from '../components/ui/PageHeader'
-import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
-import { Card, CardHeader, CardDivider } from '../components/ui/Card'
 import BrandIcon, { type BrandKey } from '../components/ui/BrandIcon'
-import ConnectModal, { INTEGRATION_CONFIGS } from '../components/ui/ConnectModal'
-import { removeSourceDataset } from '../lib/dataStore'
-import {
-  Plug, RefreshCw, Settings, Plus, Database,
-  Clock, ChevronRight, Search, Loader2, Trash2,
-} from 'lucide-react'
+import ConnectModal from '../components/ui/ConnectModal'
+import { ingest } from '../lib/ingest'
+import type { StoredTransaction } from '../lib/dataStore'
+import { ReloadIcon, UploadIcon, ExclamationTriangleIcon, CheckIcon } from '@radix-ui/react-icons'
 
-const BRAND_MAP: Record<string, BrandKey> = {
-  'quickbooks':  'quickbooks',
-  'plaid':       'plaid',
-  'adp':         'adp',
-  'salesforce':  'salesforce',
-  'netsuite':    'netsuite',
-  'xero':        'xero',
-  'slack':       'slack',
-  'csv':         'csv',
-  'document':    'documents',
-  'stripe':      'stripe',
-  'sap':         'sap',
-  'expensify':   'expensify',
-  'gusto':       'gusto',
+// Connected systems. Each one is connected by signing in to it directly and
+// approving read-only access; Ventura never sees a password or asks for a
+// developer key. Data arrives through the same checks as an uploaded file.
+
+interface ConnectionView { id: string; accountName: string | null; status: string; lastSyncedAt: string | null; lastError: string | null; connectedBy: string | null }
+interface ProviderView { id: 'plaid' | 'quickbooks' | 'xero' | 'gusto'; name: string; kind: 'oauth' | 'plaid'; available: boolean; missing: string[]; connections: ConnectionView[] }
+interface Status { admin: boolean; storage: 'database' | 'browser'; providers: ProviderView[] }
+
+const ABOUT: Record<ProviderView['id'], { brand: BrandKey; reads: string }> = {
+  quickbooks: { brand: 'quickbooks', reads: 'Bills, expenses, cheques, card charges and supplier credits. Read-only.' },
+  xero:       { brand: 'xero',       reads: 'Bills, spend money transactions and supplier credit notes. Read-only.' },
+  plaid:      { brand: 'plaid',      reads: 'Posted transactions from business bank and card accounts, through Plaid. Read-only.' },
+  gusto:      { brand: 'gusto',      reads: 'Processed payroll runs, as the total debited from the company. Read-only.' },
 }
 
-function getBrand(intg: { id: string; name: string }): BrandKey {
-  const id = intg.id.toLowerCase()
-  for (const [key, val] of Object.entries(BRAND_MAP)) {
-    if (id.includes(key) || intg.name.toLowerCase().includes(key)) return val
-  }
-  return 'generic'
+const ERRORS: Record<string, string> = {
+  access_denied: 'Access was not approved, so nothing was connected.',
+  invalid_state: 'The connection attempt expired or was opened in another tab. Try again.',
+  token_exchange_failed: 'The system did not accept the connection. Try again, or check the app settings with your admin.',
+  not_admin: 'Only the workspace admin can connect systems.',
+  invalid_callback: 'The connection could not be completed. Try again.',
 }
 
-function getIntegrationId(intg: { id: string; name: string }): string {
-  const name = intg.name.toLowerCase()
-  if (name.includes('quickbooks')) return 'quickbooks'
-  if (name.includes('plaid'))      return 'plaid'
-  if (name.includes('adp'))        return 'adp'
-  if (name.includes('salesforce')) return 'salesforce'
-  if (name.includes('netsuite'))   return 'netsuite'
-  if (name.includes('xero'))       return 'xero'
-  if (name.includes('slack'))      return 'slack'
-  if (name.includes('stripe'))     return 'stripe'
-  if (name.includes('sap'))        return 'sap'
-  if (name.includes('csv'))        return 'csv'
-  if (name.includes('document'))   return 'documents'
-  if (name.includes('expensify'))  return 'expensify'
-  if (name.includes('gusto'))      return 'gusto'
-  return intg.id
+declare global {
+  interface Window { Plaid?: { create: (o: Record<string, unknown>) => { open: () => void } } }
 }
 
-interface IntegrationDef {
-  id:          string
-  name:        string
-  type:        string
-  description: string
-  authMethod:  string
+function loadPlaid(): Promise<void> {
+  if (window.Plaid) return Promise.resolve()
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script')
+    s.src = 'https://cdn.plaid.com/link/v2/stable/link-initialize.js'
+    s.onload = () => resolve()
+    s.onerror = () => reject(new Error('Plaid Link could not load.'))
+    document.head.appendChild(s)
+  })
 }
 
-const INTEGRATION_CATALOG: IntegrationDef[] = [
-  { id: 'quickbooks', name: 'QuickBooks Online', type: 'GL / Accounting',    description: 'Two-way sync of transactions, bills, invoices, and GL exports from QuickBooks Online.',                      authMethod: 'OAuth 2.0'        },
-  { id: 'plaid',      name: 'Plaid',            type: 'Bank Feeds',         description: 'Direct bank feed connection via Plaid Link. Supports 12,000+ financial institutions.',                          authMethod: 'OAuth (Plaid Link)'},
-  { id: 'adp',        name: 'ADP',              type: 'Payroll',            description: 'Payroll run data, employee headcount, and W-2 summaries from ADP Workforce Now.',                               authMethod: 'Token-Based Auth'  },
-  { id: 'salesforce', name: 'Salesforce',       type: 'CRM',                description: 'Revenue pipeline, closed deals, and AR aging from Salesforce CRM.',                                             authMethod: 'OAuth 2.0'        },
-  { id: 'netsuite',   name: 'NetSuite ERP',     type: 'ERP',                description: 'Full GL, AP/AR, and multi-entity consolidation from Oracle NetSuite.',                                           authMethod: 'Token-Based Auth'  },
-  { id: 'csv',        name: 'File Upload',      type: 'File / CSV',        description: 'Upload CSV, XLSX, QBO, OFX, PDF, or ZIP files. Column auto-detection handles most export formats.',              authMethod: 'File Upload'       },
-  { id: 'stripe',     name: 'Stripe',           type: 'Payments',           description: 'Revenue transactions, refunds, and dispute history from Stripe.',                                                authMethod: 'API Key'           },
-  { id: 'xero',       name: 'Xero',             type: 'GL / Accounting',    description: 'Xero Accounting GL, bank reconciliations, and bills via the Xero API.',                                         authMethod: 'OAuth 2.0'        },
-  { id: 'expensify',  name: 'Expensify',        type: 'Expense Management', description: 'Approved expense reports, receipts, and policy violations from Expensify.',                                     authMethod: 'API Key'           },
-  { id: 'gusto',      name: 'Gusto',            type: 'Payroll / HR',       description: 'Payroll journal entries, employee costs, and benefits data from Gusto.',                                        authMethod: 'OAuth 2.0'        },
-  { id: 'sap',        name: 'SAP S/4HANA',      type: 'Enterprise ERP',     description: 'Full SAP GL, CO, and FI module data via OData APIs.',                                                            authMethod: 'API Key'           },
-]
-
-const ADD_OPTIONS = [
-  { id: 'quickbooks', name: 'QuickBooks',     brand: 'quickbooks' as BrandKey, desc: 'GL / Accounting'    },
-  { id: 'plaid',      name: 'Plaid',          brand: 'plaid'      as BrandKey, desc: 'Bank feeds'         },
-  { id: 'adp',        name: 'ADP',            brand: 'adp'        as BrandKey, desc: 'Payroll'            },
-  { id: 'salesforce', name: 'Salesforce',     brand: 'salesforce' as BrandKey, desc: 'CRM / Revenue'      },
-  { id: 'netsuite',   name: 'NetSuite ERP',   brand: 'netsuite'   as BrandKey, desc: 'Multi-entity GL'    },
-  { id: 'xero',       name: 'Xero',           brand: 'xero'       as BrandKey, desc: 'Accounting'         },
-  { id: 'stripe',     name: 'Stripe',         brand: 'stripe'     as BrandKey, desc: 'Payments'           },
-  { id: 'expensify',  name: 'Expensify',      brand: 'expensify'  as BrandKey, desc: 'Expense management' },
-  { id: 'gusto',      name: 'Gusto',          brand: 'gusto'      as BrandKey, desc: 'HR & payroll'       },
-  { id: 'sap',        name: 'SAP S/4HANA',    brand: 'sap'        as BrandKey, desc: 'Enterprise ERP'     },
-  { id: 'slack',      name: 'Slack',          brand: 'slack'      as BrandKey, desc: 'Alert notifications' },
-  { id: 'csv',        name: 'CSV / Excel',    brand: 'csv'        as BrandKey, desc: 'File upload'        },
-  { id: 'documents',  name: 'Doc Upload',     brand: 'documents'  as BrandKey, desc: 'PDF & image OCR'    },
-]
+const ago = (iso: string | null) => {
+  if (!iso) return 'Not synced yet'
+  const m = Math.round((Date.now() - Date.parse(iso)) / 60_000)
+  return m < 1 ? 'Synced just now' : m < 60 ? `Synced ${m} min ago` : m < 1440 ? `Synced ${Math.round(m / 60)} h ago` : `Synced ${new Date(iso).toLocaleDateString()}`
+}
 
 export default function IntegrationsPage() {
-  const [processingCard, setProcessingCard] = useState<string | null>(null)
-  const [activeModal,    setActiveModal]    = useState<string | null>(null)
-  const [showAddPanel,   setShowAddPanel]   = useState(false)
-  const [addSearch,      setAddSearch]      = useState('')
-  const [newlyConnected, setNewlyConnected] = useState<string[]>([])
+  const [status,  setStatus]  = useState<Status | null>(null)
+  const [busy,    setBusy]    = useState<string | null>(null)
+  const [message, setMessage] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null)
+  const [upload,  setUpload]  = useState(false)
 
-  useEffect(() => {
+  const refresh = useCallback(async () => {
     try {
-      const stored = JSON.parse(localStorage.getItem('sf_connected') || '{}')
-      const params          = new URLSearchParams(window.location.search)
-      const oauthConnected  = params.get('connected')
-      const oauthError      = params.get('error')
-
-      if (oauthConnected) {
-        // OAuth callback returned — mark as connected and clean the URL
-        stored[oauthConnected] = { connectedAt: new Date().toISOString(), status: 'Connected' }
-        localStorage.setItem('sf_connected', JSON.stringify(stored))
-        window.history.replaceState({}, '', '/integrations')
-      }
-
-      if (oauthError) {
-        console.error('[OAuth] connection error:', oauthError)
-        window.history.replaceState({}, '', '/integrations')
-      }
-
-      setNewlyConnected(Object.keys(stored))
-    } catch {}
+      const r = await fetch('/api/integrations/status')
+      if (r.ok) setStatus(await r.json())
+    } catch { /* offline */ }
   }, [])
 
-  async function handleRefresh(id: string) {
-    if (INTEGRATION_CONFIGS[id]?.authType === 'file') {
-      setActiveModal(id)
-      return
+  const sync = useCallback(async (p: ProviderView, c: ConnectionView) => {
+    setBusy(c.id); setMessage(null)
+    const all: StoredTransaction[] = []
+    let cursor: string | null = null
+    try {
+      do {
+        const r: Response = await fetch('/api/integrations/sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ connectionId: c.id, cursor, months: 12 }) })
+        const j = await r.json()
+        if (!r.ok) throw new Error(j.error ?? 'Sync failed')
+        all.push(...(j.transactions as StoredTransaction[]))
+        cursor = j.cursor
+        setMessage({ tone: 'ok', text: `Fetched ${all.length.toLocaleString()} transactions from ${c.accountName ?? p.name}…` })
+      } while (cursor)
+      const res = ingest({ sourceId: `${p.id}:${c.id.replace(/^meta:/, '')}`, label: c.accountName ?? p.name, transactions: all, actor: 'You' })
+      setMessage({ tone: 'ok', text: `${c.accountName ?? p.name}: ${res.txCount.toLocaleString()} transactions checked, ${res.anomalyCount} finding${res.anomalyCount === 1 ? '' : 's'}${res.carried ? `, ${res.carried} earlier decisions kept` : ''}.` })
+    } catch (e) {
+      setMessage({ tone: 'error', text: e instanceof Error ? e.message : 'Sync failed' })
+    } finally {
+      setBusy(null)
+      void refresh()
     }
-    setProcessingCard(id)
-    await new Promise(r => setTimeout(r, 2000))
-    setProcessingCard(null)
-  }
+  }, [refresh])
 
-  function handleConnected(id: string) {
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search)
+    const connected = q.get('connected'), error = q.get('error')
+    if (connected || error) window.history.replaceState({}, '', '/integrations')
+    if (error) setMessage({ tone: 'error', text: ERRORS[error] ?? `The connection did not complete (${error}).` })
+    void (async () => {
+      const r = await fetch('/api/integrations/status').catch(() => null)
+      const s: Status | null = r?.ok ? await r.json() : null
+      setStatus(s)
+      // Fresh from connecting: fetch its data straight away.
+      const p = s?.providers.find(x => x.id === connected)
+      const c = p?.connections[p.connections.length - 1]
+      if (p && c) void sync(p, c)
+    })()
+  }, [sync])
+
+  async function connect(p: ProviderView) {
+    setBusy(p.id); setMessage(null)
     try {
-      const stored = JSON.parse(localStorage.getItem('sf_connected') || '{}')
-      if (!stored[id]) {
-        stored[id] = { connectedAt: new Date().toISOString(), status: 'Connected' }
-        localStorage.setItem('sf_connected', JSON.stringify(stored))
+      if (p.kind === 'plaid') {
+        const r = await fetch('/api/integrations/plaid/link-token', { method: 'POST' })
+        const j = await r.json()
+        if (!r.ok) throw new Error(j.error ?? 'Plaid is not available')
+        await loadPlaid()
+        window.Plaid!.create({
+          token: j.link_token,
+          onSuccess: async (publicToken: string, meta: { institution?: { name?: string } }) => {
+            const x = await fetch('/api/integrations/plaid/exchange', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ public_token: publicToken, institution: meta?.institution?.name }) })
+            const xj = await x.json()
+            if (!x.ok) { setMessage({ tone: 'error', text: xj.error ?? 'Could not connect the account' }); setBusy(null); return }
+            const r2 = await fetch('/api/integrations/status')
+            const s: Status = await r2.json()
+            setStatus(s)
+            const pp = s.providers.find(v => v.id === 'plaid')!
+            await sync(pp, pp.connections[pp.connections.length - 1])
+          },
+          onExit: () => setBusy(null),
+        }).open()
+        return
       }
-    } catch {}
-    setNewlyConnected(prev => prev.includes(id) ? prev : [...prev, id])
+      const r = await fetch('/api/oauth/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ provider: p.id }) })
+      const j = await r.json()
+      if (!r.ok || !j.url) throw new Error(j.error ?? 'This connection is not set up yet')
+      window.location.href = j.url
+    } catch (e) {
+      setMessage({ tone: 'error', text: e instanceof Error ? e.message : 'Could not connect' })
+      setBusy(null)
+    }
   }
 
-  function handleDisconnect(id: string) {
-    // Remove only this source's data — other connected sources keep their data
-    removeSourceDataset(id)
-    try {
-      const stored = JSON.parse(localStorage.getItem('sf_connected') || '{}')
-      delete stored[id]
-      localStorage.setItem('sf_connected', JSON.stringify(stored))
-    } catch {}
-    setNewlyConnected(prev => prev.filter(s => s !== id))
+  async function disconnect(p: ProviderView, c: ConnectionView) {
+    if (!window.confirm(`Disconnect ${c.accountName ?? p.name}? Ventura stops reading from it and deletes its access. Findings and decisions already recorded stay.`)) return
+    setBusy(c.id)
+    await fetch('/api/integrations/disconnect', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ connectionId: c.id }) }).catch(() => null)
+    setBusy(null)
+    void refresh()
   }
-
-  const connectedCount = newlyConnected.length
-
-  const filteredAddOptions = ADD_OPTIONS.filter(o =>
-    addSearch === '' || o.name.toLowerCase().includes(addSearch.toLowerCase()) || o.desc.toLowerCase().includes(addSearch.toLowerCase())
-  )
 
   return (
     <AppLayout title="Integrations">
-
-      {activeModal && (
-        <ConnectModal
-          integrationId={activeModal}
-          onClose={() => setActiveModal(null)}
-          onConnected={(id) => { handleConnected(id) }}
-        />
-      )}
+      {upload && <ConnectModal integrationId="csv" onClose={() => setUpload(false)} onConnected={() => undefined} />}
 
       <PageHeader
         title="Integrations"
-        subtitle="Connected data sources and identity providers"
-        actions={
-          <Button
-            variant="primary"
-            size="sm"
-            icon={<Plus className="w-3.5 h-3.5" />}
-            onClick={() => setShowAddPanel(p => !p)}
-          >
-            Add integration
-          </Button>
-        }
+        subtitle="Connect the systems Ventura reads spend from. You sign in to each one directly and approve read-only access; Ventura never sees your passwords."
+        actions={<Button variant="secondary" size="sm" icon={<UploadIcon className="w-3.5 h-3.5" />} onClick={() => setUpload(true)}>Upload a file</Button>}
         className="mb-6"
       />
 
-      {/* Add integration panel */}
-      {showAddPanel && (
-        <div className="mb-6 bg-surface-raised border border-border rounded-lg shadow-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-            <p className="text-sm font-medium text-text-primary">Add a new integration</p>
-            <button onClick={() => setShowAddPanel(false)} className="text-text-muted hover:text-text-secondary text-xs">Close</button>
-          </div>
-          <div className="px-5 py-4">
-            <div className="flex items-center gap-2 bg-surface-sunken border border-border rounded-md px-3 py-2 mb-4 max-w-xs">
-              <Search className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />
-              <input
-                type="text"
-                placeholder="Search integrations…"
-                value={addSearch}
-                onChange={e => setAddSearch(e.target.value)}
-                className="bg-transparent text-sm text-text-secondary placeholder-text-muted outline-none w-full"
-              />
-            </div>
-            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-              {filteredAddOptions.map(opt => (
-                <button
-                  key={opt.id}
-                  onClick={() => { setShowAddPanel(false); setActiveModal(opt.id) }}
-                  className="flex flex-col items-center gap-2 p-3 rounded-lg border border-border hover:border-accent-400 hover:shadow-sm transition-all text-center group"
-                >
-                  <BrandIcon brand={opt.brand} size={36} />
-                  <p className="text-xs font-medium text-text-secondary group-hover:text-accent-800 transition-colors leading-snug">{opt.name}</p>
-                  <p className="text-[10px] text-text-muted">{opt.desc}</p>
-                </button>
-              ))}
-            </div>
-          </div>
+      {message && (
+        <div role="status" className={`mb-5 flex items-start gap-2 rounded-lg border px-4 py-3 text-[13.5px] ${message.tone === 'error' ? 'border-critical-line bg-critical-bg text-critical-fg' : 'border-border bg-surface-raised text-text-secondary'}`}>
+          {message.tone === 'error' ? <ExclamationTriangleIcon className="mt-0.5 h-4 w-4 flex-shrink-0" /> : <CheckIcon className="mt-0.5 h-4 w-4 flex-shrink-0 text-positive-fg" />}
+          {message.text}
         </div>
       )}
 
-      {/* Summary stats */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-        {[
-          { label: 'Connected sources', value: `${connectedCount} / ${INTEGRATION_CATALOG.length}`, icon: Plug,     color: 'text-positive-fg',  bg: 'bg-positive-bg',  border: 'border-positive-line'  },
-          { label: 'Available sources',  value: INTEGRATION_CATALOG.length,                          icon: Database, color: 'text-positive-fg',   bg: 'bg-positive-bg',   border: 'border-positive-line'   },
-          { label: 'File upload',        value: 'Supported',                                          icon: Database, color: 'text-text-secondary',  bg: 'bg-surface-raised',  border: 'border-border'  },
-        ].map((s) => {
-          const Icon = s.icon
-          return (
-            <div key={s.label} className={`${s.bg} border ${s.border} rounded-lg px-4 py-3 flex items-center gap-3`}>
-              <Icon className={`w-5 h-5 ${s.color} flex-shrink-0`} />
-              <div>
-                <p className={`text-base font-medium ${s.color}`}>{s.value}</p>
-                <p className="text-xs text-text-muted">{s.label}</p>
-              </div>
-            </div>
-          )
-        })}
-      </div>
+      {status?.storage === 'browser' && (
+        <p className="mb-5 rounded-lg border border-dashed border-border-strong px-4 py-3 text-[13px] text-text-muted">
+          Synced data and review decisions are kept in this browser until the workspace database is set up. Connections themselves are stored securely on the server.
+        </p>
+      )}
 
-      {/* Integration cards */}
-      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4 mb-8">
-        {INTEGRATION_CATALOG.map((intg) => {
-          const brand      = getBrand(intg)
-          const modalId    = getIntegrationId(intg)
-          const isInConfig = !!INTEGRATION_CONFIGS[modalId]
-          const isConnected = newlyConnected.includes(modalId)
-          const status = isConnected ? 'Connected' : 'Not connected'
+      <div className="grid gap-4 md:grid-cols-2">
+        {(status?.providers ?? []).map(p => {
+          const about = ABOUT[p.id]
           return (
-            <div key={intg.id} className="bg-surface-raised border border-border rounded-lg p-5 flex flex-col min-h-[220px]">
-              {processingCard === modalId ? (
-                <div className="flex flex-col items-center justify-center flex-1 gap-3 py-4">
-                  <div className="w-10 h-10 rounded-full bg-positive-bg border border-positive-line flex items-center justify-center">
-                    <Loader2 className="w-5 h-5 text-positive-fg animate-spin" />
-                  </div>
-                  <div className="text-center">
-                    <p className="text-sm font-medium text-text-primary">Refreshing…</p>
-                    <p className="text-xs text-text-muted mt-0.5">Syncing latest records from {intg.name}</p>
-                  </div>
+            <section key={p.id} className="flex flex-col rounded-xl border border-border bg-surface-raised p-5 shadow-card">
+              <div className="flex items-center gap-3">
+                <BrandIcon brand={about.brand} size={40} />
+                <div className="min-w-0">
+                  <h2 className="text-[15px] font-medium text-text-primary">{p.name}</h2>
+                  <p className="text-[13px] text-text-muted">{about.reads}</p>
                 </div>
-              ) : (
-                <>
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <BrandIcon brand={brand} size={40} />
-                      <div>
-                        <p className="text-sm font-medium text-text-primary">{intg.name}</p>
-                        <p className="text-xs text-text-muted">{intg.type}</p>
+              </div>
+
+              <div className="mt-4 flex-1 space-y-2">
+                {p.connections.map(c => (
+                  <div key={c.id} className="rounded-lg border border-border-subtle bg-surface px-3 py-2.5">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-[13.5px] font-medium text-text-primary">{c.accountName ?? 'Connected account'}</p>
+                        <p className={`text-[12.5px] ${c.lastError ? 'text-critical-fg' : 'text-text-muted'}`}>{c.lastError ?? ago(c.lastSyncedAt)}</p>
+                      </div>
+                      <div className="flex flex-shrink-0 items-center gap-1.5">
+                        <Button variant="secondary" size="sm" loading={busy === c.id} icon={<ReloadIcon className="h-3 w-3" />} onClick={() => sync(p, c)}>Sync now</Button>
+                        {status?.admin && <Button variant="ghost" size="sm" onClick={() => disconnect(p, c)} disabled={busy === c.id}>Disconnect</Button>}
                       </div>
                     </div>
-                    <Badge variant="integration" value={status} dot>{status}</Badge>
                   </div>
+                ))}
+                {!p.available && (
+                  <p className="text-[13px] text-text-muted">
+                    Not set up yet.{status?.admin && p.missing.length > 0 && <> Needs <span className="font-mono text-[12px]">{p.missing.join(', ')}</span> on the server.</>}
+                  </p>
+                )}
+              </div>
 
-                  <p className="text-xs text-text-muted leading-relaxed mb-4 flex-1">{intg.description}</p>
-
-                  <div className="space-y-1.5 mb-4">
-                    {[
-                      { label: 'Auth method', value: intg.authMethod },
-                      { label: 'Records',     value: isConnected ? 'Synced' : 'N/A' },
-                    ].map((row) => (
-                      <div key={row.label} className="flex justify-between text-xs">
-                        <span className="text-text-muted">{row.label}</span>
-                        <span className="text-text-secondary font-medium">{row.value}</span>
-                      </div>
-                    ))}
+              {p.available && (status?.admin
+                ? <div className="mt-4 border-t border-border-subtle pt-4">
+                    <Button variant={p.connections.length ? 'secondary' : 'primary'} size="sm" loading={busy === p.id} onClick={() => connect(p)}>
+                      {p.connections.length ? (p.kind === 'plaid' ? 'Connect another bank' : 'Connect another company') : `Connect ${p.name.replace(/ \(.*\)$/, '')}`}
+                    </Button>
                   </div>
-
-                  <div className="flex items-center gap-2 pt-3 border-t border-border-subtle">
-                    {isConnected ? (
-                      <>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          icon={<RefreshCw className="w-3 h-3" />}
-                          onClick={() => handleRefresh(modalId)}
-                          className="flex-1"
-                        >
-                          Refresh
-                        </Button>
-                        <button
-                          onClick={() => handleDisconnect(modalId)}
-                          className="flex items-center gap-1 text-xs font-medium text-critical-fg hover:text-critical-fg hover:bg-critical-bg px-2.5 py-1.5 rounded-md transition-colors border border-transparent hover:border-critical-line"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                          Reset
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          icon={<RefreshCw className="w-3 h-3" />}
-                          onClick={() => handleRefresh(intg.id)}
-                          className="flex-1"
-                        >
-                          Sync now
-                        </Button>
-                        {isInConfig && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            icon={<Settings className="w-3.5 h-3.5" />}
-                            onClick={() => setActiveModal(modalId)}
-                          >
-                            Configure
-                          </Button>
-                        )}
-                        <Button variant="ghost" size="sm" icon={<ChevronRight className="w-3.5 h-3.5" />} />
-                      </>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
+                : !p.connections.length && <p className="mt-4 border-t border-border-subtle pt-4 text-[13px] text-text-muted">Ask your workspace admin to connect this.</p>)}
+            </section>
           )
         })}
       </div>
 
+      <section className="mt-6 rounded-xl border border-border bg-surface-raised p-5">
+        <h2 className="text-[15px] font-medium text-text-primary">Everything else, by export</h2>
+        <p className="mt-1 max-w-[70ch] text-[13.5px] leading-relaxed text-text-secondary">
+          NetSuite, SAP, Sage, Expensify, Ramp, Brex, ADP and any other system: export a CSV or Excel file of payments, bills or card
+          transactions and upload it. Ventura finds the header row and maps the columns itself, and runs the same checks.
+        </p>
+        <div className="mt-4"><Button variant="secondary" size="sm" icon={<UploadIcon className="w-3.5 h-3.5" />} onClick={() => setUpload(true)}>Upload a file</Button></div>
+      </section>
     </AppLayout>
   )
 }

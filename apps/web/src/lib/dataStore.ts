@@ -245,6 +245,55 @@ function loadSourceMap(): Record<string, Dataset> {
   } catch { return {} }
 }
 
+/** One source's own dataset (an upload or a connection), as last saved on this device. */
+export function loadSourceDataset(sourceId: string): Dataset | null {
+  if (typeof window === 'undefined') return null
+  return loadSourceMap()[sourceId] ?? null
+}
+
+/** Every source's own dataset on this device, keyed by source. */
+export function loadAllSourceDatasets(): Record<string, Dataset> {
+  if (typeof window === 'undefined') return {}
+  return loadSourceMap()
+}
+
+/**
+ * A reviewer's decision on this device: written to the source the finding
+ * came from (the record every later merge is rebuilt from) and to the
+ * merged view, so the next upload or sync can never undo it.
+ */
+export function setFindingStatus(id: string, status: AnomalyStatus): boolean {
+  if (typeof window === 'undefined') return false
+  try {
+    const map = loadSourceMap()
+    let found = false
+    for (const ds of Object.values(map)) {
+      const f = ds.anomalies.find(a => a.id === id)
+      if (f) { f.status = status; found = true }
+    }
+    if (found) {
+      localStorage.setItem(SOURCES_KEY, JSON.stringify(map))
+      return saveDataset(mergeSourceDatasets(Object.values(map)))
+    }
+    const ds = loadDataset()
+    const f = ds?.anomalies.find(a => a.id === id)
+    if (!ds || !f) return false
+    f.status = status
+    return saveDataset(ds)
+  } catch { return false }
+}
+
+/** Replace every source on this device at once (loading the workspace from the server). */
+export function replaceSourceDatasets(map: Record<string, Dataset>): boolean {
+  if (typeof window === 'undefined') return false
+  try {
+    localStorage.setItem(SOURCES_KEY, JSON.stringify(map))
+    const all = Object.values(map)
+    if (all.length === 0) { clearDataset(); return true }
+    return saveDataset(mergeSourceDatasets(all))
+  } catch { return false }
+}
+
 export function saveSourceDataset(sourceId: string, ds: Dataset): boolean {
   if (typeof window === 'undefined') return false
   try {

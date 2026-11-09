@@ -3,7 +3,8 @@ import Link from 'next/link'
 import AppLayout from '../components/layout/AppLayout'
 import BrandIcon, { type BrandKey } from '../components/ui/BrandIcon'
 import ConnectModal from '../components/ui/ConnectModal'
-import { clearDataset } from '../lib/dataStore'
+import { loadAllSourceDatasets } from '../lib/dataStore'
+import { useRouter } from 'next/router'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import {
   CheckCircle, ArrowRight, Upload,
@@ -29,12 +30,11 @@ interface Source {
 }
 
 const SOURCES: Source[] = [
-  { id: 'quickbooks', brand: 'quickbooks', name: 'QuickBooks Online', category: 'Accounting',   desc: 'GL, invoices, vendors, P&L, chart of accounts', popular: true  },
-  { id: 'plaid',      brand: 'plaid',      name: 'Plaid Bank Feeds',  category: 'Banking',       desc: 'Real-time bank transactions, balances, ACH data', popular: true  },
-  { id: 'adp',        brand: 'adp',        name: 'ADP Payroll',       category: 'HR / Payroll',  desc: 'Employee records, payroll runs, headcount', popular: false },
-  { id: 'salesforce', brand: 'salesforce', name: 'Salesforce CRM',    category: 'Revenue',       desc: 'Contracts, ARR, deal pipeline, customer spend', popular: false },
-  { id: 'netsuite',   brand: 'netsuite',   name: 'NetSuite ERP',      category: 'ERP',           desc: 'Multi-entity GL, consolidations, reporting', popular: false },
-  { id: 'csv',        brand: 'csv',        name: 'CSV / Spreadsheet', category: 'Manual import', desc: 'Upload any CSV or Excel export from any system', popular: false },
+  { id: 'quickbooks', brand: 'quickbooks', name: 'QuickBooks Online', category: 'Accounting',    desc: 'Bills, expenses, card charges and supplier credits', popular: true  },
+  { id: 'xero',       brand: 'xero',       name: 'Xero',              category: 'Accounting',    desc: 'Bills, spend transactions and credit notes',         popular: true  },
+  { id: 'plaid',      brand: 'plaid',      name: 'Bank and card',     category: 'Banking',       desc: 'Posted transactions through Plaid',                  popular: true  },
+  { id: 'gusto',      brand: 'gusto',      name: 'Gusto',             category: 'Payroll',       desc: 'Processed payroll runs',                             popular: false },
+  { id: 'csv',        brand: 'csv',        name: 'CSV / Spreadsheet', category: 'Any system',    desc: 'Upload an export from NetSuite, SAP, Expensify or anything else', popular: false },
 ]
 
 const GHOST_METRICS = [
@@ -48,30 +48,23 @@ export default function WelcomePage() {
   const user = useCurrentUser()
   const companyDisplay = user?.company || 'Your Organization'
 
+  const router = useRouter()
   const [activeModal, setActiveModal] = useState<string | null>(null)
   const [connected,   setConnected]   = useState<string[]>([])
 
+  // A source counts as connected once data from it has been checked here.
   useEffect(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('sf_connected') || '{}')
-      setConnected(Object.keys(stored))
-    } catch {}
+    setConnected([...new Set(Object.keys(loadAllSourceDatasets()).map(k => (k.startsWith('upload') || k === 'csv' ? 'csv' : k.split(':')[0])))])
   }, [])
 
   function handleConnected(id: string) {
-    try {
-      const stored = JSON.parse(localStorage.getItem('sf_connected') || '{}')
-      if (!stored[id]) {
-        stored[id] = { connectedAt: new Date().toISOString(), status: 'Connected' }
-        localStorage.setItem('sf_connected', JSON.stringify(stored))
-      }
-    } catch {}
     setConnected(prev => prev.includes(id) ? prev : [...prev, id])
   }
 
-  function handleDisconnect(id: string) {
-    clearDataset()
-    setConnected([])
+  // Systems connect from Integrations, by signing in to them; files upload here.
+  function open(id: string) {
+    if (id === 'csv') setActiveModal('csv')
+    else router.push('/integrations')
   }
 
   return (
@@ -177,7 +170,7 @@ export default function WelcomePage() {
                   <p className="text-[11px] text-text-muted leading-snug">{src.desc}</p>
                   <div className="flex gap-1.5">
                     <button
-                      onClick={() => !isConnected && setActiveModal(src.id)}
+                      onClick={() => !isConnected && open(src.id)}
                       disabled={isConnected}
                       className={`flex-1 text-xs font-medium py-2 rounded-md transition-colors flex items-center justify-center gap-1.5 ${
                         isConnected
@@ -188,18 +181,10 @@ export default function WelcomePage() {
                       {isConnected ? (
                         <><CheckCircle className="w-3.5 h-3.5" /> Connected</>
                       ) : (
-                        <>Connect {src.name.split(' ')[0]}</>
+                        <>{src.id === 'csv' ? 'Upload a file' : `Connect ${src.name.split(' ')[0]}`}</>
                       )}
                     </button>
-                    {isConnected && (
-                      <button
-                        onClick={() => handleDisconnect(src.id)}
-                        title="Reset connection"
-                        className="text-critical-fg hover:text-critical-fg hover:bg-red-50 px-2 rounded-md transition-colors border border-transparent hover:border-red-200"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    )}
+
                   </div>
                 </div>
               )

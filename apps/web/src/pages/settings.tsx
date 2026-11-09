@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import AppLayout from '../components/layout/AppLayout'
+import DetectionSettings from '../components/settings/DetectionSettings'
 import PageHeader from '../components/ui/PageHeader'
 import Button from '../components/ui/Button'
 import { Card, CardHeader, CardDivider } from '../components/ui/Card'
@@ -9,7 +10,7 @@ import {
   Users, Shield, Building2, Settings, Plus, Edit, CheckCircle, Key, RefreshCw, AlertTriangle, Eye, Database, Trash2, AlertCircle, Loader2, ChevronDown, Clock, X, ArrowLeft,
 } from 'lucide-react'
 
-type SettingsTab = 'users' | 'roles' | 'security' | 'tenant' | 'data'
+type SettingsTab = 'users' | 'roles' | 'security' | 'tenant' | 'detection' | 'data'
 type ResetStep   = 'idle' | 'confirm' | 'sending' | 'verify' | 'verifying' | 'done' | 'error'
 type InviteState = 'idle' | 'loading' | 'ready'
 
@@ -241,6 +242,7 @@ export default function SettingsPage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Incorrect code')
       clearDataset()
+      await fetch('/api/workspace/reset', { method: 'POST' }).catch(() => null)
       setResetStep('done')
     } catch (e) {
       setResetError(e instanceof Error ? e.message : 'Verification failed')
@@ -272,6 +274,7 @@ export default function SettingsPage() {
           .then(({ ok, d }) => {
             if (!ok) throw new Error(d.error || 'Incorrect code')
             clearDataset()
+            void fetch('/api/workspace/reset', { method: 'POST' }).catch(() => null)
             setResetStep('done')
           })
           .catch(e => {
@@ -298,6 +301,7 @@ export default function SettingsPage() {
     { id: 'roles',    label: 'Roles'    },
     { id: 'security', label: 'Security' },
     { id: 'tenant',   label: 'Tenant'   },
+    { id: 'detection', label: 'Detection' },
     { id: 'data',     label: 'Data'     },
   ]
 
@@ -782,6 +786,8 @@ export default function SettingsPage() {
       )}
 
       {/* ── Data ── */}
+      {activeTab === 'detection' && <DetectionSettings isAdmin={currentUser?.role !== 'employee'} />}
+
       {activeTab === 'data' && (
         <div className="max-w-xl space-y-6">
 

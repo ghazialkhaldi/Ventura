@@ -582,11 +582,51 @@ async function parsePDF(file: File): Promise<{ rows: RawRow[]; headers: string[]
   }
 }
 
+// ─── OFX / QFX / QBO (bank and card downloads) ─────────────────────────────────
+
+/**
+ * Bank and card downloads in Open Financial Exchange format, which Quicken
+ * (.qfx) and QuickBooks (.qbo) files also use. Version 1 is SGML, where leaf
+ * fields have no closing tag; version 2 is XML. Both are read the same way:
+ * each <STMTTRN> block is one transaction. Amounts are from the account
+ * holder's side, so negative is money out (spend) and positive money in.
+ */
+export function parseOFXText(text: string): StoredTransaction[] {
+  const field = (block: string, tag: string) => {
+    const m = new RegExp(`<${tag}>([^<\r\n]*)`, 'i').exec(block)
+    return m ? m[1].trim() : ''
+  }
+  const account = field(text, 'ACCTID').replace(/^.*(\d{4})$/, '••$1')
+  const out: StoredTransaction[] = []
+  const blocks = text.split(/<STMTTRN>/i).slice(1)
+  blocks.forEach((raw, i) => {
+    const block = raw.split(/<\/STMTTRN>/i)[0]
+    const amt = parseAmount(field(block, 'TRNAMT'))
+    if (!amt) return
+    const posted = field(block, 'DTPOSTED')
+    const date = /^\d{8}/.test(posted) ? `${posted.slice(0, 4)}-${posted.slice(4, 6)}-${posted.slice(6, 8)}` : ''
+    const name = field(block, 'NAME') || field(block, 'PAYEE')
+    const memo = field(block, 'MEMO')
+    const check = field(block, 'CHECKNUM')
+    out.push({
+      id: `TX-${i}`, rowIndex: i, date,
+      vendor: name,
+      amount: Math.abs(amt),
+      direction: amt < 0 ? 'debit' : 'credit',
+      description: [name, memo && memo !== name ? memo : '', check ? `#${check}` : ''].filter(Boolean).join(' '),
+      category: '',
+      account,
+    })
+  })
+  return out
+}
+
 // ─── Unified file parser ──────────────────────────────────────────────────────
 
 const EXCEL_EXTS = ['.xlsx', '.xls', '.xlsm', '.xlsb']
 const CSV_EXTS   = ['.csv', '.tsv', '.txt']
 const PDF_EXTS   = ['.pdf']
+const OFX_EXTS   = ['.ofx', '.qfx', '.qbo']
 
 export async function parseFile(
   file: File,
@@ -596,6 +636,16 @@ export async function parseFile(
   let rows: RawRow[] = []
   let headers: string[] = []
 
+  if (OFX_EXTS.includes(ext)) {
+    try {
+      const transactions = parseOFXText(await file.text())
+      if (transactions.length === 0) return { error: `No transactions found in ${file.name}. Check that it is a bank or card statement download.` }
+      return { transactions, mapping: { date: 'DTPOSTED', vendor: 'NAME', amount: 'TRNAMT', debit: null, credit: null, description: 'MEMO', category: null, account: 'ACCTID' }, rowCount: transactions.length }
+    } catch (e: unknown) {
+      return { error: `Failed to read ${file.name}: ${e instanceof Error ? e.message : String(e)}` }
+    }
+  }
+
   try {
     if (EXCEL_EXTS.includes(ext)) {
       ;({ rows, headers } = await parseExcel(file))
@@ -604,7 +654,7 @@ export async function parseFile(
     } else if (PDF_EXTS.includes(ext)) {
       ;({ rows, headers } = await parsePDF(file))
     } else {
-      return { error: `Unsupported file type: ${ext}` }
+      return { error: `${ext} files cannot be read. Upload a CSV, Excel, PDF, or OFX/QFX/QBO bank download.` }
     }
   } catch (e: unknown) {
     return { error: `Failed to parse ${file.name}: ${e instanceof Error ? e.message : String(e)}` }

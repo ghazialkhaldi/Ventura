@@ -9,6 +9,7 @@ import { parseFile } from '../lib/transactionParser'
 import { runAnomalyDetection } from '../lib/anomalyEngine'
 import { saveDataset, loadDataset } from '../lib/dataStore'
 import { namespaceRows } from '../lib/datasetStats'
+import { getDetectionConfig } from '../lib/workspaceSettings'
 import {
   normalizeTransactions,
   detectInvoiceDuplicates,
@@ -175,7 +176,7 @@ export default function ImportCenterPage() {
       // evidence never collide with what is already in the workspace.
       const batchTag  = batchId.replace(/[^a-z0-9]/gi, '').slice(-6).toUpperCase()
       const batchRows = namespaceRows(parsed.transactions, batchTag)
-      const anomalies = runAnomalyDetection(batchRows, {}, { idPrefix: batchTag })
+      const anomalies = runAnomalyDetection(batchRows, getDetectionConfig(), { idPrefix: batchTag })
       setStageStatus('engine', 'done', `${anomalies.length} anomalies detected`)
 
       // Save to localStorage

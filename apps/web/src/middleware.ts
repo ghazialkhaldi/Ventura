@@ -1,30 +1,10 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-
-// Routes that require an authenticated Supabase session (admin)
-const PROTECTED_PATHS = [
-  '/dashboard',
-  '/settings',
-  '/anomalies',
-  '/workflows',
-  '/integrations',
-  '/governance',
-  '/audit',
-]
-
-// Routes only employees can access
-const EMPLOYEE_PATHS = ['/employee-dashboard']
+import { claimsFromToken, mfaPassed } from './lib/server/mfa'
+import { isProtected, isEmployeePage } from './lib/server/routes'
 
 // Routes that should redirect authenticated users away (e.g. login)
 const AUTH_PATHS = ['/login', '/signup', '/']
-
-function isProtected(pathname: string): boolean {
-  return PROTECTED_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'))
-}
-
-function isEmployeePage(pathname: string): boolean {
-  return EMPLOYEE_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'))
-}
 
 function isAuthPage(pathname: string): boolean {
   return AUTH_PATHS.includes(pathname)
@@ -60,12 +40,14 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
     [
       "default-src 'self'",
       isDev
-        ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
-        : "script-src 'self' 'unsafe-inline'",   // unsafe-inline needed for Next.js inline scripts
+        ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.plaid.com"
+        : "script-src 'self' 'unsafe-inline' https://cdn.plaid.com",   // unsafe-inline needed for Next.js inline scripts; Plaid Link
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob:",
       "font-src 'self' https://fonts.gstatic.com",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.resend.com https://vitals.vercel-insights.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.resend.com https://vitals.vercel-insights.com https://*.plaid.com",
+      // Plaid Link runs in its own frame; the customer signs in to their bank there, never on Ventura.
+      "frame-src https://cdn.plaid.com",
       "frame-ancestors 'none'",
       "object-src 'none'",
       "base-uri 'self'",
@@ -76,7 +58,8 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
 
   // Cross-origin isolation — no COEP require-corp: it blocks Google Fonts
   // and other cross-origin resources that don't send CORP headers
-  h.set('Cross-Origin-Opener-Policy', 'same-origin')
+  // allow-popups: banks that sign in through Plaid's OAuth flow open a popup.
+  h.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups')
   h.set('Cross-Origin-Resource-Policy', 'same-origin')
 
   // Remove server fingerprinting headers
@@ -117,6 +100,15 @@ export async function middleware(request: NextRequest) {
   // Refresh session — IMPORTANT: do not remove, required for SSR auth
   const { data: { user } } = await supabase.auth.getUser()
 
+  // Signing in with a password gives a complete session at once, so a session
+  // is only "signed in" here once the SERVER has recorded that it passed its
+  // second factor (lib/server/mfa.ts). A password alone is not enough.
+  let mfaOk = false
+  if (user) {
+    const { data: { session } } = await supabase.auth.getSession()
+    mfaOk = mfaPassed(user, claimsFromToken(session?.access_token))
+  }
+
   // Redirects MUST carry any refreshed session cookies from supabaseResponse.
   // Supabase refresh tokens are single-use: if getUser() rotated the token and
   // we redirect without the new cookies, the browser keeps dead tokens and the
@@ -132,11 +124,13 @@ export async function middleware(request: NextRequest) {
   }
 
   // Route protection: unauthenticated users can't access protected paths
-  if ((isProtected(pathname) || isEmployeePage(pathname)) && !user) {
+  if ((isProtected(pathname) || isEmployeePage(pathname)) && (!user || !mfaOk)) {
     return redirectTo(isEmployeePage(pathname) ? '/employee-login' : '/login', { next: pathname })
   }
 
-  if (user) {
+  // A half signed-in user (password, no code yet) is left on the sign-in pages
+  // to finish, not bounced to the dashboard, which would send them straight back.
+  if (user && mfaOk) {
     const meta    = (user.user_metadata || {}) as Record<string, unknown>
     const company = meta._company as Record<string, string> | undefined
     // Older employee accounts lack the user_type tag — having a _company

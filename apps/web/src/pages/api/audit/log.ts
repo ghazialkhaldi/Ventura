@@ -1,14 +1,16 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { createClient } from '../../../utils/supabase/server'
 import { createAdminClient } from '../../../utils/supabase/admin'
-import { writeAuditEvent, resolveTenantId, clientIp } from '../../../lib/auditServer'
+import { writeAuditEvent, clientIp } from '../../../lib/auditServer'
+import { getWorkspace } from '../../../lib/server/workspace'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end()
 
-  const supabase = createClient({ req, res })
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return res.status(401).json({ error: 'Not authenticated' })
+  // The event is filed under the workspace the SERVER knows this person
+  // belongs to, never one they name or claim.
+  const ws = await getWorkspace(req, res)
+  if (!ws) return res.status(401).json({ error: 'Not authenticated' })
+  const { user } = ws
 
   const { action, resource, detail } = req.body || {}
   if (!action || typeof action !== 'string') return res.status(400).json({ error: 'action is required' })
@@ -17,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // This is the source of truth shown on /audit-logs; the fire-and-forget
   // write never blocks the response.
   void writeAuditEvent({
-    tenantId:    resolveTenantId(user),
+    tenantId:    ws.tenantId,
     actorId:     user.id,
     actorEmail:  user.email ?? null,
     event:       String(action),

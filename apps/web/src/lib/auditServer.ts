@@ -57,18 +57,6 @@ export async function writeAuditEvent(input: AuditWriteInput): Promise<void> {
   }
 }
 
-/**
- * Resolves the tenant id for an authenticated user: admins are the root of
- * their own tenant; employees inherit the admin they joined via
- * `_company.admin_id` (set in api/invite/join.ts). Matches the tenancy
- * model the rest of the app already uses for team/invite/connections data.
- */
-export function resolveTenantId(user: { id: string; user_metadata?: Record<string, unknown> | null }): string {
-  const meta = (user.user_metadata ?? {}) as Record<string, unknown>
-  const company = meta._company as Record<string, string> | undefined
-  return company?.admin_id || user.id
-}
-
 export function clientIp(req: { headers: Record<string, string | string[] | undefined> }): string | null {
   const fwd = req.headers['x-forwarded-for']
   if (typeof fwd === 'string' && fwd.trim()) return fwd.split(',')[0].trim()

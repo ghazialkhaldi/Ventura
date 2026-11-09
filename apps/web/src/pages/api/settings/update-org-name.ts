@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { createClient } from '../../../utils/supabase/server'
-import { writeAuditEvent, resolveTenantId, clientIp } from '../../../lib/auditServer'
+import { writeAuditEvent, clientIp } from '../../../lib/auditServer'
+import { getWorkspace, isAdmin } from '../../../lib/server/workspace'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end()
@@ -11,9 +11,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
   const trimmed = name.trim().slice(0, 120)
 
-  const supabase = createClient({ req, res })
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return res.status(401).json({ error: 'Not authenticated' })
+  const ws = await getWorkspace(req, res)
+  if (!ws) return res.status(401).json({ error: 'Not authenticated' })
+  if (!isAdmin(ws)) return res.status(403).json({ error: 'Only the workspace admin can rename the organization.' })
+  const { user, supabase } = ws
 
   // _company_name is what api/invite/join.ts and api/invite/validate.ts
   // actually read when deciding what company name to show an employee
@@ -27,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (error) return res.status(500).json({ error: 'Failed to update organization name' })
 
   void writeAuditEvent({
-    tenantId: resolveTenantId(user), actorId: user.id, actorEmail: user.email ?? null,
+    tenantId: ws.tenantId, actorId: user.id, actorEmail: user.email ?? null,
     event: 'Organization name changed', detail: trimmed, severity: 'info', ip: clientIp(req),
   })
 

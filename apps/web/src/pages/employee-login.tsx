@@ -224,7 +224,7 @@ export default function EmployeeLoginPage() {
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ email: suEmail, code, password: suPw, firstName: firstName.trim(), lastName: lastName.trim() }),
     })
-    const body = await res.json() as { error?: string }
+    const body = await res.json() as { error?: string; signedIn?: boolean }
     if (!res.ok) {
       setError(body.error || 'Incorrect or expired code.')
       setDigits(['', '', '', '', '', ''])
@@ -233,15 +233,21 @@ export default function EmployeeLoginPage() {
       return
     }
 
-    // Step 2: sign in with the newly created (pre-confirmed) account
-    const { data, error: signInErr } = await supabase.auth.signInWithPassword({ email: suEmail, password: suPw })
-    if (signInErr || !data.user) {
-      setError(signInErr?.message || 'Account created. Please sign in.')
+    // Step 2: the server signed the new account in and recorded that the code
+    // just proved the email. Do NOT sign in again here: that would start a new
+    // session, which has not passed the second factor. If the server could not
+    // sign them in, the account still exists, so send them to the normal
+    // sign-in, which includes the code step.
+    const created = body as { error?: string; signedIn?: boolean }
+    const { data: { user: u } } = created.signedIn ? await supabase.auth.getUser() : { data: { user: null } }
+    if (!u) {
       setLoading(false)
+      setSiEmail(suEmail)
+      await switchTab('signin')
+      setError('Your account is ready. Please sign in.')
       return
     }
 
-    const u        = data.user
     const meta     = (u.user_metadata || {}) as Record<string, string>
     const fullName = [firstName.trim(), lastName.trim()].filter(Boolean).join(' ')
     const cMeta    = (u.user_metadata?._company ?? {}) as Record<string, string>

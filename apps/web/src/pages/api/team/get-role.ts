@@ -1,21 +1,21 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { createClient } from '../../../utils/supabase/server'
+import { getWorkspace } from '../../../lib/server/workspace'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') return res.status(405).end()
 
-  const supabase = createClient({ req, res })
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return res.status(401).json({ error: 'Not authenticated' })
+  const ws = await getWorkspace(req, res)
+  if (!ws) return res.status(401).json({ error: 'Not authenticated' })
 
-  const meta    = (user.user_metadata || {}) as Record<string, unknown>
-  const company = meta._company as Record<string, string> | undefined
-  if (!company?.admin_id) return res.status(404).json({ error: 'Not in a workspace' })
+  // Not a member of anyone else's workspace.
+  if (ws.tenantId === ws.user.id) return res.status(404).json({ error: 'Not in a workspace' })
 
+  // What the server has verified, never the person's own editable copy.
+  const own = ((ws.user.user_metadata ?? {})._company ?? {}) as Record<string, string>
   return res.json({
-    role:      company.role     ?? 'viewer',
-    company:   company.company_name ?? '',
-    adminId:   company.admin_id,
-    joinedAt:  company.joined_at ?? null,
+    role:      ws.role,
+    company:   ws.tenantName ?? '',
+    adminId:   ws.tenantId,
+    joinedAt:  own.joined_at ?? null,
   })
 }

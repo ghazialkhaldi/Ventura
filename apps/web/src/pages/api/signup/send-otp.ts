@@ -1,17 +1,19 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { randomInt, createHash, createHmac } from 'crypto'
+import { otpSecret, otpMac, newCode, escapeHtml } from '../../../lib/server/otp'
+import { rateLimit, limitKey, waitText } from '../../../lib/server/rateLimit'
+import { clientIp } from '../../../lib/auditServer'
 
 const CODE_TTL_S = 600 // 10 minutes
-const EMAIL_REGEX = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/
+// No angle brackets, quotes or ampersands: this address goes into an email.
+const EMAIL_REGEX = /^[^\s@<>"'&]{1,64}@[^\s@<>"'&]{1,255}\.[^\s@<>"'&]{2,}$/
 
-function signingSecret() {
-  return (
-    process.env.TOKEN_ENCRYPTION_KEY?.slice(0, 32) ||
-    process.env.RESEND_API_KEY?.slice(0, 32) ||
-    'ventura-signup-dev-secret'
-  )
-}
-
+// Sends the signup verification code.
+//
+// The cookie carries a KEYED hash of the code, not a plain one. A plain
+// SHA-256 of a six-digit number can be reversed in well under a second by
+// whoever holds it, and the holder here is the person asking for the code, so
+// that would have made the email check meaningless. Without the server's key
+// the cookie tells them nothing.
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end()
 
@@ -27,17 +29,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!process.env.RESEND_API_KEY) {
     return res.status(503).json({ error: 'Email service is not configured on this server.' })
   }
+  const secret = otpSecret()
+  if (!secret) return res.status(503).json({ error: 'Email service is not configured on this server.' })
 
-  const code      = randomInt(100000, 1000000).toString()
-  const codeHash  = createHash('sha256').update(code).digest('hex')
+  // This endpoint sends mail from our domain to any address it is given, so it
+  // is limited per address (so nobody can flood one inbox) and per caller (so
+  // nobody can use it to flood many).
+  const ip = clientIp(req) ?? 'unknown'
+  const [byEmail, byIp] = await Promise.all([
+    rateLimit(limitKey('signup-send-email', email), 3, 600),
+    rateLimit(limitKey('signup-send-ip', ip), 10, 3600),
+  ])
+  if (!byEmail.ok || !byIp.ok) {
+    const wait = Math.max(byEmail.retryAfterSec, byIp.retryAfterSec)
+    return res.status(429).json({ error: `Too many codes requested. Please wait ${waitText(wait)} and try again.` })
+  }
+
+  const code      = newCode()
   const expiresAt = Date.now() + CODE_TTL_S * 1000
+  const mac       = otpMac(secret, 'signup', email, code, expiresAt)
+  const cookie    = Buffer.from(JSON.stringify({ email, expiresAt, mac })).toString('base64')
 
-  // Sign the cookie payload to prevent client-side forgery
-  const payload = `${email}|${codeHash}|${expiresAt}`
-  const sig     = createHmac('sha256', signingSecret()).update(payload).digest('hex')
-  const cookie  = Buffer.from(JSON.stringify({ email, codeHash, expiresAt, sig })).toString('base64')
-
-  res.setHeader('Set-Cookie', `_su_otp=${cookie}; HttpOnly; SameSite=Lax; Path=/api/signup; Max-Age=${CODE_TTL_S}`)
+  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : ''
+  res.setHeader('Set-Cookie', `_su_otp=${cookie}; HttpOnly; SameSite=Lax; Path=/api/signup; Max-Age=${CODE_TTL_S}${secure}`)
 
   const html = `
 <!DOCTYPE html>
@@ -59,7 +73,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               <p style="margin:0 0 8px;font-size:12px;font-weight:600;color:#10b981;text-transform:uppercase;letter-spacing:2px;">Account verification</p>
               <h1 style="margin:0 0 16px;font-size:26px;font-weight:700;color:#f0f6ff;line-height:1.2;letter-spacing:-0.5px;">Verify your email</h1>
               <p style="margin:0 0 36px;font-size:14px;color:#7a93b0;line-height:1.7;">
-                Use the code below to verify <strong style="color:#a8c0d8;">${email}</strong> and complete your Ventura account setup.
+                Use the code below to verify <strong style="color:#a8c0d8;">${escapeHtml(email)}</strong> and complete your Ventura account setup.
               </p>
               <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:36px;">
                 <tr><td style="background:#0c1526;border:1px solid #1e3048;border-radius:10px;padding:28px 24px;text-align:center;">

@@ -1,76 +1,66 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { randomInt, createHash } from 'crypto'
-import { createClient } from '../../utils/supabase/server'
+import { getSession } from '../../lib/server/session'
+import { hasVerifiedTotp } from '../../lib/server/mfa'
+import { adminClient } from '../../lib/server/workspace'
+import { otpSecret, otpMac, newCode, escapeHtml } from '../../lib/server/otp'
+import { rateLimit, limitKey, waitText } from '../../lib/server/rateLimit'
+import { clientIp } from '../../lib/auditServer'
 
-const CODE_TTL_MS  = 10 * 60 * 1000
-const MAX_SENDS    = 5
-const WINDOW_MS    = 10 * 60 * 1000
+const CODE_TTL_MS = 10 * 60 * 1000
 
-const EMAIL_REGEX = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/
-
+// Sends the emailed sign-in code.
+//
+// The person is already signed in with their password; this is the second
+// factor. The code's state lives in `app_metadata`, which only the server can
+// write, never in `user_metadata`, which the user can edit from the browser
+// (that would let them reset their own attempt counters or plant a code they
+// know). The code is kept only as a keyed hash.
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end()
 
-  // Strict type + format validation — reject anything that isn't a well-formed email string
-  const raw = req.body?.email
-  if (!raw || typeof raw !== 'string' || raw.length > 320) {
-    return res.status(400).json({ error: 'Email required' })
-  }
-  const email = raw.trim().toLowerCase()
-  if (!EMAIL_REGEX.test(email)) {
-    return res.status(400).json({ error: 'Invalid email address' })
+  // A live session made by signInWithPassword. The code goes to THAT account's
+  // email, whatever the request body says.
+  const session = await getSession(req, res)
+  if (!session) return res.status(401).json({ error: 'Session not found. Please sign in again.' })
+  const { user } = session
+  const email = user.email?.toLowerCase()
+  if (!email) return res.status(401).json({ error: 'Session not found. Please sign in again.' })
+
+  if (hasVerifiedTotp(user)) {
+    return res.status(400).json({ error: 'This account uses an authenticator app. Enter the code from the app.' })
   }
 
-  // Fail fast and clearly if email sending isn't configured — previously this
-  // fell through to the Resend call, which failed with an opaque
-  // "Failed to send verification email" that looked like a transient
-  // delivery problem instead of a missing environment variable.
+  // Fail fast and clearly if the server is not set up to send or sign codes.
   if (!process.env.RESEND_API_KEY) {
     return res.status(503).json({ error: 'Email verification is not configured on this server. Set RESEND_API_KEY.' })
   }
-
-  const supabase = createClient({ req, res })
-
-  // Confirm the caller has a live Supabase session (created by signInWithPassword)
-  const { data: { user } } = await supabase.auth.getUser()
-  // Compare normalized emails to prevent case-based session bypass
-  if (!user || user.email?.toLowerCase() !== email) {
-    return res.status(401).json({ error: 'Session not found. Please sign in again.' })
+  const secret = otpSecret()
+  const admin  = adminClient()
+  if (!secret || !admin) {
+    return res.status(503).json({ error: 'Email verification is not configured on this server.' })
   }
 
-  // Rate-limit: track send timestamps in metadata
-  const meta       = (user.user_metadata || {}) as Record<string, unknown>
-  const sendLog    = Array.isArray(meta._mfa_sends) ? (meta._mfa_sends as number[]) : []
-  const windowStart = Date.now() - WINDOW_MS
-  const recentSends = sendLog.filter((t: number) => t > windowStart)
-
-  if (recentSends.length >= MAX_SENDS) {
-    // Tell the user exactly how long until the oldest send falls out of the window
-    const oldestRecent  = Math.min(...recentSends)
-    const waitMs        = oldestRecent + WINDOW_MS - Date.now()
-    const waitMin       = Math.max(1, Math.ceil(waitMs / 60000))
-    return res.status(429).json({
-      error: `Too many codes requested. Please wait ${waitMin} minute${waitMin === 1 ? '' : 's'} and try again.`,
-    })
+  // Per account and per address, counted in the database so every serverless
+  // instance sees the same numbers.
+  const ip = clientIp(req) ?? 'unknown'
+  const [byUser, byIp] = await Promise.all([
+    rateLimit(limitKey('mfa-send-user', user.id), 5, 600),
+    rateLimit(limitKey('mfa-send-ip', ip), 20, 3600),
+  ])
+  if (!byUser.ok || !byIp.ok) {
+    const wait = Math.max(byUser.retryAfterSec, byIp.retryAfterSec)
+    return res.status(429).json({ error: `Too many codes requested. Please wait ${waitText(wait)} and try again.` })
   }
 
-  // Cryptographically secure code + SHA-256 hash (never store plaintext)
-  const code      = randomInt(100000, 1000000).toString()
-  const codeHash  = createHash('sha256').update(code).digest('hex')
-  const expiresAt = new Date(Date.now() + CODE_TTL_MS).toISOString()
+  const code      = newCode()
+  const expiresAt = Date.now() + CODE_TTL_MS
+  const app       = (user.app_metadata ?? {}) as Record<string, unknown>
 
-  // Store hash + expiry + attempt counter in user metadata
-  const { error: updateErr } = await supabase.auth.updateUser({
-    data: {
-      _mfa_hash:     codeHash,
-      _mfa_exp:      expiresAt,
-      _mfa_attempts: 0,
-      _mfa_sends:    [...recentSends, Date.now()],
-    },
+  const { error: updateErr } = await admin.auth.admin.updateUserById(user.id, {
+    app_metadata: { ...app, mfa_challenge: { mac: otpMac(secret, 'mfa', user.id, code, expiresAt), exp: expiresAt, attempts: 0 } },
   })
-
   if (updateErr) {
-    console.error('updateUser error:', updateErr)
+    console.error('[send-mfa] could not store the challenge:', updateErr)
     return res.status(500).json({ error: 'Failed to create verification code. Please try again.' })
   }
 
@@ -100,7 +90,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                   <p style="margin:0 0 8px;font-size:12px;font-weight:600;color:#10b981;text-transform:uppercase;letter-spacing:2px;">Identity verification</p>
                   <h1 style="margin:0 0 16px;font-size:26px;font-weight:700;color:#f0f6ff;line-height:1.2;letter-spacing:-0.5px;">Your sign-in code</h1>
                   <p style="margin:0 0 36px;font-size:14px;color:#7a93b0;line-height:1.7;">
-                    Someone is signing in to Ventura as <strong style="color:#a8c0d8;">${email}</strong>. Use the code below to confirm it&rsquo;s you.
+                    Someone is signing in to Ventura as <strong style="color:#a8c0d8;">${escapeHtml(email)}</strong>. Use the code below to confirm it&rsquo;s you.
                   </p>
                   <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:36px;">
                     <tr>
@@ -149,10 +139,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   })
 
   if (!emailRes.ok) {
-    const err = await emailRes.text()
-    console.error('Resend error:', err)
+    console.error('[send-mfa] Resend error:', await emailRes.text())
     // Clear the stored code so it can't be guessed
-    await supabase.auth.updateUser({ data: { _mfa_hash: null, _mfa_exp: null } })
+    await admin.auth.admin.updateUserById(user.id, { app_metadata: { ...app, mfa_challenge: null } })
     return res.status(500).json({ error: 'Failed to send verification email. Please try again.' })
   }
 

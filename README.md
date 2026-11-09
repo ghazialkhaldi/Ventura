@@ -66,7 +66,7 @@ npm run dev     # http://localhost:3000
 
 ## Input format
 
-Ventura reads CSV, Excel, PDF and OFX/QFX/QBO files. It finds the header row, searches every sheet, and maps the date, vendor, amount and debit or credit columns itself. Credits are set aside, not counted as spend. Extra columns are kept but not used for detection.
+Ventura reads CSV, Excel, PDF and OFX/QFX/QBO files. It finds the header row, picks the sheet that holds the ledger, and maps the columns itself: date, vendor, amount or debit and credit, category, account, period, invoice number, entry type (AP, journal, card, payroll), legal entity and local-currency amount. It reads NetSuite, QuickBooks and consolidated ERP layouts, including section rows, repeated headings and subtotals. Credits are set aside, not counted as spend, but they are used to recognize voids and reversed accruals.
 
 Connected systems (Plaid, QuickBooks, Xero, Gusto) can pull transactions, and findings run through the same checks as an uploaded file.
 
@@ -79,7 +79,7 @@ npm run test:server     # sign-in codes, MFA, rate limits, workspace membership,
 npm run eval:engine     # precision and recall on simulated companies
 ```
 
-`eval:engine` scores the engine against registers with planted anomalies and an answer key, including seventeen simulated companies from a bakery to a 90,000-row multi-entity enterprise. These registers are written by the same person who wrote the detector, so treat the numbers as a regression guard, not as evidence about real companies.
+`eval:engine` scores the engine against registers with planted anomalies and an answer key, including seventeen simulated companies from a bakery to a 90,000-row multi-entity enterprise. These registers are written by the same person who wrote the detector, so treat the numbers as a regression guard, not as evidence about real companies. For a fairer read, `test-data/` keeps holdout companies scored once, before any tuning, with their first-run results saved beside them. Once a holdout has been used to fix something it is no longer clean; use a new one.
 
 `test:server` includes a check that every page under `src/pages` is listed as public or protected in `src/lib/server/routes.ts`. Adding a page without choosing fails the test.
 

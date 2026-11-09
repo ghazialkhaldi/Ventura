@@ -34,6 +34,15 @@ export interface DetectionConfig {
   /** How many times the vendor's median a payment must reach. */
   vendorRatio: number
   /**
+   * The ratio that is enough for a vendor whose bills barely move, once there
+   * is history to show that: a fixed $14,800 contract billing three times that
+   * is news even though a volatile vendor could do so on an ordinary month.
+   */
+  vendorSteadyRatio: number
+  /** Log spread at or below which a vendor counts as steady, and the history needed to say so. */
+  vendorSteadySpread: number
+  vendorSteadyHistory: number
+  /**
    * How far above the vendor's other payments, in units of their own spread on
    * a log scale, a payment must sit. Spend varies by multiples, so a vendor that
    * routinely ranges widely needs a far larger jump than a steady one.
@@ -121,6 +130,10 @@ export interface DetectionConfig {
   /** Share of a vendor's other payments that must be non-round for a round one to stand out. */
   roundOthersIrregularShare: number
 
+  // ── Missing payee ──
+  /** Up to this many payments with no payee are each their own finding; beyond it, one finding about the export. */
+  missingPayeeGroupAbove: number
+
   // ── Reporting ──────────────────────────────────────────────────────────────
   /**
    * Confidence below which a finding's amount is excluded from reported risk
@@ -139,6 +152,9 @@ export const DEFAULT_DETECTION_CONFIG: DetectionConfig = {
 
   vendorMinHistory:              4,
   vendorRatio:                   4,
+  vendorSteadyRatio:             2.5,
+  vendorSteadySpread:            0.2,
+  vendorSteadyHistory:           8,
   vendorLogZ:                    3.5,
   vendorMaxMargin:               3,
   vendorMaxMarginHistory:        10,
@@ -169,6 +185,8 @@ export const DEFAULT_DETECTION_CONFIG: DetectionConfig = {
 
   roundNumberMin:                5_000,
   roundOthersIrregularShare:     0.75,
+
+  missingPayeeGroupAbove:        12,
 
   exposureConfidenceFloor:       70,
 }

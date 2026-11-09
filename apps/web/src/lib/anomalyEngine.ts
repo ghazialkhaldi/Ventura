@@ -88,7 +88,7 @@ const LEGAL_SUFFIXES = new Set([
   'inc', 'incorporated', 'llc', 'ltd', 'limited', 'co', 'company', 'corp', 'corporation',
   'plc', 'gmbh', 'pty', 'sa', 'ag', 'bv', 'nv', 'lp', 'llp', 'pllc', 'pc', 'srl', 'oy', 'ab',
 ])
-const MISSING_NAMES = new Set(['', 'unknown', 'unknown vendor', 'unknown payee', 'n a', 'na', 'none', 'tbd', 'no vendor', 'no payee', 'blank', 'null'])
+const MISSING_NAMES = new Set(['', 'various', 'misc', 'miscellaneous', 'sundry', 'cash', 'one time vendor', 'unknown', 'unknown vendor', 'unknown payee', 'n a', 'na', 'none', 'tbd', 'no vendor', 'no payee', 'blank', 'null'])
 
 /**
  * One key per real-world vendor. "Summit Print Co.", "Summit Print Company"
@@ -96,7 +96,7 @@ const MISSING_NAMES = new Set(['', 'unknown', 'unknown vendor', 'unknown payee',
  * same invoice gets paid twice without either payment looking repeated.
  */
 export function vendorKey(name: string): string {
-  const toks = (name || '').toLowerCase().replace(/&/g, ' and ').split(/[^\p{L}\p{N}]+/u).filter(Boolean)
+  const toks = (name || '').normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().replace(/&/g, ' and ').split(/[^\p{L}\p{N}]+/u).filter(Boolean)
   if (toks.length > 1 && toks[0] === 'the') toks.shift()
   while (toks.length > 1 && LEGAL_SUFFIXES.has(toks[toks.length - 1])) toks.pop()
   return toks.join(' ')
@@ -132,6 +132,31 @@ function refsOf(desc: string): Set<string> {
 }
 
 /**
+ * The keys of a real invoice number. Clerks retype these, and "SPS-48213",
+ * "SPS48213" and "48213" all get past an ERP's duplicate check, so the digits
+ * are a key of their own once there are enough of them to mean something.
+ */
+function invoiceRefs(invoice: string): Set<string> {
+  const out = new Set<string>()
+  // Leading zeros are padding: 0001234 and 1234 are one number.
+  const canon = invoice.toUpperCase().replace(/[^A-Z0-9]/g, '').replace(/\d+/g, d => d.replace(/^0+/, '') || '0')
+  if (canon) out.add(canon)
+  const run = (invoice.match(/\d+/g) ?? []).map(d => d.replace(/^0+/, '')).sort((a, b) => b.length - a.length)[0] ?? ''
+  if (run.length >= 5) out.add('#' + run)
+  return out
+}
+
+/** Two figures made of the same digits but in another order: a keying slip. */
+function transposed(a: number, b: number): boolean {
+  if (cents(a) === cents(b)) return false
+  const sort = (n: number) => String(cents(n)).split('').sort().join('')
+  return sort(a) === sort(b)
+}
+
+/** Entries that are not payments to a vendor. */
+const notPayment = (t: StoredTransaction) => t.source === 'journal' || t.source === 'payroll'
+
+/**
  * The chance that a vendor's payments produce this exact amount, to the cent,
  * within `window` days by coincidence: how many of its payments fall in such
  * a window, times how likely any one of them is to land on this cent, judged
@@ -147,7 +172,7 @@ function coincidence(v: Vendor, amount: number, window: number): number {
 }
 
 /** Wording that marks one of several planned payments against the same invoice. */
-const INSTALMENT = /\b(instal+ments?|deposits?|tranches?|progress|retention|milestones?|partial|balance|down ?payment|advance)\b|\b\d+\s*(of|\/)\s*\d+\b|\b\d{1,3}\s*%/i
+const INSTALMENT = /\b(instal+ments?|deposits?|tranches?|progress|retention|retainage|milestones?|partial|balance|down ?payment|advance)\b|\b\d+\s*(of|\/)\s*\d+\b|\b\d{1,3}\s*%/i
 
 /** A description's words without its references, or '' when it says nothing beyond the vendor's name. */
 function descKey(desc: string, vendor: string): string {
@@ -164,6 +189,8 @@ interface Row {
   acct: string              // the unit it was paid for: cost centre, store, property, truck
   refs: Set<string>
   desc: string
+  /** Its references come from a real invoice-number column, not a description. */
+  invoiced: boolean
 }
 
 /**
@@ -213,6 +240,13 @@ interface Ctx {
   counts: { weekend: number; dated: number; round: number; material: number }
   /** Whether a row counts toward the weekend rate: material, and not from a daily feed. */
   weekendBase: (r: Row) => boolean
+  /** Credits by vendor: reversals, voids and credit memos that cancel a payment. */
+  credits: Map<string, { day: number; amount: number }[]>
+}
+
+/** A credit for this payment, dated between two days: a void and reissue, or an accrual and its reversal. */
+function reversedWithin(ctx: Ctx, r: Row, from: number, to: number): boolean {
+  return (ctx.credits.get(r.key) ?? []).some(c => c.day >= from && c.day <= to && Math.abs(c.amount - r.tx.amount) <= r.tx.amount * 0.01)
 }
 
 const CADENCES = [1, 3.5, 7, 14, 15.2, 30.4, 91, 182, 365]
@@ -247,10 +281,17 @@ function cadenceOf(all: number[], minCount: number, extraShare: number): Cadence
 
 const seriesKey = (r: Row) => `${cents(r.tx.amount)}|${r.acct}`
 
-function buildContext(txs: StoredTransaction[], cfg: DetectionConfig): Ctx {
+function buildContext(txs: StoredTransaction[], cfg: DetectionConfig, creditTxs: StoredTransaction[] = []): Ctx {
   const rows: Row[] = txs
     .filter(t => !isMissingVendor(t.vendor) && t.amount > 0)
-    .map(tx => ({ tx, day: dayNumber(tx.date), key: vendorKey(tx.vendor), acct: (tx.account || '').trim().toLowerCase(), refs: refsOf(tx.description), desc: descKey(tx.description, tx.vendor) }))
+    .map(tx => {
+      // An invoice number, where the file has one, outranks anything in the
+      // description: a PO number there is shared by every line against the PO.
+      const invoice = (tx.invoice ?? '').trim()
+      return { tx, day: dayNumber(tx.date), key: vendorKey(tx.vendor), acct: (tx.account || '').trim().toLowerCase(), refs: invoice ? invoiceRefs(invoice) : refsOf(tx.description), desc: descKey(tx.description, tx.vendor), invoiced: !!invoice }
+    })
+  const credits = new Map<string, { day: number; amount: number }[]>()
+  for (const t of creditTxs) if (!isMissingVendor(t.vendor) && t.amount > 0) pushTo(credits, vendorKey(t.vendor), { day: dayNumber(t.date), amount: t.amount })
 
   const vendors = new Map<string, Vendor>()
   for (const r of rows) {
@@ -315,7 +356,7 @@ function buildContext(txs: StoredTransaction[], cfg: DetectionConfig): Ctx {
     if (r.tx.amount >= cfg.roundNumberMin) { material++; if (isRoundThousand(r.tx.amount)) round++ }
   }
   return {
-    cfg, rows, vendors,
+    cfg, rows, vendors, credits,
     start: Number.isFinite(start) ? start : NaN,
     end:   Number.isFinite(end) ? end : NaN,
     weekendShare: dated ? weekend / dated : 0,
@@ -366,8 +407,11 @@ function detectDuplicates(ctx: Ctx): Draft[] {
   const out: Draft[] = []
   const refCount = new Map<string, number>()
   for (const r of ctx.rows) for (const ref of r.refs) refCount.set(`${r.key}|${ref}`, (refCount.get(`${r.key}|${ref}`) ?? 0) + 1)
+  // A reference on three or more rows suggests planned instalments when all we
+  // have is a number in a description. A real invoice number paid three times
+  // in the same amount, with nothing saying instalment, is just paid three times.
   const planned = (a: Row, b: Row, ref: string) =>
-    INSTALMENT.test(a.tx.description) || INSTALMENT.test(b.tx.description) || (refCount.get(`${a.key}|${ref}`) ?? 0) >= 3
+    INSTALMENT.test(a.tx.description) || INSTALMENT.test(b.tx.description) || (!a.invoiced && !b.invoiced && (refCount.get(`${a.key}|${ref}`) ?? 0) >= 3)
 
   for (const v of ctx.vendors.values()) {
     for (const s of v.series.values()) {
@@ -388,8 +432,11 @@ function detectDuplicates(ctx: Ctx): Draft[] {
         const d = later.day - earlier.day
         if (cadence && d >= cadence * cfg.recurringExtraShare) anchor = later
         if (d > cfg.duplicateWindowDays) continue
+        if (reversedWithin(ctx, later, earlier.day, later.day)) continue // voided and reissued, or accrued and reversed
 
         const shared   = [...later.refs].filter(x => earlier.refs.has(x))
+        // Lines of one invoice posted together, each describing its own share.
+        if (d === 0 && shared.length && later.invoiced && earlier.invoiced && later.desc !== earlier.desc) continue
         const conflict = later.refs.size > 0 && earlier.refs.size > 0 && shared.length === 0
         // A description only counts when it says something: "Fuel" on every row of a fuel card says nothing.
         const sameDesc = !!later.desc && later.desc === earlier.desc && later.desc !== v.usualDesc
@@ -420,6 +467,8 @@ function detectDuplicates(ctx: Ctx): Draft[] {
           if (d > 0 || batchy || v.perDay >= 1) continue
           severity = 'MEDIUM'; confidence = 70
           why = 'The invoice numbers differ, so these may be two separate invoices; two identical amounts to one vendor on one day is still worth confirming.'
+        } else if (later.tx.source === 'card' && later.tx.amount < cfg.minExcess) {
+          continue // two coffees at the same price are two coffees
         } else if (d === 0) {
           if (batchy || coincidence(v, later.tx.amount, 0) >= 0.001) continue
           severity = 'CRITICAL'; confidence = sameDesc || (!later.desc && !earlier.desc) ? 96 : 90
@@ -487,6 +536,77 @@ function detectDuplicates(ctx: Ctx): Draft[] {
       reasoning: 'The same invoice reference and amount appear under two different vendor names. Either the vendor exists twice in the master file, which lets one invoice be paid twice, or a payment went to a look-alike record. Confirm which record is genuine.',
     }))
   }
+  out.push(...detectInvoiceRepeats(ctx), ...detectAccruedAndInvoiced(ctx))
+  return out
+}
+
+/**
+ * One invoice number posted again on a later date.
+ *
+ * Lines posted together are one posting, so a multi-line invoice re-entered
+ * later as a single line still matches on its total. The amounts must agree:
+ * to within 2%, which allows for FX and a freight or tax line added on re-entry,
+ * or by a transposition, which is the same invoice mis-keyed. Partial payments
+ * of one invoice differ by far more, and are left alone.
+ */
+function detectInvoiceRepeats(ctx: Ctx): Draft[] {
+  const { cfg } = ctx
+  const out: Draft[] = []
+  for (const v of ctx.vendors.values()) {
+    const byInvoice = new Map<string, Row[]>()
+    for (const r of v.rows) {
+      if (!r.invoiced || !Number.isFinite(r.day)) continue
+      const keys = [...r.refs]
+      pushTo(byInvoice, keys.find(k => k.startsWith('#')) ?? keys[0], r)
+    }
+    for (const group of byInvoice.values()) {
+      const byDay = new Map<number, Row[]>()
+      for (const r of group) pushTo(byDay, r.day, r)
+      if (byDay.size < 2) continue
+      const postings = [...byDay.entries()].sort((a, b) => a[0] - b[0]).map(([day, rows]) => ({ day, rows, total: rows.reduce((t, r) => t + r.tx.amount, 0) }))
+      for (let i = 1; i < postings.length; i++) {
+        const later = postings[i]
+        const earlier = postings.slice(0, i).reverse().find(e =>
+          later.day - e.day <= cfg.duplicateWindowDays * 3 && (Math.abs(e.total - later.total) <= e.total * 0.02 || transposed(e.total, later.total)))
+        if (!earlier || later.rows.some(r => INSTALMENT.test(r.tx.description)) || earlier.rows.some(r => INSTALMENT.test(r.tx.description))) continue
+        if (reversedWithin(ctx, { ...later.rows[0], tx: { ...later.rows[0].tx, amount: later.total } }, earlier.day, later.day)) continue
+        const d = later.day - earlier.day
+        const slip = transposed(earlier.total, later.total)
+        const ref = later.rows[0].tx.invoice!.trim()
+        out.push(draft('duplicate', `${slip ? 'Invoice re-keyed with digits swapped' : 'Invoice posted twice'} — ${v.name}`, [...later.rows, ...earlier.rows], {
+          amount: later.total, severity: d <= 7 ? 'CRITICAL' : 'HIGH', confidence: slip ? 88 : d <= 7 ? 97 : 93, vendor: later.rows[0].tx.vendor,
+          description: `Invoice ${ref} for ${fmtAmt(later.total)} to ${later.rows[0].tx.vendor} on ${later.rows[0].tx.date} (${rowLabel(later.rows[0].tx)}) matches ${earlier.rows[0].tx.invoice} for ${fmtExact(earlier.total)} posted on ${earlier.rows[0].tx.date} (${rowLabel(earlier.rows[0].tx)}), ${plural(d, 'day')} earlier.`,
+          reasoning: `${slip ? 'The two amounts use the same digits in a different order on the same invoice number, which is how a re-keyed invoice looks.' : 'The same invoice number was posted again for the same amount.'} Lines posted together are counted as one posting, so splitting or consolidating lines does not hide it. No void or credit cancels the first posting.`,
+        }))
+      }
+    }
+  }
+  return out
+}
+
+/** An estimate booked by journal rather than an invoice from the vendor. */
+const isAccrual = (r: Row) => /\baccru/i.test(r.tx.description) || (r.tx.source === 'journal' && !r.invoiced)
+
+/**
+ * An accrual that was never reversed, followed by the real invoice: the same
+ * expense booked twice. Ordinary accruals reverse, usually the next day, and
+ * that credit is the difference between this and routine month-end work.
+ */
+function detectAccruedAndInvoiced(ctx: Ctx): Draft[] {
+  const out: Draft[] = []
+  const HORIZON = 62 // invoices trail an accrual by up to two month-ends
+  for (const v of ctx.vendors.values()) {
+    for (const a of v.rows) {
+      if (!Number.isFinite(a.day) || !isAccrual(a) || a.tx.amount < ctx.cfg.minExcess) continue
+      const inv = v.rows.find(r => r !== a && Number.isFinite(r.day) && !isAccrual(r) && r.day > a.day && r.day - a.day <= HORIZON && Math.abs(r.tx.amount - a.tx.amount) <= a.tx.amount * 0.005)
+      if (!inv || reversedWithin(ctx, a, a.day, inv.day + 35)) continue
+      out.push(draft('duplicate', `Accrued and invoiced, never reversed — ${v.name}`, [inv, a], {
+        amount: inv.tx.amount, severity: 'HIGH', confidence: 84, vendor: inv.tx.vendor,
+        description: `${fmtAmt(inv.tx.amount)} from ${inv.tx.vendor} on ${inv.tx.date} (${rowLabel(inv.tx)}) matches an accrual booked on ${a.tx.date} (${rowLabel(a.tx)}) with no reversal in this register.`,
+        reasoning: 'An accrual is an estimate, and is normally reversed when the invoice arrives. This one has no matching credit, so the expense appears to have been recorded twice. Confirm the accrual was released.',
+      }))
+    }
+  }
   return out
 }
 
@@ -514,6 +634,8 @@ function cadenceName(c: number): string {
  * fertiliser, a year-end stock-up) is a second regime, and a price the vendor
  * charges again and again is a price, not an anomaly.
  */
+const ANNUAL = /\b(annual|yearly|renewal)\b/i
+
 function detectVendorOutliers(ctx: Ctx): Draft[] {
   const { cfg } = ctx
   const out: Draft[] = []
@@ -544,15 +666,20 @@ function detectVendorOutliers(ctx: Ctx): Draft[] {
       const prevMax = pos === n - 1 ? sorted[n - 2] : sorted[n - 1]
       const margin  = r.tx.amount / prevMax
       const beyond  = m >= cfg.vendorMaxMarginHistory && margin >= cfg.vendorMaxMargin && (z >= cfg.vendorLogZ - 0.5 || (margin >= 5 && m >= 20))
-      if (ratio < cfg.vendorRatio || (z < cfg.vendorLogZ && !beyond) || r.tx.amount - med < cfg.minExcess) continue
+      // A contract's scheduled lump is expected to break a steady pattern.
+      const steady = logSpread <= cfg.vendorSteadySpread && m >= cfg.vendorSteadyHistory && !INSTALMENT.test(r.tx.description) && !ANNUAL.test(r.tx.description)
+      if (ratio < (steady ? cfg.vendorSteadyRatio : cfg.vendorRatio) || (z < cfg.vendorLogZ && !beyond) || r.tx.amount - med < cfg.minExcess) continue
       let peers = 0
       for (let k = n - 1; k >= 0 && sorted[k] >= r.tx.amount / 2; k--) if (k !== pos) peers++
       if (peers > 1) continue
 
-      const severity: Severity = ratio >= 8 && r.tx.amount >= cfg.approvalLimit ? 'CRITICAL' : ratio >= 5 ? 'HIGH' : 'MEDIUM'
+      if (notPayment(r.tx)) continue
+      // An annual renewal beside small monthly charges is worth one look, not an alarm.
+      const annual = ANNUAL.test(r.tx.description)
+      const severity: Severity = annual ? 'LOW' : ratio >= 8 && r.tx.amount >= cfg.approvalLimit ? 'CRITICAL' : ratio >= 5 ? 'HIGH' : 'MEDIUM'
       out.push(draft('outlier', `Unusual amount for this vendor — ${v.name}`, [r], {
         amount: r.tx.amount, severity,
-        confidence: Math.min(96, 60 + 9 * Math.log2(ratio) + Math.min(8, m)),
+        confidence: annual ? 62 : Math.min(96, 60 + 9 * Math.log2(ratio) + Math.min(8, m)),
         description: `${fmtAmt(r.tx.amount)} to ${r.tx.vendor} on ${r.tx.date || 'an undated row'} is ${ratio.toFixed(1)}× this vendor's usual ${fmtAmt(med)} (${rowLabel(r.tx)}).`,
         reasoning: `Across ${v.name}'s ${plural(m, 'other payment')}, the median is ${fmtAmt(med)}${peers ? ' and only one other comes within half of this one' : ' and none comes within half of this one'}. This one is ${ratio.toFixed(1)} times the median${r.tx.amount >= cfg.vendorMaxMargin * prevMax ? ` and ${(r.tx.amount / prevMax).toFixed(1)} times the largest other payment it has received` : ''}, far beyond the vendor's own spread. It is measured against this vendor only, so a vendor that is routinely large never trips it.`,
       }))
@@ -575,10 +702,14 @@ function detectVendorOutliers(ctx: Ctx): Draft[] {
 function detectCategoryOutliers(ctx: Ctx): Draft[] {
   const { cfg } = ctx
   const out: Draft[] = []
+  // Card swipes and invoices are different worlds even in one account: a
+  // catering invoice says nothing against $40 lunches. Each is compared with
+  // its own kind when the file says which is which.
   const byCat = new Map<string, Row[]>()
+  const kind = (r: Row) => (r.tx.source === 'card' ? '|card' : '')
   for (const r of ctx.rows) {
     const c = (r.tx.category || 'Uncategorized').trim().toLowerCase()
-    pushTo(byCat, c, r)
+    pushTo(byCat, c + kind(r), r)
   }
   // Each category sorted once, with its vendor count.
   const catStats = new Map<string, { sorted: number[]; vendors: Map<string, number> }>()
@@ -595,7 +726,8 @@ function detectCategoryOutliers(ctx: Ctx): Draft[] {
       // Without a real category there is no like-for-like range: rent compared
       // with stationery says nothing.
       if (!cat || cat.toLowerCase() === 'uncategorized') continue
-      const stats = catStats.get(cat.toLowerCase())
+      if (notPayment(r.tx)) continue
+      const stats = catStats.get(cat.toLowerCase() + kind(r))
       if (!stats) continue
       const own = stats.vendors.get(v.key) ?? 0
       const otherCount = stats.sorted.length - own
@@ -605,7 +737,7 @@ function detectCategoryOutliers(ctx: Ctx): Draft[] {
       let pool = stats.sorted
       if (own) {
         pool = [...stats.sorted]
-        for (const o of v.rows) if ((o.tx.category || '').trim().toLowerCase() === cat.toLowerCase()) {
+        for (const o of v.rows) if ((o.tx.category || '').trim().toLowerCase() === cat.toLowerCase() && kind(o) === kind(r)) {
           const i = pool.lastIndexOf(o.tx.amount)
           if (i >= 0) pool.splice(i, 1)
         }
@@ -657,9 +789,16 @@ function binomialTail(k: number, n: number): number {
  * under that. A smooth spread of amounts never does that, so the bunching
  * locates a company's real limit (a $5,000 card limit, say) without being told.
  */
-function approvalLimits(ctx: Ctx): { limit: number; inferred: boolean }[] {
+interface Limit { limit: number; inferred: boolean; candidate?: boolean }
+
+/** How close under a common limit a cluster must sit before it counts without any company-wide evidence. */
+const CANDIDATE_BAND = 0.95
+/** Below this, a limit is not worth a controller's morning. */
+const CANDIDATE_FLOOR = 5_000
+
+function approvalLimits(ctx: Ctx): Limit[] {
   const { cfg } = ctx
-  const out = [{ limit: cfg.approvalLimit, inferred: false }]
+  const out: Limit[] = [{ limit: cfg.approvalLimit, inferred: false }]
   const amounts: number[] = []
   for (const v of ctx.vendors.values()) for (const r of v.rows) if (!inSeries(v, r) && (v.priceCount.get(cents(r.tx.amount)) ?? 0) < 3) amounts.push(r.tx.amount)
   for (const T of CANDIDATE_LIMITS) {
@@ -671,9 +810,14 @@ function approvalLimits(ctx: Ctx): { limit: number; inferred: boolean }[] {
       else if (a >= T * 0.8 && a < T * 0.9) under++
     }
     if (below >= 6 && below >= 3 * (above + 1) && below >= 2 * (under + 1) && binomialTail(below, below + above) < 0.02) out.push({ limit: T, inferred: true })
+    // Companies have more than one limit, and a single vendor hugging a common
+    // one is evidence enough, held to a tighter band and a stricter test.
+    else if (T >= CANDIDATE_FLOOR) out.push({ limit: T, inferred: true, candidate: true })
   }
   return out
 }
+
+interface Payee { v: Vendor; rows: Row[]; amt: (r: Row) => number; unit: string }
 
 /**
  * Payments to one vendor clustered just beneath an approval limit.
@@ -683,19 +827,42 @@ function approvalLimits(ctx: Ctx): { limit: number; inferred: boolean }[] {
  * days. A fixed fee that simply recurs at that level is a rhythm, not a split;
  * and a vendor that is routinely paid just *over* the limit has nothing to
  * avoid, because its amounts are not bunched under the line.
+ *
+ * A vendor is judged across the whole group, so splitting between two legal
+ * entities does not hide it, and again within each foreign entity in its own
+ * currency, because that is the money its limits are written in.
  */
 function detectApprovalAvoidance(ctx: Ctx): Draft[] {
+  const limits = approvalLimits(ctx)
+  const group: Payee[] = [...ctx.vendors.values()].map(v => ({ v, rows: v.rows, amt: r => r.tx.amount, unit: '' }))
+  const out = scanForSplits(ctx, group, limits)
+
+  const local = (r: Row) => r.tx.localAmount ?? r.tx.amount
+  const foreign: Payee[] = []
+  for (const v of ctx.vendors.values()) {
+    const byEntity = new Map<string, Row[]>()
+    for (const r of v.rows) if (r.tx.entity && r.tx.localAmount && Math.abs(r.tx.localAmount - r.tx.amount) > r.tx.amount * 0.001) pushTo(byEntity, r.tx.entity, r)
+    for (const [entity, rows] of byEntity) foreign.push({ v, rows, amt: local, unit: ` in entity ${entity}'s own currency` })
+  }
+  if (foreign.length) out.push(...scanForSplits(ctx, foreign, CANDIDATE_LIMITS.filter(T => T >= CANDIDATE_FLOOR).map(limit => ({ limit, inferred: true, candidate: true }))))
+  return out
+}
+
+function scanForSplits(ctx: Ctx, payees: Payee[], limits: Limit[]): Draft[] {
   const { cfg } = ctx
   const out: Draft[] = []
 
-  for (const { limit, inferred } of approvalLimits(ctx)) {
-    const low = limit * cfg.approvalBandLow
-    for (const v of ctx.vendors.values()) {
-      const band = v.rows.filter(r => Number.isFinite(r.day) && r.tx.amount >= low && r.tx.amount <= limit && !inSeries(v, r) && !allocation(v, r) && (v.priceCount.get(cents(r.tx.amount)) ?? 0) < 3)
+  for (const { limit, inferred, candidate } of limits) {
+    const low = limit * (candidate ? CANDIDATE_BAND : cfg.approvalBandLow)
+    const alpha = candidate ? 0.01 / CANDIDATE_LIMITS.length : 0.01 // every limit tried is another chance to be fooled
+    for (const { v, rows, amt, unit } of payees) {
+      const band = rows.filter(r => Number.isFinite(r.day) && amt(r) >= low && amt(r) <= limit && !inSeries(v, r) && !allocation(v, r) && (v.priceCount.get(cents(r.tx.amount)) ?? 0) < 3)
       if (band.length < 2) continue
-      // A vendor paid just over the line as often as just under it has nothing to avoid.
-      const over  = v.rows.filter(r => r.tx.amount > limit && r.tx.amount <= limit * 1.25).length
-      if (over >= 2 && over >= band.length) continue
+      // A vendor paid just over the line as often as just under it has little
+      // to avoid, which explains away anything short of three invoices landing
+      // within a whisker of the limit in one week.
+      const over  = rows.filter(r => amt(r) > limit && amt(r) <= limit * 1.25).length
+      const routinelyOver = over >= 2 && over >= band.length
       const active = Math.max(1, band[band.length - 1].day - band[0].day + 1, (Number.isFinite(ctx.end - ctx.start) ? ctx.end - ctx.start + 1 : 1))
       let i = 0
       while (i < band.length) {
@@ -703,19 +870,27 @@ function detectApprovalAvoidance(ctx: Ctx): Draft[] {
         while (j + 1 < band.length && band[j + 1].day - band[i].day <= cfg.approvalWindowDays) j++
         const cluster = band.slice(i, j + 1)
         const span = cluster[cluster.length - 1].day - cluster[0].day
-        // How likely is a cluster this tight at the vendor's own rate of in-band
-        // payments, over all the windows it could have fallen in? A vendor paid
-        // in this range every week produces pairs by chance; one paid there
-        // once a year does not produce three in a week.
-        const rateOut = (band.length - cluster.length) / active
+        // How likely is a cluster this tight at the vendor's own rate of
+        // payments this close to the line, over all the windows it could have
+        // fallen in? A vendor paid in this range every week produces pairs by
+        // chance; one paid there once a year does not produce three in a week.
+        // Measured at the cluster's own distance from the limit: a vendor whose
+        // invoices merely run near it rarely lands within a percent of it.
+        const tightest = Math.min(...cluster.map(amt))
+        const peers = band.filter(r => amt(r) >= tightest).length
+        const rateOut = (peers - cluster.length) / active
         const chance  = poissonTail(cluster.length, rateOut * (span + 1)) * Math.max(1, active / (span + 1))
-        if ((cluster.length >= 3 || (cluster.length === 2 && span <= cfg.approvalPairMaxDays)) && chance < 0.01) {
+        // Routinely over the line excuses everything but three or more hugging it.
+        const hugging = cluster.length >= 3 && tightest >= limit * 0.97
+        if ((!routinelyOver || hugging) && (cluster.length >= 3 || (cluster.length === 2 && span <= cfg.approvalPairMaxDays)) && chance < alpha) {
           const total = cluster.reduce((s, r) => s + r.tx.amount, 0)
           const which = inferred ? `an apparent ${fmtAmt(limit)} limit` : `the ${fmtAmt(limit)} approval limit`
+          const entities = new Set(cluster.map(r => r.tx.entity).filter(Boolean))
+          const across = !unit && entities.size > 1 ? ` across ${entities.size} legal entities` : ''
           out.push(draft('approval_avoidance', `Payments split under ${inferred ? 'an apparent' : 'the'} approval limit — ${v.name}`, cluster, {
-            amount: total, severity: cluster.length >= 3 ? 'CRITICAL' : 'HIGH', confidence: (cluster.length >= 3 ? 94 : 84) - (inferred ? 4 : 0),
-            description: `${cluster.length} payments to ${v.name} totalling ${fmtAmt(total)} between ${cluster[0].tx.date} and ${cluster[cluster.length - 1].tx.date}, each between ${fmtAmt(low)} and ${fmtAmt(limit)}, none individually reaching ${which}.`,
-            reasoning: `Each payment stays under ${which}, yet together they total ${fmtAmt(total)} across ${plural(span, 'day')}. Several payments to one vendor landing just under a limit within a week is the signature of a purchase split to avoid approval.${inferred ? ` This file shows a limit at ${fmtAmt(limit)}: payments bunch just below it far more than a smooth spread of amounts would.` : ''} Confirm them against the underlying invoices.`,
+            amount: total, severity: cluster.length >= 3 ? 'CRITICAL' : 'HIGH', confidence: (cluster.length >= 3 ? 94 : 84) - (candidate ? 8 : inferred ? 4 : 0),
+            description: `${cluster.length} payments to ${v.name}${across} totalling ${fmtAmt(total)} between ${cluster[0].tx.date} and ${cluster[cluster.length - 1].tx.date}, each between ${fmtAmt(low)} and ${fmtAmt(limit)}${unit}, none individually reaching ${which}.`,
+            reasoning: `Each payment stays under ${which}${unit}, yet together they total ${fmtAmt(total)} across ${plural(span, 'day')}${across}. Several payments to one vendor landing just under a limit within a week is the classic signature of an invoice split to avoid a second approver. Check whether these are one purchase.`,
           }))
           i = j + 1
         } else i++
@@ -757,22 +932,25 @@ function detectVelocity(ctx: Ctx): Draft[] {
   const W = cfg.velocityWindowDays
 
   for (const v of ctx.vendors.values()) {
-    const rows = v.rows.filter(r => Number.isFinite(r.day) && !v.allocExtra.has(r.tx.id)) // an invoice's allocation lines are one payment
+    const rows = v.rows.filter(r => Number.isFinite(r.day) && !v.allocExtra.has(r.tx.id) && !notPayment(r.tx)) // an invoice's allocation lines are one payment
     if (rows.length < 2) continue
     const first = rows[0].day
 
     if (first - ctx.start >= cfg.newVendorGraceDays) {
       const burst = rows.filter(r => r.day - first < W)
-      if (burst.length < cfg.velocityNewVendorMinCount) continue
       const restMax = densest(rows.slice(burst.length), W).count
-      if (restMax && (burst.length < cfg.velocityBurstMultiple * restMax || burst.length - restMax < 2)) continue
-      const total = burst.reduce((s, r) => s + r.tx.amount, 0)
-      out.push(draft('high_frequency', `New vendor paid ${burst.length} times in its first week — ${v.name}`, burst, {
-        amount: total, severity: 'HIGH', confidence: 86,
-        description: `${plural(burst.length, 'payment')} to ${v.name} totalling ${fmtAmt(total)} within ${plural(W, 'day')} of its first appearance on ${rows[0].tx.date}.`,
-        reasoning: `${v.name} is not paid anywhere in the ${plural(first - ctx.start, 'day')} of this register before ${rows[0].tx.date}, then receives ${plural(burst.length, 'payment')} in ${plural(W, 'day')}${restMax ? `, against at most ${restMax} in any week since` : ''}. A new vendor has no established rhythm to justify that frequency. Confirm the vendor and that each invoice is distinct.`,
-      }))
-      continue
+      // Most vendors first seen mid-register are simply not burst at the start:
+      // they fall through and are judged on their own rhythm like any other.
+      const isBurst = burst.length >= cfg.velocityNewVendorMinCount && !(restMax && (burst.length < cfg.velocityBurstMultiple * restMax || burst.length - restMax < 2))
+      if (isBurst) {
+        const total = burst.reduce((s, r) => s + r.tx.amount, 0)
+        out.push(draft('high_frequency', `New vendor paid ${burst.length} times in its first week — ${v.name}`, burst, {
+          amount: total, severity: 'HIGH', confidence: 86,
+          description: `${plural(burst.length, 'payment')} to ${v.name} totalling ${fmtAmt(total)} within ${plural(W, 'day')} of its first appearance on ${rows[0].tx.date}.`,
+          reasoning: `${v.name} is not paid anywhere in the ${plural(first - ctx.start, 'day')} of this register before ${rows[0].tx.date}, then receives ${plural(burst.length, 'payment')} in ${plural(W, 'day')}${restMax ? `, against at most ${restMax} in any week since` : ''}. A new vendor has no established rhythm to justify that frequency. Confirm the vendor and that each invoice is distinct.`,
+        }))
+        continue
+      }
     }
 
     const activeDays = rows[rows.length - 1].day - first + 1 - W
@@ -813,8 +991,12 @@ function detectCategoryMismatch(ctx: Ctx): Draft[] {
     }
     if (counts.size < 2) continue
     const [modalKey, modalRows] = [...counts.entries()].sort((a, b) => b[1].length - a[1].length)[0]
-    if (modalRows.length < cfg.categoryConsistencyMinHistory || modalRows.length / coded.length < cfg.categoryConsistencyShare) continue
+    if (modalRows.length < cfg.categoryConsistencyMinHistory) continue
     const departures = coded.filter(r => r.tx.category.trim().toLowerCase() !== modalKey)
+    // A single departure from an established pattern is the case this check
+    // exists for, however short the history; the share guards against a vendor
+    // genuinely split across categories.
+    if (departures.length > 1 && modalRows.length / coded.length < cfg.categoryConsistencyShare) continue
     if (departures.length > 2) continue
     const modal = modalRows[0].tx.category.trim()
 
@@ -920,10 +1102,14 @@ function detectPeriodMismatch(ctx: Ctx, all: StoredTransaction[]): Draft[] {
     const d = dayNumber(x.t.date)
     return d < first ? first - d : d > last ? d - last : 0
   }
-  if (off.length >= 5 && off.filter(x => daysOutside(x) <= 7).length / off.length >= 0.8) off = off.filter(x => daysOutside(x) > 7)
+  // One boundary is an event, not a calendar: a batch held back at year end
+  // crowds a single month end, and that is the error this check is for.
+  const near = off.filter(x => daysOutside(x) <= 7)
+  const boundaries = new Set(near.map(x => x.p.year * 12 + x.p.month))
+  if (off.length >= 5 && near.length / off.length >= 0.8 && boundaries.size >= 4) off = off.filter(x => daysOutside(x) > 7)
   if (off.length === 0) return []
   const byTx = new Map(ctx.rows.map(r => [r.tx, r]))
-  const rowOf = (t: StoredTransaction): Row => byTx.get(t) ?? { tx: t, day: dayNumber(t.date), key: vendorKey(t.vendor), acct: '', refs: new Set(), desc: '' }
+  const rowOf = (t: StoredTransaction): Row => byTx.get(t) ?? { tx: t, day: dayNumber(t.date), key: vendorKey(t.vendor), acct: '', refs: new Set(), desc: '', invoiced: false }
   const calendar = mode === 0 ? '' : ` In this file a period label sits ${plural(Math.abs(mode), 'month')} ${mode > 0 ? 'ahead of' : 'behind'} the calendar month, a fiscal calendar learned from ${Math.round((modeCount / labelled.length) * 100)}% of rows.`
 
   if (off.length > cfg.periodGroupAbove) {
@@ -939,7 +1125,7 @@ function detectPeriodMismatch(ctx: Ctx, all: StoredTransaction[]): Draft[] {
   return off.map(x => {
     const expected = x.p.year * 12 + x.p.month - mode // calendar month the label stands for
     const diff = x.d - expected                       // >0: dated after its period
-    const crossesYear = mode === 0 && Math.floor(x.d / 12) !== Math.floor(expected / 12)
+    const crossesYear = Math.floor((x.d + mode) / 12) !== Math.floor((expected + mode) / 12) // in the file's own fiscal years
     let severity: Severity, confidence: number, why: string
     if (diff > 0) {
       severity = crossesYear || diff >= 2 ? 'HIGH' : 'MEDIUM'; confidence = crossesYear ? 95 : 92
@@ -1057,6 +1243,50 @@ function detectNewVendorRisk(ctx: Ctx): Draft[] {
   return out
 }
 
+/**
+ * One slip apart: a letter added, dropped or changed, or two neighbours
+ * swapped. Two separate changes is usually a different word ("Media" and
+ * "Medical", "Fulton" and "Falcon"), not a typo.
+ */
+function oneSlipApart(a: string, b: string): boolean {
+  if (a === b || Math.abs(a.length - b.length) > 1) return false
+  const [s, l] = a.length <= b.length ? [a, b] : [b, a]
+  let i = 0
+  while (i < s.length && s[i] === l[i]) i++
+  if (s.length === l.length) {
+    if (s.slice(i + 1) === l.slice(i + 1)) return true
+    return s[i] === l[i + 1] && s[i + 1] === l[i] && s.slice(i + 2) === l.slice(i + 2)
+  }
+  return s.slice(i) === l.slice(i + 1)
+}
+
+/**
+ * A new vendor spelled almost exactly like an established one: a typo-squat
+ * set up to receive payments meant for a real supplier, or a duplicate master
+ * record. A whole different word ("Supply" and "Services") is too far away to
+ * trip this, which leaves genuinely different companies alone.
+ */
+function detectLookalikeVendors(ctx: Ctx): Draft[] {
+  const { cfg } = ctx
+  const out: Draft[] = []
+  const first = (v: Vendor) => v.rows.find(r => Number.isFinite(r.day))?.day ?? NaN
+  const known = [...ctx.vendors.values()].filter(v => v.rows.length >= cfg.vendorMinHistory + 1)
+  for (const v of ctx.vendors.values()) {
+    if (v.key.length < 8 || first(v) - ctx.start < cfg.newVendorGraceDays) continue
+    // A difference in digits is a store or branch number, not a misspelling.
+    const digits = (key: string) => key.replace(/\D/g, '')
+    const twin = known.find(k => k !== v && first(k) < first(v) && digits(k.key) === digits(v.key) && oneSlipApart(v.key, k.key))
+    if (!twin) continue
+    const total = v.rows.reduce((t, r) => t + r.tx.amount, 0)
+    out.push(draft('new_vendor_risk', `New vendor named almost like an existing one — ${v.name}`, v.rows, {
+      amount: total, severity: 'HIGH', confidence: 88,
+      description: `${v.name} first appears on ${v.rows[0].tx.date} and is paid ${fmtAmt(total)}. Its name is nearly identical to ${twin.name}, an established vendor.`,
+      reasoning: `A new vendor record one character from a real supplier is how payments get redirected, and also how duplicate master records start. Compare its bank details and tax ID with ${twin.name}'s.`,
+    }))
+  }
+  return out
+}
+
 // ─── 9. Round number, unusual for the vendor ──────────────────────────────────
 
 /**
@@ -1072,7 +1302,7 @@ function detectRoundNumbers(ctx: Ctx): Draft[] {
     if (v.rows.length < 5) continue
     const irregularAll = v.rows.filter(o => !isRoundHundred(o.tx.amount)).length
     for (const r of v.rows) {
-      if (r.tx.amount < cfg.roundNumberMin || !isRoundThousand(r.tx.amount) || inSeries(v, r) || allocation(v, r)) continue
+      if (r.tx.amount < cfg.roundNumberMin || !isRoundThousand(r.tx.amount) || inSeries(v, r) || allocation(v, r) || notPayment(r.tx)) continue
       const others = v.rows.length - 1
       const irregular = irregularAll / others // this payment is round, so every irregular one is another
       if (irregular < cfg.roundOthersIrregularShare) continue
@@ -1092,16 +1322,31 @@ function detectRoundNumbers(ctx: Ctx): Draft[] {
 
 // ─── 10. Missing payee ────────────────────────────────────────────────────────
 
+/** Bookkeeping entries that legitimately name no payee. */
+const NON_CASH = /deprecia|amorti[sz]|accru|reclass|re-?measure|revaluation|write.?(off|down)|true.?up|\bfx\b|exchange (gain|loss)|interest|adjust|\baje\b|allocation/i
+const noPayeeExpected = (t: StoredTransaction) =>
+  notPayment(t) || NON_CASH.test(t.description) || NON_CASH.test(t.category) || NON_CASH.test(t.account)
+
 function detectMissingVendor(txs: StoredTransaction[], cfg: DetectionConfig): Draft[] {
-  const blanks = txs.filter(t => t.amount > 0 && isMissingVendor(t.vendor))
+  const blanks = txs.filter(t => t.amount > 0 && isMissingVendor(t.vendor) && !noPayeeExpected(t))
   if (blanks.length === 0) return []
+  const rows: Row[] = blanks.map(tx => ({ tx, day: dayNumber(tx.date), key: '', acct: '', refs: new Set(), desc: '', invoiced: false }))
+  const reasoning = 'Every payment must identify who was paid. A blank payee means a data-entry gap, a broken export mapping, or a payment nobody wants traced. Identify the counterparty for each row.'
+
+  // A few are each worth a reviewer's attention; a flood is one problem with the export.
+  if (blanks.length <= cfg.missingPayeeGroupAbove) {
+    return rows.map(r => draft('missing_vendor', `Payment with no payee — ${fmtAmt(r.tx.amount)}`, [r], {
+      amount: r.tx.amount, severity: r.tx.amount >= cfg.approvalLimit ? 'HIGH' : 'MEDIUM', confidence: 97, vendor: '(no payee)', category: 'Data quality',
+      description: `${fmtAmt(r.tx.amount)} on ${r.tx.date || 'an undated row'} (${rowLabel(r.tx)}) names ${r.tx.vendor.trim() ? `"${r.tx.vendor.trim()}" as its payee` : 'no vendor or payee'}.`,
+      reasoning,
+    }))
+  }
   const total = blanks.reduce((s, t) => s + t.amount, 0)
-  const rows: Row[] = blanks.map(tx => ({ tx, day: dayNumber(tx.date), key: '', acct: '', refs: new Set(), desc: '' }))
   return [draft('missing_vendor', `${plural(blanks.length, 'payment')} with no payee`, rows, {
     amount: total, severity: blanks.length > 10 || total >= cfg.approvalLimit ? 'HIGH' : 'MEDIUM', confidence: 99,
     vendor: '(no payee)', category: 'Data quality',
     description: `${plural(blanks.length, 'payment')} totalling ${fmtAmt(total)} name no vendor or payee.`,
-    reasoning: 'Every payment must identify who was paid. A blank payee means a data-entry gap, a broken export mapping, or a payment nobody wants traced. Identify the counterparty for each row.',
+    reasoning,
   })]
 }
 
@@ -1170,7 +1415,7 @@ export function runAnomalyDetection(
   // these checks: a refund beside its original charge is not a duplicate,
   // and inflows would skew every baseline.
   const txs = allTxs.filter(t => t.direction !== 'credit' && t.amount > 0)
-  const ctx = buildContext(txs, cfg)
+  const ctx = buildContext(txs, cfg, allTxs.filter(t => t.direction === 'credit'))
 
   const drafts = merge([
     ...detectDuplicates(ctx),
@@ -1180,6 +1425,7 @@ export function runAnomalyDetection(
     ...detectCategoryOutliers(ctx),
     ...detectVelocity(ctx),
     ...detectNewVendorRisk(ctx),
+    ...detectLookalikeVendors(ctx),
     ...detectCategoryMismatch(ctx),
     ...detectRoundNumbers(ctx),
     ...detectMissingVendor(txs, cfg),

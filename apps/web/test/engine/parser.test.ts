@@ -171,6 +171,54 @@ test('column headings repeated through a paginated report are not data', async (
   assert.equal(r.transactions.length, 3)
 })
 
+test('invoice, source, entity and local amount come through from a GL export', async () => {
+  const r = await parseFile(workbook({ 'GL Detail': [['Posting Date', 'Source', 'Entity', 'Vendor No.', 'Vendor Name', 'Invoice No.', 'Invoice Date', 'Txn Amount (Local)', 'Debit (USD)', 'Credit (USD)'], ['2026-01-05', 'AP', 400, 'V-1', 'Hanse', 'H-1001', '2026-01-02', '19.480,30', 22800, ''], ['2026-01-06', 'GL', 100, '', '', '', '', 500, 500, '']] }))
+  if ('error' in r) return assert.fail(r.error)
+  assert.equal(r.mapping.invoice, 'Invoice No.')
+  assert.deepEqual([r.transactions[0].invoice, r.transactions[0].source, r.transactions[0].entity, r.transactions[0].localAmount], ['H-1001', 'ap', '400', 19480.3])
+  assert.equal(r.transactions[1].source, 'journal')
+})
+
+test('a NetSuite Type column is the source, and the account becomes the category', async () => {
+  const r = await parseFile(workbook({ S: [['Date', 'Type', 'Document Number', 'Name', 'Memo', 'Account', 'Department', 'Amount'], ['2026-01-05', 'Bill', 'D-1', 'Acme', 'Parts', '6100 Medical Supplies', 'Surgery', 900], ['2026-01-06', 'Journal', 'J-1', '', 'Depreciation', '7100 Depreciation', 'Admin', 450]] }))
+  if ('error' in r) return assert.fail(r.error)
+  assert.equal(r.mapping.source, 'Type')
+  assert.equal(r.mapping.category, 'Account')
+  assert.equal(r.mapping.account, 'Department')
+  assert.deepEqual([r.transactions[0].source, r.transactions[0].category], ['ap', '6100 Medical Supplies'])
+})
+
+test('a Type column of spending categories is still the category', async () => {
+  const r = await parseFile(workbook({ S: [['Date', 'Type', 'Name', 'Account', 'Amount'], ['2026-01-05', 'Software', 'Acme', 'Main', 900], ['2026-01-06', 'Rent', 'Bolt', 'Main', 450]] }))
+  if ('error' in r) return assert.fail(r.error)
+  assert.equal(r.mapping.category, 'Type')
+  assert.equal(r.mapping.source ?? null, null)
+})
+
+test('a QuickBooks detail report: section rows become the account, Num the invoice', async () => {
+  const r = await parseFile(workbook({ S: [
+    ['Larkfield Architects'], ['Transaction Detail by Account'], [],
+    ['', 'Date', 'Transaction Type', 'Num', 'Name', 'Memo/Description', 'Split', 'Amount', 'Balance'],
+    ['Legal'],
+    ['', '2025-09-08', 'Bill', '1042', 'Harlow Brandt', 'Filing', 'A/P', '1,200.00', '1,200.00'],
+    ['', '2025-09-30', 'Journal Entry', 'JE1', '', 'Monthly depreciation', 'A/P', '300.00', '1,500.00'],
+    ['Total for Legal', '', '', '', '', '', '', '$1,500.00', ''],
+    ['Rent'],
+    ['', '2025-10-01', 'Bill', '77', 'Marlowe', 'Office rent', 'A/P', '4,000.00', '4,000.00'],
+    ['TOTAL', '', '', '', '', '', '', '$5,500.00', ''],
+  ] }))
+  if ('error' in r) return assert.fail(r.error)
+  assert.equal(r.transactions.length, 3)
+  assert.deepEqual(r.transactions.map(t => [t.category, t.invoice, t.source]), [['Legal', '1042', 'ap'], ['Legal', 'JE1', 'journal'], ['Rent', '77', 'ap']])
+  assert.equal(r.transactions[0].amount, 1200, 'the running balance is never the amount')
+})
+
+test('a check number is not an invoice number', async () => {
+  const r = await parseFile(workbook({ S: [['Date', 'Transaction Type', 'Num', 'Name', 'Amount'], ['2025-09-08', 'Bill', '1042', 'Acme', 900], ['2025-09-10', 'Check', '5521', 'Acme', 900]] }))
+  if ('error' in r) return assert.fail(r.error)
+  assert.deepEqual(r.transactions.map(t => t.invoice), ['1042', undefined])
+})
+
 test('an amount column stays when "debit" and "credit" are not money', async () => {
   const r = await parseFile(workbook({ S: [['Date', 'Vendor', 'Amount', 'Debit Account', 'Credit Account'], ['2026-01-05', 'Acme', 900, 6010, 2000], ['2026-01-06', 'Bolt', 450, 6010, 2000]] }))
   if ('error' in r) return assert.fail(r.error)

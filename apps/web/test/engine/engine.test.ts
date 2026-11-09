@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { runAnomalyDetection, computeRiskExposure, vendorKey, parsePeriodLabel, flaggedRows } from '../../src/lib/anomalyEngine'
+import { runAnomalyDetection, computeRiskExposure, vendorKey, parsePeriodLabel, flaggedRows, isMissingVendor } from '../../src/lib/anomalyEngine'
 import type { StoredTransaction } from '../../src/lib/dataStore'
 import { SCENARIOS } from './fixtures'
 import { randomRegister } from './random'
@@ -195,4 +195,123 @@ test('a fiscal calendar is learned, one row outside it is reported, and period 1
   txs.push(tx(101, '2026-06-30', 'FY26-P13'))
   const flagged = runAnomalyDetection(txs).filter(f => f.type === 'period_mismatch')
   assert.deepEqual(flagged.flatMap(f => flaggedRows(f)), ['TX-100'])
+})
+
+// ── Real ledgers: invoice numbers, reversals, accruals, splits ───────────────
+
+const L = (id: number, date: string, vendor: string, amount: number, extra: Partial<StoredTransaction> = {}): StoredTransaction =>
+  ({ id: `TX-${id}`, date, vendor, amount, description: 'Parts', category: 'Parts', account: 'Yard', rowIndex: id, direction: 'debit', ...extra })
+/** Enough ordinary history that a vendor is not new and has a rhythm of its own. */
+const history = (vendor: string, around: number, n = 12) => Array.from({ length: n }, (_, i) =>
+  L(9000 + i + vendor.length * 100, `2025-${String(1 + (i % 12)).padStart(2, '0')}-1${i % 7}`, vendor, around + i * 73.31, { invoice: `H-${vendor.length}${1000 + i}` }))
+const dupes = (txs: StoredTransaction[]) => runAnomalyDetection(txs).filter(f => f.type === 'duplicate')
+
+test('one invoice retyped without its prefix is the same invoice', () => {
+  const f = dupes([...history('Stellar Pump', 9000), L(1, '2026-03-02', 'Stellar Pump', 12384.1, { invoice: 'SPS-48213' }), L(2, '2026-03-16', 'Stellar Pump', 12384.1, { invoice: 'SPS48213' }), L(3, '2026-03-27', 'Stellar Pump', 12384.1, { invoice: '48213' })])
+  assert.deepEqual(f.flatMap(flaggedRows).sort(), ['TX-2', 'TX-3'])
+})
+
+test('an invoice re-keyed with digits swapped is caught', () => {
+  const f = dupes([...history('Harbor Motors', 9000), L(1, '2026-04-02', 'Harbor Motors', 14582.4, { invoice: 'HM-77120' }), L(2, '2026-04-13', 'Harbor Motors', 14528.4, { invoice: 'HM-77120' })])
+  assert.deepEqual(f.flatMap(flaggedRows), ['TX-2'])
+})
+
+test('a multi-line invoice re-entered as one line matches on its total', () => {
+  const f = dupes([...history('Apex Paint', 20000), L(1, '2026-03-10', 'Apex Paint', 18000.25, { invoice: 'AP-55100', account: 'Yard' }), L(2, '2026-03-10', 'Apex Paint', 13000.5, { invoice: 'AP-55100', account: 'Dock' }), L(3, '2026-03-26', 'Apex Paint', 31000.75, { invoice: 'AP-55100R' })])
+  assert.deepEqual(f.flatMap(flaggedRows), ['TX-3'])
+})
+
+test('partial payments of one invoice are not duplicates', () => {
+  assert.equal(dupes([...history('Keel Co', 9000), L(1, '2026-03-02', 'Keel Co', 4000.1, { invoice: 'KC-90011' }), L(2, '2026-03-20', 'Keel Co', 6210.4, { invoice: 'KC-90011' })]).length, 0)
+})
+
+test('a void and reissue is one payment, however it is numbered', () => {
+  assert.equal(dupes([...history('Scaffold Co', 15000), L(1, '2026-02-02', 'Scaffold Co', 15604.2, { invoice: 'SC-44120' }), L(2, '2026-02-10', 'Scaffold Co', 15604.2, { invoice: 'SC-44120', direction: 'credit' }), L(3, '2026-02-11', 'Scaffold Co', 15604.2, { invoice: 'SC-44120' })]).length, 0)
+})
+
+test('an accrual with its reversal is routine; without one it is expensed twice', () => {
+  const accrual = L(1, '2026-03-31', 'Praxis Group', 140000.6, { description: 'Accrue Q3 advisory', source: 'journal' })
+  const invoice = L(3, '2026-04-16', 'Praxis Group', 140000.6, { invoice: 'PG-81020', source: 'ap' })
+  const reversal = L(2, '2026-04-01', 'Praxis Group', 140000.6, { description: 'Reverse accrual', source: 'journal', direction: 'credit' })
+  const hist = history('Praxis Group', 42000)
+  assert.equal(dupes([...hist, accrual, reversal, invoice]).length, 0)
+  assert.deepEqual(dupes([...hist, accrual, invoice]).flatMap(flaggedRows), ['TX-3'])
+})
+
+test('journals and interest name no payee by design; real payments are each reported', () => {
+  const f = runAnomalyDetection([
+    L(1, '2026-01-31', '', 612000, { description: 'Monthly depreciation', source: 'journal' }),
+    L(2, '2026-01-31', '', 48000, { description: 'Amortization of intangibles' }),
+    L(3, '2026-01-21', '', 18240.55, { description: 'Misc. payment', source: 'ap' }),
+    L(4, '2026-01-22', 'UNKNOWN VENDOR', 6480.2, { description: 'Shop supplies', source: 'ap' }),
+  ]).filter(x => x.type === 'missing_vendor')
+  assert.deepEqual(f.flatMap(flaggedRows).sort(), ['TX-3', 'TX-4'])
+})
+
+test('a batch held back at one period end is reported; a calendar that drifts every month is not', () => {
+  const base = (i: number) => L(i, `2026-0${1 + (i % 6)}-1${i % 9}`, `Vendor ${i}`, 1500 + i * 11.3, { period: `FY26-P${String(7 + (i % 6)).padStart(2, '0')}` })
+  const ledger = Array.from({ length: 60 }, (_, i) => base(i))
+  const batch = [0, 1, 2, 3, 4].map(k => L(100 + k, '2026-04-02', `Held ${k}`, 7000 + k, { period: 'FY26-P09' }))
+  assert.equal(runAnomalyDetection([...ledger, ...batch]).filter(x => x.type === 'period_mismatch').flatMap(flaggedRows).length, 5)
+  const months = ['2026-02-02', '2026-03-02', '2026-04-02', '2026-05-02', '2026-06-02']
+  const drift = months.map((d, k) => L(200 + k, d, `Drift ${k}`, 7000 + k, { period: `FY26-P${String(7 + k).padStart(2, '0')}` }))
+  assert.equal(runAnomalyDetection([...ledger, ...drift]).filter(x => x.type === 'period_mismatch').length, 0)
+})
+
+test('a split is found under a limit nobody configured, in the money the limit is written in', () => {
+  const eur = [19480.3, 19715.85, 19620.4]
+  const hist = history('Hanse Stahl', 12000).map(t => ({ ...t, entity: '400', localAmount: t.amount / 1.17 }))
+  const split = eur.map((e, k) => L(k + 1, `2025-11-0${4 + k}`, 'Hanse Stahl', Math.round(e * 117) / 100, { entity: '400', localAmount: e, invoice: `HS-7000${k}` }))
+  const f = runAnomalyDetection([...hist, ...split]).filter(x => x.type === 'approval_avoidance')
+  assert.equal(f.length, 1)
+  assert.match(f[0].description, /own currency/)
+})
+
+test('a new vendor one letter from a real one is raised; a branch number and a different word are not', () => {
+  const real = history('Pacific Marine Supply', 6000)
+  const flagged = (name: string) => runAnomalyDetection([...real, ...history('Filler Vendor Inc', 3000), L(1, '2026-03-05', name, 8740.55, { invoice: 'X-1' })]).some(x => x.type === 'new_vendor_risk' && /almost like/.test(x.title))
+  assert.equal(flagged('Pacifc Marine Supply'), true)
+  assert.equal(flagged('Pacific Marine Services'), false)
+  assert.equal(flagged('Pacific Marine Supply 2'), false)
+})
+
+test('one departure from a five-payment coding pattern is reported', () => {
+  const coded = [0, 1, 2, 3, 4].map(k => L(k, `2025-0${k + 2}-18`, 'Ostermann Tools', 200000 + k * 9000.5, { category: 'CIP Machinery' }))
+  const f = runAnomalyDetection([...coded, L(9, '2026-03-24', 'Ostermann Tools', 212450.7, { category: 'Repairs' })]).filter(x => x.type === 'category_mismatch')
+  assert.deepEqual(f.flatMap(flaggedRows), ['TX-9'])
+})
+
+test('accents do not make a second vendor', () => assert.equal(vendorKey('MÜLLER Schiffstechnik GmbH'), vendorKey('Muller Schiffstechnik')))
+
+test('a vendor first seen mid-register still gets the burst check once it has history', () => {
+  const late = Array.from({ length: 10 }, (_, i) => L(i, `2025-${String(3 + i).padStart(2, '0')}-14`, 'Harmon CPAs', 3000 + i * 91.7, { invoice: `HC-${1000 + i}` }))
+  const start = L(50, '2025-01-02', 'Some Other Vendor', 500)
+  const week = Array.from({ length: 8 }, (_, i) => L(60 + i, `2025-07-0${1 + (i % 5)}`, 'Harmon CPAs', 2100 + i * 171.3, { invoice: `HC-${2000 + i}` }))
+  assert.ok(runAnomalyDetection([start, ...late, ...week]).some(f => f.type === 'high_frequency'))
+})
+
+test('a steady vendor billing three times its norm is news; a volatile one is not', () => {
+  const series = (spread: number) => Array.from({ length: 12 }, (_, i) => L(i, `2025-${String(1 + i).padStart(2, '0')}-1${i % 8}`, 'Contract Co', 14800 * (1 + spread * Math.sin(i * 2.3)), { invoice: `CC-${1000 + i}` }))
+  const spike = L(99, '2025-08-05', 'Contract Co', 45880.4, { invoice: 'CC-9999' })
+  const out = (txs: StoredTransaction[]) => runAnomalyDetection(txs).filter(f => f.type === 'outlier').length
+  assert.equal(out([...series(0.04), spike]), 1)
+  assert.equal(out([...series(0.9), spike]), 0)
+})
+
+test('same invoice with a freight line added on re-entry is a duplicate', () => {
+  assert.equal(dupes([...history('Blue Rx', 30000), L(1, '2025-09-02', 'Blue Rx', 38000.5, { invoice: 'BR-71002' }), L(2, '2025-09-22', 'Blue Rx', 38456.51, { invoice: 'BR-71002' })]).length, 1)
+})
+
+test('lines of one invoice posted together are not duplicates of each other', () => {
+  const lines = ['North', 'South', 'East'].map((l, k) => L(k + 1, '2025-02-20', 'NetGuard IT', 5120.4, { invoice: 'NG-32078', description: `Allocation ${l}` }))
+  assert.equal(dupes([...history('NetGuard IT', 14000), ...lines]).length, 0)
+})
+
+test('placeholder payees are missing payees', () => {
+  for (const n of ['Various', 'MISC', 'Sundry', 'Cash']) assert.equal(isMissingVendor(n), true, n)
+  assert.equal(isMissingVendor('Various Marine Supply'), false)
+})
+
+test('leading zeros on an invoice number are padding', () => {
+  assert.deepEqual(dupes([...history('Ostrom Structural', 20000), L(1, '2025-09-02', 'Ostrom Structural', 24601.2, { invoice: '4417' }), L(2, '2025-09-20', 'Ostrom Structural', 24601.2, { invoice: '0004417' })]).flatMap(flaggedRows), ['TX-2'])
 })

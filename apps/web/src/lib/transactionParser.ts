@@ -1,4 +1,4 @@
-import type { StoredTransaction, ColumnMapping } from './dataStore'
+import type { StoredTransaction, ColumnMapping, EntrySource } from './dataStore'
 
 // ─── Column synonym tables ────────────────────────────────────────────────────
 
@@ -10,6 +10,10 @@ const CREDIT_SYN      = ['credit','credit amount','deposit','inflow','income','p
 const DESCRIPTION_SYN = ['description','memo','notes','details','reference','narrative','particulars','remark','line description','note','memo line']
 const CATEGORY_SYN    = ['category','type','account type','expense type','classification','class','cost center','department','budget code','gl category','subcategory','sub-category']
 const PERIOD_SYN      = ['period','fiscal period','posting period','accounting period','gl period','period name','fiscal month','acct period']
+const INVOICE_SYN     = ['invoice no','invoice number','invoice #','invoice','inv no','inv number','invoice id','vendor invoice','bill no','bill number','document number','doc no']
+const SOURCE_SYN      = ['source','source code','journal source','source type','transaction type','txn type','document type','doc type','journal type','entry type','module']
+const ENTITY_SYN      = ['entity','legal entity','entity code','company code','company','subsidiary','business unit','operating unit','branch']
+const UNIT_SYN        = ['cost center','department','dept','location','class','store','site','property','division']
 const ACCOUNT_SYN     = ['account','account name','account number','gl account','ledger account','account code','cost account','chart of accounts','gl code','account id']
 
 // ─── Column detection ─────────────────────────────────────────────────────────
@@ -80,7 +84,26 @@ export function detectColumns(headers: string[]): ColumnMapping {
     category:    matchCol(headers, CATEGORY_SYN),
     account:     matchCol(headers, ACCOUNT_SYN),
     period:      matchCol(headers, PERIOD_SYN),
+    // "Invoice Date" and "Invoice Amount" are not the invoice number.
+    // QuickBooks calls it just "Num".
+    invoice:     matchCol(headers.filter(h => !/date|amount|amt|total|due|status|type/i.test(h)), INVOICE_SYN) ?? (headers.find(h => /^num\.?$/i.test(h.trim())) ?? null),
+    source:      matchCol(headers, SOURCE_SYN),
+    entity:      otherThan(matchCol(headers, ENTITY_SYN), matchCol(headers.filter(h => !ID_HEADER.test(h)), VENDOR_SYN)),
   }
+}
+
+/** A column already used as something else cannot also be this one. */
+const otherThan = (col: string | null, taken: string | null) => (col === taken ? null : col)
+
+/** The kind of entry, from whatever an ERP calls it. Unrecognised values say nothing. */
+export function classifySource(raw: string): EntrySource | undefined {
+  const s = raw.toLowerCase()
+  if (!s) return undefined
+  if (/\b(pr|payroll|paycheck|paye?)\b/.test(s)) return 'payroll'
+  if (/\b(cc|card|cards|amex|pcard|p-card|expense report|expenses?|t&e)\b/.test(s)) return 'card'
+  if (/\b(gl|gj|je|jnl|journal|manual|adj|adjustment|accrual)\b/.test(s)) return 'journal'
+  if (/\b(ap|a\/p|payables?|bill|bills|invoice|vendor|purchase)\b/.test(s)) return 'ap'
+  return undefined
 }
 
 // ─── Value parsers ────────────────────────────────────────────────────────────
@@ -239,6 +262,13 @@ export function rowsToTransactions(
     const category = cell(mapping.category)
     const account  = cell(mapping.account)
     const period   = cell(mapping.period)
+    const kind     = cell(mapping.source)
+    // On a check or wire, QuickBooks' "Num" holds the check number. That says
+    // nothing about which invoice it paid.
+    const invoice  = /check|cheque|\bpayment\b|\bach\b|\bwire\b|\beft\b/i.test(kind) ? '' : cell(mapping.invoice)
+    const source   = classifySource(kind)
+    const entity   = cell(mapping.entity)
+    const local    = mapping.localAmount ? Math.abs(parseAmount(cell(mapping.localAmount))) : 0
 
     txs.push({
       id:          `TX-${i}`,
@@ -251,6 +281,10 @@ export function rowsToTransactions(
       rowIndex:    i,
       direction,
       ...(period ? { period } : {}),
+      ...(invoice ? { invoice } : {}),
+      ...(source ? { source } : {}),
+      ...(entity ? { entity } : {}),
+      ...(local ? { localAmount: local } : {}),
     })
   }
 
@@ -309,6 +343,15 @@ function pickHeaderRow(rows: unknown[][], maxScan = 15): number {
   return bestScore >= 6 ? bestIdx : 0
 }
 
+/** The column an unnamed, section-headed first column becomes. */
+const SECTION = 'Account'
+
+/** A row holding only a label in its first cell. */
+function isSectionRow(cells: unknown[]): boolean {
+  const first = String(cells[0] ?? '').trim()
+  return !!first && !/^total\b/i.test(first) && cells.slice(1).every(c => String(c ?? '').trim() === '')
+}
+
 /**
  * Build row objects from a matrix given the header row index. Repeated header
  * names are suffixed so later columns don't silently overwrite earlier ones.
@@ -323,6 +366,13 @@ function buildRows(matrix: unknown[][], headerIdx: number): { rows: RawRow[]; he
     return n === 0 ? base : `${base} (${n + 1})`
   })
 
+  // QuickBooks' detail report has no account column. It leaves its first column
+  // unnamed and heads each block of rows with the account name there, so the
+  // account has to be carried down onto the rows beneath it.
+  const sectioned = rawHeaders[0] === '' && !rawHeaders.includes(SECTION) && matrix.slice(headerIdx + 1).some(isSectionRow)
+  if (sectioned) rawHeaders[0] = SECTION
+  let section = ''
+
   const headers = rawHeaders.filter(Boolean)
   const rows: RawRow[] = []
   const headerText = (matrix[headerIdx] ?? []).map(h => String(h ?? '').trim())
@@ -332,9 +382,11 @@ function buildRows(matrix: unknown[][], headerIdx: number): { rows: RawRow[]; he
     // Paginated reports repeat their column headings throughout the data.
     const repeats = headerText.filter((h, ci) => h && String(cells[ci] ?? '').trim() === h).length
     if (headers.length > 0 && repeats / headers.length >= 0.5) continue
+    if (sectioned && isSectionRow(cells)) { section = String(cells[0]).trim(); continue }
     const row: RawRow = {}
     rawHeaders.forEach((h, ci) => {
       if (!h) return
+      if (sectioned && ci === 0) { row[h] = /^total\b/i.test(String(cells[0] ?? '').trim()) ? '' : section; return }
       const cell = cells[ci]
       row[h] = cell instanceof Date
         ? `${cell.getFullYear()}-${String(cell.getMonth() + 1).padStart(2, '0')}-${String(cell.getDate()).padStart(2, '0')}`
@@ -456,17 +508,34 @@ function validateMapping(rows: RawRow[], headers: string[], mapping: ColumnMappi
     m.vendor = best?.h ?? null
   }
 
+  // NetSuite and QuickBooks put "Bill", "Journal" and "Check" in a column called
+  // Type. That says what kind of entry a row is, not what the money bought.
+  if (m.category && (!m.source || m.source === m.category) && /^(transaction\s*)?type$/i.test(m.category)) {
+    const vals = sample(rows, m.category, 200)
+    if (vals.length && vals.filter(v => classifySource(v)).length / vals.length >= 0.5) {
+      m.source = m.category
+      m.category = m.account && numericRatio(rows, m.account) < 0.5 ? m.account : null
+      m.account = matchCol(headers.filter(h => h !== m.category && h !== m.source), UNIT_SYN) ?? m.account
+    }
+  }
+  if (m.source && m.source === m.category) m.category = null
+  // With no category column, the account name is the next best thing.
+  if (!m.category && m.account && numericRatio(rows, m.account) < 0.5) m.category = m.account
+
   // A category is what the money was spent on. Where the file has an account
   // name, that is a better answer than who spent it, and the checks compare
   // like with like only when it is used.
+  // The cost center is not lost: it is the unit a payment was made for, which
+  // is what the account slot means to the checks.
   if (m.category && m.account && /cost\s*cent|department|dept|division/i.test(m.category) && numericRatio(rows, m.account) < 0.5) {
-    m.category = m.account
+    ;[m.category, m.account] = [m.account, m.category]
   }
 
   // With separate debit and credit columns the direction of each row is
   // explicit, and a consolidated export's "Txn Amount" beside them is in each
   // entity's own currency, so summing it adds dollars to euros.
   if (m.amount && m.debit && m.credit && m.debit !== m.credit && moneyColumn(rows, m.debit) && moneyColumn(rows, m.credit, true)) {
+    m.localAmount = m.amount // not summed, but approval limits are set in this money
     m.amount = null
   }
 

@@ -42,7 +42,20 @@ export interface StoredTransaction {
   direction?: 'debit' | 'credit'
   // Accounting-period label from the source file (e.g. "Jan-26"), when present.
   period?: string
+  // The invoice number, when the file has a column for it. Far stronger evidence
+  // than a number that happens to appear in a description.
+  invoice?: string
+  // What kind of entry this is, when the file says. Journals and payroll are not
+  // payments to a vendor, and card swipes are not comparable to invoices.
+  source?: EntrySource
+  // The legal entity or business unit, in a consolidated export.
+  entity?: string
+  // The amount in the entity's own currency, when `amount` is a reporting
+  // currency. Approval limits are set in local money.
+  localAmount?: number
 }
+
+export type EntrySource = 'ap' | 'journal' | 'card' | 'payroll'
 
 export interface DetectedAnomaly {
   id: string
@@ -103,6 +116,10 @@ export interface ColumnMapping {
   account:     string | null
   // Accounting-period label column (e.g. "Period", "Posting period"), when present.
   period?:     string | null
+  invoice?:     string | null
+  source?:      string | null
+  entity?:      string | null
+  localAmount?: string | null
 }
 
 export interface UploadedFile {

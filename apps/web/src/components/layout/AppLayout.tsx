@@ -59,8 +59,8 @@ export default function AppLayout({ children, title }: AppLayoutProps) {
     try { sessionStorage.setItem('sf_hydrated_at', String(Date.now())) } catch { /* ignore */ }
     void (async () => {
       const before = localStorage.getItem('sf_dataset')
-      const [from] = await Promise.all([hydrateFromServer(), refreshDetectionConfig()])
-      if (from === 'server' && localStorage.getItem('sf_dataset') !== before) setDataVersion(v => v + 1)
+      await Promise.all([hydrateFromServer(), refreshDetectionConfig()])
+      if (localStorage.getItem('sf_dataset') !== before) setDataVersion(v => v + 1)
     })()
   }, [])
 

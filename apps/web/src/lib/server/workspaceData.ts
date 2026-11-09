@@ -14,6 +14,20 @@ export interface TxIn {
   description?: string; category?: string; account?: string; period?: string
 }
 
+// The database returns at most 1,000 rows per request.
+const PAGE = 1000
+
+/** Every row of a query, page by page. A failed page throws: a partial list must never pass for the whole one. */
+async function allRows<T>(page: (from: number) => PromiseLike<{ data: unknown[] | null; error: { message: string } | null }>): Promise<T[]> {
+  const out: T[] = []
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await page(from)
+    if (error) throw error
+    out.push(...((data ?? []) as T[]))
+    if ((data ?? []).length < PAGE) return out
+  }
+}
+
 /** Create or replace a source's register; returns its id. */
 export async function upsertSource(tenantId: string, sourceKey: string, source: string, name: string, summary: unknown, mapping: unknown, actor: { id: string; email: string | null }): Promise<string | null> {
   const db = adminClient()
@@ -78,6 +92,28 @@ export async function upsertFindings(tenantId: string, datasetId: string, findin
   return true
 }
 
+/**
+ * The last step of a save. Findings the new run no longer raises are removed
+ * (their history stays in finding_events), and the copy is marked complete,
+ * which is what lets a browser replace its own copy with this one.
+ */
+export async function finishSource(tenantId: string, datasetId: string, findingIds: string[]): Promise<boolean> {
+  const db = adminClient()
+  if (!db || !(await ownsDataset(tenantId, datasetId))) return false
+  const keep = new Set(findingIds)
+  const held = await allRows<{ id: string }>(from => db.from('findings').select('id').eq('tenant_id', tenantId).eq('dataset_id', datasetId).order('id').range(from, from + PAGE - 1))
+  const stale = held.map(r => r.id).filter(id => !keep.has(id))
+  for (let i = 0; i < stale.length; i += 200) {
+    const { error } = await db.from('findings').delete().eq('tenant_id', tenantId).in('id', stale.slice(i, i + 200))
+    if (error) throw error
+  }
+  const { data, error } = await db.from('datasets').select('summary').eq('id', datasetId).single()
+  if (error) throw error
+  const { error: updateError } = await db.from('datasets').update({ summary: { ...(data.summary as object), complete: true } }).eq('id', datasetId)
+  if (updateError) throw updateError
+  return true
+}
+
 const STATUSES = ['Open', 'Under Review', 'Resolved', 'Dismissed']
 
 /** A reviewer's decision: the finding's status, and an append-only event recording who, what and when. */
@@ -103,14 +139,16 @@ export async function loadState(tenantId: string) {
   const { data: sources, error } = await db.from('datasets').select('id, source_key, source, name, summary, column_mapping, created_at').eq('tenant_id', tenantId)
   if (tableMissing(error)) return null
   if (error) throw error
-  const { data: findings } = await db.from('findings').select('*').eq('tenant_id', tenantId)
-  const cited = [...new Set((findings ?? []).flatMap(f => (f.row_refs as string[]) ?? []))]
+  const findings = await allRows<{ row_refs: string[] | null }>(from => db.from('findings').select('*').eq('tenant_id', tenantId).order('id').range(from, from + PAGE - 1))
+  const cited = [...new Set(findings.flatMap(f => f.row_refs ?? []))]
   const evidence: unknown[] = []
-  for (let i = 0; i < cited.length; i += 500) {
-    const { data } = await db.from('transactions').select('dataset_id, row_ref, row_index, date, vendor, amount, direction, description, category, account, period').eq('tenant_id', tenantId).in('row_ref', cited.slice(i, i + 500))
+  // Row ids are long and go in the URL, so ask for a modest number at a time.
+  for (let i = 0; i < cited.length; i += 100) {
+    const { data, error: rowsError } = await db.from('transactions').select('dataset_id, row_ref, row_index, date, vendor, amount, direction, description, category, account, period').eq('tenant_id', tenantId).in('row_ref', cited.slice(i, i + 100))
+    if (rowsError) throw rowsError
     evidence.push(...(data ?? []))
   }
-  return { sources: sources ?? [], findings: findings ?? [], evidence }
+  return { sources: sources ?? [], findings, evidence }
 }
 
 export async function findingHistory(tenantId: string, findingId: string) {

@@ -21,6 +21,17 @@ export interface IngestInput {
 
 export interface IngestResult { txCount: number; anomalyCount: number; carried: number }
 
+/**
+ * The start of a source's finding ids. The readable part alone would be "UPLOAD"
+ * for every file, and the workspace keys findings by id across all its sources.
+ */
+function idPrefix(sourceId: string): string {
+  let h = 2166136261
+  for (let i = 0; i < sourceId.length; i++) h = Math.imul(h ^ sourceId.charCodeAt(i), 16777619)
+  const readable = sourceId.split(':')[0].replace(/[^a-z0-9]/gi, '').slice(0, 6).toUpperCase() || 'SRC'
+  return `${readable}${(h >>> 0).toString(36).toUpperCase()}`
+}
+
 const fingerprint = (f: Pick<DetectedAnomaly, 'type' | 'rowRefs'>) => `${f.type}|${[...flaggedRows(f)].sort().join(',')}`
 
 /**
@@ -45,7 +56,7 @@ export function carryForward(fresh: DetectedAnomaly[], previous: DetectedAnomaly
 }
 
 export function ingest(input: IngestInput): IngestResult {
-  const prefix = input.sourceId.replace(/[^a-z0-9]/gi, '').slice(0, 6).toUpperCase() || 'SRC'
+  const prefix = idPrefix(input.sourceId)
   const txs = namespaceRows(input.transactions, input.sourceId)
   const detected = runAnomalyDetection(txs, getDetectionConfig(), { idPrefix: prefix })
   const previous = loadSourceDataset(input.sourceId)?.anomalies ?? []

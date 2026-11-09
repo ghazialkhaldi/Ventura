@@ -1,12 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { getWorkspace, canDecide } from '../../../lib/server/workspace'
-import { upsertSource, insertTransactions, upsertFindings } from '../../../lib/server/workspaceData'
+import { upsertSource, insertTransactions, upsertFindings, finishSource } from '../../../lib/server/workspaceData'
 
 export const config = { api: { bodyParser: { sizeLimit: '4mb' } } }
 
 // Saves one source to the workspace in steps the browser sends one after
-// another: the register and its summary, its rows in chunks, then its
-// findings. Replies { stored: false } until migration 003 has run.
+// another: the register and its summary, its rows in chunks, its findings,
+// and a last step that marks the copy complete. Replies { stored: false } until migration 003 has run.
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).end()
   const ws = await getWorkspace(req, res)
@@ -24,6 +24,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     if (b.step === 'findings') {
       const ok = await upsertFindings(ws.tenantId, String(b.datasetId), Array.isArray(b.findings) ? b.findings : [])
+      return res.json({ stored: ok })
+    }
+    if (b.step === 'finish') {
+      const ok = await finishSource(ws.tenantId, String(b.datasetId), Array.isArray(b.findingIds) ? b.findingIds.map(String) : [])
       return res.json({ stored: ok })
     }
     res.status(400).json({ error: 'Unknown step' })

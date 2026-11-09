@@ -9,7 +9,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!ws) return res.status(401).json({ error: 'Not authenticated' })
   try {
     const state = await loadState(ws.tenantId)
-    res.json(state ? { stored: true, ...state } : { stored: false })
+    res.json(state ? { stored: true, workspace: ws.tenantId, ...state } : { stored: false, workspace: ws.tenantId })
   } catch (e) {
     console.error('[workspace/state]', e)
     res.status(500).json({ error: 'Could not load the workspace' })

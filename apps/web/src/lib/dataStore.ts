@@ -302,14 +302,12 @@ export function setFindingStatus(id: string, status: AnomalyStatus): boolean {
   } catch { return false }
 }
 
-/** Replace every source on this device at once (loading the workspace from the server). */
+/** Replace the sources on this device (loading the workspace from the server). Callers pass at least one. */
 export function replaceSourceDatasets(map: Record<string, Dataset>): boolean {
   if (typeof window === 'undefined') return false
   try {
     localStorage.setItem(SOURCES_KEY, JSON.stringify(map))
-    const all = Object.values(map)
-    if (all.length === 0) { clearDataset(); return true }
-    return saveDataset(mergeSourceDatasets(all))
+    return saveDataset(mergeSourceDatasets(Object.values(map)))
   } catch { return false }
 }
 
@@ -376,6 +374,35 @@ export function clearDataset(): void {
     localStorage.removeItem(READY_KEY)
     localStorage.removeItem(SOURCES_KEY)
     localStorage.removeItem('sf_connected')
+  } catch {}
+}
+
+// Everything a browser holds that belongs to a workspace.
+const WORKSPACE_KEYS = [
+  DS_KEY, READY_KEY, SOURCES_KEY, 'sf_connected', 'sf_import_batches', 'sf_normalized_invoices',
+  'sf_detection_config', 'sf_masking_profile', 'sf_testing_mode', 'sf_tier_config',
+]
+const OWNER_KEY = 'sf_data_workspace'
+
+/** Remove a workspace's data from this browser, so the next person to sign in here cannot see or inherit it. */
+export function forgetWorkspaceData(): void {
+  if (typeof window === 'undefined') return
+  try {
+    for (const key of [...WORKSPACE_KEYS, OWNER_KEY]) localStorage.removeItem(key)
+    sessionStorage.removeItem('sf_hydrated_at')
+  } catch {}
+}
+
+/**
+ * Record whose data this browser holds. Data left by a different workspace (a
+ * session that expired instead of signing out) is removed, never carried over.
+ */
+export function bindBrowserToWorkspace(workspaceId: string): void {
+  if (typeof window === 'undefined') return
+  try {
+    const owner = localStorage.getItem(OWNER_KEY)
+    if (owner && owner !== workspaceId) forgetWorkspaceData()
+    localStorage.setItem(OWNER_KEY, workspaceId)
   } catch {}
 }
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { forgetWorkspaceData } from '../lib/dataStore'
 
 export interface CurrentUser {
   email: string
@@ -30,7 +31,7 @@ export function clearUser(): void {
   if (typeof window !== 'undefined') {
     localStorage.removeItem('sf_user')
     localStorage.removeItem('sf_token')
-    localStorage.removeItem('sf_connected')
+    forgetWorkspaceData()
   }
 }
 

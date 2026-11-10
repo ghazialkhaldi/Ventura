@@ -59,6 +59,7 @@ Then run the SQL files in `apps/web/supabase/migrations/` in order, in the Supab
 1. `002_security_audit_log.sql`: the append-only security log
 2. `003_workspace_data.sql`: workspace data, findings and the decision record
 3. `004_rate_limits.sql`: rate limits for sign-in and signup codes. **Without it, limits fall back to per-server memory, which does little on Vercel.**
+4. `005_close_reasons.sql`: why a finding was closed (real issue, known or expected, false alarm)
 
 ```bash
 npm run dev     # http://localhost:3000

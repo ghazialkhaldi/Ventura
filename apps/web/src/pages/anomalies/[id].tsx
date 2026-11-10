@@ -6,7 +6,7 @@ import AppLayout from '../../components/layout/AppLayout'
 import Badge from '../../components/ui/Badge'
 import Button from '../../components/ui/Button'
 import FocusBrackets from '../../components/FocusBrackets'
-import { loadDataset, setFindingStatus, isUndecided } from '../../lib/dataStore'
+import { loadDataset, setFindingStatus, isUndecided, CLOSE_REASON_LABELS, type CloseReason } from '../../lib/dataStore'
 import { recordDecision } from '../../lib/workspaceSync'
 import type { DetectedAnomaly, StoredTransaction } from '../../lib/dataStore'
 import { ChevronLeftIcon as ChevronLeft, ChevronRightIcon as ChevronRight } from '@radix-ui/react-icons'
@@ -62,7 +62,7 @@ export default function AnomalyDetailPage() {
   const [related,  setRelated]  = useState<DetectedAnomaly[]>([])
   const [sourceTx, setSourceTx] = useState<StoredTransaction[]>([])
   const [updating, setUpdating] = useState(false)
-  const [history,  setHistory]  = useState<{ actor_email: string | null; action: string; from_status: string | null; to_status: string | null; note: string | null; created_at: string }[] | null>(null)
+  const [history,  setHistory]  = useState<{ actor_email: string | null; action: string; from_status: string | null; to_status: string | null; note: string | null; reason?: CloseReason | null; created_at: string }[] | null>(null)
 
   useEffect(() => { if (id) void loadHistory() }, [id]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -79,11 +79,11 @@ export default function AnomalyDetailPage() {
     }
   }, [id])
 
-  async function updateStatus(status: DetectedAnomaly['status']) {
+  async function updateStatus(status: DetectedAnomaly['status'], closeReason?: CloseReason) {
     setUpdating(true)
-    if (setFindingStatus(id, status)) setAnomaly(a => a ? { ...a, status } : a)
+    if (setFindingStatus(id, status, closeReason)) setAnomaly(a => a ? { ...a, status, closeReason } : a)
     // Recorded for the whole team, with who and when, once the workspace database exists.
-    const stored = await recordDecision(id, status)
+    const stored = await recordDecision(id, status, closeReason)
     if (stored) loadHistory()
     setUpdating(false)
   }
@@ -277,11 +277,11 @@ export default function AnomalyDetailPage() {
             </div>
             <div className="p-5 space-y-2.5">
               <button
-                onClick={() => updateStatus('Resolved')}
-                disabled={updating || anomaly.status === 'Resolved'}
+                onClick={() => updateStatus('Resolved', 'real_issue')}
+                disabled={updating || (anomaly.status === 'Resolved' && anomaly.closeReason === 'real_issue')}
                 className="w-full flex items-center gap-2 justify-center h-10 bg-accent-600 hover:bg-accent-700 disabled:opacity-50 text-white text-[14px] font-medium px-4 rounded-md shadow-card"
               >
-                {anomaly.status === 'Resolved' ? 'Resolved' : 'Mark resolved'}
+                Real issue, resolved
               </button>
               <button
                 onClick={() => updateStatus('Under Review')}
@@ -290,13 +290,18 @@ export default function AnomalyDetailPage() {
               >
                 Send for review
               </button>
-              <button
-                onClick={() => updateStatus('Dismissed')}
-                disabled={updating || anomaly.status === 'Dismissed'}
-                className="w-full flex items-center gap-2 justify-center h-10 text-text-secondary hover:text-text-primary hover:bg-surface-overlay disabled:opacity-50 text-[14px] font-medium px-4 rounded-md"
-              >
-                Dismiss
-              </button>
+              <div className="grid grid-cols-2 gap-2">
+                {(['known_expected', 'false_alarm'] as const).map(reason => (
+                  <button
+                    key={reason}
+                    onClick={() => updateStatus('Dismissed', reason)}
+                    disabled={updating || (anomaly.status === 'Dismissed' && anomaly.closeReason === reason)}
+                    className="flex items-center justify-center h-10 text-text-secondary hover:text-text-primary hover:bg-surface-overlay disabled:opacity-50 text-[14px] font-medium px-2 rounded-md"
+                  >
+                    {CLOSE_REASON_LABELS[reason]}
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="px-5 pb-4">
               <p className="text-[12.5px] text-text-muted leading-relaxed">
@@ -306,7 +311,7 @@ export default function AnomalyDetailPage() {
                 <ol className="mt-3 space-y-2 border-t border-border-subtle pt-3">
                   {history.map((e, i) => (
                     <li key={i} className="text-[12.5px] leading-snug">
-                      <span className="text-text-primary">{e.action === 'raised' ? 'Raised' : e.action === 'note_added' ? 'Note added' : `${e.from_status ?? ''} → ${e.to_status ?? ''}`}</span>
+                      <span className="text-text-primary">{e.action === 'raised' ? 'Raised' : e.action === 'note_added' ? 'Note added' : `${e.from_status ?? ''} → ${e.to_status ?? ''}`}{e.reason ? ` (${CLOSE_REASON_LABELS[e.reason]})` : ''}</span>
                       <span className="text-text-muted"> · {e.actor_email ?? 'Ventura'} · {new Date(e.created_at).toLocaleString()}</span>
                       {e.note && <span className="block text-text-secondary">{e.note}</span>}
                     </li>

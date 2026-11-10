@@ -2,7 +2,7 @@
 // migration 003 has run the server answers { stored: false } and the
 // browser's copy is all there is; once it has, every source and decision is
 // saved for the whole team, and any member's browser loads it.
-import { bindBrowserToWorkspace, loadAllSourceDatasets, replaceSourceDatasets, type Dataset, type DetectedAnomaly, type StoredTransaction } from './dataStore'
+import { bindBrowserToWorkspace, loadAllSourceDatasets, replaceSourceDatasets, type Dataset, type CloseReason, type DetectedAnomaly, type StoredTransaction } from './dataStore'
 
 async function post(url: string, body: unknown): Promise<{ stored?: boolean; datasetId?: string } | null> {
   try {
@@ -51,14 +51,14 @@ export function pushSourceToServer(sourceId: string, label: string, ds: Dataset,
 }
 
 /** Record a reviewer's decision for the team. Returns whether the server kept it. */
-export async function recordDecision(id: string, status: DetectedAnomaly['status'], note?: string): Promise<boolean> {
-  const r = await post('/api/findings/decide', { id, status, note })
+export async function recordDecision(id: string, status: DetectedAnomaly['status'], reason?: CloseReason | null, note?: string): Promise<boolean> {
+  const r = await post('/api/findings/decide', { id, status, reason, note })
   return !!r?.stored
 }
 
 interface ServerFinding {
   id: string; dataset_id: string | null; type: DetectedAnomaly['type']; severity: DetectedAnomaly['severity']; confidence: number
-  status: DetectedAnomaly['status']; title: string; vendor: string | null; amount: number | string | null; category: string | null
+  status: DetectedAnomaly['status']; close_reason?: CloseReason | null; title: string; vendor: string | null; amount: number | string | null; category: string | null
   description: string | null; reasoning: string | null; row_refs: string[]; also_matched: DetectedAnomaly['alsoMatched'] | null; detected_at: string
 }
 interface ServerRow {
@@ -124,6 +124,7 @@ export async function hydrateFromServer(): Promise<'server' | 'browser'> {
       id: f.id, type: f.type, severity: f.severity, confidence: f.confidence, status: f.status, title: f.title,
       vendor: f.vendor ?? '', amount: Number(f.amount ?? 0), category: f.category ?? '', description: f.description ?? '',
       reasoning: f.reasoning ?? '', rowRefs: f.row_refs ?? [], detectedAt: f.detected_at,
+      ...(f.close_reason ? { closeReason: f.close_reason } : {}),
       ...(f.also_matched ? { alsoMatched: f.also_matched } : {}),
       ...(flagged.get(f.id) !== undefined ? { flaggedCount: flagged.get(f.id) } : {}),
     }))

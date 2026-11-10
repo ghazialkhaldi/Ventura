@@ -48,7 +48,7 @@ export function carryForward(fresh: DetectedAnomaly[], previous: DetectedAnomaly
     if (old && !taken.has(old.id)) {
       taken.add(old.id)
       if (old.status !== 'Open') carried++
-      return { ...f, id: old.id, status: old.status, detectedAt: old.detectedAt }
+      return { ...f, id: old.id, status: old.status, detectedAt: old.detectedAt, ...(old.closeReason ? { closeReason: old.closeReason } : {}) }
     }
     return { ...f, id: `ANO-${prefix}-${String(++next).padStart(3, '0')}` }
   })

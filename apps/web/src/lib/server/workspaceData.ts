@@ -2,6 +2,11 @@
 // migration-003 tables. Every function returns null when the tables do not
 // exist yet, so callers can tell the browser to keep using its own copy.
 import { adminClient, tableMissing } from './workspace'
+import { CLOSE_REASON_LABELS, closeReasonFor } from '../dataStore'
+
+// Migration 005 adds the close-reason columns. Until it has run, decisions still save.
+const columnMissing = (e: { code?: string; message?: string } | null) =>
+  !!e && (e.code === '42703' || e.code === 'PGRST204' || /column .* does not exist|could not find the .* column/i.test(e.message ?? ''))
 
 export interface FindingIn {
   id: string; type: string; severity: string; confidence: number; status: string; title: string
@@ -93,18 +98,33 @@ export async function upsertFindings(tenantId: string, datasetId: string, findin
 }
 
 /**
- * The last step of a save. Findings the new run no longer raises are removed
- * (their history stays in finding_events), and the copy is marked complete,
- * which is what lets a browser replace its own copy with this one.
+ * What a new run means for the findings already held: those it no longer raises
+ * are removed if nobody has touched them, and kept if a reviewer has, because
+ * that decision is part of the record.
+ */
+export function reconcileFindings(held: { id: string; status: string }[], raised: Set<string>): { remove: string[]; keep: string[] } {
+  const gone = held.filter(f => !raised.has(f.id))
+  return { remove: gone.filter(f => f.status === 'Open').map(f => f.id), keep: gone.filter(f => f.status !== 'Open').map(f => f.id) }
+}
+
+/**
+ * The last step of a save: settle findings the new run no longer raises and
+ * mark the copy complete, which is what lets a browser replace its own copy
+ * with this one.
  */
 export async function finishSource(tenantId: string, datasetId: string, findingIds: string[]): Promise<boolean> {
   const db = adminClient()
   if (!db || !(await ownsDataset(tenantId, datasetId))) return false
-  const keep = new Set(findingIds)
-  const held = await allRows<{ id: string }>(from => db.from('findings').select('id').eq('tenant_id', tenantId).eq('dataset_id', datasetId).order('id').range(from, from + PAGE - 1))
-  const stale = held.map(r => r.id).filter(id => !keep.has(id))
-  for (let i = 0; i < stale.length; i += 200) {
-    const { error } = await db.from('findings').delete().eq('tenant_id', tenantId).in('id', stale.slice(i, i + 200))
+  const held = await allRows<{ id: string; status: string }>(from => db.from('findings').select('id, status').eq('tenant_id', tenantId).eq('dataset_id', datasetId).order('id').range(from, from + PAGE - 1))
+  const { remove, keep } = reconcileFindings(held, new Set(findingIds))
+  for (let i = 0; i < remove.length; i += 200) {
+    const { error } = await db.from('findings').delete().eq('tenant_id', tenantId).in('id', remove.slice(i, i + 200))
+    if (error) throw error
+  }
+  // A kept finding's row ids are positions in the old file. In a changed file
+  // they could point at different payments, and no evidence beats wrong evidence.
+  for (let i = 0; i < keep.length; i += 200) {
+    const { error } = await db.from('findings').update({ row_refs: [] }).eq('tenant_id', tenantId).in('id', keep.slice(i, i + 200))
     if (error) throw error
   }
   const { data, error } = await db.from('datasets').select('summary').eq('id', datasetId).single()
@@ -117,18 +137,30 @@ export async function finishSource(tenantId: string, datasetId: string, findingI
 const STATUSES = ['Open', 'Under Review', 'Resolved', 'Dismissed']
 
 /** A reviewer's decision: the finding's status, and an append-only event recording who, what and when. */
-export async function decide(tenantId: string, findingId: string, status: string, note: string | null, actor: { id: string; email: string | null }): Promise<'stored' | 'not_found' | null> {
+export async function decide(tenantId: string, findingId: string, status: string, note: string | null, actor: { id: string; email: string | null }, rawReason?: unknown): Promise<'stored' | 'not_found' | null> {
   const db = adminClient()
   if (!db || !STATUSES.includes(status)) return null
   const { data: f, error } = await db.from('findings').select('status').eq('tenant_id', tenantId).eq('id', findingId).maybeSingle()
   if (tableMissing(error)) return null
   if (!f) return 'not_found'
+  const reason = closeReasonFor(status, rawReason)
   const now = new Date().toISOString()
-  await db.from('findings').update({ status, decided_by: actor.id, decided_by_email: actor.email, decided_at: now, updated_at: now }).eq('tenant_id', tenantId).eq('id', findingId)
-  await db.from('finding_events').insert({
+  const decision = { status, decided_by: actor.id, decided_by_email: actor.email, decided_at: now, updated_at: now }
+  const saveDecision = (row: object) => db.from('findings').update(row).eq('tenant_id', tenantId).eq('id', findingId)
+  let saved = await saveDecision({ ...decision, close_reason: reason })
+  if (columnMissing(saved.error)) saved = await saveDecision(decision)
+  if (saved.error) throw saved.error
+
+  const event = {
     tenant_id: tenantId, finding_id: findingId, actor_id: actor.id, actor_email: actor.email,
     action: note && f.status === status ? 'note_added' : 'status_changed', from_status: f.status, to_status: status, note: note?.slice(0, 2000) ?? null,
-  })
+  }
+  let logged = await db.from('finding_events').insert({ ...event, reason })
+  if (columnMissing(logged.error)) {
+    const label = reason ? CLOSE_REASON_LABELS[reason] : null
+    logged = await db.from('finding_events').insert({ ...event, note: label ? (event.note ? `${label}: ${event.note}` : label) : event.note })
+  }
+  if (logged.error) throw logged.error
   return 'stored'
 }
 
@@ -154,9 +186,12 @@ export async function loadState(tenantId: string) {
 export async function findingHistory(tenantId: string, findingId: string) {
   const db = adminClient()
   if (!db) return null
-  const { data, error } = await db.from('finding_events').select('actor_email, action, from_status, to_status, note, created_at').eq('tenant_id', tenantId).eq('finding_id', findingId).order('created_at')
-  if (tableMissing(error)) return null
-  return data ?? []
+  const read = (columns: string) => db.from('finding_events').select(columns).eq('tenant_id', tenantId).eq('finding_id', findingId).order('created_at')
+  const columns = 'actor_email, action, from_status, to_status, note, created_at'
+  let result = await read(`${columns}, reason`)
+  if (columnMissing(result.error)) result = await read(columns)
+  if (tableMissing(result.error)) return null
+  return result.data ?? []
 }
 
 export async function getSettings(tenantId: string) {

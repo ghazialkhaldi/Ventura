@@ -13,7 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const status = String(req.body?.status ?? '')
   const note = typeof req.body?.note === 'string' && req.body.note.trim() ? req.body.note.trim() : null
   try {
-    const r = await decide(ws.tenantId, id, status, note, { id: ws.user.id, email: ws.user.email ?? null })
+    const r = await decide(ws.tenantId, id, status, note, { id: ws.user.id, email: ws.user.email ?? null }, req.body?.reason)
     if (r === 'not_found') return res.status(404).json({ stored: false, error: 'Finding not found in the workspace' })
     res.json({ stored: r === 'stored' })
   } catch (e) {

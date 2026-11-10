@@ -11,6 +11,19 @@ export type AnomalyStatus = 'Open' | 'Under Review' | 'Resolved' | 'Dismissed'
 // A finding still needs a decision while it is Open or Under Review. Every
 // "open" count in the app uses this, so the sidebar, dashboard and lists agree.
 export const isUndecided = (a: { status: AnomalyStatus }) => a.status === 'Open' || a.status === 'Under Review'
+// Why a finding was closed. Status alone cannot separate a false alarm from
+// something real but already known.
+export type CloseReason = 'real_issue' | 'known_expected' | 'false_alarm'
+export const CLOSE_REASON_LABELS: Record<CloseReason, string> = {
+  real_issue:     'Real issue',
+  known_expected: 'Known or expected',
+  false_alarm:    'False alarm',
+}
+/** The reason to record for a decision: a recognised one, and only when the decision closes the finding. */
+export function closeReasonFor(status: string, reason: unknown): CloseReason | null {
+  if (status !== 'Resolved' && status !== 'Dismissed') return null
+  return typeof reason === 'string' && Object.keys(CLOSE_REASON_LABELS).includes(reason) ? reason as CloseReason : null
+}
 // Used by Badge.tsx for workflow/integration status color mapping.
 export type WorkflowStatus = 'On Track' | 'Warning' | 'Bottleneck' | 'Critical'
 export type IntegrationStatus = 'Connected' | 'Disconnected' | 'Degraded' | 'Pending' | 'Not connected'
@@ -65,6 +78,7 @@ export interface DetectedAnomaly {
   amount: number
   severity: Severity
   status: AnomalyStatus
+  closeReason?: CloseReason
   confidence: number        // 0–100
   detectedAt: string        // ISO
   description: string
@@ -281,14 +295,19 @@ export function loadAllSourceDatasets(): Record<string, Dataset> {
  * came from (the record every later merge is rebuilt from) and to the
  * merged view, so the next upload or sync can never undo it.
  */
-export function setFindingStatus(id: string, status: AnomalyStatus): boolean {
+export function setFindingStatus(id: string, status: AnomalyStatus, closeReason?: CloseReason | null): boolean {
   if (typeof window === 'undefined') return false
+  const apply = (f: DetectedAnomaly) => {
+    f.status = status
+    if (closeReason) f.closeReason = closeReason
+    else delete f.closeReason
+  }
   try {
     const map = loadSourceMap()
     let found = false
     for (const ds of Object.values(map)) {
       const f = ds.anomalies.find(a => a.id === id)
-      if (f) { f.status = status; found = true }
+      if (f) { apply(f); found = true }
     }
     if (found) {
       localStorage.setItem(SOURCES_KEY, JSON.stringify(map))
@@ -297,7 +316,7 @@ export function setFindingStatus(id: string, status: AnomalyStatus): boolean {
     const ds = loadDataset()
     const f = ds?.anomalies.find(a => a.id === id)
     if (!ds || !f) return false
-    f.status = status
+    apply(f)
     return saveDataset(ds)
   } catch { return false }
 }

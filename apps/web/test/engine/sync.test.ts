@@ -12,7 +12,7 @@ g.localStorage = { getItem: (k: string) => store.get(k) ?? null, setItem: (k: st
 import { hydrateFromServer } from '../../src/lib/workspaceSync'
 import { ingest } from '../../src/lib/ingest'
 import { clearUser } from '../../src/hooks/useCurrentUser'
-import { loadDataset, loadAllSourceDatasets, saveSourceDataset, type Dataset, type StoredTransaction } from '../../src/lib/dataStore'
+import { closeReasonFor, setFindingStatus, loadDataset, loadAllSourceDatasets, saveSourceDataset, type Dataset, type StoredTransaction } from '../../src/lib/dataStore'
 
 const row = (i: number, vendor = 'Acme Supplies', amount = 4200): StoredTransaction => ({
   id: `r${i}`, date: `2026-03-${String((i % 27) + 1).padStart(2, '0')}`, vendor, amount, description: 'Consulting', category: 'Services', account: '6100', rowIndex: i,
@@ -185,4 +185,37 @@ test('with no database yet, another workspace still cannot see this data', async
   server.workspace = 'company-b'
   await hydrateFromServer()
   assert.equal(loadDataset(), null)
+})
+
+test('a close reason survives a sync and a re-upload of the same file', async () => {
+  const input = { sourceId: 'upload:ledger.csv', label: 'ledger.csv', transactions: withDuplicate() }
+  ingest(input)
+  await settle()
+  const id = loadDataset()!.anomalies[0].id
+  assert.ok(setFindingStatus(id, 'Dismissed', 'false_alarm'))
+  const onServer = server.findings.find(f => f.id === id)!
+  onServer.status = 'Dismissed'; onServer.close_reason = 'false_alarm'
+  await hydrateFromServer()
+  assert.equal(loadDataset()!.anomalies.find(a => a.id === id)?.closeReason, 'false_alarm')
+  ingest(input)
+  const after = loadDataset()!.anomalies.find(a => a.id === id)
+  assert.equal(after?.status, 'Dismissed')
+  assert.equal(after?.closeReason, 'false_alarm')
+})
+
+test('sending a closed finding back for review clears its reason', () => {
+  ingest({ sourceId: 'upload:ledger.csv', label: 'ledger.csv', transactions: withDuplicate() })
+  const id = loadDataset()!.anomalies[0].id
+  setFindingStatus(id, 'Resolved', 'real_issue')
+  setFindingStatus(id, 'Under Review')
+  assert.equal(loadDataset()!.anomalies[0].closeReason, undefined)
+})
+
+test('a close reason is recorded only for a recognised reason on a closing decision', () => {
+  assert.equal(closeReasonFor('Dismissed', 'false_alarm'), 'false_alarm')
+  assert.equal(closeReasonFor('Resolved', 'real_issue'), 'real_issue')
+  assert.equal(closeReasonFor('Under Review', 'false_alarm'), null)
+  assert.equal(closeReasonFor('Dismissed', 'made_up'), null)
+  assert.equal(closeReasonFor('Dismissed', undefined), null)
+  assert.equal(closeReasonFor('Dismissed', 'toString'), null)
 })
